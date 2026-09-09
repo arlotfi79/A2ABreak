@@ -1,0 +1,237 @@
+{
+  "section_id": "3.6",
+  "title": "3.6 Versioning",
+  "depth": 3,
+  "parent_path": [
+    "3. A2A Protocol Operations",
+    "3.6 Versioning"
+  ],
+  "url_anchor": "#36-versioning",
+  "word_count": 294,
+  "statement_count": 9,
+  "elapsed_seconds": 102.13,
+  "statements": [
+    {
+      "statement_id": "N-3.6-001",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Patch version numbers SHOULD NOT be used in requests, responses and Agent Cards, and MUST not be considered when clients and servers negotiate protocol versions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "request.version_format = Major.Minor & response.version_format = Major.Minor & agent_card.version_format = Major.Minor",
+      "actions": [
+        "Omit patch version numbers from requests",
+        "Omit patch version numbers from responses",
+        "Omit patch version numbers from Agent Cards"
+      ],
+      "modality": "should",
+      "id": "N-3-6-001"
+    },
+    {
+      "statement_id": "N-3.6-002",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Patch version numbers SHOULD NOT be used in requests, responses and Agent Cards, and MUST not be considered when clients and servers negotiate protocol versions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "version_negotiation",
+      "pre_cond": null,
+      "post_cond": "negotiation.patch_version_considered = false",
+      "actions": [
+        "Ignore patch version numbers when clients and servers negotiate protocol versions"
+      ],
+      "modality": "must",
+      "id": "N-3-6-002"
+    },
+    {
+      "statement_id": "N-3.6-003",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Clients MUST send the A2A-Version header with each request to maintain compatibility after an agent upgrades to a new version of the protocol (except for 0.3 Clients - 0.3 will be assumed for empty header).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": "client.version != 0.3",
+      "post_cond": "request.A2A-Version_header.present = true",
+      "actions": [
+        "Include A2A-Version header in each request sent to the agent"
+      ],
+      "modality": "must",
+      "id": "N-3-6-003"
+    },
+    {
+      "statement_id": "N-3.6-004",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Clients MAY provide the A2A-Version as a request parameter instead of a header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": null,
+      "post_cond": "request.A2A-Version_param.present = true",
+      "actions": [
+        "Include A2A-Version as a query/request parameter instead of an HTTP header"
+      ],
+      "modality": "may",
+      "id": "N-3-6-004"
+    },
+    {
+      "statement_id": "N-3.6-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Agents MUST process requests using the semantics of the requested A2A-Version (matching Major.Minor).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request",
+      "pre_cond": "request.A2A-Version.present = true",
+      "post_cond": "server.processing_semantics = request.A2A-Version",
+      "actions": [
+        "Process the request using the semantics of the A2A-Version specified in the request, matching Major.Minor"
+      ],
+      "modality": "must",
+      "id": "N-3-6-005"
+    },
+    {
+      "statement_id": "N-3.6-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "If the version is not supported by the interface, agents MUST return a VersionNotSupportedError.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request",
+      "pre_cond": "server.version_supported = false",
+      "post_cond": "response.error = VersionNotSupportedError",
+      "actions": [
+        "Return a VersionNotSupportedError response to the client"
+      ],
+      "modality": "must",
+      "id": "N-3-6-006"
+    },
+    {
+      "statement_id": "N-3.6-007",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "Agents MUST interpret empty value as 0.3 version.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request",
+      "pre_cond": "request.A2A-Version = empty",
+      "post_cond": "server.interpreted_version = 0.3",
+      "actions": [
+        "Interpret an empty A2A-Version header value as protocol version 0.3"
+      ],
+      "modality": "must",
+      "id": "N-3-6-007"
+    },
+    {
+      "statement_id": "N-3.6-008",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Tooling libraries and SDKs that implement the A2A protocol MUST provide mechanisms to help clients manage protocol versioning, such as negotiation of the transport and protocol version used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "client.version_management_mechanism.available = true",
+      "actions": [
+        "Provide mechanisms to help clients manage protocol versioning",
+        "Support negotiation of the transport and protocol version used"
+      ],
+      "modality": "must",
+      "id": "N-3-6-008"
+    },
+    {
+      "statement_id": "N-3.6-009",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Client Agents that require the latest features of the protocol should be configured to request specific versions and avoid automatic fallback to older versions, to prevent silently losing functionality.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": "client.requires_latest_features = true",
+      "post_cond": "client.version_specific_request = true & client.version_fallback_automatic = false",
+      "actions": [
+        "Configure client to request specific protocol versions",
+        "Disable automatic fallback to older protocol versions"
+      ],
+      "modality": "should",
+      "id": "N-3-6-009"
+    }
+  ]
+}

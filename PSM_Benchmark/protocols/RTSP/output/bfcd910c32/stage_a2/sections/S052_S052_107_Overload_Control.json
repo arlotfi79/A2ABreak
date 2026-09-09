@@ -1,0 +1,162 @@
+{
+  "section_id": "S052",
+  "title": "S052 10.7 Overload Control",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S052 10.7 Overload Control"
+  ],
+  "url_anchor": "#s052-107-overload-control",
+  "word_count": 718,
+  "statement_count": 6,
+  "elapsed_seconds": 80.51,
+  "statements": [
+    {
+      "statement_id": "N-S052-1",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "It is REQUIRED to increase the timeout period in proportion to the current load on the server, i.e., an increasing workload should result in an increased length of the indicated unavailability.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "server",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S052-001"
+    },
+    {
+      "statement_id": "N-S052-2",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "It is REQUIRED not to send the same value in the Retry-After header to all requesting proxies and clients, but to add a variation to the mean value of the Retry-After header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "server",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S052-002"
+    },
+    {
+      "statement_id": "N-S052-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "Any additional request to a specific address MUST be delayed according to the Retry-After headers received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "503_or_553_response_received_with_Retry_After",
+      "pre_cond": "(response.code = 503 | response.code = 553) & response.header.Retry_After != null",
+      "post_cond": "next_request.send_time >= current_time + Retry_After.value",
+      "actions": [
+        "delay_outgoing_request_by_Retry_After_value"
+      ],
+      "modality": "must",
+      "id": "N-S052-003"
+    },
+    {
+      "statement_id": "N-S052-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "rtsp_fsm",
+      "description": "For addresses where no response was received or TCP timeout occurred, an initial wait timer SHOULD be set to 5 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tcp_timeout | no_response_received",
+      "pre_cond": "timer.iteration = 0",
+      "post_cond": "timer.mean_value = 5",
+      "actions": [
+        "initialise_wait_timer_to_5_seconds"
+      ],
+      "modality": "should",
+      "id": "N-S052-004"
+    },
+    {
+      "statement_id": "N-S052-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "rtsp_fsm",
+      "description": "That timer MUST be doubled for each additional failure to connect or receive response until the value exceeds 30 minutes when the timer's mean value may be set to 30 minutes.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "additional_connect_failure | additional_no_response",
+      "pre_cond": "timer.mean_value <= 1800",
+      "post_cond": "timer.mean_value = min(timer.mean_value * 2, 1800)",
+      "actions": [
+        "double_wait_timer_mean_value",
+        "cap_timer_mean_at_1800_seconds_when_exceeded"
+      ],
+      "modality": "must",
+      "id": "N-S052-005"
+    },
+    {
+      "statement_id": "N-S052-6",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "rtsp_fsm",
+      "description": "It is REQUIRED not to set the same value in the timer for each scheduling, but instead to add a variation to the mean value, resulting in picking a random value within the range of 0.5 to 1.5 times the mean value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "timer_scheduled",
+      "pre_cond": "timer.mean_value != null",
+      "post_cond": "timer.actual_value >= timer.mean_value * 0.5 & timer.actual_value <= timer.mean_value * 1.5",
+      "actions": [
+        "randomise_timer_actual_value_within_0.5_to_1.5_of_mean"
+      ],
+      "modality": "must",
+      "id": "N-S052-006"
+    }
+  ]
+}

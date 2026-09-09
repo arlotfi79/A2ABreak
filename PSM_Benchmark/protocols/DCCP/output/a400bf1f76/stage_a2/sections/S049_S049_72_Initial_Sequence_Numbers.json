@@ -1,0 +1,134 @@
+{
+  "section_id": "S049",
+  "title": "S049 7.2 Initial Sequence Numbers",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S049 7.2 Initial Sequence Numbers"
+  ],
+  "url_anchor": "#s049-72-initial-sequence-numbers",
+  "word_count": 411,
+  "statement_count": 5,
+  "elapsed_seconds": 67.94,
+  "statements": [
+    {
+      "statement_id": "N-S049-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Initial sequence numbers MUST be chosen to avoid two problems:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ISN_selection",
+      "pre_cond": null,
+      "post_cond": "ISN.avoids_old_packet_delivery & ISN.avoids_sequence_number_attacks",
+      "actions": [
+        "Choose ISN to avoid delivery of old packets from previous connections with the same 4-tuple",
+        "Choose ISN to avoid sequence number attacks"
+      ],
+      "modality": "must",
+      "id": "N-S049-001"
+    },
+    {
+      "statement_id": "N-S049-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "dccp",
+      "stage": "dccp_fsm",
+      "description": "DCCP implementations SHOULD use TCP's strategies to avoid them [RFC793, RFC1948].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ISN_selection",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S049-002"
+    },
+    {
+      "statement_id": "N-S049-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "To address the first problem, an implementation MUST ensure that the initial sequence number for a given <source address, source port, destination address, destination port> 4-tuple doesn't overlap with recent sequence numbers on previous connections with the same 4-tuple.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ISN_selection",
+      "pre_cond": "connection.same_4tuple.recent_sequence_numbers.exist",
+      "post_cond": "ISN.4tuple != recent_sequence_number.same_4tuple",
+      "actions": [
+        "Verify ISN for the 4-tuple does not overlap with any sequence number sent on a previous connection with the same 4-tuple within the last 2 maximum segment lifetimes"
+      ],
+      "modality": "must",
+      "id": "N-S049-003"
+    },
+    {
+      "statement_id": "N-S049-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The implementation MUST additionally ensure that the lower 24 bits of the initial sequence number don't overlap with the lower 24 bits of recent sequence numbers (unless the implementation plans to avoid short sequence numbers; see Section 7.6).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ISN_selection",
+      "pre_cond": "!endpoint.avoids_short_sequence_numbers",
+      "post_cond": "ISN.lower24bits != recent_sequence_number.lower24bits",
+      "actions": [
+        "Verify the lower 24 bits of the ISN do not overlap with the lower 24 bits of any recent sequence number for the same 4-tuple"
+      ],
+      "modality": "must",
+      "id": "N-S049-004"
+    },
+    {
+      "statement_id": "N-S049-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "To address the second problem, an implementation MUST provide each 4-tuple with an independent initial sequence number space.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ISN_selection",
+      "pre_cond": null,
+      "post_cond": "ISN_space.per_4tuple = independent",
+      "actions": [
+        "Assign each 4-tuple an independent initial sequence number space so that one connection's ISN reveals no information about ISNs of other connections to the same host"
+      ],
+      "modality": "must",
+      "id": "N-S049-005"
+    }
+  ]
+}

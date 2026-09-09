@@ -1,0 +1,226 @@
+{
+  "section_id": "S032",
+  "title": "S032 3.8.4 TCP Keep-Alives",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S032 3.8.4 TCP Keep-Alives"
+  ],
+  "url_anchor": "#s032-384-tcp-keep-alives",
+  "word_count": 249,
+  "statement_count": 9,
+  "elapsed_seconds": 161.14,
+  "statements": [
+    {
+      "statement_id": "N-S032-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "Implementers MAY include \"keep-alives\" in their TCP implementations (MAY-5), although this practice is not universally accepted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "implementers"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S032-001"
+    },
+    {
+      "statement_id": "N-S032-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "tcp_fsm",
+      "description": "If keep-alives are included, the application MUST be able to turn them on or off for each TCP connection (MUST-24), and they MUST default to off (MUST-25).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "application"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "keep_alive.included = true",
+      "post_cond": null,
+      "actions": [
+        "allow application to enable or disable keep-alives per TCP connection"
+      ],
+      "modality": "must",
+      "id": "N-S032-002"
+    },
+    {
+      "statement_id": "N-S032-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If keep-alives are included, the application MUST be able to turn them on or off for each TCP connection (MUST-24), and they MUST default to off (MUST-25).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "connection"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "keep_alive.included = true",
+      "post_cond": "keep_alive.enabled = false",
+      "actions": [
+        "default keep-alive to off for each connection"
+      ],
+      "modality": "must",
+      "id": "N-S032-003"
+    },
+    {
+      "statement_id": "N-S032-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Keep-alive packets MUST only be sent when no sent data is outstanding, and no data or acknowledgment packets have been received for the connection within an interval (MUST-26).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "connection"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "keep_alive_timer_expiry",
+      "pre_cond": "connection.outstanding_sent_data = 0 & connection.idle_interval_elapsed = true",
+      "post_cond": null,
+      "actions": [
+        "send keep-alive probe segment"
+      ],
+      "modality": "must",
+      "id": "N-S032-004"
+    },
+    {
+      "statement_id": "N-S032-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "tcp_fsm",
+      "description": "This interval MUST be configurable (MUST-27) and MUST default to no less than two hours (MUST-28).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "timer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "make keep-alive idle interval configurable"
+      ],
+      "modality": "must",
+      "id": "N-S032-005"
+    },
+    {
+      "statement_id": "N-S032-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "tcp_fsm",
+      "description": "This interval MUST be configurable (MUST-27) and MUST default to no less than two hours (MUST-28).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "timer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "keep_alive.interval.default >= 7200",
+      "actions": [
+        "set default keep-alive idle interval to no less than two hours"
+      ],
+      "modality": "must",
+      "id": "N-S032-006"
+    },
+    {
+      "statement_id": "N-S032-7",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "Consequently, if a keep-alive mechanism is implemented it MUST NOT interpret failure to respond to any specific probe as a dead connection (MUST-29).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "tcp",
+        "connection"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "keep_alive_probe_no_response",
+      "pre_cond": "keep_alive.implemented = true & keep_alive.probe_sent = true & keep_alive.response_received = false",
+      "post_cond": "connection.declared_dead = false",
+      "actions": [
+        "do not declare connection dead based on failure to respond to any single keep-alive probe"
+      ],
+      "modality": "must",
+      "id": "N-S032-007"
+    },
+    {
+      "statement_id": "N-S032-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "An implementation SHOULD send a keep-alive segment with no data (SHLD-12); however, it MAY be configurable to send a keep-alive segment containing one garbage octet (MAY-6), for compatibility with erroneous TCP implementations.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S032-008"
+    },
+    {
+      "statement_id": "N-S032-9",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "An implementation SHOULD send a keep-alive segment with no data (SHLD-12); however, it MAY be configurable to send a keep-alive segment containing one garbage octet (MAY-6), for compatibility with erroneous TCP implementations.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S032-009"
+    }
+  ]
+}

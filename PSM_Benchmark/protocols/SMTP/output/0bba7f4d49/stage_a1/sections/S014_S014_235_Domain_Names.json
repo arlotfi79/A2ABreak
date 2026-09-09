@@ -1,0 +1,79 @@
+{
+  "section_id": "S014",
+  "title": "S014 2.3.5 Domain Names",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S014 2.3.5 Domain Names"
+  ],
+  "url_anchor": "#s014-235-domain-names",
+  "word_count": 366,
+  "statement_count": 3,
+  "elapsed_seconds": 23.18,
+  "statements": [
+    {
+      "statement_id": "D-S014-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "The domain name given in the EHLO command MUST be either a primary host name (a domain name that resolves to an address RR) or, if the host has no name, an address literal, as described in Section 4.1.3 and discussed further in the EHLO discussion of Section 4.1.4.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S014",
+      "object_name": "EHLO command",
+      "field_name": "domain",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "primary host name (FQDN resolving to address RR)",
+        "address literal"
+      ],
+      "guard_semantics": "EHLO domain must be FQDN resolving to address RR or address literal if host has no name"
+    },
+    {
+      "statement_id": "D-S014-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "Only resolvable, fully-qualified domain names (FQDNs) are permitted when domain names are used in SMTP. Local nicknames or unqualified names MUST NOT be used. Local aliases MUST NOT appear in any SMTP transaction.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S014",
+      "object_name": "SMTP transaction",
+      "field_name": "domain name",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "resolvable FQDN",
+        "CNAME resolving to MX or address RR"
+      ],
+      "guard_semantics": "domain.is_fqdn = true & domain.is_resolvable = true"
+    },
+    {
+      "statement_id": "D-S014-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "The reserved mailbox name 'postmaster' may be used in a RCPT command without domain qualification and MUST be accepted if so used.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S014",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT TO postmaster (unqualified)",
+      "pre_cond": "rcpt.mailbox = 'postmaster' & rcpt.domain = null",
+      "post_cond": "server.accepted_recipient = true",
+      "actions": [
+        "accept RCPT TO postmaster without domain qualification"
+      ],
+      "modality": "must"
+    }
+  ]
+}

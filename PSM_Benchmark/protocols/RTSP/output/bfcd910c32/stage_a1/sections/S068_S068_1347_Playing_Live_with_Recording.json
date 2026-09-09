@@ -1,0 +1,78 @@
+{
+  "section_id": "S068",
+  "title": "S068 13.4.7 Playing Live with Recording",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S068 13.4.7 Playing Live with Recording"
+  ],
+  "url_anchor": "#s068-1347-playing-live-with-recording",
+  "word_count": 249,
+  "statement_count": 3,
+  "elapsed_seconds": 22.4,
+  "statements": [
+    {
+      "statement_id": "D-S068-001",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Live media with recording is indicated by the content of the Media-Properties header in the SETUP response when: the Random Access property is set to Random-Access; the Content Modifications property is set to Time-Progressing; the Retention property is set to Time-Limited or Unlimited.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S068",
+      "object_name": "Media-Properties header",
+      "field_name": "Random-Access + Time-Progressing + Time-Limited|Unlimited",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "Random-Access",
+        "Time-Progressing",
+        "Time-Limited",
+        "Unlimited"
+      ],
+      "guard_semantics": "media.random_access = Random-Access & media.content_modifications = Time-Progressing & media.retention = Time-Limited | media.retention = Unlimited"
+    },
+    {
+      "statement_id": "D-S068-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The SETUP 200 OK response MUST include the Media-Range header for this type of media (live media with recording).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S068",
+      "object_name": "SETUP 200 OK response",
+      "field_name": "Media-Range",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "media.random_access = Random-Access & media.content_modifications = Time-Progressing & (media.retention = Time-Limited | media.retention = Unlimited)"
+    },
+    {
+      "statement_id": "D-S068-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the client requests a delivery point that is located outside the recording window, e.g., if the requested point is too far in the past, the server selects the oldest point in the recording.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S068",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY request with out-of-window delivery point",
+      "pre_cond": "media.content_modifications = Time-Progressing & requested_delivery_point < recording_window.start",
+      "post_cond": "delivery_point = recording_window.oldest_point",
+      "actions": [
+        "adjust delivery point to oldest point in recording"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "section_id": "S067",
+  "title": "S067 4.2.4 Reply Code 502",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S067 4.2.4 Reply Code 502"
+  ],
+  "url_anchor": "#s067-424-reply-code-502",
+  "word_count": 73,
+  "statement_count": 4,
+  "elapsed_seconds": 21.96,
+  "statements": [
+    {
+      "statement_id": "D-S067-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "502 SHOULD be used when the command is actually recognized by the SMTP server, but not implemented.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S067",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_recognized_not_implemented",
+      "pre_cond": "server.command_recognized = true & server.command_implemented = false",
+      "post_cond": "server.reply_code = 502",
+      "actions": [
+        "send_502_reply"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S067-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the command is not recognized, code 500 SHOULD be returned.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S067",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_not_recognized",
+      "pre_cond": "server.command_recognized = false",
+      "post_cond": "server.reply_code = 500",
+      "actions": [
+        "send_500_reply"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S067-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Extended SMTP systems MUST NOT list capabilities in response to EHLO for which they will return 502 (or 500) replies.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S067",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "EHLO_received",
+      "pre_cond": "session.mode = ESMTP",
+      "post_cond": "server.ehlo_capabilities != capability_returning_500_or_502",
+      "actions": [
+        "send_EHLO_response_excluding_unimplemented_capabilities"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-004",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Extended SMTP systems MUST NOT list capabilities in response to EHLO for which they will return 502 (or 500) replies.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S067",
+      "object_name": "EHLO_response",
+      "field_name": "advertised_capabilities",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "capabilities_with_reply_code_not_500_or_502"
+      ],
+      "guard_semantics": "session.mode = ESMTP"
+    }
+  ]
+}

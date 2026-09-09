@@ -1,0 +1,181 @@
+{
+  "section_id": "S069",
+  "title": "S069 8.1.3 Server Response",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S069 8.1.3 Server Response"
+  ],
+  "url_anchor": "#s069-813-server-response",
+  "word_count": 443,
+  "statement_count": 8,
+  "elapsed_seconds": 32.15,
+  "statements": [
+    {
+      "statement_id": "D-S069-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "In the second phase of the three-way handshake, the server moves from the LISTEN state to RESPOND and sends a DCCP-Response message to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "RESPOND",
+      "trigger": "receive DCCP-Request",
+      "pre_cond": "protocol.state = LISTEN",
+      "post_cond": "protocol.state = RESPOND",
+      "actions": [
+        "send DCCP-Response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S069-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server MAY respond to a DCCP-Request packet with a DCCP-Reset packet to refuse the connection.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "receive DCCP-Request",
+      "pre_cond": "protocol.state = LISTEN",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset (Reset Code 7 | 8 | 9)"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S069-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Every valid DCCP-Request received while the server is in the RESPOND state MUST elicit a new DCCP-Response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "RESPOND",
+      "to_state": "RESPOND",
+      "trigger": "receive valid DCCP-Request",
+      "pre_cond": "protocol.state = RESPOND",
+      "post_cond": "protocol.state = RESPOND",
+      "actions": [
+        "send new DCCP-Response",
+        "increment Sequence Number by one"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S069-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server leaves the RESPOND state for OPEN when it receives a valid DCCP-Ack from the client, completing the three-way handshake.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "RESPOND",
+      "to_state": "OPEN",
+      "trigger": "receive valid DCCP-Ack",
+      "pre_cond": "protocol.state = RESPOND",
+      "post_cond": "protocol.state = OPEN",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S069-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "It MAY also leave the RESPOND state for CLOSED after a timeout of not less than 4MSL (8 minutes); when doing so, it SHOULD send a DCCP-Reset with Reset Code 2, \"Aborted\", to clean up state at the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "RESPOND",
+      "to_state": "CLOSED",
+      "trigger": "timeout >= 4MSL",
+      "pre_cond": "protocol.state = RESPOND",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "send DCCP-Reset (Reset Code 2, Aborted)"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S069-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "In the second phase of the three-way handshake, the server moves from the LISTEN state to RESPOND.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "state_name": "RESPOND",
+      "enum_name": "ServerState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = RESPOND"
+    },
+    {
+      "statement_id": "D-S069-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server leaves the RESPOND state for OPEN when it receives a valid DCCP-Ack from the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "state_name": "OPEN",
+      "enum_name": "ServerState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OPEN"
+    },
+    {
+      "statement_id": "D-S069-008",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "It MAY also leave the RESPOND state for CLOSED after a timeout of not less than 4MSL (8 minutes).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "state_name": "CLOSED",
+      "enum_name": "ServerState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = CLOSED"
+    }
+  ]
+}

@@ -1,0 +1,3129 @@
+{
+  "meta": {
+    "total_statements": 142,
+    "by_category": {
+      "FSM_STATE": 22,
+      "IMPLICIT_TRANSITION": 96,
+      "FIELD_PRESENCE": 23,
+      "ONEOF_CONSTRAINT": 1
+    },
+    "by_subject": {
+      "client": 28,
+      "session": 19,
+      "connection": 49,
+      "server": 42,
+      "message": 4
+    },
+    "by_stage": {
+      "mqtt_fsm": 142
+    }
+  },
+  "statements": [
+    {
+      "statement_id": "D-S001-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "after connecting to the MQTT Server (Broker), a Client can publish and subscribe to multiple topics",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S001",
+      "state_name": "connected",
+      "enum_name": "ClientConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = connected"
+    },
+    {
+      "statement_id": "D-S001-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "after connecting to the MQTT Server (Broker), a Client can publish and subscribe to multiple topics",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S001",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "connected",
+      "trigger": "connection request",
+      "pre_cond": null,
+      "post_cond": "client.state = connected",
+      "actions": [
+        "establish MQTT connection to Broker"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S001-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "Clients use the MQTT PUBLISH packet to publish to a topic",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S001",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "connected",
+      "to_state": "connected",
+      "trigger": "publish request",
+      "pre_cond": "client.state = connected",
+      "post_cond": "client.state = connected",
+      "actions": [
+        "send MQTT PUBLISH packet"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S001-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "subscribe requests from the Clients to the Broker",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S001",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "connected",
+      "to_state": "connected",
+      "trigger": "subscribe request",
+      "pre_cond": "client.state = connected",
+      "post_cond": "client.state = connected",
+      "actions": [
+        "send MQTT subscribe request to Broker"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "A stateful interaction between a Client and a Broker. Some Sessions last only as long as the Network Connection; others can span multiple Network Connections.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "state_name": "Session",
+      "enum_name": "MQTTConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S004-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client requests to connect to the Broker. This is the first packet sent by a Client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send CONNECT packet"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "CONNACK packets contain return codes that indicate either a success or an error state in response to a Client's CONNECT packet.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "Session",
+      "trigger": "CONNACK received (success)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "receive CONNACK with success return code"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "CONNACK packets contain return codes that indicate either a success or an error state in response to a Client's CONNECT packet.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "error state",
+      "trigger": "CONNACK received (error)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "receive CONNACK with error return code"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "An AUTH Control Packet is sent from the Client to the Broker or from the Broker to the Client as part of an extended authentication exchange. The Authentication Method is set in the CONNECT packet, and consequent AUTH packets follow the same Authentication Method.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S004",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "AUTH sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "exchange AUTH packet during extended authentication"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The DISCONNECT packet is the final MQTT Control Packet sent from the Client or the Broker. It indicates the reason why the Network Connection is being closed.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DISCONNECT sent",
+      "pre_cond": null,
+      "post_cond": "connection.network_connection = closed",
+      "actions": [
+        "send DISCONNECT packet",
+        "close Network Connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Network Connection is closed without the Client first sending a DISCONNECT packet with reason code 0x00 (Normal disconnection) and the MQTT Connection has a Will Message, the Will Message is published.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Network Connection closed without Normal disconnection",
+      "pre_cond": "connection.will_flag = true & connection.disconnect_reason_code != 0x00",
+      "post_cond": null,
+      "actions": [
+        "publish Will Message"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Network Connection is not closed normally, the Broker sends a last Will Message for the Client if the Client provided one in its CONNECT packet. Situations include: an I/O error or network failure detected by the Broker; the Client fails to communicate within the Keep Alive period; the Client closes the Network Connection without first sending a DISCONNECT packet with reason code 0x00; the Broker closes the Network Connection without first receiving a DISCONNECT packet with reason code 0x00.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "Session",
+      "to_state": null,
+      "trigger": "abnormal Network Connection closure",
+      "pre_cond": "connection.will_flag = true",
+      "post_cond": null,
+      "actions": [
+        "publish Will Message"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Will Flag is set in the CONNECT flags, then the Payload of the CONNECT packet includes information about the Will. The information consists of the Will Properties, Will Topic, and Will Payload fields.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "object_name": "CONNECT",
+      "field_name": "Will Flag",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "connection.will_flag = true \u2192 CONNECT.payload includes Will Properties, Will Topic, Will Payload"
+    },
+    {
+      "statement_id": "D-S005-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "Step (A): Client sends Token request to the Authorization Server before initiating an MQTT connection.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "actors": [
+        "Client",
+        "Authorization Server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Token request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Token request to Authorization Server"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "Step (B): Authorization Server returns Access token to Client in response to token request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "actors": [
+        "Authorization Server",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "Token Obtained",
+      "trigger": "Access token received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "receive Access token from Authorization Server"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Step (C): Client sends Connection request along with the access token to the Broker, initiating connection setup.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": "Token Obtained",
+      "to_state": "Connecting",
+      "trigger": "Connection request + access token",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Connection request with access token to Broker"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Step (D): Broker optionally sends Introspection request to the Authorization Server to validate the access token presented by the Client.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "actors": [
+        "Broker",
+        "Authorization Server"
+      ],
+      "from_state": "Connecting",
+      "to_state": "Introspecting",
+      "trigger": "Introspection request (optional)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Introspection request to Authorization Server"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S005-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Step (E): Authorization Server optionally sends Introspection response to Broker, completing token validation.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "actors": [
+        "Authorization Server",
+        "Broker"
+      ],
+      "from_state": "Introspecting",
+      "to_state": "Connecting",
+      "trigger": "Introspection response (optional)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "receive Introspection response from Authorization Server"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S005-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Step (F): Broker sends Connection response to Client, completing connection setup.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "Connecting",
+      "to_state": "Connected",
+      "trigger": "Connection response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Connection response to Client"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "Client holds an access token obtained from the Authorization Server and is ready to initiate an MQTT connection request to the Broker.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S005",
+      "state_name": "Token Obtained",
+      "enum_name": "ConnectionSetupState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S005-008",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Client has sent Connection request with access token to Broker and is awaiting Connection response; Broker may optionally perform introspection during this state.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S005",
+      "state_name": "Connecting",
+      "enum_name": "ConnectionSetupState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S005-009",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Broker has sent Introspection request to Authorization Server and is awaiting Introspection response before proceeding with connection authorization.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S005",
+      "state_name": "Introspecting",
+      "enum_name": "ConnectionSetupState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S005-010",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Client has received Connection response from Broker; connection setup is complete and the Client may use the Pub/Sub interface.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S005",
+      "state_name": "Connected",
+      "enum_name": "ConnectionSetupState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S005-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Connection request sent by the Client to the Broker (step C) must include the access token obtained from the Authorization Server.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "object_name": "Connection request",
+      "field_name": "access token",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S008-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST authenticate to the Broker either over MQTT or TLS before performing any other action.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "pre-authenticated",
+      "to_state": "authenticated",
+      "trigger": "authenticate",
+      "pre_cond": null,
+      "post_cond": "client.authenticated = true",
+      "actions": [
+        "authenticate to broker over MQTT or TLS"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S008-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The token is transported inside the CONNECT packet and MUST be validated using one of the methods described in Section 2.2.2 (TLS:Anon,MQTT:ace).",
+      "is_inferred": false,
+      "confidence": 0.82,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT packet received",
+      "pre_cond": "connection.auth_mode = TLS:Anon,MQTT:ace",
+      "post_cond": "connection.token_validated = true",
+      "actions": [
+        "extract token from CONNECT packet",
+        "validate token"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S008-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The token is transported inside the CONNECT packet (for TLS:Anon,MQTT:ace option).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S008",
+      "object_name": "CONNECT",
+      "field_name": "token",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "connection.auth_mode = TLS:Anon,MQTT:ace"
+    },
+    {
+      "statement_id": "D-S008-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "When the Client uses TLS:Anon,MQTT:None, the Client can only publish or subscribe to public topics.",
+      "is_inferred": false,
+      "confidence": 0.78,
+      "source_section": "S008",
+      "actors": [
+        "client"
+      ],
+      "from_state": "authenticated",
+      "to_state": null,
+      "trigger": "publish or subscribe",
+      "pre_cond": "connection.auth_mode = TLS:Anon,MQTT:None",
+      "post_cond": "session.topic_scope = public_only",
+      "actions": [
+        "restrict publish/subscribe to public topics"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S008-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST authenticate the Broker during the TLS handshake.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TLS handshake",
+      "to_state": "broker authenticated",
+      "trigger": "TLS handshake",
+      "pre_cond": null,
+      "post_cond": "server.authenticated = true",
+      "actions": [
+        "validate broker public key or certificate against rs_cnf parameter"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Client connects to the Broker to publish its token to the 'authz-info' topic using the TLS:Anon,MQTT:None option over a TLS connection.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S009",
+      "state_name": "Connected (TLS:Anon, MQTT:None)",
+      "enum_name": "ClientConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.tls_auth = TLS:Anon & connection.mqtt_auth = None"
+    },
+    {
+      "statement_id": "D-S009-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "After publishing the token, the Client disconnects from the Broker.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S009",
+      "state_name": "Disconnected",
+      "enum_name": "ClientConnectionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S009-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Client is expected to reconnect using client authentication over TLS (i.e., TLS:Known(RPK/PSK),MQTT:none).",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S009",
+      "state_name": "Connected (TLS:Known(RPK/PSK), MQTT:None)",
+      "enum_name": "ClientConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.tls_auth = TLS:Known & connection.mqtt_auth = None"
+    },
+    {
+      "statement_id": "D-S009-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client connects to the Broker to publish its token to the 'authz-info' topic, using the TLS:Anon,MQTT:None option over a TLS connection.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connected (TLS:Anon, MQTT:None)",
+      "trigger": "connect",
+      "pre_cond": "client.token_transport_required = true",
+      "post_cond": "connection.tls_auth = TLS:Anon & connection.mqtt_auth = None",
+      "actions": [
+        "establish TLS connection with anonymous credentials",
+        "connect with MQTT:None"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "After publishing the token, the Client disconnects from the Broker.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Connected (TLS:Anon, MQTT:None)",
+      "to_state": "Disconnected",
+      "trigger": "token published to authz-info",
+      "pre_cond": "connection.state = Connected (TLS:Anon, MQTT:None) & publish.topic = authz-info",
+      "post_cond": null,
+      "actions": [
+        "publish token to authz-info topic",
+        "disconnect from Broker"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client is expected to reconnect using client authentication over TLS (i.e., TLS:Known(RPK/PSK),MQTT:none).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Disconnected",
+      "to_state": "Connected (TLS:Known(RPK/PSK), MQTT:None)",
+      "trigger": "reconnect",
+      "pre_cond": "connection.state = Disconnected",
+      "post_cond": "connection.tls_auth = TLS:Known & connection.mqtt_auth = None",
+      "actions": [
+        "reconnect using TLS:Known(RPK/PSK),MQTT:none"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S009-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST verify the validity of the token. If the token is not valid, the Broker MUST discard the token.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH received on authz-info",
+      "pre_cond": "publish.topic = authz-info & token.valid = false",
+      "post_cond": "token.stored = false",
+      "actions": [
+        "validate token",
+        "discard token"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker stores and indexes all tokens received to the 'authz-info' topic in its key store.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH received on authz-info",
+      "pre_cond": "publish.topic = authz-info & token.valid = true",
+      "post_cond": "token.stored = true",
+      "actions": [
+        "validate token",
+        "store token in key store"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the QoS level is equal to 0, and the token is not valid, or if the claims cannot be obtained in the case of an introspected token, the Broker MUST send a DISCONNECT packet with reason code 0x87 (Not authorized).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token validation failure on authz-info PUBLISH (QoS=0)",
+      "pre_cond": "publish.qos = 0 & (token.valid = false | token.claims_obtainable = false)",
+      "post_cond": null,
+      "actions": [
+        "send DISCONNECT with reason code 0x87"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the PUBLISH Payload does not parse to a token, the Broker MUST send a DISCONNECT with reason code 0x99 (Payload format invalid).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "payload parse failure on authz-info PUBLISH (QoS=0)",
+      "pre_cond": "publish.qos = 0 & payload.parseable = false",
+      "post_cond": null,
+      "actions": [
+        "send DISCONNECT with reason code 0x99"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the QoS level of the PUBLISH packet is greater than or equal to 1, and the token is not valid, or the claims cannot be obtained in the case of an introspected token, the Broker MUST send reason code 0x87 (Not authorized) in the PUBACK or PUBREC.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token validation failure on authz-info PUBLISH (QoS>=1)",
+      "pre_cond": "publish.qos >= 1 & (token.valid = false | token.claims_obtainable = false)",
+      "post_cond": null,
+      "actions": [
+        "send PUBACK or PUBREC with reason code 0x87"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the PUBLISH Payload does not parse to a token, the PUBACK/PUBREC reason code is 0x99 (Payload format invalid).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "payload parse failure on authz-info PUBLISH (QoS>=1)",
+      "pre_cond": "publish.qos >= 1 & payload.parseable = false",
+      "post_cond": null,
+      "actions": [
+        "send PUBACK or PUBREC with reason code 0x99"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-013",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The 'authz-info' topic MUST only be published (i.e., the Clients are not allowed to subscribe to it).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "object_name": "authz-info",
+      "field_name": "operation",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "PUBLISH"
+      ],
+      "guard_semantics": "client.operation = PUBLISH"
+    },
+    {
+      "statement_id": "D-S014-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "After sending the CONNECT packet, the Client MUST wait to receive the CONNACK packet from the Broker. The only packets it is allowed to send are DISCONNECT or AUTH that are in response to the Broker AUTH.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "state_name": "Waiting for CONNACK",
+      "enum_name": "ClientConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = Waiting for CONNACK"
+    },
+    {
+      "statement_id": "D-S014-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Except for a DISCONNECT and AUTH response from the Client, the Broker MUST NOT process any packets before sending a CONNACK packet.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S014",
+      "state_name": "Processing CONNECT",
+      "enum_name": "BrokerConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "server.state = Processing CONNECT"
+    },
+    {
+      "statement_id": "D-S014-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "After sending the CONNECT packet, the Client MUST wait to receive the CONNACK packet from the Broker.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S014",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Waiting for CONNACK",
+      "trigger": "CONNECT sent",
+      "pre_cond": null,
+      "post_cond": "client.state = Waiting for CONNACK",
+      "actions": [
+        "send CONNECT packet with token in Authentication Data"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The only packets it is allowed to send are DISCONNECT or AUTH that are in response to the Broker AUTH.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S014",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Waiting for CONNACK",
+      "to_state": "Waiting for CONNACK",
+      "trigger": "AUTH received from Broker",
+      "pre_cond": "client.state = Waiting for CONNACK",
+      "post_cond": null,
+      "actions": [
+        "send AUTH to Broker"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S014-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Will Flag is set to 1, the Broker MUST check that the token allows the publication of the Will Message. If the Will authorization fails, the connection is refused.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S014",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Processing CONNECT",
+      "to_state": "Connection Refused",
+      "trigger": "Will authorization failure",
+      "pre_cond": "connect.will_flag = 1 & token.scope.covers(will_topic) = false",
+      "post_cond": null,
+      "actions": [
+        "refuse connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "In MQTT v5.0, the Client signals a new Session by setting the Clean Start flag to 1 in the CONNECT packet. If the Broker starts a new Session, the Broker MUST set the Session Present flag to 0 in the CONNACK packet to signal this to the Client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S014",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Processing CONNECT",
+      "to_state": "Connected",
+      "trigger": "CONNECT accepted with Clean Start = 1",
+      "pre_cond": "connect.clean_start = 1",
+      "post_cond": "connack.session_present = 0",
+      "actions": [
+        "start new session",
+        "send CONNACK with Session Present = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If a CONNECT packet is received with Clean Start set to 0, and there is a Session associated with the Client Identifier, the Broker MUST resume communications with the Client based on the state from the existing Session. The Broker MUST set the Session Present flag to 1 in the CONNACK packet.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S014",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Processing CONNECT",
+      "to_state": "Connected",
+      "trigger": "CONNECT received with Clean Start = 0 and existing session",
+      "pre_cond": "connect.clean_start = 0 & session.exists = true",
+      "post_cond": "connack.session_present = 1",
+      "actions": [
+        "resume existing session",
+        "send CONNACK with Session Present = 1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If this Client Identifier represents a Client already connected to the Broker, the Broker sends a DISCONNECT packet to the existing Client with reason code 0x8E (Session taken over) and closes the connection to the Client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S014",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Connected",
+      "to_state": "Disconnected",
+      "trigger": "duplicate Client Identifier CONNECT received",
+      "pre_cond": "session.client_id.collision = true",
+      "post_cond": null,
+      "actions": [
+        "send DISCONNECT(0x8E) to existing client",
+        "close connection to existing client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The User Name Flag and Password Flag MUST be set to 0 to use AUTH packets for authentication and authorization.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "object_name": "CONNECT",
+      "field_name": "User Name Flag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        0
+      ],
+      "guard_semantics": "must be 0 when using AUTH-based token transport"
+    },
+    {
+      "statement_id": "D-S014-010",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The User Name Flag and Password Flag MUST be set to 0 to use AUTH packets for authentication and authorization.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "object_name": "CONNECT",
+      "field_name": "Password Flag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        0
+      ],
+      "guard_semantics": "must be 0 when using AUTH-based token transport"
+    },
+    {
+      "statement_id": "D-S014-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "When reconnecting to a Broker that supports continuing existing Sessions, the Client MUST still provide a token in addition to using the same Client Identifier and setting the Clean Start to 0.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S014",
+      "object_name": "CONNECT",
+      "field_name": "Authentication Data",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "must be present even when resuming an existing session (connect.clean_start = 0)"
+    },
+    {
+      "statement_id": "D-S015-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST set the Authentication Method as a property of a CONNECT packet by using the property identifier 21 (0x15), which MUST be set to \"ace\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "object_name": "CONNECT",
+      "field_name": "Authentication Method",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "ace"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S015-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Method is followed by the Authentication Data, which has a property identifier 22 (0x16) and is Binary Data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "object_name": "CONNECT",
+      "field_name": "Authentication Data",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S015-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Broker does not support this profile, it sends a CONNACK packet with reason code 0x8C (Bad authentication method).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S015",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT received with unsupported authentication profile",
+      "pre_cond": "connection.authentication_method != \"ace\"",
+      "post_cond": null,
+      "actions": [
+        "send CONNACK with reason code 0x8C (Bad authentication method)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S016-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The token is also validated, as described in Section 2.2.5, and the Broker responds with a CONNACK packet with the appropriate response code.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S016",
+      "actors": [
+        "client",
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT received with PoP Authentication Data (token length, token, MAC or signature over TLS exporter content)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "validate_token",
+        "send_CONNACK_with_appropriate_response_code"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S016-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Data inside the Client's CONNECT packet MUST contain the two-byte integer token length, the token, and the keyed message digest (MAC) or the Client signature.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S016",
+      "object_name": "CONNECT",
+      "field_name": "Authentication Data",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "token_length (2 bytes)",
+        "token",
+        "MAC or Client signature over TLS exporter content"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S016-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client cannot reauthenticate using this method during the same TLS session.",
+      "is_inferred": false,
+      "confidence": 0.72,
+      "source_section": "S016",
+      "actors": [
+        "client",
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "reauthentication_attempt_via_PoP_TLS_exporter",
+      "pre_cond": "session.tls_session = active & session.pop_tls_exporter_auth_used = true",
+      "post_cond": null,
+      "actions": [
+        "reject_reauthentication"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Authentication Data inside the Client's CONNECT contains only the two-byte integer token length and the token, the Broker MUST respond with an AUTH packet with the authenticated reason code set to 0x18 (Continue Authentication).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": "AWAITING_CHALLENGE_RESPONSE",
+      "trigger": "CONNECT received with token-only Authentication Data",
+      "pre_cond": "connection.auth_data = token_only",
+      "post_cond": "connection.state = AWAITING_CHALLENGE_RESPONSE",
+      "actions": [
+        "send AUTH reason_code=0x18 with 8-byte RS nonce as challenge"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker also uses this method if the Authentication Data does not contain a token, but the Broker has a token stored for the connecting Client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": "AWAITING_CHALLENGE_RESPONSE",
+      "trigger": "CONNECT received with no token but stored token exists for client",
+      "pre_cond": "connection.auth_data.token = null & session.stored_token != null",
+      "post_cond": "connection.state = AWAITING_CHALLENGE_RESPONSE",
+      "actions": [
+        "send AUTH reason_code=0x18 with 8-byte RS nonce as challenge"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client responds to this with an AUTH packet with reason code 0x18 (Continue Authentication). The Authentication Data includes the 8-byte Client nonce and the signature or MAC computed over the RS nonce concatenated with the Client nonce using PoP key in the token.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AWAITING_BROKER_CHALLENGE",
+      "to_state": "AWAITING_CONNACK",
+      "trigger": "AUTH 0x18 received from Broker with RS nonce challenge",
+      "pre_cond": "connection.auth_method = ace & connection.auth_data.rs_nonce != null",
+      "post_cond": "connection.state = AWAITING_CONNACK",
+      "actions": [
+        "send AUTH reason_code=0x18 with client_nonce and MAC_or_signature over (rs_nonce || client_nonce)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Next, the token is validated. The success case is illustrated in Figure 7: after token validation the Broker sends CONNACK 0x00 (Success).",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TOKEN_VALIDATION",
+      "to_state": "CONNECTED",
+      "trigger": "token validation success",
+      "pre_cond": "connection.state = TOKEN_VALIDATION & token.valid = true",
+      "post_cond": "connection.state = CONNECTED",
+      "actions": [
+        "send CONNACK reason_code=0x00"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker continues authentication using an AUTH packet that contains the Authentication Method and the Authentication Data. The Authentication Method MUST be set to 'ace', and the Authentication Data MUST NOT be empty and MUST contain an 8-byte RS nonce as a challenge for the Client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AWAITING_CHALLENGE_RESPONSE",
+      "to_state": "TOKEN_VALIDATION",
+      "trigger": "AUTH 0x18 received from Client with client nonce and MAC",
+      "pre_cond": "connection.state = AWAITING_CHALLENGE_RESPONSE & connection.auth_method = ace",
+      "post_cond": "connection.state = TOKEN_VALIDATION",
+      "actions": [
+        "validate token (may involve introspection)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker continues authentication; AUTH 0x18 (Continue Authentication) with RS nonce challenge has been sent and Broker is awaiting the client's challenge response.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S017",
+      "state_name": "AWAITING_CHALLENGE_RESPONSE",
+      "enum_name": "PoP_Auth_State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = AWAITING_CHALLENGE_RESPONSE"
+    },
+    {
+      "statement_id": "D-S017-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker is performing token validation after receiving the client's AUTH 0x18 challenge response (may involve introspection).",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S017",
+      "state_name": "TOKEN_VALIDATION",
+      "enum_name": "PoP_Auth_State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = TOKEN_VALIDATION"
+    },
+    {
+      "statement_id": "D-S017-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Method MUST be set to 'ace' in the Broker's AUTH challenge packet during PoP challenge/response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "object_name": "AUTH packet (Broker challenge)",
+      "field_name": "Authentication Method",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "ace"
+      ],
+      "guard_semantics": "connection.state = AWAITING_CHALLENGE_RESPONSE"
+    },
+    {
+      "statement_id": "D-S017-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Data MUST NOT be empty and MUST contain an 8-byte RS nonce as a challenge for the Client in the Broker's AUTH packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "object_name": "AUTH packet (Broker challenge)",
+      "field_name": "Authentication Data",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "8-byte RS nonce"
+      ],
+      "guard_semantics": "connection.state = AWAITING_CHALLENGE_RESPONSE"
+    },
+    {
+      "statement_id": "D-S017-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MAY also reauthenticate using this challenge-response flow, as described in Section 4.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": "CONNECTED",
+      "to_state": "AWAITING_BROKER_CHALLENGE",
+      "trigger": "client initiates reauthentication via PoP challenge-response",
+      "pre_cond": "connection.state = CONNECTED",
+      "post_cond": "connection.state = AWAITING_BROKER_CHALLENGE",
+      "actions": [
+        "send AUTH to initiate PoP reauthentication"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S018-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST verify the validity of the token either locally or MAY send a request to the introspection endpoint of the AS. The Broker MUST verify the claims in the access token.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S018",
+      "state_name": "TOKEN_VALIDATION",
+      "enum_name": "BrokerConnectionStates",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TOKEN_VALIDATION"
+    },
+    {
+      "statement_id": "D-S018-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Validation of the signature or MAC MUST fail if the signature algorithm is set to 'none' when the key used for the signature algorithm cannot be determined or the computed and received signature/MAC do not match.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S018",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "TOKEN_VALIDATION",
+      "to_state": "VALIDATION_FAILED",
+      "trigger": "signature_or_MAC_validation_failure",
+      "pre_cond": "token.signature_algorithm = 'none' | token.signing_key = null | token.computed_signature != token.received_signature",
+      "post_cond": "protocol.state = VALIDATION_FAILED",
+      "actions": [
+        "reject_token",
+        "deny_client_authentication"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S018-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST check if the access token is still valid, if it is the intended destination (i.e., the audience) of the token, and if the token was issued by an authorized Authorization Server.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S018",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "TOKEN_VALIDATION",
+      "to_state": "VALIDATION_FAILED",
+      "trigger": "token_claim_check_failure",
+      "pre_cond": "token.valid = false | token.audience != broker.id | token.issuer_authorized = false",
+      "post_cond": "protocol.state = VALIDATION_FAILED",
+      "actions": [
+        "reject_token",
+        "deny_client_access"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S018-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker validates the signature or the MAC, depending on how the PoP protocol is implemented, to authenticate the Client.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "S018",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "TOKEN_VALIDATION",
+      "to_state": "CLIENT_AUTHENTICATED",
+      "trigger": "token_validation_success",
+      "pre_cond": "token.valid = true & token.audience = broker.id & token.issuer_authorized = true & token.signature_valid = true",
+      "post_cond": "protocol.state = CLIENT_AUTHENTICATED",
+      "actions": [
+        "accept_token",
+        "authenticate_client"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S018-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The 'cnf' claim MUST contain either the Client's RPK or, if the key is already known by the Broker (e.g., from previous communication), a reference to it.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S018",
+      "object_name": "access_token",
+      "field_name": "cnf",
+      "field_type": "claim",
+      "required": true,
+      "allowed_values": [
+        "client_RPK",
+        "RPK_reference"
+      ],
+      "guard_semantics": "required when Client uses TLS RPK mode to authenticate to Broker"
+    },
+    {
+      "statement_id": "D-S019-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "The token or its introspection result MUST be cached to allow a Client's future PUBLISH and SUBSCRIBE messages.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S019",
+      "object_name": "session",
+      "field_name": "cached_token_or_introspection_result",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S019-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "During the CONNECT, if the Will Flag is set to 1, the Broker MUST also authorize the publication of the Will Topic and Will Message using the token's scope field.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S019",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECT",
+      "to_state": null,
+      "trigger": "Will Flag = 1 in CONNECT",
+      "pre_cond": "connection.will_flag = 1",
+      "post_cond": "server.will_topic_authorized = true",
+      "actions": [
+        "authorize Will Topic and Will Message using token scope field"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S019-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MAY signal in the CONNACK explicitly whether Wildcard Subscriptions are supported by returning a CONNACK property 'Wildcard Subscription Available'.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S019",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECT",
+      "to_state": "CONNACK",
+      "trigger": "CONNECT received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send CONNACK with Wildcard Subscription Available property"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S019-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the scope is empty, the Broker records no permissions for the Client for any topic. In this case, the Client is not able to publish or subscribe to any protected topics.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S019",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "CONNECT",
+      "to_state": null,
+      "trigger": "scope is empty",
+      "pre_cond": "session.scope = empty",
+      "post_cond": "session.publish_permitted = false & session.subscribe_permitted = false",
+      "actions": [
+        "record no topic permissions for client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S019-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The non-empty scope is used to authorize the Will Topic, if provided, in the CONNECT packet, during connection setup and, if the connection request succeeds, the Topic Names or Topic Filters requested in the future PUBLISH and SUBSCRIBE packets.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S019",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECT",
+      "to_state": "Connected",
+      "trigger": "connection request succeeds & scope is non-empty",
+      "pre_cond": "session.scope != empty & connection.request_succeeds = true",
+      "post_cond": "session.publish_permitted = scope_authorized & session.subscribe_permitted = scope_authorized",
+      "actions": [
+        "authorize Will Topic using scope",
+        "authorize future PUBLISH Topic Names using scope",
+        "authorize future SUBSCRIBE Topic Filters using scope"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S019-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "For the authorization to succeed, the Broker MUST verify that the Topic Name or Topic Filter in question is either an exact match to or a subset of at least one topic_filter in the scope.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S019",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Connected",
+      "to_state": null,
+      "trigger": "PUBLISH or SUBSCRIBE received",
+      "pre_cond": "session.scope != empty",
+      "post_cond": "authorization.result = (topic_name_or_filter matches scope)",
+      "actions": [
+        "verify Topic Name or Topic Filter is exact match or subset of at least one scope topic_filter"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S020-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Based on the validation result (obtained either via local inspection or using the introspection interface of the AS), the Broker MUST send a CONNACK packet to the Client.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S020",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "validation_result_obtained",
+      "pre_cond": null,
+      "post_cond": "connack_packet.sent = true",
+      "actions": [
+        "send CONNACK packet to Client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S021-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Authentication can fail for the following reasons: if the Client does not provide a valid token, the Client omits the Authentication Data field and the Broker has no token stored for the Client, the token or Authentication data are malformed, or if the Will Flag is set, the authorization checks for the Will Topic fails. The Broker responds with the CONNACK reason code 0x87 (Not Authorized) or any other applicable reason code.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S021",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authentication_failure",
+      "pre_cond": "client.token_valid = false | (client.authentication_data_present = false & server.stored_token = null) | client.token_malformed = true | (connection.will_flag = true & will_topic.authorized = false)",
+      "post_cond": null,
+      "actions": [
+        "send CONNACK with reason_code=0x87 (Not Authorized)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S021-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MAY also trigger AS discovery and include a User Property (identified as property type 38 (0x26)) in the CONNACK for the AS Request Creation Hints.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S021",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authentication_failure",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "trigger AS discovery",
+        "include User Property 'ace_as_hint' in CONNACK"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S021-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The name of the User Property MUST be set to 'ace_as_hint' when the Broker includes AS Request Creation Hints in the CONNACK.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "object_name": "CONNACK",
+      "field_name": "User Property name",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "ace_as_hint"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S022-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "On success, the reason code of the CONNACK is 0x00 (Success). Having accepted the connection, the Broker MUST be prepared to store the token during the connection and after disconnection for future use.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S022",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Authorizing",
+      "to_state": "Connected",
+      "trigger": "AuthorizationSuccess",
+      "pre_cond": null,
+      "post_cond": "session.token_stored = true",
+      "actions": [
+        "send CONNACK with reason code 0x00",
+        "store access token"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S022-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Broker starts a new Session, it MUST also set Session Present to 0 in the CONNACK packet to signal a new Session to the Client.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S022",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Authorizing",
+      "to_state": "Connected",
+      "trigger": "AuthorizationSuccess",
+      "pre_cond": "session.is_new = true",
+      "post_cond": "connack.session_present = 0",
+      "actions": [
+        "send CONNACK with reason code 0x00",
+        "set Session Present = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S022-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Otherwise, it MUST set Session Present to 1 in the CONNACK packet.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S022",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Authorizing",
+      "to_state": "Connected",
+      "trigger": "AuthorizationSuccess",
+      "pre_cond": "session.is_new = false",
+      "post_cond": "connack.session_present = 1",
+      "actions": [
+        "send CONNACK with reason code 0x00",
+        "set Session Present = 1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S022-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The reason code of the CONNACK is 0x00 (Success) on authorization success; Session Present must be set to 0 for new session or 1 for existing session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S022",
+      "object_name": "CONNACK",
+      "field_name": "Session Present",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "0",
+        "1"
+      ],
+      "guard_semantics": "0 if session.is_new = true; 1 if session.is_new = false"
+    },
+    {
+      "statement_id": "D-S022-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Having accepted the connection, the Broker MUST be prepared to store the token during the connection and after disconnection for future use. PUBLISH and SUBSCRIBE packets, which are sent after a connection setup, do not contain access tokens.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S022",
+      "state_name": "Connected",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.token_stored = true & connack.reason_code = 0x00"
+    },
+    {
+      "statement_id": "D-S022-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the token is not self-contained and the Broker uses token introspection, it MAY cache the validation result to authorize the subsequent PUBLISH and SUBSCRIBE packets.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S022",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Connected",
+      "to_state": "Connected",
+      "trigger": "TokenIntrospectionResult",
+      "pre_cond": "session.token.self_contained = false & server.uses_introspection = true",
+      "post_cond": "session.introspection_cached = true",
+      "actions": [
+        "cache introspection result"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S024-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Client is allowed to publish to the topic, the Broker publishes the message to all valid subscribers of the topic.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S024",
+      "actors": [
+        "broker",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH_received",
+      "pre_cond": "authorization.result = authorized",
+      "post_cond": "message.forwarded = true",
+      "actions": [
+        "publish message to all valid subscribers of the topic"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S024-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "In the case of an authorization failure, the Broker MUST return an error if the Client has set the QoS level of the PUBLISH packet to greater than or equal to 1. Depending on the QoS level, the Broker responds with either a PUBACK or PUBREC packet with reason code 0x87 (Not authorized).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S024",
+      "actors": [
+        "broker",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH_received",
+      "pre_cond": "authorization.result = not_authorized & publish.qos >= 1",
+      "post_cond": "error_response.sent = true",
+      "actions": [
+        "send PUBACK with reason_code=0x87 if QoS=1",
+        "send PUBREC with reason_code=0x87 if QoS=2"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S024-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "On receiving an acknowledgment with 0x87 (Not authorized), the Client MAY reauthenticate by providing a new token.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Reauthenticating",
+      "trigger": "PUBACK_or_PUBREC_received_reason_0x87",
+      "pre_cond": "acknowledgment.reason_code = 0x87",
+      "post_cond": "client.reauthentication_initiated = true",
+      "actions": [
+        "provide new token",
+        "reauthenticate"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S024-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "For QoS level 0, the Broker sends a DISCONNECT packet with reason code 0x87 (Not authorized) and closes the Network Connection.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S024",
+      "actors": [
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "PUBLISH_received",
+      "pre_cond": "authorization.result = not_authorized & publish.qos = 0",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "send DISCONNECT with reason_code=0x87",
+        "close Network Connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S024-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker sends a DISCONNECT packet and closes the Network Connection on authorization failure for QoS 0.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S024",
+      "state_name": "Disconnected",
+      "enum_name": "ConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "connection.state = Disconnected"
+    },
+    {
+      "statement_id": "D-S024-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "For all QoS levels, the Broker MAY return 0x80 (Unspecified error) if they do not want to leak the Topic Names to unauthorized clients.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S024",
+      "actors": [
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH_received",
+      "pre_cond": "authorization.result = not_authorized",
+      "post_cond": "error_response.sent = true",
+      "actions": [
+        "send error response with reason_code=0x80"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S025-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST close the Network Connection and SHOULD send a DISCONNECT packet with reason code 0x87 (Not authorized) before closing the Network Connection to unauthorized subscribers.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S025",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Connected",
+      "to_state": "Network Connection Closed",
+      "trigger": "Unauthorized subscriber identified for PUBLISH forwarding",
+      "pre_cond": "connection.subscriber_authorized = false",
+      "post_cond": "connection.state = NetworkConnectionClosed",
+      "actions": [
+        "send DISCONNECT packet with reason code 0x87 (Not authorized)",
+        "close Network Connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "The Broker forwards the PUBLISH packet to all the valid subscribers \u2014 subscribers with valid matching Topic Subscriptions and authorized access.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S025",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Connected",
+      "to_state": "Connected",
+      "trigger": "PUBLISH packet received with valid matching Topic Subscription and authorized subscriber",
+      "pre_cond": "connection.subscriber_authorized = true & session.subscription_match = true",
+      "post_cond": "message.forwarded = true",
+      "actions": [
+        "forward PUBLISH packet to subscriber"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S026-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "On receiving the SUBSCRIBE packet, the Broker MUST use the type of packet (i.e., SUBSCRIBE) and the Topic Filter in the packet header to match against the scope field of the stored token or introspection result.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SUBSCRIBE received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "match Topic Filter against scope field of stored token or introspection result"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S026-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "As a response to the SUBSCRIBE packet, the Broker issues a SUBACK packet. For each Topic Filter, the SUBACK packet includes a return code matching the QoS level for the corresponding Topic Filter.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SUBSCRIBE authorized",
+      "pre_cond": "topic_filter = subset_of(token.scope.topic_filter)",
+      "post_cond": null,
+      "actions": [
+        "send SUBACK with QoS return code for each authorized Topic Filter"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S026-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "In the case of failure, the return code is 0x87, indicating that the Client is not authorized.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SUBSCRIBE not authorized",
+      "pre_cond": "topic_filter != subset_of(token.scope.topic_filter)",
+      "post_cond": null,
+      "actions": [
+        "send SUBACK with return code 0x87 (Not Authorized) for each unauthorized Topic Filter"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S026-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MAY return 0x80 (Unspecified error) if they do not want to leak the Topic Names to unauthorized clients.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SUBSCRIBE not authorized",
+      "pre_cond": "topic_filter != subset_of(token.scope.topic_filter)",
+      "post_cond": null,
+      "actions": [
+        "send SUBACK with return code 0x80 (Unspecified Error) instead of 0x87"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S026-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "A reason code is returned for each Topic Filter. Therefore, the Client may receive success codes for a subset of its Topic Filters while being unauthorized for the rest.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S026",
+      "object_name": "SUBACK",
+      "field_name": "reason_code",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "QoS level",
+        "0x87",
+        "0x80"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S027-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "After sending a DISCONNECT packet, the Network Connection is closed, and no more messages can be sent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "state_name": "Network Connection Closed",
+      "enum_name": "NetworkConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S027-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "To start reauthentication, the Client MUST send an AUTH packet with reason code 0x19 (Reauthentication).",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S027",
+      "state_name": "Reauthenticating",
+      "enum_name": "NetworkConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S027-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST check for token expiration whenever a CONNECT, PUBLISH, or SUBSCRIBE packet is received or sent.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT_or_PUBLISH_or_SUBSCRIBE_received_or_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "check token expiration"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Token expirations may trigger the Broker to send PUBACK, SUBACK, and DISCONNECT packets with the return code set to 'Not authorized'. After sending a DISCONNECT packet, the Network Connection is closed, and no more messages can be sent.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": "Network Connection Closed",
+      "trigger": "token_expiration_detected",
+      "pre_cond": null,
+      "post_cond": "connection.state = Network Connection Closed",
+      "actions": [
+        "send DISCONNECT with return code 'Not authorized'",
+        "close Network Connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S027-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "To start reauthentication, the Client MUST send an AUTH packet with reason code 0x19 (Reauthentication). The Client MUST set the Authentication Method as 'ace' and transport the new token in the Authentication Data.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S027",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "Reauthenticating",
+      "trigger": "reauthentication_initiated",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send AUTH with reason code 0x19 (Reauthentication)",
+        "set Authentication Method to 'ace'",
+        "transport new token in Authentication Data"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker accepts reauthentication requests if the Client has already submitted a token (may be expired), for which it performed proof of possession. Otherwise, the Broker MUST deny the request.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "Reauthenticating",
+      "to_state": null,
+      "trigger": "AUTH_received",
+      "pre_cond": "session.token_submitted = false | session.pop_performed = false",
+      "post_cond": null,
+      "actions": [
+        "deny reauthentication request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the reauthentication fails, the Broker MUST send a DISCONNECT packet with reason code 0x87 (Not Authorized).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "Reauthenticating",
+      "to_state": "Network Connection Closed",
+      "trigger": "reauthentication_failed",
+      "pre_cond": null,
+      "post_cond": "connection.state = Network Connection Closed",
+      "actions": [
+        "send DISCONNECT with reason code 0x87 (Not Authorized)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST set the Authentication Method as 'ace' and transport the new token in the Authentication Data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "object_name": "AUTH",
+      "field_name": "Authentication Method",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "ace"
+      ],
+      "guard_semantics": "reauthentication_in_progress"
+    },
+    {
+      "statement_id": "D-S027-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST set the Authentication Method as 'ace' and transport the new token in the Authentication Data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "object_name": "AUTH",
+      "field_name": "Authentication Data",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "reauthentication_in_progress"
+    },
+    {
+      "statement_id": "D-S028-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "if the Session is currently not connected, the time at which the Session will end and the Session State will be discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "state_name": "not connected",
+      "enum_name": "SessionConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.connected = false"
+    },
+    {
+      "statement_id": "D-S028-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "if the Session Expiry Interval is set to 0, the Broker doesn't store the Session State but MUST keep the retained messages.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S028",
+      "actors": [
+        "client",
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": "not connected",
+      "trigger": "DISCONNECT",
+      "pre_cond": "session.expiry_interval = 0",
+      "post_cond": "session.state_stored = false & broker.retained_messages_kept = true",
+      "actions": [
+        "discard session state",
+        "keep retained messages"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S028-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If the Broker stores the Session State, the state MAY include the token and its introspection result (for reference tokens) in addition to the MQTT Session State.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S028",
+      "actors": [
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": "not connected",
+      "trigger": "DISCONNECT",
+      "pre_cond": "session.expiry_interval > 0",
+      "post_cond": "session.state_stored = true",
+      "actions": [
+        "store session state",
+        "optionally store token and introspection result"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S028-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "if the Session is currently not connected, the time at which the Session will end and the Session State will be discarded.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S028",
+      "actors": [
+        "broker"
+      ],
+      "from_state": "not connected",
+      "to_state": null,
+      "trigger": "session_expiry_time_reached",
+      "pre_cond": "session.connected = false & session.expiry_time_reached = true",
+      "post_cond": "session.state = null",
+      "actions": [
+        "discard session state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S028-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "In case of disconnections due to network errors or server disconnection due to a protocol error (which includes authorization errors), the Will Message is sent if the Client supplied a Will in the CONNECT packet. The Will Message MUST be published to the Will Topic, regardless of whether the corresponding token has expired.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S028",
+      "actors": [
+        "broker",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "not connected",
+      "trigger": "network_error | protocol_error",
+      "pre_cond": "client.will_supplied = true",
+      "post_cond": "will_message.published_to_will_topic = true",
+      "actions": [
+        "publish Will Message to Will Topic regardless of token expiry"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S028-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "The messages to be retained are indicated to the Broker by setting a RETAIN flag in a PUBLISH packet. This way, the publisher signals to the Broker to store the most recent message for the associated topic.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "object_name": "PUBLISH",
+      "field_name": "RETAIN",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": [
+        "0",
+        "1"
+      ],
+      "guard_semantics": "RETAIN=1 triggers broker to store most recent message for associated topic"
+    },
+    {
+      "statement_id": "D-S028-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client's token scope array MUST include the Will Topic.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "object_name": "token",
+      "field_name": "scope",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "token.scope includes Will Topic; required pre-condition for Will Message publication"
+    },
+    {
+      "statement_id": "D-S028-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "the Broker MUST use the minimum of the token expiry and message expiry interval to discard a retained message.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S028",
+      "actors": [
+        "broker"
+      ],
+      "from_state": "retained",
+      "to_state": "discarded",
+      "trigger": "min(token_expiry, message_expiry_interval)_reached",
+      "pre_cond": "message.retain_flag = 1 & min(token.expiry, message.expiry_interval)_reached = true",
+      "post_cond": "message.retained = false",
+      "actions": [
+        "discard retained message"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S028-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST continue publishing the retained messages as long as the associated tokens are valid.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S028",
+      "actors": [
+        "broker"
+      ],
+      "from_state": "retained",
+      "to_state": null,
+      "trigger": "new_subscriber",
+      "pre_cond": "message.retained = true & token.valid = true",
+      "post_cond": "retained_message.published_to_subscriber = true",
+      "actions": [
+        "publish retained message to new subscriber"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S029-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Brokers that do not support MQTT v3.1.1 Clients return a CONNACK packet with reason code 0x84 (Unsupported Protocol Version) in response to the connection requests.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S029",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "CONNECTING",
+      "to_state": "CLOSED",
+      "trigger": "connection_request_received",
+      "pre_cond": "server.supports_v3_1_1 = false & client.protocol_version = 3.1.1",
+      "post_cond": "connection.rejected = true & connection.reason_code = 0x84",
+      "actions": [
+        "send CONNACK with reason code 0x84 (Unsupported Protocol Version)",
+        "close connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S030-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If there is no Session associated with the Client Identifier, the Broker MUST create a new Session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "state_name": "new Session",
+      "enum_name": "SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.associated = false | session.clean_flag = 1"
+    },
+    {
+      "statement_id": "D-S030-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If the Clean flag is set to 0, the Broker MUST resume communications with the Client based on the state from the current Session (as identified by the Client Identifier).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "state_name": "existing Session continued",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.clean_flag = 0 & session.associated = true"
+    },
+    {
+      "statement_id": "D-S030-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "The Client SHOULD set the Clean flag to 1 to always start a new Session.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "new Session",
+      "trigger": "CONNECT received with Clean flag = 1",
+      "pre_cond": "connect.clean_flag = 1",
+      "post_cond": "session.state = new Session",
+      "actions": [
+        "create new Session"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S030-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If the Clean flag is set to 0, the Broker MUST resume communications with the Client based on the state from the current Session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "existing Session continued",
+      "trigger": "CONNECT received with Clean flag = 0 and existing session",
+      "pre_cond": "connect.clean_flag = 0 & session.associated = true",
+      "post_cond": "session.state = existing Session continued",
+      "actions": [
+        "resume Session state",
+        "send CONNACK with Session Present = 1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If there is no Session associated with the Client Identifier, the Broker MUST create a new Session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "new Session",
+      "trigger": "CONNECT received with Clean flag = 0 and no existing session",
+      "pre_cond": "connect.clean_flag = 0 & session.associated = false",
+      "post_cond": "session.state = new Session",
+      "actions": [
+        "create new Session",
+        "send CONNACK with Session Present = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST set the Session Present flag in the CONNACK packet accordingly, i.e., 0 to indicate a new Session to the Client and 1 to indicate that the existing Session is continued.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": "new Session",
+      "to_state": null,
+      "trigger": "new Session created",
+      "pre_cond": "session.state = new Session",
+      "post_cond": "connack.session_present = 0",
+      "actions": [
+        "send CONNACK with Session Present = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST set the Session Present flag in the CONNACK packet accordingly, i.e., 1 to indicate that the existing Session is continued.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": "existing Session continued",
+      "to_state": null,
+      "trigger": "existing Session resumed",
+      "pre_cond": "session.state = existing Session continued",
+      "post_cond": "connack.session_present = 1",
+      "actions": [
+        "send CONNACK with Session Present = 1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Client provided the token via the 'authz-info' topic and will not update the token in the CONNECT packet, it MUST authenticate over TLS. The subsequent TLS handshake would fail without a valid token.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S030",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token published to authz-info topic without CONNECT token update",
+      "pre_cond": "token.transport = authz-info & connect.token_updated = false",
+      "post_cond": "connection.auth_method = TLS",
+      "actions": [
+        "authenticate over TLS"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST still perform PoP validation on the provided Client token.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT received",
+      "pre_cond": null,
+      "post_cond": "token.pop_validated = true",
+      "actions": [
+        "perform PoP validation on Client token"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-010",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "User Name and Password flags MUST be set to 1 to ensure that the Payload of the CONNECT packet includes both the User Name and Password fields.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "object_name": "CONNECT",
+      "field_name": "User Name Flag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        1
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S030-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "User Name and Password flags MUST be set to 1 to ensure that the Payload of the CONNECT packet includes both the User Name and Password fields.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "object_name": "CONNECT",
+      "field_name": "Password Flag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        1
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S031-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The tokenless CONNECT attempt MUST fail. The challenge-response-based PoP is not possible for MQTT v3.1.1.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S031",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "CONNECT_without_token",
+      "pre_cond": "connection.token = null",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "reject CONNECT attempt",
+        "deny connection establishment"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "In the case of an authorization error, the Broker MUST ignore the PUBLISH packet and disconnect the Client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S031",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "PUBLISH_authorization_failure",
+      "pre_cond": "client.publish_authorized = false",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "ignore PUBLISH packet",
+        "disconnect Client below application layer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Token expirations MUST lead to disconnecting the Client rather than silently dropping messages when the Broker is forwarding PUBLISH packets to subscribed Clients.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S031",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "subscriber_token_expiration",
+      "pre_cond": "client.token.expired = true & broker.forwarding_publish = true",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "disconnect Client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "The Broker will disconnect on almost any error and may not keep the Session State, necessitating that clients make a greater effort to ensure that tokens remain valid.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S031",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "authorization_error",
+      "pre_cond": null,
+      "post_cond": "session.state_preserved = false",
+      "actions": [
+        "disconnect connection",
+        "discard Session State"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S036-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "After the Broker validates an access token and accepts a connection from a client, it caches the token to authorize a Client's publish and subscribe requests in an ongoing Session.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S036",
+      "state_name": "ongoing Session",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.token_cached = true & session.connection_accepted = true"
+    },
+    {
+      "statement_id": "D-S036-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "After the Broker validates an access token and accepts a connection from a client, it caches the token to authorize a Client's publish and subscribe requests in an ongoing Session.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S036",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "ongoing Session",
+      "trigger": "access token validated and connection accepted",
+      "pre_cond": "connection.token_valid = true",
+      "post_cond": "session.token_cached = true",
+      "actions": [
+        "cache access token",
+        "authorize publish and subscribe requests"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "For MQTT v5.0, when a Client connects with a long Session Expiry Interval, the Broker may need to maintain the Client's MQTT Session State after it disconnects for an extended period.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S036",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "ongoing Session",
+      "to_state": "Session State maintained after disconnect",
+      "trigger": "Client disconnects with long Session Expiry Interval",
+      "pre_cond": "session.expiry_interval = long",
+      "post_cond": "session.state_stored = true",
+      "actions": [
+        "maintain MQTT Session State"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S036-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "For MQTT v3.1.1, the Session State may need to be stored indefinitely, as it does not have a Session Expiry Interval feature.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S036",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "ongoing Session",
+      "to_state": "Session State maintained after disconnect",
+      "trigger": "Client disconnects (MQTT v3.1.1)",
+      "pre_cond": "session.version = v3.1.1",
+      "post_cond": "session.state_stored = true & session.expiry = indefinite",
+      "actions": [
+        "store Session State indefinitely"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S036-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If the Broker caches the token introspection responses, then the Broker SHOULD use a reasonable cache timeout to introspect tokens regularly.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S036",
+      "object_name": "Broker token introspection cache",
+      "field_name": "cache_timeout",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "session.token_introspection_cached = true"
+    }
+  ]
+}

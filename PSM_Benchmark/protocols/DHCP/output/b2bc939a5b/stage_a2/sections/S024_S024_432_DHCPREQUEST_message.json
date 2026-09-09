@@ -1,0 +1,600 @@
+{
+  "section_id": "S024",
+  "title": "S024 4.3.2 DHCPREQUEST message",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S024 4.3.2 DHCPREQUEST message"
+  ],
+  "url_anchor": "#s024-432-dhcprequest-message",
+  "word_count": 884,
+  "statement_count": 24,
+  "elapsed_seconds": 532.85,
+  "statements": [
+    {
+      "statement_id": "N-S024-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client uses a 'client identifier' in a DHCPREQUEST message, it MUST use that same 'client identifier' in all subsequent messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "client.uses_client_identifier = true",
+      "post_cond": null,
+      "actions": [
+        "use same 'client identifier' in all subsequent messages"
+      ],
+      "modality": "must",
+      "id": "N-S024-001"
+    },
+    {
+      "statement_id": "N-S024-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client included a list of requested parameters in a DHCPDISCOVER message, it MUST include that list in all subsequent messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "dhcpdiscover.requested_parameters_list = present",
+      "post_cond": null,
+      "actions": [
+        "include requested parameter list in all subsequent messages"
+      ],
+      "modality": "must",
+      "id": "N-S024-002"
+    },
+    {
+      "statement_id": "N-S024-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "Any configuration parameters in the DHCPACK message SHOULD NOT conflict with those in the earlier DHCPOFFER message to which the client is responding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "message.type = DHCPACK & dhcpoffer.received = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S024-003"
+    },
+    {
+      "statement_id": "N-S024-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client SHOULD use the parameters in the DHCPACK message for configuration.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPACK received",
+      "pre_cond": "message.received.type = DHCPACK",
+      "post_cond": null,
+      "actions": [
+        "use DHCPACK parameters for configuration"
+      ],
+      "modality": "should",
+      "id": "N-S024-004"
+    },
+    {
+      "statement_id": "N-S024-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Client inserts the address of the selected server in 'server identifier', 'ciaddr' MUST be zero, 'requested IP address' MUST be filled in with the yiaddr value from the chosen DHCPOFFER.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "SELECTING",
+      "to_state": null,
+      "trigger": "sending DHCPREQUEST",
+      "pre_cond": "protocol.state = SELECTING",
+      "post_cond": "dhcprequest.ciaddr = 0 & dhcprequest.requested_ip_address = dhcpoffer.yiaddr",
+      "actions": [
+        "insert selected server address in 'server identifier'",
+        "set ciaddr to zero",
+        "fill 'requested IP address' with yiaddr from chosen DHCPOFFER"
+      ],
+      "modality": "must",
+      "id": "N-S024-005"
+    },
+    {
+      "statement_id": "N-S024-6",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "As an implementation detail, servers SHOULD NOT reuse offered addresses and may use an implementation-specific timeout mechanism to decide when to reuse an offered address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "do not reuse offered addresses"
+      ],
+      "modality": "should",
+      "id": "N-S024-006"
+    },
+    {
+      "statement_id": "N-S024-7",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "'server identifier' MUST NOT be filled in, 'requested IP address' option MUST be filled in with client's notion of its previously assigned address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "INIT-REBOOT",
+      "to_state": null,
+      "trigger": "sending DHCPREQUEST",
+      "pre_cond": "protocol.state = INIT-REBOOT",
+      "post_cond": "dhcprequest.server_identifier = not_filled",
+      "actions": [
+        "do not fill 'server identifier'"
+      ],
+      "modality": "must",
+      "id": "N-S024-007"
+    },
+    {
+      "statement_id": "N-S024-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "'server identifier' MUST NOT be filled in, 'requested IP address' option MUST be filled in with client's notion of its previously assigned address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "INIT-REBOOT",
+      "to_state": null,
+      "trigger": "sending DHCPREQUEST",
+      "pre_cond": "protocol.state = INIT-REBOOT",
+      "post_cond": "dhcprequest.requested_ip_address = client.cached_ip_address",
+      "actions": [
+        "fill 'requested IP address' with client's notion of previously assigned address"
+      ],
+      "modality": "must",
+      "id": "N-S024-008"
+    },
+    {
+      "statement_id": "N-S024-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "'ciaddr' MUST be zero.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "INIT-REBOOT",
+      "to_state": null,
+      "trigger": "sending DHCPREQUEST",
+      "pre_cond": "protocol.state = INIT-REBOOT",
+      "post_cond": "dhcprequest.ciaddr = 0",
+      "actions": [
+        "set ciaddr to zero"
+      ],
+      "modality": "must",
+      "id": "N-S024-009"
+    },
+    {
+      "statement_id": "N-S024-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "Server SHOULD send a DHCPNAK message to the client if the 'requested IP address' is incorrect, or is on the wrong network.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPREQUEST received from INIT-REBOOT client",
+      "pre_cond": "dhcprequest.requested_ip_address = incorrect | dhcprequest.network = wrong",
+      "post_cond": null,
+      "actions": [
+        "send DHCPNAK to client"
+      ],
+      "modality": "should",
+      "id": "N-S024-010"
+    },
+    {
+      "statement_id": "N-S024-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "If the DHCP server detects that the client is on the wrong net (i.e., the result of applying the local subnet mask or remote subnet mask (if 'giaddr' is not zero) to 'requested IP address' option value doesn't match reality), then the server SHOULD send a DHCPNAK message to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "wrong network detected for INIT-REBOOT client",
+      "pre_cond": "subnet_check(dhcprequest.requested_ip_address, dhcprequest.giaddr) = mismatch",
+      "post_cond": null,
+      "actions": [
+        "send DHCPNAK to client"
+      ],
+      "modality": "should",
+      "id": "N-S024-011"
+    },
+    {
+      "statement_id": "N-S024-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "If not, then the server SHOULD send a DHCPNAK message to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client IP address check fails",
+      "pre_cond": "client.ip_address_correct = false",
+      "post_cond": null,
+      "actions": [
+        "send DHCPNAK to client"
+      ],
+      "modality": "should",
+      "id": "N-S024-012"
+    },
+    {
+      "statement_id": "N-S024-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "If the DHCP server has no record of this client, then it MUST remain silent, and MAY output a warning to the network administrator.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPREQUEST received from INIT-REBOOT client with no server record",
+      "pre_cond": "server.client_record = none",
+      "post_cond": null,
+      "actions": [
+        "remain silent (do not respond to DHCPREQUEST)"
+      ],
+      "modality": "must",
+      "id": "N-S024-013"
+    },
+    {
+      "statement_id": "N-S024-14",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "If the DHCP server has no record of this client, then it MUST remain silent, and MAY output a warning to the network administrator.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPREQUEST received from INIT-REBOOT client with no server record",
+      "pre_cond": "server.client_record = none",
+      "post_cond": null,
+      "actions": [
+        "output warning to network administrator"
+      ],
+      "modality": "may",
+      "id": "N-S024-014"
+    },
+    {
+      "statement_id": "N-S024-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server MUST broadcast the DHCPNAK message to the 0xffffffff broadcast address because the client may not have a correct network address or subnet mask, and the client may not be answering ARP requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "sending DHCPNAK to INIT-REBOOT client",
+      "pre_cond": "dhcprequest.giaddr = 0x0",
+      "post_cond": "dhcpnak.destination = 0xffffffff",
+      "actions": [
+        "broadcast DHCPNAK to 0xffffffff broadcast address"
+      ],
+      "modality": "must",
+      "id": "N-S024-015"
+    },
+    {
+      "statement_id": "N-S024-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server MUST set the broadcast bit in the DHCPNAK, so that the relay agent will broadcast the DHCPNAK to the client, because the client may not have a correct network address or subnet mask, and the client may not be answering ARP requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server",
+        "client",
+        "relay agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "sending DHCPNAK to INIT-REBOOT client via relay",
+      "pre_cond": "dhcprequest.giaddr != 0",
+      "post_cond": "dhcpnak.broadcast_bit = set",
+      "actions": [
+        "set broadcast bit in DHCPNAK"
+      ],
+      "modality": "must",
+      "id": "N-S024-016"
+    },
+    {
+      "statement_id": "N-S024-17",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "'server identifier' MUST NOT be filled in, 'requested IP address' option MUST NOT be filled in, 'ciaddr' MUST be filled in with client's IP address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "RENEWING",
+      "to_state": null,
+      "trigger": "sending DHCPREQUEST",
+      "pre_cond": "protocol.state = RENEWING",
+      "post_cond": "dhcprequest.server_identifier = not_filled & dhcprequest.requested_ip_address = not_filled",
+      "actions": [
+        "do not fill 'server identifier'",
+        "do not fill 'requested IP address' option"
+      ],
+      "modality": "must",
+      "id": "N-S024-017"
+    },
+    {
+      "statement_id": "N-S024-18",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "'server identifier' MUST NOT be filled in, 'requested IP address' option MUST NOT be filled in, 'ciaddr' MUST be filled in with client's IP address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "RENEWING",
+      "to_state": null,
+      "trigger": "sending DHCPREQUEST",
+      "pre_cond": "protocol.state = RENEWING",
+      "post_cond": "dhcprequest.ciaddr = client.ip_address",
+      "actions": [
+        "fill 'ciaddr' with client's IP address"
+      ],
+      "modality": "must",
+      "id": "N-S024-018"
+    },
+    {
+      "statement_id": "N-S024-19",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "A client MAY choose to renew or extend its lease prior to T1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "BOUND",
+      "to_state": "RENEWING",
+      "trigger": "client chooses to renew lease before T1 expiry",
+      "pre_cond": "protocol.state = BOUND & timer.T1 = not_expired",
+      "post_cond": null,
+      "actions": [
+        "send DHCPREQUEST to renew or extend lease"
+      ],
+      "modality": "may",
+      "id": "N-S024-019"
+    },
+    {
+      "statement_id": "N-S024-20",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "'server identifier' MUST NOT be filled in, 'requested IP address' option MUST NOT be filled in, 'ciaddr' MUST be filled in with client's IP address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REBINDING",
+      "to_state": null,
+      "trigger": "sending DHCPREQUEST",
+      "pre_cond": "protocol.state = REBINDING",
+      "post_cond": "dhcprequest.server_identifier = not_filled & dhcprequest.requested_ip_address = not_filled",
+      "actions": [
+        "do not fill 'server identifier'",
+        "do not fill 'requested IP address' option"
+      ],
+      "modality": "must",
+      "id": "N-S024-020"
+    },
+    {
+      "statement_id": "N-S024-21",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "'server identifier' MUST NOT be filled in, 'requested IP address' option MUST NOT be filled in, 'ciaddr' MUST be filled in with client's IP address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REBINDING",
+      "to_state": null,
+      "trigger": "sending DHCPREQUEST",
+      "pre_cond": "protocol.state = REBINDING",
+      "post_cond": "dhcprequest.ciaddr = client.ip_address",
+      "actions": [
+        "fill 'ciaddr' with client's IP address"
+      ],
+      "modality": "must",
+      "id": "N-S024-021"
+    },
+    {
+      "statement_id": "N-S024-22",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "This message MUST be broadcast to the 0xffffffff IP broadcast address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REBINDING",
+      "to_state": null,
+      "trigger": "sending DHCPREQUEST",
+      "pre_cond": "protocol.state = REBINDING",
+      "post_cond": "dhcprequest.destination = 0xffffffff",
+      "actions": [
+        "broadcast DHCPREQUEST to 0xffffffff IP broadcast address"
+      ],
+      "modality": "must",
+      "id": "N-S024-022"
+    },
+    {
+      "statement_id": "N-S024-23",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The DHCP server SHOULD check 'ciaddr' for correctness before replying to the DHCPREQUEST.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPREQUEST received from REBINDING client",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "check 'ciaddr' for correctness before replying"
+      ],
+      "modality": "should",
+      "id": "N-S024-023"
+    },
+    {
+      "statement_id": "N-S024-24",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "A DHCP server MAY extend a client's lease only if it has local administrative authority to do so.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPREQUEST received from REBINDING client",
+      "pre_cond": "server.local_administrative_authority = true",
+      "post_cond": null,
+      "actions": [
+        "extend client lease"
+      ],
+      "modality": "may",
+      "id": "N-S024-024"
+    }
+  ]
+}

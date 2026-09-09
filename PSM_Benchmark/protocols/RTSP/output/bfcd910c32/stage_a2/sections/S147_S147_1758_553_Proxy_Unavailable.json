@@ -1,0 +1,88 @@
+{
+  "section_id": "S147",
+  "title": "S147 17.5.8 553 Proxy Unavailable",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S147 17.5.8 553 Proxy Unavailable"
+  ],
+  "url_anchor": "#s147-1758-553-proxy-unavailable",
+  "word_count": 166,
+  "statement_count": 3,
+  "elapsed_seconds": 30.6,
+  "statements": [
+    {
+      "statement_id": "1-S147-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If known, the length of the delay MAY be indicated in a Retry-After header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S147",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "response.status = 553 & delay.length = known",
+      "post_cond": "response.Retry-After = delay.length",
+      "actions": [
+        "include Retry-After header in 553 response with delay length"
+      ],
+      "modality": "may",
+      "id": "N-S147-001"
+    },
+    {
+      "statement_id": "2-S147-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If no Retry-After is given, the agent SHOULD handle the response as it would for a 500 response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S147",
+      "actors": [
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "553_response_received & Retry-After_absent",
+      "pre_cond": "response.status = 553 & response.Retry-After = absent",
+      "post_cond": null,
+      "actions": [
+        "apply 500 response handling logic to 553 response"
+      ],
+      "modality": "should",
+      "id": "N-S147-002"
+    },
+    {
+      "statement_id": "3-S147-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The agent MUST honor the length, if given in the Retry-After header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S147",
+      "actors": [
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "553_response_received & Retry-After_present",
+      "pre_cond": "response.status = 553 & response.Retry-After = present",
+      "post_cond": "timer.retry_delay = response.Retry-After.value",
+      "actions": [
+        "set retry delay timer to value in Retry-After header",
+        "defer retry until timer expires"
+      ],
+      "modality": "must",
+      "id": "N-S147-003"
+    }
+  ]
+}

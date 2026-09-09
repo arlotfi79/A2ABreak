@@ -1,0 +1,123 @@
+{
+  "section_id": "S020",
+  "title": "S020 4.1 Constructing and sending DHCP messages",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S020 4.1 Constructing and sending DHCP messages"
+  ],
+  "url_anchor": "#s020-41-constructing-and-sending-dhcp-messages",
+  "word_count": 1352,
+  "statement_count": 5,
+  "elapsed_seconds": 88.51,
+  "statements": [
+    {
+      "statement_id": "D-S020-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "DHCP clients are responsible for all message retransmission. The client MUST adopt a retransmission strategy that incorporates a randomized exponential backoff algorithm to determine the delay between retransmissions. The retransmission delay SHOULD be doubled with subsequent retransmissions up to a maximum of 64 seconds.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S020",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "retransmission_timer_expires",
+      "pre_cond": null,
+      "post_cond": "client.retransmission_delay = min(client.retransmission_delay * 2, 64)",
+      "actions": [
+        "retransmit_pending_message",
+        "double_retransmission_delay_up_to_64s"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S020-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "A client that cannot receive unicast IP datagrams until its protocol software has been configured with an IP address SHOULD set the BROADCAST bit in the 'flags' field to 1 in any DHCPDISCOVER or DHCPREQUEST messages that client sends. A client that can receive unicast IP datagrams before its protocol software has been configured SHOULD clear the BROADCAST bit to 0.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S020",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DHCPDISCOVER | send_DHCPREQUEST",
+      "pre_cond": "client.can_receive_unicast = false",
+      "post_cond": "message.flags.BROADCAST = 1",
+      "actions": [
+        "set_BROADCAST_bit_to_1_in_flags"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S020-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "If the 'giaddr' field in a DHCP message from a client is non-zero, the server sends any return messages to the 'DHCP server' port on the BOOTP relay agent whose address appears in 'giaddr'. If the 'giaddr' field is zero and the 'ciaddr' field is nonzero, then the server unicasts DHCPOFFER and DHCPACK messages to the address in 'ciaddr'. If 'giaddr' is zero and 'ciaddr' is zero, and the broadcast bit is set, then the server broadcasts DHCPOFFER and DHCPACK messages to 0xffffffff. If the broadcast bit is not set and 'giaddr' is zero and 'ciaddr' is zero, then the server unicasts DHCPOFFER and DHCPACK messages to the client's hardware address and 'yiaddr' address. In all cases, when 'giaddr' is zero, the server broadcasts any DHCPNAK messages to 0xffffffff.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S020",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response_message",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "if message.giaddr != 0: forward_to_relay_agent_at_giaddr_port_67",
+        "if message.giaddr = 0 & message.ciaddr != 0: unicast_DHCPOFFER_DHCPACK_to_ciaddr",
+        "if message.giaddr = 0 & message.ciaddr = 0 & message.flags.BROADCAST = 1: broadcast_DHCPOFFER_DHCPACK_to_0xffffffff",
+        "if message.giaddr = 0 & message.ciaddr = 0 & message.flags.BROADCAST = 0: unicast_DHCPOFFER_DHCPACK_to_chaddr_and_yiaddr",
+        "if message.giaddr = 0: broadcast_DHCPNAK_to_0xffffffff"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S020-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "DHCP clients MUST use the IP address provided in the 'server identifier' option for any unicast requests to the DHCP server.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S020",
+      "object_name": "DHCP unicast request",
+      "field_name": "server identifier",
+      "field_type": "option",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "destination address for client unicast requests to server"
+    },
+    {
+      "statement_id": "D-S020-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The 'xid' field is used by the client to match incoming DHCP messages with pending requests. A DHCP client MUST choose 'xid's in such a way as to minimize the chance of using an 'xid' identical to one used by another client.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S020",
+      "object_name": "DHCP message",
+      "field_name": "xid",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "matches incoming DHCP messages with pending client requests"
+    }
+  ]
+}

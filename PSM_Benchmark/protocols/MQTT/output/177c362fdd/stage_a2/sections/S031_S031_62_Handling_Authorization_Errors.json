@@ -1,0 +1,91 @@
+{
+  "section_id": "S031",
+  "title": "S031 6.2 Handling Authorization Errors",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S031 6.2 Handling Authorization Errors"
+  ],
+  "url_anchor": "#s031-62-handling-authorization-errors",
+  "word_count": 284,
+  "statement_count": 3,
+  "elapsed_seconds": 36.13,
+  "statements": [
+    {
+      "statement_id": "N-S031-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The tokenless CONNECT attempt MUST fail.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "connection_rejected",
+      "trigger": "CONNECT_without_token",
+      "pre_cond": "connection.token = null",
+      "post_cond": "connection.state = connection_rejected",
+      "actions": [
+        "reject CONNECT attempt"
+      ],
+      "modality": "must",
+      "id": "N-S031-001"
+    },
+    {
+      "statement_id": "N-S031-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "In the case of an authorization error, the Broker MUST ignore the PUBLISH packet and disconnect the Client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "Connected",
+      "to_state": "Disconnected",
+      "trigger": "PUBLISH_authorization_failure",
+      "pre_cond": "connection.state = Connected & publish.authorization = failed",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "ignore PUBLISH packet",
+        "disconnect Client"
+      ],
+      "modality": "must",
+      "id": "N-S031-002"
+    },
+    {
+      "statement_id": "N-S031-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "These token expirations MUST lead to disconnecting the Client rather than silently dropping messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "Connected",
+      "to_state": "Disconnected",
+      "trigger": "token_expiration",
+      "pre_cond": "connection.state = Connected & client.token.state = expired",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "disconnect Client"
+      ],
+      "modality": "must",
+      "id": "N-S031-003"
+    }
+  ]
+}

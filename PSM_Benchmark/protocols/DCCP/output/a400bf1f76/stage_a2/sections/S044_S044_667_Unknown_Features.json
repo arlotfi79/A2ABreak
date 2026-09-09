@@ -1,0 +1,138 @@
+{
+  "section_id": "S044",
+  "title": "S044 6.6.7 Unknown Features",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S044 6.6.7 Unknown Features"
+  ],
+  "url_anchor": "#s044-667-unknown-features",
+  "word_count": 186,
+  "statement_count": 5,
+  "elapsed_seconds": 32.96,
+  "statements": [
+    {
+      "statement_id": "N-S044-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints MUST respond to unknown Change options with Empty Confirm options (that is, Confirm options containing no data), which inform the CHANGING endpoint that the feature was not understood.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S044",
+      "actors": [
+        "endpoint",
+        "CHANGING endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_unknown_Change_option",
+      "pre_cond": "feature.known = false",
+      "post_cond": null,
+      "actions": [
+        "send Empty Confirm option (containing no data)"
+      ],
+      "modality": "must",
+      "id": "N-S044-001"
+    },
+    {
+      "statement_id": "N-S044-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "However, if the Change option was Mandatory, the connection MUST be reset; see Section 6.6.9.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S044",
+      "actors": [
+        "endpoint",
+        "connection"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_Mandatory_unknown_Change_option",
+      "pre_cond": "change_option.mandatory = true & feature.known = false",
+      "post_cond": null,
+      "actions": [
+        "reset connection"
+      ],
+      "modality": "must",
+      "id": "N-S044-002"
+    },
+    {
+      "statement_id": "N-S044-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "On receiving an empty Confirm option for some feature, the CHANGING endpoint MUST transition back to the STABLE state, leaving the feature's value unchanged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S044",
+      "actors": [
+        "CHANGING endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "STABLE",
+      "trigger": "receive_empty_Confirm_option",
+      "pre_cond": "endpoint.state = CHANGING",
+      "post_cond": "endpoint.state = STABLE & feature.value = unchanged",
+      "actions": [
+        "transition to STABLE state",
+        "leave feature value unchanged"
+      ],
+      "modality": "must",
+      "id": "N-S044-003"
+    },
+    {
+      "statement_id": "N-S044-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The CHANGING endpoint SHOULD reset the connection (with Reset Code 5, \"Option Error\") if it receives an empty Confirm option for such a feature.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S044",
+      "actors": [
+        "CHANGING endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": null,
+      "trigger": "receive_empty_Confirm_for_required_feature",
+      "pre_cond": "endpoint.state = CHANGING & feature.required_by_all_dccp = true & confirm.data = empty",
+      "post_cond": null,
+      "actions": [
+        "reset connection with Reset Code 5 (Option Error)"
+      ],
+      "modality": "should",
+      "id": "N-S044-004"
+    },
+    {
+      "statement_id": "N-S044-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Nevertheless, endpoints MUST ignore any such options they receive.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S044",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_Confirm_option_for_unknown_feature_number",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "ignore Confirm option referring to unknown feature number"
+      ],
+      "modality": "must",
+      "id": "N-S044-005"
+    }
+  ]
+}

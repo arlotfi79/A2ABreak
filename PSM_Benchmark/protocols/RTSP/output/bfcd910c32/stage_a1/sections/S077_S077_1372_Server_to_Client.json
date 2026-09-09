@@ -1,0 +1,197 @@
+{
+  "section_id": "S077",
+  "title": "S077 13.7.2 Server to Client",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S077 13.7.2 Server to Client"
+  ],
+  "url_anchor": "#s077-1372-server-to-client",
+  "word_count": 466,
+  "statement_count": 8,
+  "elapsed_seconds": 36.04,
+  "statements": [
+    {
+      "statement_id": "D-S077-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server can send TEARDOWN requests in the server-to-client direction to indicate that the server has been forced to terminate the ongoing session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S077",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server forced to terminate session",
+      "pre_cond": null,
+      "post_cond": "session.state = terminated",
+      "actions": [
+        "server sends TEARDOWN request with Terminate-Reason header"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S077-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "When an RTSP client has maintained an RTSP session that otherwise is inactive for an extended period of time, the server may reclaim the resources by issuing a TEARDOWN request with the Terminate-Reason set to 'Session-Timeout'.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S077",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_inactivity_timeout",
+      "pre_cond": "session.inactive_duration > session.timeout_period",
+      "post_cond": "session.state = terminated",
+      "actions": [
+        "server issues TEARDOWN with Terminate-Reason=Session-Timeout"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S077-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In case the server needs to stop providing service to the established sessions and there is no server to point at in a REDIRECT request, then TEARDOWN SHALL be used to terminate the session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S077",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_stop_service & no_redirect_target",
+      "pre_cond": "session.established = true & redirect_target.available = false",
+      "post_cond": "session.state = terminated",
+      "actions": [
+        "server sends TEARDOWN"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S077-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "This method can also be used when non-recoverable internal errors have happened and the server has no other option than to terminate the sessions.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S077",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "non_recoverable_internal_error",
+      "pre_cond": null,
+      "post_cond": "session.state = terminated",
+      "actions": [
+        "server sends TEARDOWN to terminate session"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S077-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The TEARDOWN request MUST be made only on the session aggregate control URI and it MUST include the following headers: Session and Terminate-Reason.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S077",
+      "object_name": "TEARDOWN request (server-to-client)",
+      "field_name": "Session",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S077-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The TEARDOWN request MUST include the following headers: Session and Terminate-Reason.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S077",
+      "object_name": "TEARDOWN request (server-to-client)",
+      "field_name": "Terminate-Reason",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S077-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The TEARDOWN request may alternatively be done on the wildcard URI '*' and without any session header. This request indicates that all sessions and pending requests being managed via the connection are terminated.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S077",
+      "actors": [
+        "server",
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server sends TEARDOWN on wildcard URI",
+      "pre_cond": "teardown.uri = '*' & teardown.session_header = null",
+      "post_cond": "all_sessions.state = terminated & all_pending_requests.state = terminated",
+      "actions": [
+        "terminate all sessions on connection",
+        "terminate all pending requests on connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S077-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Any intervening proxies SHOULD do all of the following in the order listed: 1. respond to the TEARDOWN request, 2. disconnect the control channel from the requesting server, 3. pass the TEARDOWN request to each applicable client.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S077",
+      "actors": [
+        "proxy",
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "proxy receives wildcard TEARDOWN from server",
+      "pre_cond": "teardown.uri = '*'",
+      "post_cond": "proxy.control_channel = disconnected & client_sessions.state = terminated",
+      "actions": [
+        "proxy sends TEARDOWN response to server",
+        "proxy disconnects control channel from requesting server",
+        "proxy passes TEARDOWN to each applicable client"
+      ],
+      "modality": "should"
+    }
+  ]
+}

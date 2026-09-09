@@ -1,0 +1,273 @@
+{
+  "section_id": "S004",
+  "title": "S004 4 Overview of Operation",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S004 4 Overview of Operation"
+  ],
+  "url_anchor": "#s004-4-overview-of-operation",
+  "word_count": 2967,
+  "statement_count": 12,
+  "elapsed_seconds": 214.62,
+  "statements": [
+    {
+      "statement_id": "D-S004-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Alice and Bob's media session has now begun, and they send media packets using the format to which they agreed in the exchange of SDP. (Labeled 'Media Session' in Figure 1.)",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "state_name": "Media Session",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S004-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Alice confirms receipt of the BYE with a 200 (OK) response, which terminates the session and the BYE transaction.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S004",
+      "state_name": "Terminated",
+      "enum_name": "SessionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S004-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Bob's SIP phone receives the INVITE and alerts Bob to the incoming call. Bob's SIP phone indicates this in a 180 (Ringing) response. When Alice's softphone receives the 180 (Ringing) response, it passes this information to Alice, perhaps using an audio ringback tone.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "S004",
+      "state_name": "Ringing",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S004-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The transaction begins with Alice's softphone sending an INVITE request addressed to Bob's SIP URI. The proxy sends a 100 (Trying) response. Bob's SIP phone sends a 180 (Ringing) response routed back through the proxies.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S004",
+      "actors": [
+        "Alice's softphone",
+        "proxy server",
+        "Bob's SIP phone"
+      ],
+      "from_state": null,
+      "to_state": "Ringing",
+      "trigger": "INVITE",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send INVITE",
+        "receive 100 Trying",
+        "receive 180 Ringing"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "When he picks up the handset, his SIP phone sends a 200 (OK) response to indicate that the call has been answered. Alice's softphone sends an acknowledgement message, ACK, to Bob's SIP phone to confirm the reception of the final response (200 (OK)). This completes the INVITE/200/ACK three-way handshake used to establish SIP sessions.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "Bob's SIP phone",
+        "Alice's softphone"
+      ],
+      "from_state": "Ringing",
+      "to_state": "Media Session",
+      "trigger": "200 OK",
+      "pre_cond": "session.state = <Ringing>",
+      "post_cond": "session.state = <Media Session>",
+      "actions": [
+        "send 200 OK",
+        "send ACK",
+        "begin media session"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If Bob did not wish to answer the call or was busy on another call, an error response would have been sent instead of the 200 (OK), which would have resulted in no media session being established.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S004",
+      "actors": [
+        "Bob's SIP phone"
+      ],
+      "from_state": "Ringing",
+      "to_state": "Terminated",
+      "trigger": "error response",
+      "pre_cond": "session.state = <Ringing>",
+      "post_cond": "session.established = false",
+      "actions": [
+        "send error response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Bob disconnects (hangs up) first and generates a BYE message. Alice confirms receipt of the BYE with a 200 (OK) response, which terminates the session and the BYE transaction.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "Bob",
+        "Alice's softphone"
+      ],
+      "from_state": "Media Session",
+      "to_state": "Terminated",
+      "trigger": "BYE",
+      "pre_cond": "session.state = <Media Session>",
+      "post_cond": "session.state = <Terminated>",
+      "actions": [
+        "send BYE",
+        "send 200 OK",
+        "terminate session"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "During the session, either Alice or Bob may decide to change the characteristics of the media session. This is accomplished by sending a re-INVITE containing a new media description. The other party sends a 200 (OK) to accept the change. The requestor responds to the 200 (OK) with an ACK.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S004",
+      "actors": [
+        "Alice",
+        "Bob"
+      ],
+      "from_state": "Media Session",
+      "to_state": "Media Session",
+      "trigger": "re-INVITE",
+      "pre_cond": "session.state = <Media Session>",
+      "post_cond": "session.state = <Media Session>",
+      "actions": [
+        "send re-INVITE",
+        "receive 200 OK",
+        "send ACK",
+        "update session parameters"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S004-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the other party does not accept the change, he sends an error response such as 488 (Not Acceptable Here), which also receives an ACK. However, the failure of the re-INVITE does not cause the existing call to fail - the session continues using the previously negotiated characteristics.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S004",
+      "actors": [
+        "Alice",
+        "Bob"
+      ],
+      "from_state": "Media Session",
+      "to_state": "Media Session",
+      "trigger": "re-INVITE rejected",
+      "pre_cond": "session.state = <Media Session>",
+      "post_cond": "session.state = <Media Session>",
+      "actions": [
+        "send re-INVITE",
+        "receive error response",
+        "send ACK",
+        "continue with previously negotiated session parameters"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-010",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The combination of the To tag, From tag, and Call-ID completely defines a peer-to-peer SIP relationship between Alice and Bob and is referred to as a dialog.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "object_name": "dialog",
+      "field_name": "To tag",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S004-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The combination of the To tag, From tag, and Call-ID completely defines a peer-to-peer SIP relationship between Alice and Bob and is referred to as a dialog.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "object_name": "dialog",
+      "field_name": "From tag",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S004-012",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The combination of the To tag, From tag, and Call-ID completely defines a peer-to-peer SIP relationship between Alice and Bob and is referred to as a dialog.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "object_name": "dialog",
+      "field_name": "Call-ID",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

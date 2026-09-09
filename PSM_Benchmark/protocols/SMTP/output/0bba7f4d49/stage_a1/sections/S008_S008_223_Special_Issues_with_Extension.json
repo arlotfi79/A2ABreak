@@ -1,0 +1,62 @@
+{
+  "section_id": "S008",
+  "title": "S008 2.2.3 Special Issues with Extensions",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S008 2.2.3 Special Issues with Extensions"
+  ],
+  "url_anchor": "#s008-223-special-issues-with-extensions",
+  "word_count": 169,
+  "statement_count": 2,
+  "elapsed_seconds": 20.71,
+  "statements": [
+    {
+      "statement_id": "D-S008-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If an intermediate SMTP system finds a next hop that does not support the required extension, it MAY choose, based on the specific extension and circumstances, to requeue the message and try later and/or try an alternate MX host.",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "REQUEUED",
+      "trigger": "next_hop_missing_required_extension",
+      "pre_cond": "extension.required = true & next_hop.supports_extension = false",
+      "post_cond": "message.state = REQUEUED",
+      "actions": [
+        "requeue_message",
+        "schedule_retry_or_try_alternate_MX"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S008-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If this strategy is employed, the timeout to fall back to an unextended format (if one is available) SHOULD be less than the normal timeout for bouncing as undeliverable.",
+      "is_inferred": false,
+      "confidence": 0.55,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": "REQUEUED",
+      "to_state": null,
+      "trigger": "requeue_timeout_expires",
+      "pre_cond": "message.state = REQUEUED & unextended_format.available = true",
+      "post_cond": "message.transmitted_without_extension = true",
+      "actions": [
+        "transmit_message_without_extension"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "section_id": "S235",
+  "title": "S235 21.4.22 484 Address Incomplete",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S235 21.4.22 484 Address Incomplete"
+  ],
+  "url_anchor": "#s235-21422-484-address-incomplete",
+  "word_count": 67,
+  "statement_count": 3,
+  "elapsed_seconds": 19.33,
+  "statements": [
+    {
+      "statement_id": "D-S235-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The server received a request with a Request-URI that was incomplete. Additional information SHOULD be provided in the reason phrase.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S235",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request_with_incomplete_Request-URI",
+      "pre_cond": "request.Request-URI = incomplete",
+      "post_cond": "response.status_code = 484",
+      "actions": [
+        "send_484_Address_Incomplete"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S235-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "With overlapped dialing, the client does not know the length of the dialing string. It sends strings of increasing lengths, prompting the user for more input, until it no longer receives a 484 (Address Incomplete) status response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S235",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_484_Address_Incomplete",
+      "pre_cond": "response.status_code = 484",
+      "post_cond": "request.dialing_string = extended",
+      "actions": [
+        "prompt_user_for_more_input",
+        "send_request_with_longer_dialing_string"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S235-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The client sends strings of increasing lengths until it no longer receives a 484 (Address Incomplete) status response, at which point overlapped dialing terminates.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "S235",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_non_484_response",
+      "pre_cond": "response.status_code != 484",
+      "post_cond": "overlapped_dialing = terminated",
+      "actions": [
+        "exit_overlapped_dialing_loop"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

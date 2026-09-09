@@ -1,0 +1,105 @@
+{
+  "section_id": "S031",
+  "title": "S031 6.2 Authentication-Protocol",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S031 6.2 Authentication-Protocol"
+  ],
+  "url_anchor": "#s031-62-authentication-protocol",
+  "word_count": 336,
+  "statement_count": 4,
+  "elapsed_seconds": 25.81,
+  "statements": [
+    {
+      "statement_id": "D-S031-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "ppp_fsm",
+      "description": "An implementation MUST NOT include multiple Authentication-Protocol Configuration Options in its Configure-Request packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "object_name": "Configure-Request",
+      "field_name": "Authentication-Protocol",
+      "field_type": "configuration option",
+      "required": false,
+      "allowed_values": [
+        "at most one instance"
+      ],
+      "guard_semantics": "cardinality=1 when Authentication-Protocol negotiation is active"
+    },
+    {
+      "statement_id": "D-S031-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If that protocol is Configure-Nak'd, then the implementation SHOULD attempt the next most desirable protocol in the next Configure-Request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S031",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCN (Configure-Nak for Authentication-Protocol)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "select next most desirable authentication protocol",
+        "send Configure-Request with new Authentication-Protocol option"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S031-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If an implementation sends a Configure-Ack, then it is agreeing to authenticate with the specified protocol.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S031",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SCA (Send Configure-Ack for Authentication-Protocol)",
+      "pre_cond": null,
+      "post_cond": "endpoint.authentication_protocol = acknowledged_protocol",
+      "actions": [
+        "commit to authenticate using specified Authentication-Protocol"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S031-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "An implementation receiving a Configure-Ack SHOULD expect the peer to authenticate with the acknowledged protocol.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S031",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCA (Receive Configure-Ack for Authentication-Protocol)",
+      "pre_cond": null,
+      "post_cond": "endpoint.expected_peer_auth_protocol = acknowledged_protocol",
+      "actions": [
+        "record expected peer authentication protocol"
+      ],
+      "modality": "should"
+    }
+  ]
+}

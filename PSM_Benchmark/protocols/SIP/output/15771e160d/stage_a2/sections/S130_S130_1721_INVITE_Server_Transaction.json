@@ -1,0 +1,433 @@
+{
+  "section_id": "S130",
+  "title": "S130 17.2.1 INVITE Server Transaction",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S130 17.2.1 INVITE Server Transaction"
+  ],
+  "url_anchor": "#s130-1721-invite-server-transaction",
+  "word_count": 851,
+  "statement_count": 17,
+  "elapsed_seconds": 223.34,
+  "statements": [
+    {
+      "statement_id": "N-S130-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The server transaction MUST generate a 100 (Trying) response unless it knows that the TU will generate a provisional or final response within 200 ms, in which case it MAY generate a 100 (Trying) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "server_transaction_constructed",
+      "pre_cond": "protocol.state = Proceeding & TU.will_generate_response_within_200ms = false",
+      "post_cond": "response_100.generated = true",
+      "actions": [
+        "Generate 100 (Trying) response"
+      ],
+      "modality": "must",
+      "id": "N-S130-001"
+    },
+    {
+      "statement_id": "N-S130-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The server transaction MUST generate a 100 (Trying) response unless it knows that the TU will generate a provisional or final response within 200 ms, in which case it MAY generate a 100 (Trying) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "server_transaction_constructed",
+      "pre_cond": "protocol.state = Proceeding & TU.will_generate_response_within_200ms = true",
+      "post_cond": null,
+      "actions": [
+        "Optionally generate 100 (Trying) response"
+      ],
+      "modality": "may",
+      "id": "N-S130-002"
+    },
+    {
+      "statement_id": "N-S130-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The 100 (Trying) response is constructed according to the procedures in Section 8.2.6, except that the insertion of tags in the To header field of the response (when none was present in the request) is downgraded from MAY to SHOULD NOT.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S130-003"
+    },
+    {
+      "statement_id": "N-S130-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The request MUST be passed to the TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "INVITE_received",
+      "pre_cond": "protocol.state = Proceeding",
+      "post_cond": "request.passed_to_TU = true",
+      "actions": [
+        "Pass request to TU"
+      ],
+      "modality": "must",
+      "id": "N-S130-004"
+    },
+    {
+      "statement_id": "N-S130-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "So long as the server transaction is in the \"Proceeding\" state, each of these MUST be passed to the transport layer for transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "transport layer"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "provisional_response_from_TU",
+      "pre_cond": "protocol.state = Proceeding",
+      "post_cond": "provisional_response.passed_to_transport = true",
+      "actions": [
+        "Pass provisional response to transport layer for transmission"
+      ],
+      "modality": "must",
+      "id": "N-S130-005"
+    },
+    {
+      "statement_id": "N-S130-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a request retransmission is received while in the \"Proceeding\" state, the most recent provisional response that was received from the TU MUST be passed to the transport layer for retransmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "transport layer"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "request_retransmission_received",
+      "pre_cond": "protocol.state = Proceeding",
+      "post_cond": "most_recent_provisional_response.passed_to_transport = true",
+      "actions": [
+        "Pass most recent provisional response to transport layer for retransmission"
+      ],
+      "modality": "must",
+      "id": "N-S130-006"
+    },
+    {
+      "statement_id": "N-S130-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If, while in the \"Proceeding\" state, the TU passes a 2xx response to the server transaction, the server transaction MUST pass this response to the transport layer for transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "TU",
+        "transport layer"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "TU_2xx_response",
+      "pre_cond": "protocol.state = Proceeding & response.status_class = 2xx",
+      "post_cond": "response.passed_to_transport = true",
+      "actions": [
+        "Pass 2xx response to transport layer for transmission"
+      ],
+      "modality": "must",
+      "id": "N-S130-007"
+    },
+    {
+      "statement_id": "N-S130-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The server transaction MUST then transition to the \"Terminated\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Terminated",
+      "trigger": "TU_2xx_response",
+      "pre_cond": "protocol.state = Proceeding & response.status_class = 2xx",
+      "post_cond": "protocol.state = Terminated",
+      "actions": [
+        "Transition to Terminated state"
+      ],
+      "modality": "must",
+      "id": "N-S130-008"
+    },
+    {
+      "statement_id": "N-S130-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "While in the \"Proceeding\" state, if the TU passes a response with status code from 300 to 699 to the server transaction, the response MUST be passed to the transport layer for transmission, and the state machine MUST enter the \"Completed\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "TU",
+        "transport layer"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "TU_3xx_6xx_response",
+      "pre_cond": "protocol.state = Proceeding & response.status_code >= 300 & response.status_code <= 699",
+      "post_cond": "response.passed_to_transport = true",
+      "actions": [
+        "Pass response to transport layer for transmission"
+      ],
+      "modality": "must",
+      "id": "N-S130-009"
+    },
+    {
+      "statement_id": "N-S130-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "state_machine",
+      "stage": "sip_fsm",
+      "description": "While in the \"Proceeding\" state, if the TU passes a response with status code from 300 to 699 to the server transaction, the response MUST be passed to the transport layer for transmission, and the state machine MUST enter the \"Completed\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Completed",
+      "trigger": "TU_3xx_6xx_response",
+      "pre_cond": "protocol.state = Proceeding & response.status_code >= 300 & response.status_code <= 699",
+      "post_cond": "protocol.state = Completed",
+      "actions": [
+        "Enter Completed state"
+      ],
+      "modality": "must",
+      "id": "N-S130-010"
+    },
+    {
+      "statement_id": "N-S130-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "When the \"Completed\" state is entered, timer H MUST be set to fire in 64*T1 seconds for all transports.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": null,
+      "trigger": "Completed_state_entered",
+      "pre_cond": "protocol.state = Completed",
+      "post_cond": "timer_H.scheduled = true & timer_H.interval = 64*T1",
+      "actions": [
+        "Set timer H to fire in 64*T1 seconds"
+      ],
+      "modality": "must",
+      "id": "N-S130-011"
+    },
+    {
+      "statement_id": "N-S130-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Furthermore, while in the \"Completed\" state, if a request retransmission is received, the server SHOULD pass the response to the transport for retransmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Completed",
+      "to_state": null,
+      "trigger": "request_retransmission_received",
+      "pre_cond": "protocol.state = Completed",
+      "post_cond": "response.passed_to_transport = true",
+      "actions": [
+        "Pass response to transport for retransmission"
+      ],
+      "modality": "should",
+      "id": "N-S130-012"
+    },
+    {
+      "statement_id": "N-S130-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If an ACK is received while the server transaction is in the \"Completed\" state, the server transaction MUST transition to the \"Confirmed\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": "Confirmed",
+      "trigger": "ACK_received",
+      "pre_cond": "protocol.state = Completed",
+      "post_cond": "protocol.state = Confirmed",
+      "actions": [
+        "Transition to Confirmed state"
+      ],
+      "modality": "must",
+      "id": "N-S130-013"
+    },
+    {
+      "statement_id": "N-S130-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If timer H fires while in the \"Completed\" state, it implies that the ACK was never received.  In this case, the server transaction MUST transition to the \"Terminated\" state, and MUST indicate to the TU that a transaction failure has occurred.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "TU"
+      ],
+      "from_state": "Completed",
+      "to_state": "Terminated",
+      "trigger": "timer_H_fires",
+      "pre_cond": "protocol.state = Completed & timer_H.fired = true",
+      "post_cond": "protocol.state = Terminated",
+      "actions": [
+        "Transition to Terminated state"
+      ],
+      "modality": "must",
+      "id": "N-S130-014"
+    },
+    {
+      "statement_id": "N-S130-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If timer H fires while in the \"Completed\" state, it implies that the ACK was never received.  In this case, the server transaction MUST transition to the \"Terminated\" state, and MUST indicate to the TU that a transaction failure has occurred.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction",
+        "TU"
+      ],
+      "from_state": "Completed",
+      "to_state": "Terminated",
+      "trigger": "timer_H_fires",
+      "pre_cond": "protocol.state = Completed & timer_H.fired = true",
+      "post_cond": "TU.notified_of_transaction_failure = true",
+      "actions": [
+        "Indicate to TU that a transaction failure has occurred"
+      ],
+      "modality": "must",
+      "id": "N-S130-015"
+    },
+    {
+      "statement_id": "N-S130-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Once timer I fires, the server MUST transition to the \"Terminated\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Confirmed",
+      "to_state": "Terminated",
+      "trigger": "timer_I_fires",
+      "pre_cond": "protocol.state = Confirmed & timer_I.fired = true",
+      "post_cond": "protocol.state = Terminated",
+      "actions": [
+        "Transition to Terminated state"
+      ],
+      "modality": "must",
+      "id": "N-S130-016"
+    },
+    {
+      "statement_id": "N-S130-17",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the transaction is in the \"Terminated\" state, it MUST be destroyed immediately.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S130",
+      "actors": [
+        "server transaction"
+      ],
+      "from_state": "Terminated",
+      "to_state": null,
+      "trigger": "Terminated_state_entered",
+      "pre_cond": "protocol.state = Terminated",
+      "post_cond": "transaction.destroyed = true",
+      "actions": [
+        "Destroy transaction immediately"
+      ],
+      "modality": "must",
+      "id": "N-S130-017"
+    }
+  ]
+}

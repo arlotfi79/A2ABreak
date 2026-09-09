@@ -1,0 +1,157 @@
+{
+  "section_id": "S086",
+  "title": "S086 6.4.8 MOVE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S086 6.4.8 MOVE Command"
+  ],
+  "url_anchor": "#s086-648-move-command",
+  "word_count": 717,
+  "statement_count": 6,
+  "elapsed_seconds": 36.91,
+  "statements": [
+    {
+      "statement_id": "D-S086-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: OK - move completed; NO - move error: can't move those messages or to that name; BAD - command unknown or arguments invalid.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S086",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "MOVE command",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": null,
+      "actions": [
+        "server returns tagged OK, NO, or BAD"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S086-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the destination mailbox does not exist, a server MUST return an error. It MUST NOT automatically create the mailbox. Unless it is certain that the destination mailbox cannot be created, the server MUST send the response code \"[TRYCREATE]\" as the prefix of the text of the tagged NO response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "MOVE command with nonexistent destination mailbox",
+      "pre_cond": "protocol.state = Selected & destination_mailbox.exists = false",
+      "post_cond": "response.code = TRYCREATE",
+      "actions": [
+        "server sends tagged NO with [TRYCREATE] response code"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S086-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Servers are also REQUIRED to send the COPYUID response code in an untagged OK before sending EXPUNGE or similar responses.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "MOVE or UID MOVE command",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "untagged_ok_with_COPYUID_sent_before_EXPUNGE = true",
+      "actions": [
+        "server sends untagged OK with COPYUID response code",
+        "server sends EXPUNGE response(s)",
+        "server sends tagged OK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S086-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "The server MUST leave each message in a state where it is in at least one of the source or target mailboxes (no message can be lost or orphaned). The server SHOULD NOT leave any message in both mailboxes.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S086",
+      "object_name": "message",
+      "field_name": "mailbox_membership",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "source_mailbox",
+        "target_mailbox"
+      ],
+      "guard_semantics": "message.in_source_mailbox = true | message.in_target_mailbox = true"
+    },
+    {
+      "statement_id": "D-S086-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The server may send EXPUNGE responses before the tagged response, so the client cannot safely send more commands with message sequence number arguments while the server is processing MOVE.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S086",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "MOVE command in progress",
+      "pre_cond": "protocol.state = Selected & server.processing_MOVE = true",
+      "post_cond": null,
+      "actions": [
+        "client must not send commands with message sequence number arguments"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S086-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Though the COPY and EXPUNGE response codes will be returned, response codes for a STORE MUST NOT be generated, and the \\Deleted flag MUST NOT be set for any message.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "MOVE command",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "response.STORE_code_generated = false & message.Deleted_flag_set = false",
+      "actions": [
+        "server returns COPY response code",
+        "server returns EXPUNGE response code",
+        "server MUST NOT generate STORE response codes",
+        "server MUST NOT set \\Deleted flag"
+      ],
+      "modality": "must"
+    }
+  ]
+}

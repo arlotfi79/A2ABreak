@@ -1,0 +1,318 @@
+{
+  "section_id": "S131",
+  "title": "S131 17.2.2 Non-INVITE Server Transaction",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S131 17.2.2 Non-INVITE Server Transaction"
+  ],
+  "url_anchor": "#s131-1722-non-invite-server-transaction",
+  "word_count": 308,
+  "statement_count": 14,
+  "elapsed_seconds": 36.89,
+  "statements": [
+    {
+      "statement_id": "D-S131-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The state machine is initialized in the \"Trying\" state and is passed a request other than INVITE or ACK when initialized.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "state_name": "Trying",
+      "enum_name": "NonINVITEServerTransactionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Trying"
+    },
+    {
+      "statement_id": "D-S131-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "While in the \"Trying\" state, if the TU passes a provisional response to the server transaction, the server transaction MUST enter the \"Proceeding\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "state_name": "Proceeding",
+      "enum_name": "NonINVITEServerTransactionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Proceeding"
+    },
+    {
+      "statement_id": "D-S131-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the TU passes a final response (status codes 200-699) to the server while in the \"Proceeding\" state, the transaction MUST enter the \"Completed\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "state_name": "Completed",
+      "enum_name": "NonINVITEServerTransactionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Completed"
+    },
+    {
+      "statement_id": "D-S131-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The server transaction MUST be destroyed the instant it enters the \"Terminated\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "state_name": "Terminated",
+      "enum_name": "NonINVITEServerTransactionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "transaction.state = Terminated"
+    },
+    {
+      "statement_id": "D-S131-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The state machine is initialized in the \"Trying\" state and is passed a request other than INVITE or ACK when initialized. This request is passed up to the TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "actors": [
+        "server transaction",
+        "TU"
+      ],
+      "from_state": null,
+      "to_state": "Trying",
+      "trigger": "non-INVITE non-ACK request received",
+      "pre_cond": null,
+      "post_cond": "transaction.state = Trying",
+      "actions": [
+        "pass request to TU"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S131-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once in the \"Trying\" state, any further request retransmissions are discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "actors": [
+        "server transaction"
+      ],
+      "from_state": "Trying",
+      "to_state": "Trying",
+      "trigger": "request retransmission received",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Trying",
+      "actions": [
+        "discard retransmission"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S131-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "While in the \"Trying\" state, if the TU passes a provisional response to the server transaction, the server transaction MUST enter the \"Proceeding\" state. The response MUST be passed to the transport layer for transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "actors": [
+        "TU",
+        "server transaction",
+        "transport layer"
+      ],
+      "from_state": "Trying",
+      "to_state": "Proceeding",
+      "trigger": "TU passes provisional response",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "pass provisional response to transport layer for transmission"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S131-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Any further provisional responses that are received from the TU while in the \"Proceeding\" state MUST be passed to the transport layer for transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "actors": [
+        "TU",
+        "server transaction",
+        "transport layer"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Proceeding",
+      "trigger": "TU passes provisional response",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "pass provisional response to transport layer for transmission"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S131-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a retransmission of the request is received while in the \"Proceeding\" state, the most recently sent provisional response MUST be passed to the transport layer for retransmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "actors": [
+        "server transaction",
+        "transport layer"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Proceeding",
+      "trigger": "request retransmission received",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "pass most recently sent provisional response to transport layer for retransmission"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S131-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the TU passes a final response (status codes 200-699) to the server while in the \"Proceeding\" state, the transaction MUST enter the \"Completed\" state, and the response MUST be passed to the transport layer for transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "actors": [
+        "TU",
+        "server transaction",
+        "transport layer"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Completed",
+      "trigger": "TU passes final response (200-699)",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "pass final response to transport layer for transmission",
+        "set Timer J to 64*T1 seconds for unreliable transports or 0 seconds for reliable transports"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S131-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "While in the \"Completed\" state, the server transaction MUST pass the final response to the transport layer for retransmission whenever a retransmission of the request is received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "actors": [
+        "server transaction",
+        "transport layer"
+      ],
+      "from_state": "Completed",
+      "to_state": "Completed",
+      "trigger": "request retransmission received",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "pass final response to transport layer for retransmission"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S131-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Any other final responses passed by the TU to the server transaction MUST be discarded while in the \"Completed\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "actors": [
+        "TU",
+        "server transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": "Completed",
+      "trigger": "TU passes additional final response",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "discard final response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S131-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The server transaction remains in this state until Timer J fires, at which point it MUST transition to the \"Terminated\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "actors": [
+        "server transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": "Terminated",
+      "trigger": "Timer J fires",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "destroy server transaction"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S131-014",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "When the server transaction enters the \"Completed\" state, it MUST set Timer J to fire in 64*T1 seconds for unreliable transports, and zero seconds for reliable transports.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S131",
+      "object_name": "NonINVITEServerTransaction",
+      "field_name": "Timer J",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": "64*T1 seconds (unreliable transport) | 0 seconds (reliable transport)",
+      "guard_semantics": "transaction.state = Completed"
+    }
+  ]
+}

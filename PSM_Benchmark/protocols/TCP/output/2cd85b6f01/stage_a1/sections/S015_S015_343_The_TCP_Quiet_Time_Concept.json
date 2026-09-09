@@ -1,0 +1,102 @@
+{
+  "section_id": "S015",
+  "title": "S015 3.4.3 The TCP Quiet Time Concept",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S015 3.4.3 The TCP Quiet Time Concept"
+  ],
+  "url_anchor": "#s015-343-the-tcp-quiet-time-concept",
+  "word_count": 1025,
+  "statement_count": 4,
+  "elapsed_seconds": 44.3,
+  "statements": [
+    {
+      "statement_id": "D-S015-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "Hosts that for any reason lose knowledge of the last sequence numbers transmitted on each active (i.e., not closed) connection shall delay emitting any TCP segments for at least the agreed MSL in the internet system that the host is a part of.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S015",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "loss of sequence number knowledge on active connection",
+      "pre_cond": "endpoint.sequence_knowledge_lost = true & connection.state != CLOSED",
+      "post_cond": "endpoint.quiet_time_elapsed = true",
+      "actions": [
+        "delay emitting any TCP segments for at least MSL seconds"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S015-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "One way to deal with this problem is to deliberately delay emitting segments for one MSL after recovery from a reboot -- this is the 'quiet time' specification.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S015",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "host reboot / recovery",
+      "pre_cond": "endpoint.reboot_recovered = true",
+      "post_cond": "endpoint.quiet_time_elapsed = true",
+      "actions": [
+        "delay emitting TCP segments for one MSL after recovery from reboot"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S015-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Hosts that for any reason lose knowledge of the last sequence numbers transmitted on each active (i.e., not closed) connection.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S015",
+      "state_name": "active",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state != CLOSED"
+    },
+    {
+      "statement_id": "D-S015-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Upon the host rebooting, a TCP peer might re-form an earlier connection (possibly after half-open connection resolution) and emit packets with sequence numbers identical to or overlapping with packets still in the network. The TCP specification recommends that the source delay for MSL seconds before emitting segments on the connection, to allow time for segments from the earlier connection incarnation to drain from the system.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S015",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new connection incarnation after reboot without sequence number memory",
+      "pre_cond": "endpoint.sequence_knowledge_lost = true",
+      "post_cond": "endpoint.msl_delay_elapsed = true",
+      "actions": [
+        "delay MSL seconds before emitting segments on the connection"
+      ],
+      "modality": "should"
+    }
+  ]
+}

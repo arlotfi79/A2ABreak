@@ -1,0 +1,171 @@
+{
+  "section_id": "S090",
+  "title": "S090 13.3.1 Processing of the INVITE",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S090 13.3.1 Processing of the INVITE"
+  ],
+  "url_anchor": "#s090-1331-processing-of-the-invite",
+  "word_count": 440,
+  "statement_count": 7,
+  "elapsed_seconds": 62.39,
+  "statements": [
+    {
+      "statement_id": "D-S090-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the request is an INVITE that contains an Expires header field, the UAS core sets a timer for the number of seconds indicated in the header field value.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S090",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE received with Expires header",
+      "pre_cond": "message.method = INVITE & message.Expires != null",
+      "post_cond": "timer.Expires.value = message.Expires",
+      "actions": [
+        "set Expires timer to value of Expires header field"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S090-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "When the timer fires, the invitation is considered to be expired.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S090",
+      "state_name": "Invitation Expired",
+      "enum_name": "InvitationState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "timer.Expires.fired = true"
+    },
+    {
+      "statement_id": "D-S090-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "When the timer fires, the invitation is considered to be expired.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S090",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": "Invitation Expired",
+      "trigger": "Expires timer fires",
+      "pre_cond": null,
+      "post_cond": "invitation.state = Invitation Expired",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S090-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the invitation expires before the UAS has generated a final response, a 487 (Request Terminated) response SHOULD be generated.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S090",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "Invitation Expired",
+      "to_state": null,
+      "trigger": "Expires timer fires",
+      "pre_cond": "transaction.final_response_sent = false",
+      "post_cond": null,
+      "actions": [
+        "send 487 Request Terminated response"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S090-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The UAS can indicate progress, accept, redirect, or reject the invitation.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S090",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS processes INVITE outside dialog",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 1xx provisional response (indicate progress)",
+        "send 2xx response (accept)",
+        "send 3xx response (redirect)",
+        "send 4xx/5xx/6xx response (reject)"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S090-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the INVITE does not contain a session description, the UAS MUST provide the offer in its first non-failure reliable message back to the UAC. In this specification, that is a 2xx response to the INVITE.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S090",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE received without session description",
+      "pre_cond": "message.session_description = null",
+      "post_cond": null,
+      "actions": [
+        "include session offer in 2xx response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S090-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the user is already a member of the session, and the session parameters contained in the session description have not changed, the UAS MAY silently accept the INVITE (that is, send a 2xx response without prompting the user).",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S090",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE received for session user already participates in",
+      "pre_cond": "session.user_is_member = true & session.parameters_changed = false",
+      "post_cond": null,
+      "actions": [
+        "send 2xx response without prompting user"
+      ],
+      "modality": "may"
+    }
+  ]
+}

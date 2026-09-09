@@ -1,0 +1,164 @@
+{
+  "section_id": "S033",
+  "title": "S033 4.4.4 Use of broadcast and unicast",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S033 4.4.4 Use of broadcast and unicast"
+  ],
+  "url_anchor": "#s033-444-use-of-broadcast-and-unicast",
+  "word_count": 131,
+  "statement_count": 7,
+  "elapsed_seconds": 36.92,
+  "statements": [
+    {
+      "statement_id": "D-S033-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "When the DHCP client knows the address of a DHCP server, in either INIT or REBOOTING state, the client may use that address in the DHCPDISCOVER or DHCPREQUEST rather than the IP broadcast address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "state_name": "INIT",
+      "enum_name": "ClientState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "protocol.state = INIT"
+    },
+    {
+      "statement_id": "D-S033-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "When the DHCP client knows the address of a DHCP server, in either INIT or REBOOTING state, the client may use that address in the DHCPDISCOVER or DHCPREQUEST rather than the IP broadcast address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "state_name": "REBOOTING",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = REBOOTING"
+    },
+    {
+      "statement_id": "D-S033-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "When the DHCP client knows the address of a DHCP server, in either INIT or REBOOTING state, the client may use that address in the DHCPDISCOVER or DHCPREQUEST rather than the IP broadcast address.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S033",
+      "actors": [
+        "client"
+      ],
+      "from_state": "INIT",
+      "to_state": null,
+      "trigger": "server_address_known",
+      "pre_cond": "protocol.state = INIT & client.server_address_known = true",
+      "post_cond": "message.destination = server_unicast_address",
+      "actions": [
+        "unicast DHCPDISCOVER or DHCPREQUEST to known server address"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S033-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "When the DHCP client knows the address of a DHCP server, in either INIT or REBOOTING state, the client may use that address in the DHCPDISCOVER or DHCPREQUEST rather than the IP broadcast address.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S033",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REBOOTING",
+      "to_state": null,
+      "trigger": "server_address_known",
+      "pre_cond": "protocol.state = REBOOTING & client.server_address_known = true",
+      "post_cond": "message.destination = server_unicast_address",
+      "actions": [
+        "unicast DHCPREQUEST to known server address"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S033-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client receives no response to DHCP messages sent to the IP address of a known DHCP server, the DHCP client reverts to using the IP broadcast address.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S033",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "no_response_to_unicast",
+      "pre_cond": "client.server_address_known = true & client.unicast_response_received = false",
+      "post_cond": "message.destination = IP_broadcast_address",
+      "actions": [
+        "revert to sending DHCP messages to IP broadcast address"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S033-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client unicasts DHCPRELEASE messages to the server. Because the client is declining the use of the IP address supplied by the server, the client broadcasts DHCPDECLINE messages.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S033",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DHCPRELEASE",
+      "pre_cond": null,
+      "post_cond": "message.destination = server_unicast_address",
+      "actions": [
+        "unicast DHCPRELEASE to server"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S033-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Because the client is declining the use of the IP address supplied by the server, the client broadcasts DHCPDECLINE messages.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S033",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DHCPDECLINE",
+      "pre_cond": null,
+      "post_cond": "message.destination = IP_broadcast_address",
+      "actions": [
+        "broadcast DHCPDECLINE"
+      ],
+      "modality": "must"
+    }
+  ]
+}

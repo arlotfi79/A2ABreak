@@ -1,0 +1,123 @@
+{
+  "section_id": "S056",
+  "title": "S056 10.2 Constructing the REGISTER Request",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S056 10.2 Constructing the REGISTER Request"
+  ],
+  "url_anchor": "#s056-102-constructing-the-register-request",
+  "word_count": 581,
+  "statement_count": 5,
+  "elapsed_seconds": 77.33,
+  "statements": [
+    {
+      "statement_id": "D-S056-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A REGISTER request does not establish a dialog.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S056",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REGISTER request sent",
+      "pre_cond": null,
+      "post_cond": "dialog.established = false",
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "UAs MUST NOT send a new registration (that is, containing new Contact header field values, as opposed to a retransmission) until they have received a final response from the registrar for the previous one or the previous REGISTER request has timed out.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S056",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "awaiting_final_response",
+      "to_state": null,
+      "trigger": "new REGISTER with new Contact values",
+      "pre_cond": "previous_register.final_response_received = false & previous_register.timed_out = false",
+      "post_cond": null,
+      "actions": [
+        "suppress new REGISTER transmission"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "UAs MUST NOT send a new registration until they have received a final response from the registrar for the previous one.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S056",
+      "actors": [
+        "UAC",
+        "registrar"
+      ],
+      "from_state": "awaiting_final_response",
+      "to_state": "registration_complete",
+      "trigger": "final response received",
+      "pre_cond": "previous_register.sent = true",
+      "post_cond": "new_registration.permitted = true",
+      "actions": [
+        "permit new REGISTER"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "UAs MUST NOT send a new registration until the previous REGISTER request has timed out.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S056",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "awaiting_final_response",
+      "to_state": "registration_timed_out",
+      "trigger": "REGISTER request timeout",
+      "pre_cond": "previous_register.sent = true & previous_register.final_response_received = false",
+      "post_cond": "new_registration.permitted = true",
+      "actions": [
+        "permit new REGISTER"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The CSeq value guarantees proper ordering of REGISTER requests. A UA MUST increment the CSeq value by one for each REGISTER request with the same Call-ID.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S056",
+      "object_name": "REGISTER request",
+      "field_name": "CSeq",
+      "field_type": "header field",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "incremented by 1 per REGISTER with same Call-ID; enables registrar to detect out-of-order delivery"
+    }
+  ]
+}

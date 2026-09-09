@@ -1,0 +1,105 @@
+{
+  "section_id": "S067",
+  "title": "S067 13.4.6 Playing Live Media",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S067 13.4.6 Playing Live Media"
+  ],
+  "url_anchor": "#s067-1346-playing-live-media",
+  "word_count": 182,
+  "statement_count": 4,
+  "elapsed_seconds": 38.24,
+  "statements": [
+    {
+      "statement_id": "D-S067-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A client MAY send PLAY requests without the Range header for live media.",
+      "is_inferred": true,
+      "confidence": 0.55,
+      "source_section": "S067",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY request (no Range header, live media)",
+      "pre_cond": "session.media_properties.random_access = No-Seeking & session.media_properties.content_modifications = Time-Progressing & session.media_properties.retention.time_duration = 0.0",
+      "post_cond": null,
+      "actions": [
+        "send PLAY request without Range header"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S067-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If the PLAY request includes the Range header for live media, it MUST use a symbolic value representing 'now'; for NPT, that range specification is 'npt=now-'.",
+      "is_inferred": true,
+      "confidence": 0.6,
+      "source_section": "S067",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY request (with Range header, live media)",
+      "pre_cond": "session.media_properties.random_access = No-Seeking & session.media_properties.content_modifications = Time-Progressing & session.media_properties.retention.time_duration = 0.0",
+      "post_cond": null,
+      "actions": [
+        "send PLAY request with Range header set to symbolic 'now' value (e.g., npt=now-)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MUST include the Range header in the PLAY response, and it MUST indicate an explicit time value and not a symbolic value.",
+      "is_inferred": true,
+      "confidence": 0.6,
+      "source_section": "S067",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY 200 OK response (live media)",
+      "pre_cond": "session.media_properties.random_access = No-Seeking & session.media_properties.content_modifications = Time-Progressing & session.media_properties.retention.time_duration = 0.0",
+      "post_cond": "response.Range.value = explicit_time",
+      "actions": [
+        "include Range header with explicit time value (not symbolic)",
+        "express time since session start as open interval (e.g., npt=96.23-)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "For live media, the SETUP 200 OK response MUST include the Media-Range header.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S067",
+      "object_name": "SETUP 200 OK response",
+      "field_name": "Media-Range",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "session.media_properties.random_access = No-Seeking & session.media_properties.content_modifications = Time-Progressing & session.media_properties.retention.time_duration = 0.0"
+    }
+  ]
+}

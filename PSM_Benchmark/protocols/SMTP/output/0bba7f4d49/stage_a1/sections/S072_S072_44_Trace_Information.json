@@ -1,0 +1,150 @@
+{
+  "section_id": "S072",
+  "title": "S072 4.4 Trace Information",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S072 4.4 Trace Information"
+  ],
+  "url_anchor": "#s072-44-trace-information",
+  "word_count": 1320,
+  "statement_count": 6,
+  "elapsed_seconds": 49.95,
+  "statements": [
+    {
+      "statement_id": "D-S072-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When an SMTP server receives a message for delivery or further processing, it MUST insert trace (\"time stamp\" or \"Received\") information at the beginning of the message content.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S072",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message received for delivery or further processing",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "insert Received header at beginning of message content"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S072-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When the delivery SMTP server makes the \"final delivery\" of a message, it inserts a return-path line at the beginning of the mail data. Here, final delivery means the message has left the SMTP environment.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S072",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "final delivery",
+      "trigger": "final delivery",
+      "pre_cond": null,
+      "post_cond": "message.left_smtp_environment = true",
+      "actions": [
+        "insert return-path line at beginning of mail data"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S072-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "Here, final delivery means the message has left the SMTP environment. Normally, this would mean it had been delivered to the destination user or an associated mail drop.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S072",
+      "state_name": "final delivery",
+      "enum_name": "DeliveryState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "message.left_smtp_environment = true"
+    },
+    {
+      "statement_id": "D-S072-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "The server must give special treatment to cases in which the processing following the end of mail data indication is only partially successful. In such cases, the response to the DATA command MUST be an OK reply. However, the SMTP server MUST compose and send an \"undeliverable mail\" notification message to the originator of the message.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S072",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "end of mail data with partial delivery failure",
+      "pre_cond": "delivery.partial_failure = true",
+      "post_cond": null,
+      "actions": [
+        "send OK reply to DATA command",
+        "compose and send undeliverable mail notification to originator for each failed recipient"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S072-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "All notification messages about undeliverable mail MUST be sent using the MAIL command and MUST use a null return path as discussed in Section 3.6.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S072",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send undeliverable mail notification",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "issue MAIL command with null return path",
+        "send notification message to originator"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S072-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "SMTP servers making final delivery MAY remove Return-path header fields before adding their own.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S072",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "final delivery",
+      "trigger": "final delivery",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "remove existing Return-path header fields",
+        "add own Return-path header field"
+      ],
+      "modality": "may"
+    }
+  ]
+}

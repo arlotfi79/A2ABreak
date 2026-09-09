@@ -1,0 +1,171 @@
+{
+  "section_id": "S041",
+  "title": "S041 6.6.4 Reordering",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S041 6.6.4 Reordering"
+  ],
+  "url_anchor": "#s041-664-reordering",
+  "word_count": 352,
+  "statement_count": 8,
+  "elapsed_seconds": 54.69,
+  "statements": [
+    {
+      "statement_id": "D-S041-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "STABLE state: a feature negotiation state from which a transition to the CHANGING state can occur when a new Change option is generated.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S041",
+      "state_name": "STABLE",
+      "enum_name": "feature_negotiation_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S041-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "UNSTABLE state: a feature negotiation state from which a transition to the CHANGING state can occur when a new Change option is generated.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S041",
+      "state_name": "UNSTABLE",
+      "enum_name": "feature_negotiation_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S041-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "CHANGING state: feature negotiation state in which Change options are retransmissions and MUST have exactly the same contents as previously transmitted options, allowing tolerance for reordering.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S041",
+      "state_name": "CHANGING",
+      "enum_name": "feature_negotiation_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S041-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "A Change option is new if and only if it was generated during a transition from the STABLE or UNSTABLE state to the CHANGING state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S041",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "STABLE",
+      "to_state": "CHANGING",
+      "trigger": "new Change option generated",
+      "pre_cond": "feature_negotiation.state = STABLE",
+      "post_cond": "feature_negotiation.state = CHANGING & connection.FGSS = current_sequence_number",
+      "actions": [
+        "generate new Change option",
+        "update FGSS to sent sequence number"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S041-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "A Change option is new if and only if it was generated during a transition from the STABLE or UNSTABLE state to the CHANGING state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S041",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "UNSTABLE",
+      "to_state": "CHANGING",
+      "trigger": "new Change option generated",
+      "pre_cond": "feature_negotiation.state = UNSTABLE",
+      "post_cond": "feature_negotiation.state = CHANGING & connection.FGSS = current_sequence_number",
+      "actions": [
+        "generate new Change option",
+        "update FGSS to sent sequence number"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S041-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "FGSR \u2014 Feature Greatest Sequence Number Received: The greatest sequence number received, considering only valid packets that contained one or more feature negotiation options (Change and/or Confirm). This value is initialized to ISR - 1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "object_name": "connection",
+      "field_name": "FGSR",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "packet.SeqNo <= connection.FGSR implies ignore Change options; packet.SeqNo <= connection.FGSR | !packet.AckNo | packet.AckNo < connection.FGSS implies ignore Confirm options"
+    },
+    {
+      "statement_id": "D-S041-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "FGSS \u2014 Feature Greatest Sequence Number Sent: The greatest sequence number sent, considering only packets that contained one or more new Change options. FGSS is initialized to ISS.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "object_name": "connection",
+      "field_name": "FGSS",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "packet.AckNo < connection.FGSS implies ignore Confirm option"
+    },
+    {
+      "statement_id": "D-S041-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "Change options generated within the CHANGING state are retransmissions and MUST have exactly the same contents as previously transmitted options, allowing tolerance for reordering.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S041",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "CHANGING",
+      "trigger": "retransmit Change option",
+      "pre_cond": "feature_negotiation.state = CHANGING",
+      "post_cond": "feature_negotiation.state = CHANGING",
+      "actions": [
+        "retransmit Change option with identical contents to previous transmission"
+      ],
+      "modality": "must"
+    }
+  ]
+}

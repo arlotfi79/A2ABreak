@@ -1,0 +1,116 @@
+{
+  "section_id": "S058",
+  "title": "S058 9.2.1.1 Frequency of Route Advertisement",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S058 9.2.1.1 Frequency of Route Advertisement"
+  ],
+  "url_anchor": "#s058-9211-frequency-of-route-advertisement",
+  "word_count": 251,
+  "statement_count": 4,
+  "elapsed_seconds": 35.07,
+  "statements": [
+    {
+      "statement_id": "1-S058-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Two UPDATE messages sent by a BGP speaker to a peer that advertise feasible routes and/or withdrawal of unfeasible routes to some common set of destinations MUST be separated by at least MinRouteAdvertisementIntervalTimer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S058",
+      "actors": [
+        "BGP speaker",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_UPDATE_message",
+      "pre_cond": "prior_UPDATE.sent = true & prior_UPDATE.destinations \u2229 current_UPDATE.destinations \u2260 \u2205",
+      "post_cond": "elapsed_time_since_prior_UPDATE >= MinRouteAdvertisementIntervalTimer",
+      "actions": [
+        "Enforce minimum interval of MinRouteAdvertisementIntervalTimer between consecutive UPDATE messages to same peer covering overlapping destinations"
+      ],
+      "modality": "must",
+      "id": "N-S058-001"
+    },
+    {
+      "statement_id": "2-S058-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "bgp_fsm",
+      "description": "Since fast convergence is needed within an autonomous system, either (a) the MinRouteAdvertisementIntervalTimer used for internal peers SHOULD be shorter than the MinRouteAdvertisementIntervalTimer used for external peers, or (b) the procedure describe in this section SHOULD NOT apply to routes sent to internal peers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S058",
+      "actors": [
+        "BGP speaker",
+        "internal peer",
+        "external peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "peer.type = internal",
+      "post_cond": "MinRouteAdvertisementIntervalTimer.internal < MinRouteAdvertisementIntervalTimer.external",
+      "actions": [
+        "Configure MinRouteAdvertisementIntervalTimer for internal peers to be shorter than for external peers"
+      ],
+      "modality": "should",
+      "id": "N-S058-002"
+    },
+    {
+      "statement_id": "3-S058-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Since fast convergence is needed within an autonomous system, either (a) the MinRouteAdvertisementIntervalTimer used for internal peers SHOULD be shorter than the MinRouteAdvertisementIntervalTimer used for external peers, or (b) the procedure describe in this section SHOULD NOT apply to routes sent to internal peers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S058",
+      "actors": [
+        "BGP speaker",
+        "internal peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_UPDATE_to_internal_peer",
+      "pre_cond": "peer.type = internal",
+      "post_cond": "MinRouteAdvertisementIntervalTimer.rate_limiting_applied = false",
+      "actions": [
+        "Exempt UPDATE messages sent to internal peers from MinRouteAdvertisementIntervalTimer rate-limiting procedure"
+      ],
+      "modality": "should",
+      "id": "N-S058-003"
+    },
+    {
+      "statement_id": "4-S058-4",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If new routes are selected multiple times while awaiting the expiration of MinRouteAdvertisementIntervalTimer, the last route selected SHALL be advertised at the end of MinRouteAdvertisementIntervalTimer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S058",
+      "actors": [
+        "BGP speaker",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "MinRouteAdvertisementIntervalTimer_expires",
+      "pre_cond": "MinRouteAdvertisementIntervalTimer.running = true & route_selection_count >= 1",
+      "post_cond": "last_selected_route.advertised = true",
+      "actions": [
+        "Advertise the most recently selected route to peer upon expiration of MinRouteAdvertisementIntervalTimer"
+      ],
+      "modality": "shall",
+      "id": "N-S058-004"
+    }
+  ]
+}

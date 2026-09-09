@@ -1,0 +1,87 @@
+{
+  "section_id": "S094",
+  "title": "S094 7.1.4 PREAUTH Response",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S094 7.1.4 PREAUTH Response"
+  ],
+  "url_anchor": "#s094-714-preauth-response",
+  "word_count": 129,
+  "statement_count": 3,
+  "elapsed_seconds": 18.24,
+  "statements": [
+    {
+      "statement_id": "D-S094-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "The PREAUTH response is always untagged and is one of three possible greetings at connection startup. It indicates that the connection has already been authenticated by external means; thus, no LOGIN/AUTHENTICATE command is needed. Because PREAUTH moves the connection directly to the authenticated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "PREAUTH greeting received at connection startup",
+      "pre_cond": "connection.state = Not Authenticated & connection.phase = greeting",
+      "post_cond": "connection.state = Authenticated",
+      "actions": [
+        "server sends untagged PREAUTH response",
+        "connection transitions to Authenticated state without LOGIN or AUTHENTICATE"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S094-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Clients that require mandatory TLS MUST close the connection after receiving the PREAUTH response on a non-protected port.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "connection closed",
+      "trigger": "PREAUTH received on non-protected port with mandatory TLS required",
+      "pre_cond": "connection.state = Authenticated & connection.tls_protected = false & client.mandatory_tls = true",
+      "post_cond": "connection.state = connection closed",
+      "actions": [
+        "client closes the connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S094-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Because PREAUTH moves the connection directly to the authenticated state, it effectively prevents the client from using the STARTTLS command.",
+      "is_inferred": true,
+      "confidence": 0.95,
+      "source_section": "S094",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Authenticated",
+      "to_state": null,
+      "trigger": "STARTTLS command issued after PREAUTH",
+      "pre_cond": "connection.state = Authenticated & connection.greeting = PREAUTH",
+      "post_cond": null,
+      "actions": [
+        "STARTTLS command is not permitted"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

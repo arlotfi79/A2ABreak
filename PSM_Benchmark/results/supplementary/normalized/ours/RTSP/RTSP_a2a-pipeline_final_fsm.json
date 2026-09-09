@@ -1,0 +1,194 @@
+{
+ "states": [
+  "Init",
+  "Ready",
+  "Play",
+  "Terminated"
+ ],
+ "initial_state": "Init",
+ "final_states": [
+  "Terminated"
+ ],
+ "transitions": [
+  {
+   "from": "Init",
+   "event": "cond default",
+   "action": "send SETUP; reply NRM=1, RP=0.0",
+   "to": "Ready"
+  },
+  {
+   "from": "Init",
+   "event": "cond Needs Redirect",
+   "action": "send SETUP; reply 3rr Redirect",
+   "to": "Init"
+  },
+  {
+   "from": "Init",
+   "event": "cond No Session hdr",
+   "action": "send S -> C: REDIRECT; reply Terminate all SES",
+   "to": "Init"
+  },
+  {
+   "from": "Ready",
+   "event": "cond URI Setup prior",
+   "action": "send SETUP; reply Change transport param",
+   "to": "Ready"
+  },
+  {
+   "from": "Ready",
+   "event": "cond md URI,NRM>1",
+   "action": "send TEARDOWN; reply Session hdr, NRM -= 1",
+   "to": "Ready"
+  },
+  {
+   "from": "Ready",
+   "event": "cond Prs URI",
+   "action": "send PAUSE; reply Return PP",
+   "to": "Ready"
+  },
+  {
+   "from": "Ready",
+   "event": "cond Terminate-Reason",
+   "action": "send SC:REDIRECT; reply Set RedP",
+   "to": "Ready"
+  },
+  {
+   "from": "Ready",
+   "event": "cond Prs URI, Range",
+   "action": "send PLAY; reply According to range",
+   "to": "Play"
+  },
+  {
+   "from": "Ready",
+   "event": "cond Prs URI",
+   "action": "send TEARDOWN; reply No session hdr, NRM = 0",
+   "to": "Init"
+  },
+  {
+   "from": "Ready",
+   "event": "cond No Terminate-Reason time parameter",
+   "action": "send SC:REDIRECT; reply Session is removed",
+   "to": "Init"
+  },
+  {
+   "from": "Ready",
+   "event": "cond default",
+   "action": "timeout",
+   "to": "Init"
+  },
+  {
+   "from": "Ready",
+   "event": "cond default",
+   "action": "cond RedP reached; reply TEARDOWN of session",
+   "to": "Init"
+  },
+  {
+   "from": "Ready",
+   "event": "receive server TEARDOWN",
+   "action": "terminate session context",
+   "to": "Terminated"
+  },
+  {
+   "from": "Play",
+   "event": "cond Prs URI, Range",
+   "action": "send PLAY; reply According to range",
+   "to": "Play"
+  },
+  {
+   "from": "Play",
+   "event": "cond default",
+   "action": "set Set RP = End of range",
+   "to": "Play"
+  },
+  {
+   "from": "Play",
+   "event": "cond All media",
+   "action": "set Set RP = End of media",
+   "to": "Play"
+  },
+  {
+   "from": "Play",
+   "event": "cond default",
+   "action": "send SC:PLAY_NOTIFY; reply 200",
+   "to": "Play"
+  },
+  {
+   "from": "Play",
+   "event": "cond md URI, IFI",
+   "action": "send SETUP; reply Change transport param.",
+   "to": "Play"
+  },
+  {
+   "from": "Play",
+   "event": "cond Terminate Reason with Time parameter",
+   "action": "send SC:REDIRECT; reply Set RedP",
+   "to": "Play"
+  },
+  {
+   "from": "Play",
+   "event": "send PLAY NOTIFY eos",
+   "action": "send end-of-stream notification",
+   "to": "Play"
+  },
+  {
+   "from": "Play",
+   "event": "send PLAY NOTIFY update",
+   "action": "send media properties update",
+   "to": "Play"
+  },
+  {
+   "from": "Play",
+   "event": "cond scale change",
+   "action": "modify playback scale value",
+   "to": "Play"
+  },
+  {
+   "from": "Play",
+   "event": "cond Prs URI",
+   "action": "send PAUSE; reply Set RP to present point",
+   "to": "Ready"
+  },
+  {
+   "from": "Play",
+   "event": "cond delivery exceeds stop",
+   "action": "pause media delivery immediately",
+   "to": "Ready"
+  },
+  {
+   "from": "Play",
+   "event": "cond Prs URI",
+   "action": "send TEARDOWN; reply No session hdr",
+   "to": "Init"
+  },
+  {
+   "from": "Play",
+   "event": "cond default",
+   "action": "send SC:REDIRECT; reply Session is removed",
+   "to": "Init"
+  },
+  {
+   "from": "Play",
+   "event": "cond default",
+   "action": "timeout; reply Stop Media playout",
+   "to": "Init"
+  },
+  {
+   "from": "Play",
+   "event": "cond default",
+   "action": "cond RedP reached; reply TEARDOWN of session",
+   "to": "Init"
+  },
+  {
+   "from": "Play",
+   "event": "cond md URI,NRM=1",
+   "action": "send TEARDOWN; reply No Session hdr, NRM=0",
+   "to": "Init"
+  },
+  {
+   "from": "Play",
+   "event": "receive TEARDOWN aggregate",
+   "action": "halt delivery immediately; destroy session state",
+   "to": "Terminated"
+  }
+ ]
+}

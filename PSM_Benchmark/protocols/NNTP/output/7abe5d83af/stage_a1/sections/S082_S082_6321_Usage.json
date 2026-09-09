@@ -1,0 +1,231 @@
+{
+  "section_id": "S082",
+  "title": "S082 6.3.2.1 Usage",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S082 6.3.2.1 Usage"
+  ],
+  "url_anchor": "#s082-6321-usage",
+  "word_count": 56,
+  "statement_count": 10,
+  "elapsed_seconds": 41.24,
+  "statements": [
+    {
+      "statement_id": "D-S082-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "After client sends IHAVE message-id, session awaits an initial response (335, 435, or 436) from the server.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S082",
+      "state_name": "IHAVE_WAITING_INITIAL",
+      "enum_name": "IHAVE_TRANSFER_STATES",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S082-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "After receiving 335 (Send article to be transferred), session enters a state where the article is being transferred and a subsequent response (235, 436, or 437) is awaited.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S082",
+      "state_name": "IHAVE_SENDING_ARTICLE",
+      "enum_name": "IHAVE_TRANSFER_STATES",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S082-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Client issues IHAVE message-id command; session moves to await initial server response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S082",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "IHAVE_WAITING_INITIAL",
+      "trigger": "IHAVE command issued",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send IHAVE message-id"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S082-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Server responds 335 (Send article to be transferred); client proceeds to send the article body.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S082",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "IHAVE_WAITING_INITIAL",
+      "to_state": "IHAVE_SENDING_ARTICLE",
+      "trigger": "335 response received",
+      "pre_cond": "protocol.state = IHAVE_WAITING_INITIAL",
+      "post_cond": null,
+      "actions": [
+        "client sends article body"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S082-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Server responds 435 (Article not wanted); IHAVE transaction ends without transfer.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S082",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IHAVE_WAITING_INITIAL",
+      "to_state": null,
+      "trigger": "435 response received",
+      "pre_cond": "protocol.state = IHAVE_WAITING_INITIAL",
+      "post_cond": null,
+      "actions": [
+        "IHAVE transaction terminated; article not transferred"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S082-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Server responds 436 (Transfer not possible; try again later) as initial response; IHAVE transaction ends, client may retry later.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S082",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IHAVE_WAITING_INITIAL",
+      "to_state": null,
+      "trigger": "436 initial response received",
+      "pre_cond": "protocol.state = IHAVE_WAITING_INITIAL",
+      "post_cond": null,
+      "actions": [
+        "IHAVE transaction terminated; retry permitted later"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S082-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Server responds 235 (Article transferred OK) after article body sent; IHAVE transaction completes successfully.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S082",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IHAVE_SENDING_ARTICLE",
+      "to_state": null,
+      "trigger": "235 response received",
+      "pre_cond": "protocol.state = IHAVE_SENDING_ARTICLE",
+      "post_cond": null,
+      "actions": [
+        "IHAVE transaction completed successfully"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S082-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Server responds 436 (Transfer failed; try again later) as subsequent response; IHAVE transaction ends with failure, retry permitted.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S082",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IHAVE_SENDING_ARTICLE",
+      "to_state": null,
+      "trigger": "436 subsequent response received",
+      "pre_cond": "protocol.state = IHAVE_SENDING_ARTICLE",
+      "post_cond": null,
+      "actions": [
+        "IHAVE transaction terminated; retry permitted later"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S082-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Server responds 437 (Transfer rejected; do not retry) as subsequent response; IHAVE transaction ends with permanent rejection.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S082",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IHAVE_SENDING_ARTICLE",
+      "to_state": null,
+      "trigger": "437 response received",
+      "pre_cond": "protocol.state = IHAVE_SENDING_ARTICLE",
+      "post_cond": null,
+      "actions": [
+        "IHAVE transaction permanently rejected; do not retry"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S082-010",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "nntp_fsm",
+      "description": "IHAVE command MUST NOT be pipelined; each IHAVE exchange must complete before another command is issued.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S082",
+      "object_name": "IHAVE",
+      "field_name": "pipelining",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": [
+        "false"
+      ],
+      "guard_semantics": "IHAVE command must not be sent in a pipeline; sequential execution required"
+    }
+  ]
+}

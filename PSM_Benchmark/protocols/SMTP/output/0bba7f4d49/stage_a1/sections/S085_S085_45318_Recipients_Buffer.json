@@ -1,0 +1,83 @@
+{
+  "section_id": "S085",
+  "title": "S085 4.5.3.1.8 Recipients Buffer",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S085 4.5.3.1.8 Recipients Buffer"
+  ],
+  "url_anchor": "#s085-45318-recipients-buffer",
+  "word_count": 141,
+  "statement_count": 3,
+  "elapsed_seconds": 22.93,
+  "statements": [
+    {
+      "statement_id": "D-S085-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "The minimum total number of recipients that MUST be buffered is 100 recipients. Rejection of messages (for excessive recipients) with fewer than 100 RCPT commands is a violation of this specification.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "object_name": "recipients buffer",
+      "field_name": "recipient_count",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "minimum 100"
+      ],
+      "guard_semantics": "server.recipient_count < 100 \u2192 rejection for excessive recipients is a protocol violation"
+    },
+    {
+      "statement_id": "D-S085-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "A server that imposes a limit on the number of recipients MUST behave in an orderly fashion, such as rejecting additional addresses over its limit rather than silently discarding addresses previously accepted.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S085",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT command received when recipient_count exceeds server limit",
+      "pre_cond": "server.recipient_count > server.recipient_limit",
+      "post_cond": "server.rcpt_rejected = true & server.previously_accepted_addresses_preserved = true",
+      "actions": [
+        "reject RCPT command with error reply",
+        "preserve previously accepted recipient addresses"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S085-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "A client that needs to deliver a message containing over 100 RCPT commands SHOULD be prepared to transmit in 100-recipient 'chunks' if the server declines to accept more than 100 recipients in a single message.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S085",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server declines to accept more than 100 recipients in a single message",
+      "pre_cond": "client.total_recipients > 100 & server.recipient_limit <= 100",
+      "post_cond": "client.transmitting_in_chunks = true & client.chunk_size = 100",
+      "actions": [
+        "segment recipient list into chunks of 100",
+        "initiate new transaction per chunk"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "section_id": "S083",
+  "title": "S083 6.3.2.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S083 6.3.2.2 Description"
+  ],
+  "url_anchor": "#s083-6322-description",
+  "word_count": 424,
+  "statement_count": 12,
+  "elapsed_seconds": 51.91,
+  "statements": [
+    {
+      "statement_id": "D-S083-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server desires a copy of that article, a 335 response MUST be returned, instructing the client to send the entire article.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S083",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "IHAVE_SENT",
+      "to_state": "SENDING_ARTICLE",
+      "trigger": "335_response",
+      "pre_cond": "server.wants_article = true",
+      "post_cond": "session.state = SENDING_ARTICLE",
+      "actions": [
+        "server sends 335 response",
+        "client sends entire article as multi-line data block"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S083-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server does not want the article, a 435 response MUST be returned, indicating that the article is not wanted.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S083",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "IHAVE_SENT",
+      "to_state": "IHAVE_COMPLETE",
+      "trigger": "435_response",
+      "pre_cond": "server.wants_article = false",
+      "post_cond": "session.ihave_result = NOT_WANTED",
+      "actions": [
+        "server sends 435 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S083-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the article isn't wanted immediately but the client should retry later if possible, a 436 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S083",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "IHAVE_SENT",
+      "to_state": "IHAVE_COMPLETE",
+      "trigger": "436_response",
+      "pre_cond": "server.wants_article_later = true",
+      "post_cond": "session.ihave_result = RETRY_LATER",
+      "actions": [
+        "server sends 436 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S083-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST return a 235 response, indicating that the article was successfully transferred.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S083",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "SENDING_ARTICLE",
+      "to_state": "TRANSFER_SUCCESS",
+      "trigger": "235_response",
+      "pre_cond": "session.state = SENDING_ARTICLE & server.transfer_ok = true",
+      "post_cond": "session.ihave_result = SUCCESS",
+      "actions": [
+        "server sends 235 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S083-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST return a 436 response, indicating that the transfer failed but should be tried again later.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S083",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "SENDING_ARTICLE",
+      "to_state": "TRANSFER_FAILED_RETRY",
+      "trigger": "436_response",
+      "pre_cond": "session.state = SENDING_ARTICLE & server.transfer_failed = true & server.retry_possible = true",
+      "post_cond": "session.ihave_result = RETRY_LATER",
+      "actions": [
+        "server sends 436 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S083-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST return a 437 response, indicating that the article was rejected.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S083",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "SENDING_ARTICLE",
+      "to_state": "TRANSFER_REJECTED",
+      "trigger": "437_response",
+      "pre_cond": "session.state = SENDING_ARTICLE & server.article_rejected = true",
+      "post_cond": "session.ihave_result = REJECTED",
+      "actions": [
+        "server sends 437 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S083-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "A lack of response (such as a dropped network connection or a network timeout) SHOULD be treated the same as a 436 response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S083",
+      "actors": [
+        "client"
+      ],
+      "from_state": "SENDING_ARTICLE",
+      "to_state": "TRANSFER_FAILED_RETRY",
+      "trigger": "connection_failure_or_timeout",
+      "pre_cond": "session.state = SENDING_ARTICLE & connection.response_received = false",
+      "post_cond": "session.ihave_result = RETRY_LATER",
+      "actions": [
+        "client treats lack of response as 436"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S083-008",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "State in which the client has sent IHAVE and is awaiting the server's initial response (335, 435, or 436).",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S083",
+      "state_name": "IHAVE_SENT",
+      "enum_name": "IHAVE_TRANSACTION",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = IHAVE_SENT"
+    },
+    {
+      "statement_id": "D-S083-009",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "State in which transmission of the article is in progress, following a 335 response from the server.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S083",
+      "state_name": "SENDING_ARTICLE",
+      "enum_name": "IHAVE_TRANSACTION",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = SENDING_ARTICLE"
+    },
+    {
+      "statement_id": "D-S083-010",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Terminal state after server returns 235, indicating the article was successfully transferred.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S083",
+      "state_name": "TRANSFER_SUCCESS",
+      "enum_name": "IHAVE_TRANSACTION",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "session.state = TRANSFER_SUCCESS"
+    },
+    {
+      "statement_id": "D-S083-011",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Terminal state after server returns 437, indicating the article was rejected.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S083",
+      "state_name": "TRANSFER_REJECTED",
+      "enum_name": "IHAVE_TRANSACTION",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "session.state = TRANSFER_REJECTED"
+    },
+    {
+      "statement_id": "D-S083-012",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Terminal state after server returns 436 (either during initial response or after article send), indicating retry is needed.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S083",
+      "state_name": "TRANSFER_FAILED_RETRY",
+      "enum_name": "IHAVE_TRANSACTION",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "session.state = TRANSFER_FAILED_RETRY"
+    }
+  ]
+}

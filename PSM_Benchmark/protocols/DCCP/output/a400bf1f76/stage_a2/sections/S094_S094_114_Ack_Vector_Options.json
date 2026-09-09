@@ -1,0 +1,354 @@
+{
+  "section_id": "S094",
+  "title": "S094 11.4 Ack Vector Options",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S094 11.4 Ack Vector Options"
+  ],
+  "url_anchor": "#s094-114-ack-vector-options",
+  "word_count": 752,
+  "statement_count": 14,
+  "elapsed_seconds": 148.51,
+  "statements": [
+    {
+      "statement_id": "1-S094-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The term \"ECN marked\" refers to packets with ECN code point 11, CE (Congestion Experienced); packets received with this ECN code point MUST be reported using State 1, Received ECN Marked.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "packet.ecn_code_point = 11",
+      "post_cond": "ack_vector.state = 1",
+      "actions": [
+        "report packet in Ack Vector using State 1 (Received ECN Marked)"
+      ],
+      "modality": "must",
+      "id": "N-S094-001"
+    },
+    {
+      "statement_id": "2-S094-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Packets received with ECN code points 00, 01, or 10 (Non-ECT, ECT(0), or ECT(1), respectively) MUST be reported using State 0, Received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "packet.ecn_code_point = 00 | packet.ecn_code_point = 01 | packet.ecn_code_point = 10",
+      "post_cond": "ack_vector.state = 0",
+      "actions": [
+        "report packet in Ack Vector using State 0 (Received)"
+      ],
+      "modality": "must",
+      "id": "N-S094-002"
+    },
+    {
+      "statement_id": "3-S094-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Ack Vector MUST NOT be sent on DCCP-Data and DCCP-Request packets, which lack an Acknowledgement Number, and any Ack Vector options encountered on such packets MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DCCP_Data_or_DCCP_Request",
+      "pre_cond": "outgoing_packet.type = DCCP-Data | outgoing_packet.type = DCCP-Request",
+      "post_cond": "outgoing_packet.ack_vector_option = absent",
+      "actions": [
+        "omit Ack Vector option from DCCP-Data packets",
+        "omit Ack Vector option from DCCP-Request packets"
+      ],
+      "modality": "must",
+      "id": "N-S094-003"
+    },
+    {
+      "statement_id": "4-S094-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Ack Vector MUST NOT be sent on DCCP-Data and DCCP-Request packets, which lack an Acknowledgement Number, and any Ack Vector options encountered on such packets MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_AckVector_on_DCCP_Data_or_DCCP_Request",
+      "pre_cond": "received_packet.type = DCCP-Data | received_packet.type = DCCP-Request & received_packet.has_ack_vector_option = true",
+      "post_cond": "ack_vector_option.processed = false",
+      "actions": [
+        "ignore Ack Vector options present on DCCP-Data packets",
+        "ignore Ack Vector options present on DCCP-Request packets"
+      ],
+      "modality": "must",
+      "id": "N-S094-004"
+    },
+    {
+      "statement_id": "5-S094-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "(These principles SHOULD also be followed for other acknowledgement mechanisms; referring to Ack Vector states simplifies their explanation.)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S094-005"
+    },
+    {
+      "statement_id": "6-S094-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Packets reported as State 0 or State 1 MUST be acknowledgeable: their options have been processed by the receiving DCCP stack.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "ack_vector.state = 0 | ack_vector.state = 1",
+      "post_cond": "packet.options.processed = true",
+      "actions": [
+        "ensure options of packets reported as State 0 or State 1 have been processed by the receiving DCCP stack before reporting"
+      ],
+      "modality": "must",
+      "id": "N-S094-006"
+    },
+    {
+      "statement_id": "7-S094-7",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Packets reported as State 3 MUST NOT be acknowledgeable.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "ack_vector.state = 3",
+      "post_cond": "packet.acknowledgeable = false",
+      "actions": [
+        "ensure packets reported as State 3 are not acknowledged"
+      ],
+      "modality": "must",
+      "id": "N-S094-007"
+    },
+    {
+      "statement_id": "8-S094-8",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Feature negotiations and options on such packets MUST NOT have been processed, and the Acknowledgement Number MUST NOT correspond to such a packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "ack_vector.state = 3",
+      "post_cond": "packet.feature_negotiations.processed = false & packet.options.processed = false",
+      "actions": [
+        "do not process feature negotiations on packets reported as State 3",
+        "do not process options on packets reported as State 3"
+      ],
+      "modality": "must",
+      "id": "N-S094-008"
+    },
+    {
+      "statement_id": "9-S094-9",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Feature negotiations and options on such packets MUST NOT have been processed, and the Acknowledgement Number MUST NOT correspond to such a packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "ack_vector.state = 3",
+      "post_cond": "ack_number.corresponds_to_state3_packet = false",
+      "actions": [
+        "ensure Acknowledgement Number does not correspond to any packet reported as State 3"
+      ],
+      "modality": "must",
+      "id": "N-S094-009"
+    },
+    {
+      "statement_id": "10-S094-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Packets dropped in the application's receive buffer MUST be reported as Received or Received ECN Marked (States 0 and 1), depending on their ECN state; such packets' ECN Nonces MUST be included in the Nonce Echo.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "packet.dropped_in_receive_buffer = true",
+      "post_cond": "ack_vector.state = 0 | ack_vector.state = 1",
+      "actions": [
+        "report application-receive-buffer-dropped packets as State 0 (Received) or State 1 (Received ECN Marked) depending on ECN state"
+      ],
+      "modality": "must",
+      "id": "N-S094-010"
+    },
+    {
+      "statement_id": "11-S094-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Packets dropped in the application's receive buffer MUST be reported as Received or Received ECN Marked (States 0 and 1), depending on their ECN state; such packets' ECN Nonces MUST be included in the Nonce Echo.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "packet.dropped_in_receive_buffer = true",
+      "post_cond": "nonce_echo.includes_ecn_nonce_of_dropped_packet = true",
+      "actions": [
+        "include ECN Nonces of application-receive-buffer-dropped packets in the Nonce Echo"
+      ],
+      "modality": "must",
+      "id": "N-S094-011"
+    },
+    {
+      "statement_id": "12-S094-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "One or more Ack Vector options that, together, report the status of a packet with a sequence number less than ISN, the initial sequence number, SHOULD be considered invalid.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_AckVector_referencing_seqnum_lt_ISN",
+      "pre_cond": "ack_vector.reported_seq_num < connection.ISN",
+      "post_cond": "ack_vector_option.validity = invalid",
+      "actions": [
+        "treat Ack Vector option as invalid when it reports a sequence number less than ISN"
+      ],
+      "modality": "should",
+      "id": "N-S094-012"
+    },
+    {
+      "statement_id": "13-S094-13",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The receiving DCCP SHOULD either ignore the options or reset the connection with Reset Code 5, \"Option Error\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "receive_AckVector_referencing_seqnum_lt_ISN",
+      "pre_cond": "ack_vector.reported_seq_num < connection.ISN",
+      "post_cond": "ack_vector_option.ignored = true | connection.reset_sent = true",
+      "actions": [
+        "ignore the invalid Ack Vector options",
+        "OR send DCCP-Reset with Reset Code 5 (Option Error)"
+      ],
+      "modality": "should",
+      "id": "N-S094-013"
+    },
+    {
+      "statement_id": "14-S094-14",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Packets that haven't been included in any Ack Vector option SHOULD be treated as \"not yet received\" (State 3) by the sender.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "actors": [
+        "endpoint",
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "packet.included_in_ack_vector = false",
+      "post_cond": "sender.inferred_packet_state = 3",
+      "actions": [
+        "treat packets not covered by any Ack Vector option as State 3 (not yet received) at the sender"
+      ],
+      "modality": "should",
+      "id": "N-S094-014"
+    }
+  ]
+}

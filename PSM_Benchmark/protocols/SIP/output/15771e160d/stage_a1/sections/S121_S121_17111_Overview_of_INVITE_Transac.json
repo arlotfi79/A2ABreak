@@ -1,0 +1,125 @@
+{
+  "section_id": "S121",
+  "title": "S121 17.1.1.1 Overview of INVITE Transaction",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S121 17.1.1.1 Overview of INVITE Transaction"
+  ],
+  "url_anchor": "#s121-17111-overview-of-invite-transaction",
+  "word_count": 182,
+  "statement_count": 5,
+  "elapsed_seconds": 60.73,
+  "statements": [
+    {
+      "statement_id": "D-S121-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "After receiving a 1xx response, any retransmissions cease altogether, and the client waits for further responses.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S121",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "1xx response received",
+      "pre_cond": null,
+      "post_cond": "client_transaction.retransmissions = ceased",
+      "actions": [
+        "cease retransmissions",
+        "wait for further responses"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S121-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "For each final response that is received at the client transaction, the client transaction sends an ACK, the purpose of which is to quench retransmissions of the response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S121",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "final response received",
+      "pre_cond": null,
+      "post_cond": "server_transaction.response_retransmissions = quenched",
+      "actions": [
+        "send ACK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S121-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "For unreliable transports (such as UDP), the client transaction retransmits requests at an interval that starts at T1 seconds and doubles after every retransmission. T1 is an estimate of the round-trip time (RTT), and it defaults to 500 ms.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "object_name": "INVITE client transaction",
+      "field_name": "T1",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": "default 500ms",
+      "guard_semantics": "transport = unreliable"
+    },
+    {
+      "statement_id": "D-S121-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The request is not retransmitted over reliable transports.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S121",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE sent",
+      "pre_cond": "transport = reliable",
+      "post_cond": "retransmission = disabled",
+      "actions": [
+        "send INVITE once"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S121-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "For unreliable transports, that response is retransmitted periodically, and for reliable transports, it is sent once.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S121",
+      "actors": [
+        "server transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "final response decided",
+      "pre_cond": "transport = unreliable",
+      "post_cond": "server_transaction.response_retransmission = periodic",
+      "actions": [
+        "retransmit final response periodically"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

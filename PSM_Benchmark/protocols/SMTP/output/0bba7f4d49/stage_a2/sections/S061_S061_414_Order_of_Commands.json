@@ -1,0 +1,414 @@
+{
+  "section_id": "S061",
+  "title": "S061 4.1.4 Order of Commands",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S061 4.1.4 Order of Commands"
+  ],
+  "url_anchor": "#s061-414-order-of-commands",
+  "word_count": 644,
+  "statement_count": 17,
+  "elapsed_seconds": 306.8,
+  "statements": [
+    {
+      "statement_id": "N-S061-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "A session that will contain mail transactions MUST first be initialized by the use of the EHLO command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "session"
+      ],
+      "from_state": "uninitialized",
+      "to_state": "initialized",
+      "trigger": "EHLO_command_sent",
+      "pre_cond": "session.will_contain_mail_transactions = true",
+      "post_cond": "session.state = initialized",
+      "actions": [
+        "initialize session with EHLO command before any mail transaction"
+      ],
+      "modality": "must",
+      "id": "N-S061-001"
+    },
+    {
+      "statement_id": "N-S061-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "An SMTP server SHOULD accept commands for non-mail transactions (e.g., VRFY or EXPN) without this initialization.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": "uninitialized",
+      "to_state": null,
+      "trigger": "VRFY_or_EXPN_received",
+      "pre_cond": "session.initialized = false",
+      "post_cond": null,
+      "actions": [
+        "accept VRFY or EXPN command without prior EHLO"
+      ],
+      "modality": "should",
+      "id": "N-S061-002"
+    },
+    {
+      "statement_id": "N-S061-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "An EHLO command MAY be issued by a client later in the session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "client"
+      ],
+      "from_state": "initialized",
+      "to_state": null,
+      "trigger": "EHLO_issued_mid_session",
+      "pre_cond": "session.begun = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S061-003"
+    },
+    {
+      "statement_id": "N-S061-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If it is issued after the session begins and the EHLO command is acceptable to the SMTP server, the SMTP server MUST clear all buffers and reset the state exactly as if a RSET command had been issued.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "initialized",
+      "trigger": "EHLO_received_mid_session",
+      "pre_cond": "session.begun = true & server.ehlo_acceptable = true",
+      "post_cond": "server.state = initialized",
+      "actions": [
+        "clear all buffers",
+        "reset state as if RSET command had been issued"
+      ],
+      "modality": "must",
+      "id": "N-S061-004"
+    },
+    {
+      "statement_id": "N-S061-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the EHLO command is not acceptable to the SMTP server, 501, 500, 502, or 550 failure replies MUST be returned as appropriate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "EHLO_received",
+      "pre_cond": "server.ehlo_acceptable = false",
+      "post_cond": null,
+      "actions": [
+        "return 501 or 500 or 502 or 550 failure reply"
+      ],
+      "modality": "must",
+      "id": "N-S061-005"
+    },
+    {
+      "statement_id": "N-S061-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "The SMTP server MUST stay in the same state after transmitting these replies that it was in before the EHLO was received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "failure_reply_transmitted_after_unacceptable_EHLO",
+      "pre_cond": "server.ehlo_acceptable = false",
+      "post_cond": "server.state = server.pre_ehlo_state",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S061-006"
+    },
+    {
+      "statement_id": "N-S061-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "The SMTP client MUST, if possible, ensure that the domain parameter to the EHLO command is a primary host name as specified for this command in Section 2.3.5.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S061-007"
+    },
+    {
+      "statement_id": "N-S061-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "If this is not possible (e.g., when the client's address is dynamically assigned and the client does not have an obvious name), an address literal SHOULD be substituted for the domain name.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S061-008"
+    },
+    {
+      "statement_id": "N-S061-9",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "An SMTP server MAY verify that the domain name argument in the EHLO command actually corresponds to the IP address of the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S061-009"
+    },
+    {
+      "statement_id": "N-S061-10",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "However, if the verification fails, the server MUST NOT refuse to accept a message on that basis.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "EHLO_domain_verification_failed",
+      "pre_cond": "server.ehlo_domain_verification.result = failed",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S061-010"
+    },
+    {
+      "statement_id": "N-S061-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "SMTP servers SHOULD process these normally (that is, not return a 503 code) even if no EHLO command has yet been received; clients SHOULD open a session with EHLO before sending these commands.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": "uninitialized",
+      "to_state": null,
+      "trigger": "NOOP_or_HELP_or_EXPN_or_VRFY_or_RSET_received",
+      "pre_cond": "session.ehlo_received = false",
+      "post_cond": null,
+      "actions": [
+        "process command normally",
+        "do not return 503 code"
+      ],
+      "modality": "should",
+      "id": "N-S061-011"
+    },
+    {
+      "statement_id": "N-S061-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "SMTP servers SHOULD process these normally (that is, not return a 503 code) even if no EHLO command has yet been received; clients SHOULD open a session with EHLO before sending these commands.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "client"
+      ],
+      "from_state": "uninitialized",
+      "to_state": "initialized",
+      "trigger": "before_sending_NOOP_or_HELP_or_EXPN_or_VRFY_or_RSET",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send EHLO command to open session before sending NOOP, HELP, EXPN, VRFY, or RSET"
+      ],
+      "modality": "should",
+      "id": "N-S061-012"
+    },
+    {
+      "statement_id": "N-S061-13",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "MAIL (or SEND, SOML, or SAML) MUST NOT be sent if a mail transaction is already open, i.e., it should be sent only if no mail transaction had been started in the session, or if the previous one successfully concluded with a successful DATA command, or if the previous one was aborted, e.g., with a RSET or new EHLO.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "client"
+      ],
+      "from_state": "transaction_open",
+      "to_state": null,
+      "trigger": "MAIL_or_SEND_or_SOML_or_SAML_attempted",
+      "pre_cond": "transaction.state = open",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S061-013"
+    },
+    {
+      "statement_id": "N-S061-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the transaction beginning command argument is not acceptable, a 501 failure reply MUST be returned and the SMTP server MUST stay in the same state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transaction_beginning_command_with_unacceptable_argument",
+      "pre_cond": "command.argument.acceptable = false",
+      "post_cond": "server.state = server.pre_command_state",
+      "actions": [
+        "return 501 failure reply",
+        "stay in same state"
+      ],
+      "modality": "must",
+      "id": "N-S061-014"
+    },
+    {
+      "statement_id": "N-S061-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the commands in a transaction are out of order to the degree that they cannot be processed by the server, a 503 failure reply MUST be returned and the SMTP server MUST stay in the same state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "out_of_order_commands_in_transaction",
+      "pre_cond": "transaction.commands.order_valid = false",
+      "post_cond": "server.state = server.pre_command_state",
+      "actions": [
+        "return 503 failure reply",
+        "stay in same state"
+      ],
+      "modality": "must",
+      "id": "N-S061-015"
+    },
+    {
+      "statement_id": "N-S061-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "The last command in a session MUST be the QUIT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "closing",
+      "trigger": "session_termination",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send QUIT as the last command in the session"
+      ],
+      "modality": "must",
+      "id": "N-S061-016"
+    },
+    {
+      "statement_id": "N-S061-17",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "The QUIT command SHOULD be used by the client SMTP to request connection closure, even when no session opening command was sent and accepted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S061",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "closing",
+      "trigger": "connection_closure_requested",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send QUIT command to request connection closure"
+      ],
+      "modality": "should",
+      "id": "N-S061-017"
+    }
+  ]
+}

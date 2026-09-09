@@ -1,0 +1,87 @@
+{
+  "section_id": "S052",
+  "title": "S052 3.9.2.1 Source Routing",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S052 3.9.2.1 Source Routing"
+  ],
+  "url_anchor": "#s052-3921-source-routing",
+  "word_count": 158,
+  "statement_count": 3,
+  "elapsed_seconds": 28.7,
+  "statements": [
+    {
+      "statement_id": "D-S052-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An application MUST be able to specify a source route when it actively opens a TCP connection (MUST-51), and this MUST take precedence over a source route received in a datagram (MUST-52).",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S052",
+      "actors": [
+        "application",
+        "tcp"
+      ],
+      "from_state": "CLOSED",
+      "to_state": null,
+      "trigger": "ACTIVE OPEN",
+      "pre_cond": null,
+      "post_cond": "connection.source_route = application_specified_route",
+      "actions": [
+        "accept source route from application",
+        "apply application-specified source route taking precedence over datagram-received source route"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S052-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "When a TCP connection is OPENed passively and a packet arrives with a completed IP Source Route Option (containing a return route), TCP implementations MUST save the return route and use it for all segments sent on this connection (MUST-53).",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S052",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "segment with completed IP Source Route Option received",
+      "pre_cond": "connection.open_type = passive",
+      "post_cond": "connection.return_route = received_source_route",
+      "actions": [
+        "save return route from IP Source Route Option",
+        "use saved return route for all segments on this connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S052-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If a different source route arrives in a later segment, the later definition SHOULD override the earlier one (SHLD-24).",
+      "is_inferred": false,
+      "confidence": 0.55,
+      "source_section": "S052",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "segment with different source route received",
+      "pre_cond": "connection.return_route != null",
+      "post_cond": "connection.return_route = new_source_route",
+      "actions": [
+        "override earlier source route with later source route definition"
+      ],
+      "modality": "should"
+    }
+  ]
+}

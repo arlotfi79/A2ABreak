@@ -1,0 +1,197 @@
+{
+  "section_id": "S024",
+  "title": "S024 5.6 DCCP-Reset Packets",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S024 5.6 DCCP-Reset Packets"
+  ],
+  "url_anchor": "#s024-56-dccp-reset-packets",
+  "word_count": 824,
+  "statement_count": 8,
+  "elapsed_seconds": 44.24,
+  "statements": [
+    {
+      "statement_id": "D-S024-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "A valid packet arrived with unexpected type. For example, a DCCP-Data packet with valid header checksum and sequence numbers arrived at a connection in the REQUEST state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "state_name": "REQUEST",
+      "enum_name": "DCCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = REQUEST"
+    },
+    {
+      "statement_id": "D-S024-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "DCCP-Reset packets unconditionally shut down a connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive DCCP-Reset",
+      "pre_cond": null,
+      "post_cond": "connection.active = false",
+      "actions": [
+        "process options on DCCP-Reset packet",
+        "shut down connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S024-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "A valid packet arrived with unexpected type. For example, a DCCP-Data packet with valid header checksum and sequence numbers arrived at a connection in the REQUEST state. Reset Code 4, Packet Error.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S024",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "receive unexpected packet type",
+      "pre_cond": "protocol.state = REQUEST & packet.checksum_valid = true & packet.sequence_numbers_valid = true",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset with Reset Code 4 (Packet Error)",
+        "set Data1 = offending packet type"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S024-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Connection Refused: The Destination Port didn't correspond to a port open for listening. Sent only in response to DCCP-Requests.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S024",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive DCCP-Request",
+      "pre_cond": "port.listening = false",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset with Reset Code 7 (Connection Refused)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S024-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Bad Service Code: The Service Code didn't equal the service code attached to the Destination Port. Sent only in response to DCCP-Requests.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S024",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive DCCP-Request",
+      "pre_cond": "request.service_code != port.service_code",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset with Reset Code 8 (Bad Service Code)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S024-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Too Busy: The server is too busy to accept new connections. Sent only in response to DCCP-Requests.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S024",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive DCCP-Request",
+      "pre_cond": "server.too_busy = true",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset with Reset Code 9 (Too Busy)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S024-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Options on DCCP-Reset packets are processed before the connection is shut down. This means that certain combinations of options, particularly involving Mandatory, may cause an endpoint to respond to a valid DCCP-Reset with another DCCP-Reset.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S024",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive DCCP-Reset with Mandatory option error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "process options on received DCCP-Reset",
+        "send DCCP-Reset with Reset Code 6 (Mandatory Error)",
+        "shut down connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S024-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Bad Init Cookie: The Init Cookie echoed by the client was incorrect or missing.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S024",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive DCCP-Request with incorrect or missing Init Cookie",
+      "pre_cond": "client.init_cookie_valid = false",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset with Reset Code 10 (Bad Init Cookie)"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

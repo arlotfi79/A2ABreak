@@ -1,0 +1,88 @@
+{
+  "section_id": "S091",
+  "title": "S091 13.3.1.1 Progress",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S091 13.3.1.1 Progress"
+  ],
+  "url_anchor": "#s091-13311-progress",
+  "word_count": 209,
+  "statement_count": 3,
+  "elapsed_seconds": 31.67,
+  "statements": [
+    {
+      "statement_id": "1-S091-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS MAY send as many provisional responses as it likes.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S091",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send_provisional_response"
+      ],
+      "modality": "may",
+      "id": "N-S091-001"
+    },
+    {
+      "statement_id": "2-S091-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "Each of these MUST indicate the same dialog ID.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S091",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_provisional_response",
+      "pre_cond": "message.type = provisional_response & message.code >= 101 & message.code <= 199",
+      "post_cond": "message.dialog_id = transaction.initial_dialog_id",
+      "actions": [
+        "set_dialog_id_equal_to_initial_dialog_id"
+      ],
+      "modality": "must",
+      "id": "N-S091-002"
+    },
+    {
+      "statement_id": "3-S091-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "To prevent cancellation, the UAS MUST send a non-100 provisional response at every minute, to handle the possibility of lost provisional responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S091",
+      "actors": [
+        "UAS",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "60_second_retransmit_interval_elapsed",
+      "pre_cond": "transaction.type = INVITE & transaction.final_response_sent = false & transaction.duration_extended = true",
+      "post_cond": "proxy_cancellation_suppressed = true",
+      "actions": [
+        "send_provisional_response(code > 100)"
+      ],
+      "modality": "must",
+      "id": "N-S091-003"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "section_id": "S102",
+  "title": "S102 16.1 Overview",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S102 16.1 Overview"
+  ],
+  "url_anchor": "#s102-161-overview",
+  "word_count": 484,
+  "statement_count": 5,
+  "elapsed_seconds": 28.32,
+  "statements": [
+    {
+      "statement_id": "D-S102-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When stateless, a proxy acts as a simple forwarding element. It forwards each request downstream to a single element determined by making a targeting and routing decision based on the request. A stateless proxy discards information about a message once the message has been forwarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "state_name": "stateless",
+      "enum_name": "ProxyMode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "proxy.mode = stateless"
+    },
+    {
+      "statement_id": "D-S102-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy remembers information (specifically, transaction state) about each incoming request and any requests it sends as a result of processing the incoming request. It uses this information to affect the processing of future messages associated with that request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "state_name": "stateful",
+      "enum_name": "ProxyMode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "proxy.mode = stateful"
+    },
+    {
+      "statement_id": "D-S102-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy MAY transition to stateless operation at any time during the processing of a request, so long as it did not do anything that would otherwise prevent it from being stateless initially (forking, for example, or generation of a 100 response). When performing such a transition, all state is simply discarded. The proxy SHOULD NOT initiate a CANCEL request.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S102",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "stateful",
+      "to_state": "stateless",
+      "trigger": "proxy_elects_stateless_transition",
+      "pre_cond": "proxy.forked = false & proxy.sent_100 = false",
+      "post_cond": "proxy.mode = stateless & proxy.transaction_state = null",
+      "actions": [
+        "discard all transaction state",
+        "SHOULD_NOT send CANCEL"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S102-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy MAY choose to 'fork' a request, routing it to multiple destinations. Any request that is forwarded to more than one location MUST be handled statefully.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "object_name": "proxy",
+      "field_name": "forked",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "true"
+      ],
+      "guard_semantics": "proxy.forked = true => proxy.mode = stateful"
+    },
+    {
+      "statement_id": "D-S102-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When a request arrives, an element that can play the role of a proxy first decides if it needs to respond to the request on its own. The element MAY respond with any appropriate error code. When responding directly to a request, the element is playing the role of a UAS and MUST behave as described in Section 8.2.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S102",
+      "actors": [
+        "proxy",
+        "UAS"
+      ],
+      "from_state": "proxy_role",
+      "to_state": "UAS_role",
+      "trigger": "proxy_elects_direct_response",
+      "pre_cond": "request.malformed = true | proxy.requires_credentials = true",
+      "post_cond": "element.role = UAS",
+      "actions": [
+        "send error response directly"
+      ],
+      "modality": "may"
+    }
+  ]
+}

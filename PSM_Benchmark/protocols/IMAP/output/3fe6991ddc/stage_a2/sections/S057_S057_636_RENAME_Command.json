@@ -1,0 +1,184 @@
+{
+  "section_id": "S057",
+  "title": "S057 6.3.6 RENAME Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S057 6.3.6 RENAME Command"
+  ],
+  "url_anchor": "#s057-636-rename-command",
+  "word_count": 729,
+  "statement_count": 7,
+  "elapsed_seconds": 82.94,
+  "statements": [
+    {
+      "statement_id": "1-S057-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the name has inferior hierarchical names, then the inferior hierarchical names MUST also be renamed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RENAME_command_received",
+      "pre_cond": "mailbox.has_inferior_hierarchical_names = true",
+      "post_cond": "inferior_hierarchical_names.all_renamed = true",
+      "actions": [
+        "rename_all_inferior_hierarchical_names"
+      ],
+      "modality": "must",
+      "id": "N-S057-001"
+    },
+    {
+      "statement_id": "2-S057-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server's hierarchy separator character appears in the new mailbox name, the server SHOULD create any superior hierarchical names that are needed for the RENAME command to complete successfully.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RENAME_command_received",
+      "pre_cond": "new_mailbox_name.contains(hierarchy_separator) = true",
+      "post_cond": "superior_hierarchical_names.created = true",
+      "actions": [
+        "create_missing_superior_hierarchical_names"
+      ],
+      "modality": "should",
+      "id": "N-S057-002"
+    },
+    {
+      "statement_id": "3-S057-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In other words, an attempt to rename \"foo/bar/zap\" to \"baz/rag/zowie\" on a server in which \"/\" is the hierarchy separator character in the corresponding namespace SHOULD create \"baz/\" and \"baz/rag/\" if they do not already exist.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RENAME_command_received",
+      "pre_cond": "new_mailbox_name.contains(hierarchy_separator) = true & superior_hierarchical_names.exist = false",
+      "post_cond": "superior_hierarchical_names.created = true",
+      "actions": [
+        "create_missing_superior_hierarchical_names"
+      ],
+      "modality": "should",
+      "id": "N-S057-003"
+    },
+    {
+      "statement_id": "4-S057-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The value of the highest-used unique identifier of the old mailbox name MUST be preserved so that a new mailbox created with the same name will not reuse the identifiers of the former incarnation, unless the new incarnation has a different unique identifier validity value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RENAME_command_completed",
+      "pre_cond": null,
+      "post_cond": "old_mailbox.highest_used_uid.preserved = true",
+      "actions": [
+        "preserve_highest_used_uid_of_old_mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S057-004"
+    },
+    {
+      "statement_id": "5-S057-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the normalized version of any of these 2 parameters differs from the corresponding supplied version, the server SHOULD return an untagged LIST response with an OLDNAME extended data item, with the OLDNAME value being the supplied existing mailbox name and the name parameter being the normalized new mailbox name (see Section 6.3.9.7).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RENAME_command_received",
+      "pre_cond": "normalized_mailbox_name != supplied_mailbox_name",
+      "post_cond": "untagged_LIST_response_with_OLDNAME.sent = true",
+      "actions": [
+        "send_untagged_LIST_response_with_OLDNAME_extended_data_item"
+      ],
+      "modality": "should",
+      "id": "N-S057-005"
+    },
+    {
+      "statement_id": "6-S057-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Mailboxes renamed in one IMAP session MAY be announced to other IMAP sessions using an unsolicited LIST response with an OLDNAME extended data item.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "server",
+        "session"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mailbox_renamed_in_peer_session",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send_unsolicited_LIST_response_with_OLDNAME_to_other_sessions"
+      ],
+      "modality": "may",
+      "id": "N-S057-006"
+    },
+    {
+      "statement_id": "7-S057-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In both of the above cases, if the server automatically subscribes a mailbox when it is renamed, then the unsolicited LIST response for each affected subscribed mailbox name MUST include the \\Subscribed attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mailbox_renamed_and_auto_subscribed",
+      "pre_cond": "server.auto_subscribes_on_rename = true",
+      "post_cond": "unsolicited_LIST_response.includes_Subscribed_attribute = true",
+      "actions": [
+        "include_Subscribed_attribute_in_unsolicited_LIST_response_for_each_affected_mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S057-007"
+    }
+  ]
+}

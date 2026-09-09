@@ -1,0 +1,190 @@
+{
+  "section_id": "S077",
+  "title": "S077 12.2.1.1 Generating the Request",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S077 12.2.1.1 Generating the Request"
+  ],
+  "url_anchor": "#s077-12211-generating-the-request",
+  "word_count": 904,
+  "statement_count": 8,
+  "elapsed_seconds": 65.85,
+  "statements": [
+    {
+      "statement_id": "D-S077-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the 'secure' flag is true, the Contact URI MUST be a SIPS URI.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S077",
+      "object_name": "dialog",
+      "field_name": "secure",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "guard_semantics": "dialog.secure = true \u2192 Contact URI must be SIPS URI"
+    },
+    {
+      "statement_id": "D-S077-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The local sequence number is part of the dialog state; if not empty it must be incremented; if empty an initial value must be chosen.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S077",
+      "object_name": "dialog",
+      "field_name": "local_sequence_number",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S077-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The route set is stored as part of the dialog state and is used by the UAC to build the Request-URI and Route header field of the request.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S077",
+      "object_name": "dialog",
+      "field_name": "route_set",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S077-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the local sequence number is not empty, the value of the local sequence number MUST be incremented by one, and this value MUST be placed into the CSeq header field.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S077",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_in_dialog_request",
+      "pre_cond": "dialog.local_sequence_number != null",
+      "post_cond": "dialog.local_sequence_number = dialog.local_sequence_number + 1",
+      "actions": [
+        "increment local_sequence_number by one",
+        "place new value in CSeq header field"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S077-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the local sequence number is empty, an initial value MUST be chosen using the guidelines of Section 8.1.1.5.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S077",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_in_dialog_request",
+      "pre_cond": "dialog.local_sequence_number = null",
+      "post_cond": "dialog.local_sequence_number != null",
+      "actions": [
+        "choose initial CSeq sequence number per Section 8.1.1.5",
+        "place value in CSeq header field"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S077-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the route set is empty, the UAC MUST place the remote target URI into the Request-URI. The UAC MUST NOT add a Route header field to the request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S077",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "generate_in_dialog_request",
+      "pre_cond": "dialog.route_set = empty",
+      "post_cond": null,
+      "actions": [
+        "set Request-URI to dialog.remote_target_URI",
+        "omit Route header field"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S077-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the route set is not empty, and the first URI in the route set contains the lr parameter, the UAC MUST place the remote target URI into the Request-URI and MUST include a Route header field containing the route set values in order, including all parameters.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S077",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "generate_in_dialog_request",
+      "pre_cond": "dialog.route_set != empty & dialog.route_set.first.lr_param = true",
+      "post_cond": null,
+      "actions": [
+        "set Request-URI to dialog.remote_target_URI",
+        "add Route header containing route_set values in order with all parameters"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S077-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the route set is not empty, and its first URI does not contain the lr parameter, the UAC MUST place the first URI from the route set into the Request-URI (stripping non-allowed parameters), MUST add a Route header field containing the remainder of the route set values in order, and MUST then place the remote target URI into the Route header field as the last value.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S077",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "generate_in_dialog_request",
+      "pre_cond": "dialog.route_set != empty & dialog.route_set.first.lr_param = false",
+      "post_cond": null,
+      "actions": [
+        "set Request-URI to route_set.first (strip non-Request-URI-allowed params)",
+        "add Route header with route_set.remainder values in order with all parameters",
+        "append dialog.remote_target_URI as last Route value"
+      ],
+      "modality": "must"
+    }
+  ]
+}

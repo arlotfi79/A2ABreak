@@ -1,0 +1,415 @@
+{
+  "findings": [
+    {
+      "finding_id": "F-001",
+      "candidate_id": "run1:C-001",
+      "title": "Auth-Required Delegation Chain Lacks Structured Scope Object, Enabling Scope Amplification",
+      "severity": "HIGH",
+      "description": "The A2A protocol explicitly enables multi-hop authorization delegation chains via TASK_STATE_AUTH_REQUIRED (section 7.6), stating this 'enables forming a chain of Tasks in TASK_STATE_AUTH_REQUIRED.' However, when a middleman agent (Agent B) receives an auth requirement from a downstream agent (Agent C) and propagates it upstream, the protocol defines no structured, machine-readable scope object for the authorization request. The TaskStatus.message carrying auth details is free-form (a Message with Parts), and the spec only says details SHOULD use 'a PushNotificationAuthenticationInfo-like structure,' which describes authentication schemes, not authorization scopes. Consequently, Agent B can create a new auth request with amplified scope (e.g., requesting 'read:calendar read:email' when Agent C only requested 'read:calendar') and the upstream client has no protocol mechanism to detect or compare the scope against the original request. The authorization_delegation transition guard checks only client.is_a2a_agent and client.is_actively_processing_task—no guard constrains scope fidelity. Under full compliance, every participant follows the spec yet scope amplification is undetectable because no protocol-defined scope schema exists to compare across hops.",
+      "fsm_trace": [
+        {
+          "step": 1,
+          "stage": "task_execution",
+          "state": "task_execution:TASK_STATE_WORKING",
+          "transition": "authorization_required",
+          "actor": "server",
+          "note": "Agent C determines it needs secondary credentials and transitions its task to AUTH_REQUIRED. The auth details are in a free-form TaskStatus.message with no protocol-defined scope schema.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 2,
+          "stage": "task_execution → interruption",
+          "state": "task_execution:TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_requested (inter-stage)",
+          "actor": "server",
+          "note": "The AUTH_REQUIRED state crosses from task_execution to the interruption phase. Agent B (as client to C) receives the free-form auth request.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 3,
+          "stage": "interruption",
+          "state": "interruption:TASK_STATE_WORKING",
+          "transition": "authorization_delegation",
+          "actor": "client",
+          "note": "Agent B propagates auth to its own task by transitioning to AUTH_REQUIRED. Guard only checks client.is_a2a_agent=true and client.is_actively_processing_task=true. Agent B creates a NEW free-form auth request that may amplify scope with no protocol constraint.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 4,
+          "stage": "interruption",
+          "state": "interruption:TASK_STATE_AUTH_REQUIRED",
+          "transition": "message_received (self-loop)",
+          "actor": "server",
+          "note": "The upstream client or user receives the potentially amplified auth request. No protocol mechanism exists to verify scope fidelity against the original request from Agent C.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 5,
+          "stage": "interruption",
+          "state": "interruption:TASK_STATE_AUTH_REQUIRED",
+          "transition": "credential_received",
+          "actor": "server",
+          "note": "Credentials (potentially over-scoped) are accepted and task resumes. Guard checks only task.state=TASK_STATE_AUTH_REQUIRED, not whether credentials match the originally requested scope.",
+          "is_reconstructed": false
+        }
+      ],
+      "missing_primitive": "A protocol-defined structured authorization scope object (schema/data type) that accompanies TASK_STATE_AUTH_REQUIRED transitions, specifying exact permissions in a machine-readable format that can be structurally compared or cryptographically linked across delegation hops to prevent scope amplification.",
+      "confirmed_absent": true,
+      "confirmed_not_by_design": true,
+      "spec_sections_checked": [
+        "7.5",
+        "7.6",
+        "4.1",
+        "4.2",
+        "3.4",
+        "13.1"
+      ],
+      "preventing_rule_checked_and_absent": true,
+      "source_ids": [
+        "N-7-6-001",
+        "N-7-6-003",
+        "D-7-6-002",
+        "D-7-6-005",
+        "N-7-6-008"
+      ]
+    },
+    {
+      "finding_id": "F-002",
+      "candidate_id": "run1:C-002",
+      "title": "No Principal Identity Propagation Across Multi-Hop Auth Delegation Chains",
+      "severity": "HIGH",
+      "description": "The A2A protocol explicitly states that payloads 'don't carry user or client identity information directly' and that 'identity is established at the transport/HTTP layer.' At each hop in a multi-agent chain, only the immediate caller's identity is known: Agent B knows Agent A's identity; Agent C knows Agent B's identity. The original User's identity is never carried forward. When the protocol simultaneously enables forming multi-hop 'chain of Tasks in TASK_STATE_AUTH_REQUIRED,' a fundamental architectural tension arises: the transport-layer identity model provides only hop-by-hop identity, while end-to-end identity propagation is needed for the credential provider to make informed authorization decisions and for downstream agents to verify delegation provenance. Credentials flowing back through the chain travel as regular Message data with no protocol binding to the delegation context, meaning intermediary agents receive credentials with no protocol-level restriction on their use. The protocol defines the multi-hop delegation feature without providing a bridge mechanism between its hop-by-hop identity model and the end-to-end identity needs of delegation chains.",
+      "fsm_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "authentication:REQUEST_AUTHORIZED",
+          "transition": "initial_message_authorized (inter-stage)",
+          "actor": "client",
+          "note": "User authenticates with Agent A at the transport layer. REQUEST_AUTHORIZED records only the User's identity. This identity will not propagate to subsequent hops.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 2,
+          "stage": "authentication",
+          "state": "authentication:REQUEST_AUTHORIZED",
+          "transition": "initial_message_authorized (inter-stage)",
+          "actor": "client",
+          "note": "Agent A authenticates with Agent B using Agent A's own credentials. Agent B's REQUEST_AUTHORIZED records Agent A's identity—the User's identity is lost at this hop boundary.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 3,
+          "stage": "task_execution",
+          "state": "task_execution:TASK_STATE_WORKING",
+          "transition": "authorization_required",
+          "actor": "server",
+          "note": "Agent C needs credentials for a third-party resource. Agent C knows only Agent B's identity. Agent C cannot assess whether the original User should be authorized for the requested action.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 4,
+          "stage": "interruption",
+          "state": "interruption:TASK_STATE_WORKING",
+          "transition": "authorization_delegation",
+          "actor": "client",
+          "note": "Agent B propagates auth request to Agent A. The delegation transition carries no field identifying the original principal (the User) or the originating agent (Agent C).",
+          "is_reconstructed": false
+        },
+        {
+          "step": 5,
+          "stage": "interruption",
+          "state": "interruption:TASK_STATE_AUTH_REQUIRED",
+          "transition": "credential_received",
+          "actor": "server",
+          "note": "User provides credentials which flow back through the chain as regular Message data. Each intermediary receives credentials without any protocol binding restricting use to the specific delegation context.",
+          "is_reconstructed": false
+        }
+      ],
+      "missing_primitive": "A protocol-level delegation context or principal identity token that travels with the auth-required delegation chain, enabling downstream agents to know the original principal and credential providers to verify the delegation chain's legitimacy. The protocol's 'No Identity in Payload' design was established for point-to-point interactions but is architecturally insufficient for the multi-hop delegation chains the protocol explicitly enables.",
+      "confirmed_absent": true,
+      "confirmed_not_by_design": true,
+      "spec_sections_checked": [
+        "7.2",
+        "7.3",
+        "7.5",
+        "7.6",
+        "4.1",
+        "13.1"
+      ],
+      "preventing_rule_checked_and_absent": true,
+      "source_ids": [
+        "N-7-6-001",
+        "D-7-6-005",
+        "N-7-6-008",
+        "N-7-5-001"
+      ]
+    },
+    {
+      "finding_id": "F-003",
+      "candidate_id": "run1:C-003",
+      "title": "Secondary Credentials Persist as Undifferentiated Messages in Retrievable Task History",
+      "severity": "MEDIUM",
+      "description": "The A2A protocol's in-task authorization flow (section 7.6) delivers secondary credentials via message/send as regular Message Parts (TextPart, DataPart, or FilePart). These credential-bearing messages become part of the Task's history array. The GetTask operation with historyLength > 0 returns past messages from the task's history, and the protocol explicitly allows multiple concurrent client streams to the same task. The Message and Part data models contain no sensitivity classification, ephemeral flag, or access-control annotation—the Part proto definition includes only content fields (text/raw/url/data), metadata (Struct), filename, and media_type. Consequently, any client authorized for a task can retrieve ALL messages including credential-bearing ones via GetTask, because the protocol provides no mechanism to distinguish or filter security-sensitive messages from regular conversation messages. Even a server that wants to redact credentials from history cannot do so in a protocol-compliant way because no signal identifies which messages contain credentials.",
+      "fsm_trace": [
+        {
+          "step": 1,
+          "stage": "task_execution",
+          "state": "task_execution:TASK_STATE_WORKING",
+          "transition": "authorization_required",
+          "actor": "server",
+          "note": "Server determines it needs secondary credentials and transitions the task to AUTH_REQUIRED.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 2,
+          "stage": "task_execution → interruption",
+          "state": "task_execution:TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_requested (inter-stage)",
+          "actor": "server",
+          "note": "Auth requirement crosses to interruption phase. Client is informed of the need for credentials.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 3,
+          "stage": "interruption",
+          "state": "interruption:TASK_STATE_AUTH_REQUIRED",
+          "transition": "credential_received",
+          "actor": "client",
+          "note": "Client sends credentials via message/send. Credentials are in a regular Part with no sensitivity flag. Server stores this in the task's history array as structurally identical to any other message.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 4,
+          "stage": "interruption",
+          "state": "interruption:TASK_STATE_AUTH_REQUIRED",
+          "transition": "credential_received",
+          "actor": "server",
+          "note": "Server processes credentials and transitions task back to WORKING. Credential-bearing message persists in task history.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 5,
+          "stage": "interruption → task_execution",
+          "state": "interruption:TASK_STATE_WORKING",
+          "transition": "interruption_resolved (inter-stage)",
+          "actor": "shared",
+          "note": "Task resumes in task_execution phase. History including credential message persists indefinitely.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 6,
+          "stage": "task_execution",
+          "state": "task_execution:TASK_STATE_COMPLETED",
+          "transition": "message_send",
+          "actor": "server",
+          "note": "Task completes. Any authorized client can call GetTask with historyLength > 0 and retrieve the credential-bearing message. The protocol provides no filtering, redaction, or sensitivity-based access control for individual messages within task history.",
+          "is_reconstructed": false
+        }
+      ],
+      "missing_primitive": "A protocol-level message or part sensitivity classification mechanism—such as an ephemeral/sensitive flag on Message or Part objects—that allows credential-bearing messages to be marked and excluded from history retrieval, or alternatively a dedicated credential delivery channel separate from the general-purpose message flow.",
+      "confirmed_absent": true,
+      "confirmed_not_by_design": true,
+      "spec_sections_checked": [
+        "7.6",
+        "4.1",
+        "4.2",
+        "3.1",
+        "3.4",
+        "3.5",
+        "13.1"
+      ],
+      "preventing_rule_checked_and_absent": true,
+      "source_ids": [
+        "N-7-6-001",
+        "D-3-4-001",
+        "D-3-5-001"
+      ]
+    },
+    {
+      "finding_id": "F-004",
+      "candidate_id": "run2:C-001:corrected",
+      "title": "Client-Provided contextId Accepted Without Ownership Verification Enables Cross-Client Context Injection and Information Leakage",
+      "severity": "MEDIUM",
+      "description": "The A2A protocol allows agents to accept client-provided contextId values (MAY, §3.4.1) and explicitly permits clients to use a contextId without a taskId to start a new task within an existing conversation context (§3.4.3). While task-level authorization is server-enforceable (the server knows the task creator from the authenticated request and §13.1 MUSTs mandate per-client task scoping), no equivalent context-level authorization mechanism exists. The contextId data model has no owner field, no creator binding, no context access token, and no server-side requirement to verify that a client providing a contextId is authorized to create tasks within that context. Critically, §3.4.3 actively defines cross-client context entry as a supported pattern, meaning a server that rejects such requests is arguably non-compliant. When an agent accepts client-provided contextIds and uses contextId to maintain internal state or LLM context (as the spec allows via §3.4.1 MAY), a second authenticated client that knows or guesses a contextId can inject a new task into another client's context. The agent processes this task using the shared conversational state, leaking information from prior interactions through the agent's internal processing — not through task access controls, which remain intact. The attack operates below the task authorization layer, at a context layer the protocol exposes but provides no authorization model for.",
+      "fsm_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "authenticated",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Client A authenticates with valid credentials. Server records Client A's identity at the transport layer per §7.4 MUST.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 2,
+          "stage": "initiation",
+          "state": "TASK_STATE_NONEXISTENT",
+          "transition": "task_creation",
+          "actor": "server",
+          "note": "Client A sends SendMessage with no contextId. Server generates contextId=X, creates Task T1 (owned by Client A — server can enforce task-level auth). Agent begins accumulating conversational state keyed by contextId=X per §3.4.1 MAY.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 3,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "task_processing_continues",
+          "actor": "server",
+          "note": "Client A interacts over multiple turns in context X. Agent accumulates sensitive state: user preferences, PII, prior approvals, business data. Task T1 may complete or continue. Context X persists with accumulated state.",
+          "is_reconstructed": true
+        },
+        {
+          "step": 4,
+          "stage": "authentication",
+          "state": "authenticated",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Client B (separate principal) authenticates with its own valid credentials. Client B has learned contextId=X through legitimate means (shared environment, referenceTaskIds, leaked logs, predictable generation).",
+          "is_reconstructed": false
+        },
+        {
+          "step": 5,
+          "stage": "initiation",
+          "state": "TASK_STATE_NONEXISTENT",
+          "transition": "task_creation",
+          "actor": "server",
+          "note": "Client B sends SendMessage with contextId=X and no taskId. Per §3.4.3 this is a normatively valid pattern: 'Clients MAY use contextId without taskId to start a new task within an existing conversation context.' Server validates only contextId-taskId consistency (no taskId provided, check passes). No context ownership verification exists — no owner field, no context access token, no creator binding. The spec actively invites this pattern. Server creates Task T2 in context X, owned by Client B. Task-level auth is intact (server knows T2 belongs to Client B). Context-level auth is absent (no mechanism to verify Client B should be in context X).",
+          "is_reconstructed": false
+        },
+        {
+          "step": 6,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "task_event_generated",
+          "actor": "server",
+          "note": "Agent processes Client B's Task T2 using context X's accumulated conversational state (per §3.4.1 MAY for maintaining LLM context). Agent's response to Client B is informed by Client A's prior interactions — information leakage through the agent's internal processing, not through task access controls. All task-level MUSTs in §13.1 are fully satisfied. Client B only accesses its own Task T2. The leakage operates below the task authorization layer.",
+          "is_reconstructed": true
+        },
+        {
+          "step": 7,
+          "stage": "task_execution",
+          "state": "TASK_STATE_COMPLETED",
+          "transition": "task_completed",
+          "actor": "server",
+          "note": "Context poisoning path: Client B's messages are now part of context X's conversational history. When Client A later creates Task T3 in context X (normal multi-turn continuation per §3.4.3), the agent processes it with a context poisoned by Client B's injected messages. Client A's tasks were never accessed or manipulated — the corruption operates through shared agent state below the task authorization layer.",
+          "is_reconstructed": true
+        }
+      ],
+      "missing_primitive": "A protocol-level context ownership model. Unlike task ownership (where the server has creator identity from the authenticated request and MUSTs telling it to scope access), context ownership has: (1) no creator field in any data structure, (2) no context access token returned on creation, (3) a spec feature at §3.4.3 that actively invites cross-client context entry, (4) authorization MUSTs at §13.1 scoped to task operations not context operations, (5) no CreateContext or JoinContext operation with authorization checks. The server cannot enforce context ownership because the spec tells it to accept client-provided contextIds (§3.4.1 MAY) and to allow new tasks in existing contexts (§3.4.3) with no ownership verification defined.",
+      "confirmed_absent": true,
+      "confirmed_not_by_design": true,
+      "spec_sections_checked": [
+        "3.4.1",
+        "3.4.2",
+        "3.4.3",
+        "4.1",
+        "7.2",
+        "7.4",
+        "7.5",
+        "13.1",
+        "3.3.2"
+      ],
+      "preventing_rule_checked_and_absent": true,
+      "source_ids": [
+        "D-3-4-012",
+        "D-3-7-003",
+        "N-3-4-012",
+        "D-4-1-044",
+        "N-13-1-002",
+        "N-3-3-008"
+      ]
+    },
+    {
+      "finding_id": "F-005",
+      "candidate_id": "run2:C-002",
+      "title": "Push Notification Webhook URL Ownership Verification Absent from Normative Specification",
+      "severity": "MEDIUM",
+      "description": "The A2A protocol's push notification mechanism allows clients to register arbitrary webhook URLs for task update delivery. The normative specification requires only that the server 'MUST establish a webhook endpoint for task update notifications' and 'MUST authenticate itself to the client's webhook URL according to the scheme specified in PushNotificationConfig.authentication'—but PushNotificationConfig.authentication is optional. The non-normative Streaming & Async guide states 'Servers SHOULD NOT blindly trust and send POST requests to any URL' and lists ownership verification as one of several suggested mitigation strategies, but no mandatory ownership verification mechanism (e.g., challenge-response) exists in the normative spec. An authenticated client can register a webhook URL pointing to any valid public HTTPS endpoint it does not own, causing the server to deliver HTTP POST requests containing task status payloads to the unowned endpoint. This enables DDoS amplification (multiple tasks with configs targeting the same victim URL) and information leakage (task state details sent to unintended third parties). The retry mechanism for failed deliveries further amplifies impact on the targeted endpoint.",
+      "fsm_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "authentication:authenticated",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Attacker authenticates to the A2A server with valid credentials—a legitimate authorized client.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 2,
+          "stage": "initiation",
+          "state": "initiation:TASK_STATE_NONEXISTENT",
+          "transition": "message_send",
+          "actor": "client",
+          "note": "Attacker sends a message with pushNotificationConfig.url pointing to a public third-party endpoint. The URL passes any SSRF validation since it is not a private IP.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 3,
+          "stage": "initiation",
+          "state": "initiation:TASK_STATE_SUBMITTED",
+          "transition": "task_creation",
+          "actor": "server",
+          "note": "Server creates the task and registers the push notification configuration with the unverified URL.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 4,
+          "stage": "task_execution",
+          "state": "task_execution:PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+          "transition": "create_push_notification_config_requested",
+          "actor": "server",
+          "note": "Push notification config transitions to ACTIVE. Guard checks only capability support, not URL ownership. No ownership verification mechanism exists in the protocol.",
+          "is_reconstructed": true
+        },
+        {
+          "step": 5,
+          "stage": "task_execution",
+          "state": "task_execution:PUSH_NOTIFICATION_CONFIG_ACTIVE",
+          "transition": "task state change triggers notification delivery",
+          "actor": "server",
+          "note": "Server sends HTTP POST with StreamResponse payload to the third-party URL. If PushNotificationConfig.authentication was omitted, the POST is sent unauthenticated. The third-party endpoint receives unwanted traffic containing task state information.",
+          "is_reconstructed": true
+        }
+      ],
+      "missing_primitive": "A mandatory protocol-level webhook URL ownership verification mechanism, such as a challenge-response handshake before activating push notification delivery. The server should send a verification request with a unique token to the proposed URL, and the URL must echo the token to prove client control. This is standard in webhook systems (Stripe, GitHub, Slack) but absent from the A2A normative specification.",
+      "confirmed_absent": true,
+      "confirmed_not_by_design": true,
+      "spec_sections_checked": [
+        "3.1",
+        "4.3",
+        "13.2",
+        "streaming-and-async topics"
+      ],
+      "preventing_rule_checked_and_absent": true,
+      "source_ids": [
+        "D-3-1-043",
+        "D-3-1-042",
+        "D-13-2-002",
+        "D-13-2-003"
+      ]
+    }
+  ],
+  "discarded": [],
+  "verified_properties": [
+    {
+      "property": "Per-Request Authentication Enforcement",
+      "evidence": "FSM states authentication:SERVER_VALIDATING_REQUEST → authentication:authenticated (with guard request.authenticated=true) and authentication:AUTHENTICATION_FAILED (with guard request.credentials.valid=false) enforce authentication at every request boundary. The spec confirms: 'MUST authenticate every incoming request based on the provided credentials and its declared authentication requirements' (Section 7.4). All transitions from CLIENT_CREDENTIAL_TRANSMISSION to SERVER_VALIDATING_REQUEST carry MUST modality. No surviving finding bypasses per-request authentication."
+    },
+    {
+      "property": "Terminal State Immutability",
+      "evidence": "FSM terminal states (TASK_STATE_COMPLETED, TASK_STATE_FAILED, TASK_STATE_CANCELED, TASK_STATE_REJECTED) across task_execution and termination phases have is_final=true and no outgoing transitions to active states. The only transition from termination:TASK_STATE_TERMINAL is a self-loop (cancel_task returns same terminal state). The spec defines these as terminal states in the Task lifecycle (Section 4.1). The transition guard 'task.state IN (COMPLETED, FAILED, CANCELED, REJECTED)' on the self-loop confirms no state regression is possible."
+    },
+    {
+      "property": "Stream Closure on Terminal/Interrupted States",
+      "evidence": "FSM transitions task_execution:STREAM_ACTIVE → task_execution:STREAM_CLOSED and interruption:STREAM_STATE_OPEN → interruption:STREAM_STATE_CLOSED both carry MUST modality with guard 'task.state IN (terminal | interrupted)'. The spec confirms streams must close when tasks reach terminal or interrupted states (Sections 3.5, 11.7). This ensures no orphaned streams can persist after task lifecycle ends."
+    },
+    {
+      "property": "Version Negotiation Error Handling",
+      "evidence": "FSM state initiation:VERSION_NEGOTIATION_ERROR is reached via MUST-modality transitions when server.version_supported=false. The spec confirms 'Clients MUST send the A2A-Version header with each request' (Section 3.6) and servers must reject unsupported versions. This prevents version-mismatch protocol confusion attacks."
+    }
+  ],
+  "inconclusive": []
+}

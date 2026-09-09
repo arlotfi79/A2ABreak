@@ -1,0 +1,1407 @@
+{
+  "protocol": "RTSP",
+  "model": "a2a-pipeline",
+  "fingerprint": {
+    "evaluator_sha256": "c302bb6e01e8e95f5fa4f1147efd289e0cba243ca3a707eeb9ae731a6a83b668",
+    "ground_truth_sha256": "cb28240f0d2737ed3238f437167ea5136b42387fd7502ec6be06a2c66da2bea5",
+    "exported_fsm_sha256": "c44660e5c4e50074b2b636468d07a7b0e4519ad531ff01e0a6401b59f6c2fee4",
+    "minilm": {
+      "found": true,
+      "snapshots": [
+        "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+      ]
+    },
+    "packages": {
+      "python": "3.13.2",
+      "numpy": "2.4.2",
+      "torch": "2.12.0",
+      "sentence-transformers": "5.5.1",
+      "pandas": "3.0.3",
+      "scikit-learn": "1.8.0",
+      "litellm": "1.83.14"
+    }
+  },
+  "official": {
+    "states": {
+      "Protocol": "RTSP",
+      "Model": "a2a-pipeline",
+      "Total Extracted": 4,
+      "Total GT": 3,
+      "Matched": 3,
+      "Precision": 0.75,
+      "Recall": 1.0,
+      "F1-Score": 0.857
+    },
+    "transitions": {
+      "Protocol": "RTSP",
+      "Model": "a2a-pipeline",
+      "TotalExtracted": 30,
+      "TotalGT": 33,
+      "Matched": 12,
+      "UnmatchedGT": 21,
+      "UnmatchedExtracted": 18,
+      "Precision": 0.4,
+      "Recall": 0.364,
+      "F1-Score": 0.381
+    },
+    "call": {
+      "match_all_states": {
+        "threshold": 0.5
+      },
+      "batch_evaluate_transitions_combined": {
+        "if_partial": false,
+        "state_threshold": 0.5,
+        "trans_threshold": 0.5
+      }
+    }
+  },
+  "diagnostics": {
+    "state_matches": [
+      {
+        "gt": "Init",
+        "extracted": "Init",
+        "score": 1.0
+      },
+      {
+        "gt": "Ready",
+        "extracted": "Ready",
+        "score": 1.0
+      },
+      {
+        "gt": "Play",
+        "extracted": "Play",
+        "score": 1.0
+      }
+    ],
+    "unmatched_gt_states": [],
+    "unselected_extracted_states": [
+      "Terminated"
+    ],
+    "matched_transitions": [
+      {
+        "extracted": {
+          "from": "Init",
+          "event": "receive SETUP redirect",
+          "action": "send 3rr redirect response",
+          "to": "Init"
+        },
+        "gt": {
+          "from": "Init",
+          "event": "cond Needs Redirect",
+          "action": "send SETUP; reply 3rr Redirect",
+          "to": "Init"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Init",
+          "event": "receive REDIRECT",
+          "action": "terminate all sessions",
+          "to": "Init"
+        },
+        "gt": {
+          "from": "Init",
+          "event": "cond No Session hdr",
+          "action": "send S -> C: REDIRECT; reply Terminate all SES",
+          "to": "Init"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Ready",
+          "event": "receive SETUP",
+          "action": "update transport parameters",
+          "to": "Ready"
+        },
+        "gt": {
+          "from": "Ready",
+          "event": "cond URI Setup prior",
+          "action": "send SETUP; reply Change transport param",
+          "to": "Ready"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Ready",
+          "event": "receive PAUSE",
+          "action": "send 200 OK response",
+          "to": "Ready"
+        },
+        "gt": {
+          "from": "Ready",
+          "event": "cond Prs URI",
+          "action": "send PAUSE; reply Return PP",
+          "to": "Ready"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Ready",
+          "event": "receive TEARDOWN session",
+          "action": "destroy session state",
+          "to": "Init"
+        },
+        "gt": {
+          "from": "Ready",
+          "event": "cond Prs URI",
+          "action": "send TEARDOWN; reply No session hdr, NRM = 0",
+          "to": "Init"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Ready",
+          "event": "receive REDIRECT immediate",
+          "action": "remove session",
+          "to": "Init"
+        },
+        "gt": {
+          "from": "Ready",
+          "event": "cond No Terminate-Reason time parameter",
+          "action": "send SC:REDIRECT; reply Session is removed",
+          "to": "Init"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Play",
+          "event": "cond end of media",
+          "action": "set resume point to end",
+          "to": "Play"
+        },
+        "gt": {
+          "from": "Play",
+          "event": "cond All media",
+          "action": "set Set RP = End of media",
+          "to": "Play"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Play",
+          "event": "receive PLAY NOTIFY",
+          "action": "send 200 response",
+          "to": "Play"
+        },
+        "gt": {
+          "from": "Play",
+          "event": "cond default",
+          "action": "send SC:PLAY_NOTIFY; reply 200",
+          "to": "Play"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Play",
+          "event": "receive REDIRECT timed",
+          "action": "set redirect deadline",
+          "to": "Play"
+        },
+        "gt": {
+          "from": "Play",
+          "event": "cond Terminate Reason with Time parameter",
+          "action": "send SC:REDIRECT; reply Set RedP",
+          "to": "Play"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Play",
+          "event": "receive TEARDOWN session",
+          "action": "destroy session state",
+          "to": "Init"
+        },
+        "gt": {
+          "from": "Play",
+          "event": "cond Prs URI",
+          "action": "send TEARDOWN; reply No session hdr",
+          "to": "Init"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Play",
+          "event": "receive REDIRECT immediate",
+          "action": "remove session",
+          "to": "Init"
+        },
+        "gt": {
+          "from": "Play",
+          "event": "cond default",
+          "action": "send SC:REDIRECT; reply Session is removed",
+          "to": "Init"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Play",
+          "event": "timeout session",
+          "action": "stop media playout",
+          "to": "Init"
+        },
+        "gt": {
+          "from": "Play",
+          "event": "cond default",
+          "action": "timeout; reply Stop Media playout",
+          "to": "Init"
+        }
+      }
+    ],
+    "unmatched_gt_transitions": [
+      {
+        "from": "Init",
+        "event": "cond default",
+        "action": "send SETUP; reply NRM=1, RP=0.0",
+        "to": "Ready"
+      },
+      {
+        "from": "Ready",
+        "event": "cond New URI",
+        "action": "send SETUP; reply NRM +=1",
+        "to": "Ready"
+      },
+      {
+        "from": "Ready",
+        "event": "cond md URI,NRM=1",
+        "action": "send TEARDOWN; reply No Session hdr, NRM = 0",
+        "to": "Init"
+      },
+      {
+        "from": "Ready",
+        "event": "cond md URI,NRM>1",
+        "action": "send TEARDOWN; reply Session hdr, NRM -= 1",
+        "to": "Ready"
+      },
+      {
+        "from": "Ready",
+        "event": "cond Prs URI, No range",
+        "action": "send PLAY; reply Play from RP",
+        "to": "Play"
+      },
+      {
+        "from": "Ready",
+        "event": "cond Prs URI, Range",
+        "action": "send PLAY; reply According to range",
+        "to": "Play"
+      },
+      {
+        "from": "Ready",
+        "event": "cond md URI, NRM=1, Range",
+        "action": "send PLAY; reply According to range",
+        "to": "Play"
+      },
+      {
+        "from": "Ready",
+        "event": "cond md URI, NRM=1",
+        "action": "send PLAY; reply Play from RP",
+        "to": "Play"
+      },
+      {
+        "from": "Ready",
+        "event": "cond Terminate-Reason",
+        "action": "send SC:REDIRECT; reply Set RedP",
+        "to": "Ready"
+      },
+      {
+        "from": "Ready",
+        "event": "cond default",
+        "action": "timeout",
+        "to": "Init"
+      },
+      {
+        "from": "Ready",
+        "event": "cond default",
+        "action": "cond RedP reached; reply TEARDOWN of session",
+        "to": "Init"
+      },
+      {
+        "from": "Play",
+        "event": "cond Prs URI",
+        "action": "send PAUSE; reply Set RP to present point",
+        "to": "Ready"
+      },
+      {
+        "from": "Play",
+        "event": "cond default",
+        "action": "set Set RP = End of range",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "cond Prs URI, No range",
+        "action": "send PLAY; reply Play from present point",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "cond Prs URI, Range",
+        "action": "send PLAY; reply According to range",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "cond New URI",
+        "action": "send SETUP; reply 455",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "cond md URI",
+        "action": "send SETUP; reply 455",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "cond md URI, IFI",
+        "action": "send SETUP; reply Change transport param.",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "cond md URI,NRM=1",
+        "action": "send TEARDOWN; reply No Session hdr, NRM=0",
+        "to": "Init"
+      },
+      {
+        "from": "Play",
+        "event": "cond md URI",
+        "action": "send TEARDOWN; reply 455",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "cond default",
+        "action": "cond RedP reached; reply TEARDOWN of session",
+        "to": "Init"
+      }
+    ],
+    "unmatched_extracted_transitions": [
+      {
+        "from": "Init",
+        "event": "receive SETUP success",
+        "action": "generate session identifier; set transport parameters",
+        "to": "Ready"
+      },
+      {
+        "from": "Ready",
+        "event": "receive TEARDOWN media",
+        "action": "remove media stream; free associated resources",
+        "to": "Ready"
+      },
+      {
+        "from": "Ready",
+        "event": "receive REDIRECT timed",
+        "action": "set redirect deadline",
+        "to": "Ready"
+      },
+      {
+        "from": "Ready",
+        "event": "receive PLAY",
+        "action": "begin media delivery",
+        "to": "Play"
+      },
+      {
+        "from": "Ready",
+        "event": "timeout session",
+        "action": "remove session",
+        "to": "Init"
+      },
+      {
+        "from": "Ready",
+        "event": "cond redirect deadline",
+        "action": "teardown session",
+        "to": "Init"
+      },
+      {
+        "from": "Ready",
+        "event": "receive server TEARDOWN",
+        "action": "terminate session context",
+        "to": "Terminated"
+      },
+      {
+        "from": "Play",
+        "event": "receive PLAY",
+        "action": "replace current play action",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "cond end of range",
+        "action": "stop media delivery",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "receive SETUP",
+        "action": "change transport parameters",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "send PLAY NOTIFY eos",
+        "action": "send end-of-stream notification",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "send PLAY NOTIFY update",
+        "action": "send media properties update",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "cond scale change",
+        "action": "modify playback scale value",
+        "to": "Play"
+      },
+      {
+        "from": "Play",
+        "event": "receive PAUSE",
+        "action": "halt media delivery",
+        "to": "Ready"
+      },
+      {
+        "from": "Play",
+        "event": "cond delivery exceeds stop",
+        "action": "pause media delivery immediately",
+        "to": "Ready"
+      },
+      {
+        "from": "Play",
+        "event": "cond redirect deadline",
+        "action": "teardown session",
+        "to": "Init"
+      },
+      {
+        "from": "Play",
+        "event": "receive TEARDOWN affected",
+        "action": "terminate media session",
+        "to": "Init"
+      },
+      {
+        "from": "Play",
+        "event": "receive TEARDOWN aggregate",
+        "action": "halt delivery immediately; destroy session state",
+        "to": "Terminated"
+      }
+    ],
+    "precision": 0.75,
+    "recall": 1.0,
+    "f1_score": 0.857
+  },
+  "supplementary": {
+    "note": "Supplementary only — the official numbers above come from the benchmark's own entry points. The official state matcher is many-to-one and the official transition matcher is greedy and order-sensitive; these one-to-one numbers bound that effect.",
+    "one_to_one": {
+      "states": {
+        "threshold": 0.5,
+        "matched": 3,
+        "total_gt": 3,
+        "total_extracted": 4,
+        "precision": 0.75,
+        "recall": 1.0,
+        "f1": 0.8571,
+        "pairs": [
+          {
+            "gt": "Init",
+            "extracted": "Init",
+            "score": 1.0
+          },
+          {
+            "gt": "Ready",
+            "extracted": "Ready",
+            "score": 1.0
+          },
+          {
+            "gt": "Play",
+            "extracted": "Play",
+            "score": 1.0
+          }
+        ]
+      },
+      "transitions": {
+        "threshold": 0.5,
+        "matched": 12,
+        "total_gt": 33,
+        "total_extracted": 30,
+        "precision": 0.4,
+        "recall": 0.3636,
+        "f1": 0.381,
+        "pairs": [
+          {
+            "extracted": {
+              "from": "Init",
+              "event": "receive SETUP redirect",
+              "action": "send 3rr redirect response",
+              "to": "Init"
+            },
+            "gt": {
+              "from": "Init",
+              "event": "cond Needs Redirect",
+              "action": "send SETUP; reply 3rr Redirect",
+              "to": "Init"
+            },
+            "label_score": 0.6795
+          },
+          {
+            "extracted": {
+              "from": "Init",
+              "event": "receive REDIRECT",
+              "action": "terminate all sessions",
+              "to": "Init"
+            },
+            "gt": {
+              "from": "Init",
+              "event": "cond No Session hdr",
+              "action": "send S -> C: REDIRECT; reply Terminate all SES",
+              "to": "Init"
+            },
+            "label_score": 0.5971
+          },
+          {
+            "extracted": {
+              "from": "Ready",
+              "event": "receive SETUP",
+              "action": "update transport parameters",
+              "to": "Ready"
+            },
+            "gt": {
+              "from": "Ready",
+              "event": "cond URI Setup prior",
+              "action": "send SETUP; reply Change transport param",
+              "to": "Ready"
+            },
+            "label_score": 0.5409
+          },
+          {
+            "extracted": {
+              "from": "Ready",
+              "event": "receive PAUSE",
+              "action": "send 200 OK response",
+              "to": "Ready"
+            },
+            "gt": {
+              "from": "Ready",
+              "event": "cond Prs URI",
+              "action": "send PAUSE; reply Return PP",
+              "to": "Ready"
+            },
+            "label_score": 0.5898
+          },
+          {
+            "extracted": {
+              "from": "Ready",
+              "event": "receive TEARDOWN session",
+              "action": "destroy session state",
+              "to": "Init"
+            },
+            "gt": {
+              "from": "Ready",
+              "event": "cond default",
+              "action": "cond RedP reached; reply TEARDOWN of session",
+              "to": "Init"
+            },
+            "label_score": 0.5221
+          },
+          {
+            "extracted": {
+              "from": "Ready",
+              "event": "cond redirect deadline",
+              "action": "teardown session",
+              "to": "Init"
+            },
+            "gt": {
+              "from": "Ready",
+              "event": "cond No Terminate-Reason time parameter",
+              "action": "send SC:REDIRECT; reply Session is removed",
+              "to": "Init"
+            },
+            "label_score": 0.6322
+          },
+          {
+            "extracted": {
+              "from": "Play",
+              "event": "cond end of media",
+              "action": "set resume point to end",
+              "to": "Play"
+            },
+            "gt": {
+              "from": "Play",
+              "event": "cond All media",
+              "action": "set Set RP = End of media",
+              "to": "Play"
+            },
+            "label_score": 0.7304
+          },
+          {
+            "extracted": {
+              "from": "Play",
+              "event": "receive PLAY NOTIFY",
+              "action": "send 200 response",
+              "to": "Play"
+            },
+            "gt": {
+              "from": "Play",
+              "event": "cond default",
+              "action": "send SC:PLAY_NOTIFY; reply 200",
+              "to": "Play"
+            },
+            "label_score": 0.7807
+          },
+          {
+            "extracted": {
+              "from": "Play",
+              "event": "receive REDIRECT timed",
+              "action": "set redirect deadline",
+              "to": "Play"
+            },
+            "gt": {
+              "from": "Play",
+              "event": "cond Terminate Reason with Time parameter",
+              "action": "send SC:REDIRECT; reply Set RedP",
+              "to": "Play"
+            },
+            "label_score": 0.5812
+          },
+          {
+            "extracted": {
+              "from": "Play",
+              "event": "receive TEARDOWN session",
+              "action": "destroy session state",
+              "to": "Init"
+            },
+            "gt": {
+              "from": "Play",
+              "event": "cond Prs URI",
+              "action": "send TEARDOWN; reply No session hdr",
+              "to": "Init"
+            },
+            "label_score": 0.5487
+          },
+          {
+            "extracted": {
+              "from": "Play",
+              "event": "receive REDIRECT immediate",
+              "action": "remove session",
+              "to": "Init"
+            },
+            "gt": {
+              "from": "Play",
+              "event": "cond default",
+              "action": "send SC:REDIRECT; reply Session is removed",
+              "to": "Init"
+            },
+            "label_score": 0.5441
+          },
+          {
+            "extracted": {
+              "from": "Play",
+              "event": "timeout session",
+              "action": "stop media playout",
+              "to": "Init"
+            },
+            "gt": {
+              "from": "Play",
+              "event": "cond default",
+              "action": "timeout; reply Stop Media playout",
+              "to": "Init"
+            },
+            "label_score": 0.753
+          }
+        ]
+      }
+    },
+    "threshold_sensitivity": {
+      "0.4": {
+        "states_official_style": {
+          "matched": 3,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.857
+        },
+        "states_one_to_one": {
+          "threshold": 0.4,
+          "matched": 3,
+          "total_gt": 3,
+          "total_extracted": 4,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571,
+          "pairs": [
+            {
+              "gt": "Init",
+              "extracted": "Init",
+              "score": 1.0
+            },
+            {
+              "gt": "Ready",
+              "extracted": "Ready",
+              "score": 1.0
+            },
+            {
+              "gt": "Play",
+              "extracted": "Play",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.4,
+          "matched": 20,
+          "total_gt": 33,
+          "total_extracted": 30,
+          "precision": 0.6667,
+          "recall": 0.6061,
+          "f1": 0.6349,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "Init",
+                "event": "receive SETUP redirect",
+                "action": "send 3rr redirect response",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Init",
+                "event": "cond Needs Redirect",
+                "action": "send SETUP; reply 3rr Redirect",
+                "to": "Init"
+              },
+              "label_score": 0.6795
+            },
+            {
+              "extracted": {
+                "from": "Init",
+                "event": "receive REDIRECT",
+                "action": "terminate all sessions",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Init",
+                "event": "cond No Session hdr",
+                "action": "send S -> C: REDIRECT; reply Terminate all SES",
+                "to": "Init"
+              },
+              "label_score": 0.5971
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "receive SETUP",
+                "action": "update transport parameters",
+                "to": "Ready"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond URI Setup prior",
+                "action": "send SETUP; reply Change transport param",
+                "to": "Ready"
+              },
+              "label_score": 0.5409
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "receive PAUSE",
+                "action": "send 200 OK response",
+                "to": "Ready"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond Prs URI",
+                "action": "send PAUSE; reply Return PP",
+                "to": "Ready"
+              },
+              "label_score": 0.5898
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "receive REDIRECT timed",
+                "action": "set redirect deadline",
+                "to": "Ready"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond Terminate-Reason",
+                "action": "send SC:REDIRECT; reply Set RedP",
+                "to": "Ready"
+              },
+              "label_score": 0.4178
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "receive TEARDOWN session",
+                "action": "destroy session state",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond Prs URI",
+                "action": "send TEARDOWN; reply No session hdr, NRM = 0",
+                "to": "Init"
+              },
+              "label_score": 0.517
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "receive REDIRECT immediate",
+                "action": "remove session",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond default",
+                "action": "cond RedP reached; reply TEARDOWN of session",
+                "to": "Init"
+              },
+              "label_score": 0.4646
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "timeout session",
+                "action": "remove session",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond default",
+                "action": "timeout",
+                "to": "Init"
+              },
+              "label_score": 0.4965
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "cond redirect deadline",
+                "action": "teardown session",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond No Terminate-Reason time parameter",
+                "action": "send SC:REDIRECT; reply Session is removed",
+                "to": "Init"
+              },
+              "label_score": 0.6322
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive PLAY",
+                "action": "replace current play action",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond Prs URI, No range",
+                "action": "send PLAY; reply Play from present point",
+                "to": "Play"
+              },
+              "label_score": 0.4429
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "cond end of range",
+                "action": "stop media delivery",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond Prs URI, Range",
+                "action": "send PLAY; reply According to range",
+                "to": "Play"
+              },
+              "label_score": 0.4126
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "cond end of media",
+                "action": "set resume point to end",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond All media",
+                "action": "set Set RP = End of media",
+                "to": "Play"
+              },
+              "label_score": 0.7304
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive PLAY NOTIFY",
+                "action": "send 200 response",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond default",
+                "action": "send SC:PLAY_NOTIFY; reply 200",
+                "to": "Play"
+              },
+              "label_score": 0.7807
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive SETUP",
+                "action": "change transport parameters",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond md URI, IFI",
+                "action": "send SETUP; reply Change transport param.",
+                "to": "Play"
+              },
+              "label_score": 0.4597
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive REDIRECT timed",
+                "action": "set redirect deadline",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond Terminate Reason with Time parameter",
+                "action": "send SC:REDIRECT; reply Set RedP",
+                "to": "Play"
+              },
+              "label_score": 0.5812
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive TEARDOWN session",
+                "action": "destroy session state",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond md URI,NRM=1",
+                "action": "send TEARDOWN; reply No Session hdr, NRM=0",
+                "to": "Init"
+              },
+              "label_score": 0.4539
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive REDIRECT immediate",
+                "action": "remove session",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond default",
+                "action": "send SC:REDIRECT; reply Session is removed",
+                "to": "Init"
+              },
+              "label_score": 0.5441
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "timeout session",
+                "action": "stop media playout",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond default",
+                "action": "timeout; reply Stop Media playout",
+                "to": "Init"
+              },
+              "label_score": 0.753
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "cond redirect deadline",
+                "action": "teardown session",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond default",
+                "action": "cond RedP reached; reply TEARDOWN of session",
+                "to": "Init"
+              },
+              "label_score": 0.4863
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive TEARDOWN affected",
+                "action": "terminate media session",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond Prs URI",
+                "action": "send TEARDOWN; reply No session hdr",
+                "to": "Init"
+              },
+              "label_score": 0.4594
+            }
+          ]
+        }
+      },
+      "0.5": {
+        "states_official_style": {
+          "matched": 3,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.857
+        },
+        "states_one_to_one": {
+          "threshold": 0.5,
+          "matched": 3,
+          "total_gt": 3,
+          "total_extracted": 4,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571,
+          "pairs": [
+            {
+              "gt": "Init",
+              "extracted": "Init",
+              "score": 1.0
+            },
+            {
+              "gt": "Ready",
+              "extracted": "Ready",
+              "score": 1.0
+            },
+            {
+              "gt": "Play",
+              "extracted": "Play",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.5,
+          "matched": 12,
+          "total_gt": 33,
+          "total_extracted": 30,
+          "precision": 0.4,
+          "recall": 0.3636,
+          "f1": 0.381,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "Init",
+                "event": "receive SETUP redirect",
+                "action": "send 3rr redirect response",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Init",
+                "event": "cond Needs Redirect",
+                "action": "send SETUP; reply 3rr Redirect",
+                "to": "Init"
+              },
+              "label_score": 0.6795
+            },
+            {
+              "extracted": {
+                "from": "Init",
+                "event": "receive REDIRECT",
+                "action": "terminate all sessions",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Init",
+                "event": "cond No Session hdr",
+                "action": "send S -> C: REDIRECT; reply Terminate all SES",
+                "to": "Init"
+              },
+              "label_score": 0.5971
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "receive SETUP",
+                "action": "update transport parameters",
+                "to": "Ready"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond URI Setup prior",
+                "action": "send SETUP; reply Change transport param",
+                "to": "Ready"
+              },
+              "label_score": 0.5409
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "receive PAUSE",
+                "action": "send 200 OK response",
+                "to": "Ready"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond Prs URI",
+                "action": "send PAUSE; reply Return PP",
+                "to": "Ready"
+              },
+              "label_score": 0.5898
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "receive TEARDOWN session",
+                "action": "destroy session state",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond default",
+                "action": "cond RedP reached; reply TEARDOWN of session",
+                "to": "Init"
+              },
+              "label_score": 0.5221
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "cond redirect deadline",
+                "action": "teardown session",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond No Terminate-Reason time parameter",
+                "action": "send SC:REDIRECT; reply Session is removed",
+                "to": "Init"
+              },
+              "label_score": 0.6322
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "cond end of media",
+                "action": "set resume point to end",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond All media",
+                "action": "set Set RP = End of media",
+                "to": "Play"
+              },
+              "label_score": 0.7304
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive PLAY NOTIFY",
+                "action": "send 200 response",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond default",
+                "action": "send SC:PLAY_NOTIFY; reply 200",
+                "to": "Play"
+              },
+              "label_score": 0.7807
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive REDIRECT timed",
+                "action": "set redirect deadline",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond Terminate Reason with Time parameter",
+                "action": "send SC:REDIRECT; reply Set RedP",
+                "to": "Play"
+              },
+              "label_score": 0.5812
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive TEARDOWN session",
+                "action": "destroy session state",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond Prs URI",
+                "action": "send TEARDOWN; reply No session hdr",
+                "to": "Init"
+              },
+              "label_score": 0.5487
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive REDIRECT immediate",
+                "action": "remove session",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond default",
+                "action": "send SC:REDIRECT; reply Session is removed",
+                "to": "Init"
+              },
+              "label_score": 0.5441
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "timeout session",
+                "action": "stop media playout",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond default",
+                "action": "timeout; reply Stop Media playout",
+                "to": "Init"
+              },
+              "label_score": 0.753
+            }
+          ]
+        }
+      },
+      "0.6": {
+        "states_official_style": {
+          "matched": 3,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.857
+        },
+        "states_one_to_one": {
+          "threshold": 0.6,
+          "matched": 3,
+          "total_gt": 3,
+          "total_extracted": 4,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571,
+          "pairs": [
+            {
+              "gt": "Init",
+              "extracted": "Init",
+              "score": 1.0
+            },
+            {
+              "gt": "Ready",
+              "extracted": "Ready",
+              "score": 1.0
+            },
+            {
+              "gt": "Play",
+              "extracted": "Play",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.6,
+          "matched": 5,
+          "total_gt": 33,
+          "total_extracted": 30,
+          "precision": 0.1667,
+          "recall": 0.1515,
+          "f1": 0.1587,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "Init",
+                "event": "receive SETUP redirect",
+                "action": "send 3rr redirect response",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Init",
+                "event": "cond Needs Redirect",
+                "action": "send SETUP; reply 3rr Redirect",
+                "to": "Init"
+              },
+              "label_score": 0.6795
+            },
+            {
+              "extracted": {
+                "from": "Ready",
+                "event": "cond redirect deadline",
+                "action": "teardown session",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Ready",
+                "event": "cond No Terminate-Reason time parameter",
+                "action": "send SC:REDIRECT; reply Session is removed",
+                "to": "Init"
+              },
+              "label_score": 0.6322
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "cond end of media",
+                "action": "set resume point to end",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond All media",
+                "action": "set Set RP = End of media",
+                "to": "Play"
+              },
+              "label_score": 0.7304
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "receive PLAY NOTIFY",
+                "action": "send 200 response",
+                "to": "Play"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond default",
+                "action": "send SC:PLAY_NOTIFY; reply 200",
+                "to": "Play"
+              },
+              "label_score": 0.7807
+            },
+            {
+              "extracted": {
+                "from": "Play",
+                "event": "timeout session",
+                "action": "stop media playout",
+                "to": "Init"
+              },
+              "gt": {
+                "from": "Play",
+                "event": "cond default",
+                "action": "timeout; reply Stop Media playout",
+                "to": "Init"
+              },
+              "label_score": 0.753
+            }
+          ]
+        }
+      }
+    }
+  }
+}

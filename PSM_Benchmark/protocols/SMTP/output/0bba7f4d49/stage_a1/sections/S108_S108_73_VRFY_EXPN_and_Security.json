@@ -1,0 +1,101 @@
+{
+  "section_id": "S108",
+  "title": "S108 7.3 VRFY, EXPN, and Security",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S108 7.3 VRFY, EXPN, and Security"
+  ],
+  "url_anchor": "#s108-73-vrfy-expn-and-security",
+  "word_count": 328,
+  "statement_count": 4,
+  "elapsed_seconds": 36.41,
+  "statements": [
+    {
+      "statement_id": "D-S108-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If a site disables these commands for security reasons, the SMTP server MUST return a 252 response, rather than a code that could be confused with successful or unsuccessful verification.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S108",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY or EXPN command received when command is disabled",
+      "pre_cond": "server.vrfy_expn_disabled = true",
+      "post_cond": null,
+      "actions": [
+        "send 252 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S108-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Sites implementing SMTP authentication may choose to make VRFY and EXPN available only to authenticated requestors.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S108",
+      "object_name": "VRFY_EXPN_command",
+      "field_name": "authentication_required",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "VRFY and EXPN commands available only when session.authenticated = true"
+    },
+    {
+      "statement_id": "D-S108-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "determination of address validity for RCPT commands is deferred until after the DATA command is received, RCPT may return no information at all, while VRFY is expected to make a serious attempt to determine validity before generating a response code.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S108",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT command received",
+      "pre_cond": "server.rcpt_validation_deferred = true",
+      "post_cond": "session.address_validity_determined = false",
+      "actions": [
+        "defer address validity determination until DATA received"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S108-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Returning a 250 reply code with the address listed in the VRFY command after having checked it only for syntax violates this rule. An implementation that supports VRFY by always returning 550 whether or not the address is valid is equally not in conformance.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S108",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY command received",
+      "pre_cond": "server.vrfy_expn_disabled = true",
+      "post_cond": null,
+      "actions": [
+        "send 252 response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

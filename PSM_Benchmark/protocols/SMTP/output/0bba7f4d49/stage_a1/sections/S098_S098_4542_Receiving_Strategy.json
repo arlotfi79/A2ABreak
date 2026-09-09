@@ -1,0 +1,56 @@
+{
+  "section_id": "S098",
+  "title": "S098 4.5.4.2 Receiving Strategy",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S098 4.5.4.2 Receiving Strategy"
+  ],
+  "url_anchor": "#s098-4542-receiving-strategy",
+  "word_count": 96,
+  "statement_count": 2,
+  "elapsed_seconds": 17.27,
+  "statements": [
+    {
+      "statement_id": "D-S098-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "The SMTP server SHOULD attempt to keep a pending listen on the SMTP port (specified by IANA as port 25) at all times.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S098",
+      "state_name": "PENDING_LISTEN",
+      "enum_name": "ServerListenState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "server.port = 25 & server.state = PENDING_LISTEN"
+    },
+    {
+      "statement_id": "D-S098-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When the SMTP server receives mail from a particular host address, it could activate its own SMTP queuing mechanisms to retry any mail pending for that host address.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S098",
+      "actors": [
+        "server"
+      ],
+      "from_state": "PENDING_LISTEN",
+      "to_state": null,
+      "trigger": "mail received from host address",
+      "pre_cond": "server.state = PENDING_LISTEN & session.remote_host = host_address",
+      "post_cond": "server.queue_retry_activated = true & session.pending_mail_for_host_retried = true",
+      "actions": [
+        "activate SMTP queuing mechanisms",
+        "retry pending mail for host address"
+      ],
+      "modality": "may"
+    }
+  ]
+}

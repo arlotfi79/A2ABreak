@@ -1,0 +1,213 @@
+{
+  "section_id": "S009",
+  "title": "S009 2.6 Session Maintenance and Termination",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S009 2.6 Session Maintenance and Termination"
+  ],
+  "url_anchor": "#s009-26-session-maintenance-and-termination",
+  "word_count": 395,
+  "statement_count": 9,
+  "elapsed_seconds": 71.89,
+  "statements": [
+    {
+      "statement_id": "D-S009-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The session context that has been established is kept alive by having the client show liveness.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "state_name": "Established",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S009-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The session context is terminated by client TEARDOWN, removal of all media resources, session timeout expiry, or server-initiated TEARDOWN.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "state_name": "Terminated",
+      "enum_name": "SessionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S009-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "If the client fails to show liveness for more than the established session timeout value (normally 60 seconds), the server may terminate the context.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Established",
+      "to_state": "Terminated",
+      "trigger": "session_timeout_expired",
+      "pre_cond": "session.liveness_elapsed > session.timeout_value",
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "server terminates session context"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S009-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The session context is normally terminated by the client sending a TEARDOWN request to the server referencing the aggregated control URI.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Established",
+      "to_state": "Terminated",
+      "trigger": "TEARDOWN_sent_aggregated_URI",
+      "pre_cond": null,
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "client sends TEARDOWN referencing aggregated control URI",
+        "session context terminated"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S009-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "If all media resources are removed from a session context, the session context is terminated.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Established",
+      "to_state": "Terminated",
+      "trigger": "all_media_resources_removed",
+      "pre_cond": "session.media_resource_count = 0",
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "session context terminated"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "When a server terminates the session context, it does so by sending a TEARDOWN request indicating the reason.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Established",
+      "to_state": "Terminated",
+      "trigger": "server_sends_TEARDOWN",
+      "pre_cond": null,
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "server sends TEARDOWN request with Terminate-Reason",
+        "session context terminated"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A server can request that the client tear down the session and re-establish it at an alternative server using the REDIRECT method; the client needs to initiate session termination prior to the deadline.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Established",
+      "to_state": "Terminated",
+      "trigger": "REDIRECT_received",
+      "pre_cond": null,
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "server sends REDIRECT with Terminate-Reason header",
+        "server includes Location header if alternative server available",
+        "client initiates session termination prior to deadline",
+        "client re-establishes session at alternative server"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S009-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "When the deadline expires, the server simply stops providing the service.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Established",
+      "to_state": "Terminated",
+      "trigger": "redirect_deadline_expired",
+      "pre_cond": null,
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "server stops providing service"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "In case the server has no other server to redirect to, and it wants to close the session for maintenance, it shall use the TEARDOWN method with a Terminate-Reason header.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S009",
+      "object_name": "TEARDOWN",
+      "field_name": "Terminate-Reason",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "server.has_alternative_server = false & server.closing_for_maintenance = true"
+    }
+  ]
+}

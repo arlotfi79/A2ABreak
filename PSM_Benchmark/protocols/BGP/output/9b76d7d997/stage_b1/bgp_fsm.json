@@ -1,0 +1,2480 @@
+{
+  "stage": "bgp_fsm",
+  "states": [
+    {
+      "state_name": "Idle",
+      "semantic_type": "initial",
+      "actor": "endpoint",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Idle",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-001",
+        "D-S041-001",
+        "D-S047-001"
+      ]
+    },
+    {
+      "state_name": "Connect",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Connect",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-002"
+      ]
+    },
+    {
+      "state_name": "Active",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Active",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-003"
+      ]
+    },
+    {
+      "state_name": "OpenSent",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OpenSent",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-004"
+      ]
+    },
+    {
+      "state_name": "OpenConfirm",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OpenConfirm",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-005"
+      ]
+    },
+    {
+      "state_name": "Established",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Established",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-002",
+        "D-S047-006",
+        "D-S048-001"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "Idle",
+      "to_state": "Connect",
+      "trigger": "ManualStart",
+      "guard": "protocol.state = Idle",
+      "actors": [
+        "user",
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "initialize BGP resources",
+        "set ConnectRetryCounter to zero",
+        "start ConnectRetryTimer",
+        "initiate TCP connection",
+        "listen for TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-007"
+      ]
+    },
+    {
+      "from_state": "Idle",
+      "to_state": "Connect",
+      "trigger": "AutomaticStart",
+      "guard": "protocol.state = Idle",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "initialize BGP resources",
+        "set ConnectRetryCounter to zero",
+        "start ConnectRetryTimer",
+        "initiate TCP connection",
+        "listen for TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-007"
+      ]
+    },
+    {
+      "from_state": "Idle",
+      "to_state": "Active",
+      "trigger": "ManualStart_PassiveTcp",
+      "guard": "protocol.state = Idle",
+      "actors": [
+        "user",
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "initialize BGP resources",
+        "set ConnectRetryCounter to zero",
+        "start ConnectRetryTimer",
+        "listen for TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-008"
+      ]
+    },
+    {
+      "from_state": "Idle",
+      "to_state": "Active",
+      "trigger": "AutomaticStart_PassiveTcp",
+      "guard": "protocol.state = Idle",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "initialize BGP resources",
+        "set ConnectRetryCounter to zero",
+        "start ConnectRetryTimer",
+        "listen for TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-008"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "user",
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "drop TCP connection",
+        "release all BGP resources",
+        "set ConnectRetryCounter to zero",
+        "stop ConnectRetryTimer"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-009"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Connect",
+      "trigger": "ConnectRetryTimer_Expires",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "drop TCP connection",
+        "restart ConnectRetryTimer",
+        "stop DelayOpenTimer",
+        "initiate TCP connection",
+        "listen for TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-010"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "OpenSent",
+      "trigger": "DelayOpenTimer_Expires",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send OPEN message",
+        "set HoldTimer large value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-011"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Connect",
+      "trigger": "TcpConnection_Valid",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "process TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-012"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Connect",
+      "trigger": "Tcp_CR_Invalid",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "reject TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-013"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Connect",
+      "trigger": "Tcp_CR_Acked",
+      "guard": "protocol.state = Connect & session.DelayOpen = TRUE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "set DelayOpenTimer initial value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-014"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Connect",
+      "trigger": "TcpConnectionConfirmed",
+      "guard": "protocol.state = Connect & session.DelayOpen = TRUE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "set DelayOpenTimer initial value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-014"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "OpenSent",
+      "trigger": "Tcp_CR_Acked",
+      "guard": "protocol.state = Connect & session.DelayOpen = FALSE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "complete BGP initialization",
+        "send OPEN message",
+        "set HoldTimer large value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-015"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "OpenSent",
+      "trigger": "TcpConnectionConfirmed",
+      "guard": "protocol.state = Connect & session.DelayOpen = FALSE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "complete BGP initialization",
+        "send OPEN message",
+        "set HoldTimer large value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-015"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Active",
+      "trigger": "TcpConnectionFails",
+      "guard": "protocol.state = Connect & DelayOpenTimer.running = TRUE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "restart ConnectRetryTimer",
+        "stop DelayOpenTimer",
+        "listen for TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-016"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "TcpConnectionFails",
+      "guard": "protocol.state = Connect & DelayOpenTimer.running = FALSE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "drop TCP connection",
+        "release all BGP resources"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-017"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "OpenConfirm",
+      "trigger": "BGPOpen",
+      "guard": "protocol.state = Connect & DelayOpenTimer.running = TRUE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "complete BGP initialization",
+        "stop DelayOpenTimer",
+        "send OPEN message",
+        "send KEEPALIVE message",
+        "start KeepaliveTimer",
+        "set HoldTimer negotiated value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-018"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "BGPHeaderErr",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-019"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "BGPOpenMsgErr",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-019"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "stop DelayOpenTimer",
+        "release all BGP resources",
+        "drop TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-020",
+        "D-S047-021"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "HoldTimer_Expires",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "KeepaliveTimer_Expires",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "IdleHoldTimer_Expires",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "BGPOpen",
+      "guard": "protocol.state = Connect & DelayOpenTimer.running = FALSE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "OpenCollisionDump",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "NotifMsg",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "KeepAliveMsg",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "UpdateMsg",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "UpdateMsgErr",
+      "guard": "protocol.state = Connect",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-022"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "user",
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "release all BGP resources",
+        "drop TCP connection",
+        "set ConnectRetryCounter to zero",
+        "stop ConnectRetryTimer"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-023"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Connect",
+      "trigger": "ConnectRetryTimer_Expires",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "restart ConnectRetryTimer",
+        "initiate TCP connection",
+        "listen for TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-024"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "OpenSent",
+      "trigger": "DelayOpenTimer_Expires",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "stop DelayOpenTimer",
+        "complete BGP initialization",
+        "send OPEN message",
+        "set HoldTimer large value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-025"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Active",
+      "trigger": "TcpConnection_Valid",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "process TCP connection flags"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-026"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Active",
+      "trigger": "Tcp_CR_Invalid",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "reject TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-027"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Active",
+      "trigger": "Tcp_CR_Acked",
+      "guard": "protocol.state = Active & session.DelayOpen = TRUE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "set DelayOpenTimer initial value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-028"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Active",
+      "trigger": "TcpConnectionConfirmed",
+      "guard": "protocol.state = Active & session.DelayOpen = TRUE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "set DelayOpenTimer initial value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-028"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "OpenSent",
+      "trigger": "Tcp_CR_Acked",
+      "guard": "protocol.state = Active & session.DelayOpen = FALSE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "complete BGP initialization",
+        "send OPEN message",
+        "set HoldTimer large value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-029"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "OpenSent",
+      "trigger": "TcpConnectionConfirmed",
+      "guard": "protocol.state = Active & session.DelayOpen = FALSE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "complete BGP initialization",
+        "send OPEN message",
+        "set HoldTimer large value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-029"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "TcpConnectionFails",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "restart ConnectRetryTimer",
+        "stop DelayOpenTimer",
+        "release all BGP resources",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-030"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "OpenConfirm",
+      "trigger": "BGPOpen",
+      "guard": "protocol.state = Active & DelayOpenTimer.running = TRUE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "stop ConnectRetryTimer",
+        "stop DelayOpenTimer",
+        "complete BGP initialization",
+        "send OPEN message",
+        "send KEEPALIVE message",
+        "start KeepaliveTimer",
+        "set HoldTimer negotiated value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-031"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "BGPHeaderErr",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-032"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "BGPOpenMsgErr",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-032"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-033",
+        "D-S047-034"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "HoldTimer_Expires",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "KeepaliveTimer_Expires",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "IdleHoldTimer_Expires",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "BGPOpen",
+      "guard": "protocol.state = Active & DelayOpenTimer.running = FALSE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "OpenCollisionDump",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "NotifMsg",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "KeepAliveMsg",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "UpdateMsg",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "UpdateMsgErr",
+      "guard": "protocol.state = Active",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-035"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "user",
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "set ConnectRetryCounter to zero"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-036"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-037"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "HoldTimer_Expires",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION HoldTimer Expired",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-038"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Active",
+      "trigger": "TcpConnectionFails",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "close BGP connection",
+        "restart ConnectRetryTimer",
+        "listen for TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-039"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "OpenConfirm",
+      "trigger": "BGPOpen",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "reset DelayOpenTimer to zero",
+        "set ConnectRetryTimer to zero",
+        "send KEEPALIVE message",
+        "set KeepaliveTimer",
+        "set HoldTimer negotiated value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-040"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "BGPHeaderErr",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with error code",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-041"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "BGPOpenMsgErr",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with error code",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-041"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "OpenCollisionDump",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-042"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-043"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "ConnectRetryTimer_Expires",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-044"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "KeepaliveTimer_Expires",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-044"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "DelayOpenTimer_Expires",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-044"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "IdleHoldTimer_Expires",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-044"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "BGPOpenWithDelay",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-044"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "NotifMsg",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-044"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "KeepAliveMsg",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-044"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "UpdateMsg",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-044"
+      ]
+    },
+    {
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "UpdateMsgErr",
+      "guard": "protocol.state = OpenSent",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-044"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "user",
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "release all BGP resources",
+        "drop TCP connection",
+        "set ConnectRetryCounter to zero",
+        "set ConnectRetryTimer to zero"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-045"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-046"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "HoldTimer_Expires",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION HoldTimer Expired",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-047"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "OpenConfirm",
+      "trigger": "KeepaliveTimer_Expires",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send KEEPALIVE message",
+        "restart KeepaliveTimer"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-048"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "TcpConnectionFails",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-049"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "NotifMsg",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-049"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-050"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "BGPOpen",
+      "guard": "protocol.state = OpenConfirm & connection.collision_drop = TRUE",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-051"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "BGPHeaderErr",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with error code",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-052"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "BGPOpenMsgErr",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with error code",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-052"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "OpenCollisionDump",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-053"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Established",
+      "trigger": "KeepAliveMsg",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "restart HoldTimer"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-054"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "ConnectRetryTimer_Expires",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-055"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "DelayOpenTimer_Expires",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-055"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "IdleHoldTimer_Expires",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-055"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "BGPOpenWithDelay",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-055"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "UpdateMsg",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-055"
+      ]
+    },
+    {
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "UpdateMsgErr",
+      "guard": "protocol.state = OpenConfirm",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-055"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "user",
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "delete associated routes",
+        "release all BGP resources",
+        "drop TCP connection",
+        "set ConnectRetryCounter to zero"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-056"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "delete associated routes",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-057"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "HoldTimer_Expires",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION HoldTimer Expired",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-058"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "KeepaliveTimer_Expires",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send KEEPALIVE message",
+        "restart KeepaliveTimer"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-059"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "OpenCollisionDump",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "delete associated routes",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-060"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "TcpConnectionFails",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "delete associated routes",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-061"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "delete associated routes",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-061"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "NotifMsg",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "delete associated routes",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-061"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "KeepAliveMsg",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "restart HoldTimer"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-062"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "UpdateMsg",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "process UPDATE message",
+        "restart HoldTimer"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-063",
+        "D-S048-003",
+        "D-S048-004",
+        "D-S048-005"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "UpdateMsgErr",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION Update error",
+        "set ConnectRetryTimer to zero",
+        "delete associated routes",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-064"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "ConnectRetryTimer_Expires",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "delete associated routes",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-065"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "DelayOpenTimer_Expires",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "delete associated routes",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-065"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "IdleHoldTimer_Expires",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "delete associated routes",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-065"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "BGPOpenWithDelay",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "delete associated routes",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-065"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "BGPHeaderErr",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "delete associated routes",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-065"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "BGPOpenMsgErr",
+      "guard": "protocol.state = Established",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send NOTIFICATION FSM Error",
+        "delete associated routes",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S047-065"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "cond NEXT_HOP_semantic_err",
+      "guard": "protocol.state = Established & NEXT_HOP.semantically_correct = false",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "should",
+      "actions": [
+        "log error",
+        "ignore the route"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S026-018",
+        "N-S026-019"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "cond NLRI_semantic_err",
+      "guard": "protocol.state = Established & NLRI.prefix.semantically_correct = false",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "should",
+      "actions": [
+        "log error locally",
+        "ignore semantically incorrect prefix"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S026-028"
+      ]
+    },
+    {
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "receive UPDATE_no_NLRI",
+      "guard": "protocol.state = Established & UPDATE.path_attributes.correct = true & UPDATE.NLRI.present = false",
+      "actors": [
+        "endpoint",
+        "remote_endpoint"
+      ],
+      "modality": "shall",
+      "actions": [
+        "treat UPDATE as valid"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S026-029"
+      ]
+    }
+  ],
+  "inter_stage": {
+    "entry_from_previous": [],
+    "exit_to_next": []
+  },
+  "discarded_states": [
+    "null (D-S038-001): no state_name provided, not a protocol state",
+    "null (D-S039-001): no state_name provided, not a protocol state",
+    "null (D-S039-011): no state_name provided, not a protocol state",
+    "null (D-S039-012): no state_name provided, not a protocol state",
+    "null (D-S039-015): no state_name provided, not a protocol state",
+    "Phase 1 (D-S049-001): Decision Process algorithmic phase, not a connection FSM state",
+    "Phase 2 (D-S049-002): Decision Process algorithmic phase, not a connection FSM state",
+    "Phase 3 (D-S049-003): Decision Process algorithmic phase, not a connection FSM state"
+  ],
+  "unresolved": [
+    "D-S031-002: OpenConfirm -> Idle on collision with local BGP Identifier < remote BGP Identifier; covered by OpenCollisionDump transition from OpenConfirm but explicit collision resolution from_state/to_state partially redundant",
+    "D-S031-003: from_state null -> Idle on collision with local BGP Identifier >= remote; new connection closed but originating from_state not specified",
+    "D-S031-004: collision detected with Established state connection; new connection closed but target state not specified in source",
+    "D-S031-006: from_state null -> Idle on collision resolution close; originating from_state unspecified",
+    "N-S026-010: Established -> Idle on unrecognized_well_known_attribute_detected; sub-case of UpdateMsgErr transition, actions describe NOTIFICATION Data content rather than FSM actions",
+    "N-S026-014: Established -> Idle on NEXT_HOP_syntactically_incorrect; sub-case of UpdateMsgErr transition, actions describe NOTIFICATION Data content",
+    "N-S030-004: Established -> Idle on prefix_count_exceeds_configured_upper_bound; local policy trigger mapped to AutomaticStop or Cease NOTIFICATION but explicit FSM event not separately defined in S047",
+    "D-S035-016: Idle -> unspecified on IdleHoldTimer_Expires; to_state not specified, behavioral action only allows automatic restart",
+    "D-S035-017: Established -> unspecified on DetectCollision; to_state not specified, behavioral action processes collision"
+  ],
+  "gaps": [
+    "No explicit transition for Idle state receiving events other than ManualStart, AutomaticStart, or passive start variants; input states the FSM refuses all other events in Idle but no explicit to_state or actions are provided for the refusal",
+    "Idle state DampPeerOscillations variant starts (AutomaticStart_with_DampPeerOscillations, AutomaticStart_with_DampPeerOscillations_and_PassiveTcpEstablishment) are defined as events in S036 but no explicit Idle -> Connect or Idle -> Active transitions with these specific triggers appear in S047",
+    "No explicit transition for second TCP connection tracking in Established state (N-S047-002); behavioral rule states tracking until OPEN sent but no FSM state change defined"
+  ]
+}

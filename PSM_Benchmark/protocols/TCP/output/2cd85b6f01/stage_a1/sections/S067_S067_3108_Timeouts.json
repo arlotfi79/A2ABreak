@@ -1,0 +1,121 @@
+{
+  "section_id": "S067",
+  "title": "S067 3.10.8 Timeouts",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S067 3.10.8 Timeouts"
+  ],
+  "url_anchor": "#s067-3108-timeouts",
+  "word_count": 97,
+  "statement_count": 5,
+  "elapsed_seconds": 20.16,
+  "statements": [
+    {
+      "statement_id": "D-S067-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "For any state if the user timeout expires, flush all queues, signal the user 'error: connection aborted due to user timeout' in general and for any outstanding calls, delete the TCB, enter the CLOSED state, and return.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "USER TIMEOUT",
+      "pre_cond": null,
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "flush all queues",
+        "signal user error: connection aborted due to user timeout",
+        "delete TCB"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S067-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "For any state if the retransmission timeout expires on a segment in the retransmission queue, send the segment at the front of the retransmission queue again, reinitialize the retransmission timer, and return.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RETRANSMISSION TIMEOUT",
+      "pre_cond": "retransmission_queue.empty = false",
+      "post_cond": null,
+      "actions": [
+        "send segment at front of retransmission queue",
+        "reinitialize retransmission timer"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S067-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the time-wait timeout expires on a connection, delete the TCB, enter the CLOSED state, and return.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "TIME-WAIT",
+      "to_state": "CLOSED",
+      "trigger": "TIME-WAIT TIMEOUT",
+      "pre_cond": "protocol.state = TIME-WAIT",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "delete TCB"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S067-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Enter the CLOSED state after user timeout or time-wait timeout expires and TCB is deleted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "state_name": "CLOSED",
+      "enum_name": "TCPState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = CLOSED"
+    },
+    {
+      "statement_id": "D-S067-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "TIME-WAIT state in which the time-wait timeout may expire, causing the connection to enter CLOSED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "state_name": "TIME-WAIT",
+      "enum_name": "TCPState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TIME-WAIT"
+    }
+  ]
+}

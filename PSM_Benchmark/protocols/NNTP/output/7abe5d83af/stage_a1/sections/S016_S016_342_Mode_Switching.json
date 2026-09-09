@@ -1,0 +1,138 @@
+{
+  "section_id": "S016",
+  "title": "S016 3.4.2 Mode Switching",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S016 3.4.2 Mode Switching"
+  ],
+  "url_anchor": "#s016-342-mode-switching",
+  "word_count": 228,
+  "statement_count": 6,
+  "elapsed_seconds": 42.85,
+  "statements": [
+    {
+      "statement_id": "D-S016-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Transit mode, which applies after the initial connection. It MUST advertise the MODE-READER capability. It MUST NOT advertise the READER capability.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S016",
+      "state_name": "Transit mode",
+      "enum_name": "ServerMode",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "server.advertises_MODE_READER = true & server.advertises_READER = false"
+    },
+    {
+      "statement_id": "D-S016-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Reading mode, after a successful MODE READER command. It MUST NOT advertise the MODE-READER capability. It MUST advertise the READER capability.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S016",
+      "state_name": "Reading mode",
+      "enum_name": "ServerMode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "server.advertises_MODE_READER = false & server.advertises_READER = true"
+    },
+    {
+      "statement_id": "D-S016-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Reading mode is entered after a successful MODE READER command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S016",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Transit mode",
+      "to_state": "Reading mode",
+      "trigger": "successful MODE READER command",
+      "pre_cond": "server.mode = Transit mode",
+      "post_cond": "server.mode = Reading mode & server.advertises_MODE_READER = false & server.advertises_READER = true",
+      "actions": [
+        "enter Reading mode",
+        "cease advertising MODE-READER capability",
+        "advertise READER capability"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S016-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In Transit mode, the server MAY cease to advertise the MODE-READER capability after the client uses any command except CAPABILITIES.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S016",
+      "object_name": "mode-switching server",
+      "field_name": "MODE-READER capability advertisement",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": [
+        "advertised",
+        "not advertised"
+      ],
+      "guard_semantics": "server.mode = Transit mode & client.last_command != CAPABILITIES"
+    },
+    {
+      "statement_id": "D-S016-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In Reading mode, the server MAY NOT advertise the IHAVE capability, even if it was advertising it in transit mode.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S016",
+      "object_name": "mode-switching server",
+      "field_name": "IHAVE capability advertisement",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": [
+        "advertised",
+        "not advertised"
+      ],
+      "guard_semantics": "server.mode = Reading mode"
+    },
+    {
+      "statement_id": "D-S016-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "A client SHOULD only issue a MODE READER command to a server if it is advertising the MODE-READER capability. If the client wishes to use any reader commands, it SHOULD use the MODE READER command immediately after the initial connection.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S016",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Transit mode",
+      "to_state": "Reading mode",
+      "trigger": "client issues MODE READER command",
+      "pre_cond": "server.advertises_MODE_READER = true",
+      "post_cond": "server.mode = Reading mode",
+      "actions": [
+        "send MODE READER command"
+      ],
+      "modality": "should"
+    }
+  ]
+}

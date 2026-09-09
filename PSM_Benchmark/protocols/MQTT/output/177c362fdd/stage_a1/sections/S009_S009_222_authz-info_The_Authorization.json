@@ -1,0 +1,298 @@
+{
+  "section_id": "S009",
+  "title": "S009 2.2.2 authz-info: The Authorization Information Topic",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S009 2.2.2 authz-info: The Authorization Information Topic"
+  ],
+  "url_anchor": "#s009-222-authz-info-the-authorization-information-topic",
+  "word_count": 390,
+  "statement_count": 13,
+  "elapsed_seconds": 136.48,
+  "statements": [
+    {
+      "statement_id": "D-S009-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Client connects to the Broker to publish its token to the 'authz-info' topic using the TLS:Anon,MQTT:None option over a TLS connection.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S009",
+      "state_name": "Connected (TLS:Anon, MQTT:None)",
+      "enum_name": "ClientConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.tls_auth = TLS:Anon & connection.mqtt_auth = None"
+    },
+    {
+      "statement_id": "D-S009-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "After publishing the token, the Client disconnects from the Broker.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S009",
+      "state_name": "Disconnected",
+      "enum_name": "ClientConnectionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S009-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Client is expected to reconnect using client authentication over TLS (i.e., TLS:Known(RPK/PSK),MQTT:none).",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S009",
+      "state_name": "Connected (TLS:Known(RPK/PSK), MQTT:None)",
+      "enum_name": "ClientConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.tls_auth = TLS:Known & connection.mqtt_auth = None"
+    },
+    {
+      "statement_id": "D-S009-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client connects to the Broker to publish its token to the 'authz-info' topic, using the TLS:Anon,MQTT:None option over a TLS connection.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connected (TLS:Anon, MQTT:None)",
+      "trigger": "connect",
+      "pre_cond": "client.token_transport_required = true",
+      "post_cond": "connection.tls_auth = TLS:Anon & connection.mqtt_auth = None",
+      "actions": [
+        "establish TLS connection with anonymous credentials",
+        "connect with MQTT:None"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "After publishing the token, the Client disconnects from the Broker.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Connected (TLS:Anon, MQTT:None)",
+      "to_state": "Disconnected",
+      "trigger": "token published to authz-info",
+      "pre_cond": "connection.state = Connected (TLS:Anon, MQTT:None) & publish.topic = authz-info",
+      "post_cond": null,
+      "actions": [
+        "publish token to authz-info topic",
+        "disconnect from Broker"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client is expected to reconnect using client authentication over TLS (i.e., TLS:Known(RPK/PSK),MQTT:none).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Disconnected",
+      "to_state": "Connected (TLS:Known(RPK/PSK), MQTT:None)",
+      "trigger": "reconnect",
+      "pre_cond": "connection.state = Disconnected",
+      "post_cond": "connection.tls_auth = TLS:Known & connection.mqtt_auth = None",
+      "actions": [
+        "reconnect using TLS:Known(RPK/PSK),MQTT:none"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S009-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST verify the validity of the token. If the token is not valid, the Broker MUST discard the token.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH received on authz-info",
+      "pre_cond": "publish.topic = authz-info & token.valid = false",
+      "post_cond": "token.stored = false",
+      "actions": [
+        "validate token",
+        "discard token"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker stores and indexes all tokens received to the 'authz-info' topic in its key store.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH received on authz-info",
+      "pre_cond": "publish.topic = authz-info & token.valid = true",
+      "post_cond": "token.stored = true",
+      "actions": [
+        "validate token",
+        "store token in key store"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the QoS level is equal to 0, and the token is not valid, or if the claims cannot be obtained in the case of an introspected token, the Broker MUST send a DISCONNECT packet with reason code 0x87 (Not authorized).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token validation failure on authz-info PUBLISH (QoS=0)",
+      "pre_cond": "publish.qos = 0 & (token.valid = false | token.claims_obtainable = false)",
+      "post_cond": null,
+      "actions": [
+        "send DISCONNECT with reason code 0x87"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the PUBLISH Payload does not parse to a token, the Broker MUST send a DISCONNECT with reason code 0x99 (Payload format invalid).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "payload parse failure on authz-info PUBLISH (QoS=0)",
+      "pre_cond": "publish.qos = 0 & payload.parseable = false",
+      "post_cond": null,
+      "actions": [
+        "send DISCONNECT with reason code 0x99"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the QoS level of the PUBLISH packet is greater than or equal to 1, and the token is not valid, or the claims cannot be obtained in the case of an introspected token, the Broker MUST send reason code 0x87 (Not authorized) in the PUBACK or PUBREC.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token validation failure on authz-info PUBLISH (QoS>=1)",
+      "pre_cond": "publish.qos >= 1 & (token.valid = false | token.claims_obtainable = false)",
+      "post_cond": null,
+      "actions": [
+        "send PUBACK or PUBREC with reason code 0x87"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the PUBLISH Payload does not parse to a token, the PUBACK/PUBREC reason code is 0x99 (Payload format invalid).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "payload parse failure on authz-info PUBLISH (QoS>=1)",
+      "pre_cond": "publish.qos >= 1 & payload.parseable = false",
+      "post_cond": null,
+      "actions": [
+        "send PUBACK or PUBREC with reason code 0x99"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-013",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The 'authz-info' topic MUST only be published (i.e., the Clients are not allowed to subscribe to it).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "object_name": "authz-info",
+      "field_name": "operation",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "PUBLISH"
+      ],
+      "guard_semantics": "client.operation = PUBLISH"
+    }
+  ]
+}

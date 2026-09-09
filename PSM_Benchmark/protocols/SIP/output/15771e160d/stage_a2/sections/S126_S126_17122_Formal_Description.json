@@ -1,0 +1,315 @@
+{
+  "section_id": "S126",
+  "title": "S126 17.1.2.2 Formal Description",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S126 17.1.2.2 Formal Description"
+  ],
+  "url_anchor": "#s126-17122-formal-description",
+  "word_count": 506,
+  "statement_count": 12,
+  "elapsed_seconds": 111.26,
+  "statements": [
+    {
+      "statement_id": "N-S126-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When entering this state, the client transaction SHOULD set timer F to fire in 64*T1 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Trying",
+      "to_state": null,
+      "trigger": "enter_Trying_state",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "timer.F.duration = 64*T1",
+      "actions": [
+        "set timer F to fire in 64*T1 seconds"
+      ],
+      "modality": "should",
+      "id": "N-S126-001"
+    },
+    {
+      "statement_id": "N-S126-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The request MUST be passed to the transport layer for transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Trying",
+      "to_state": null,
+      "trigger": "enter_Trying_state",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "request.passed_to_transport = true",
+      "actions": [
+        "pass request to transport layer for transmission"
+      ],
+      "modality": "must",
+      "id": "N-S126-002"
+    },
+    {
+      "statement_id": "N-S126-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If an unreliable transport is in use, the client transaction MUST set timer E to fire in T1 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Trying",
+      "to_state": null,
+      "trigger": "enter_Trying_state",
+      "pre_cond": "transaction.state = Trying & transport.type = unreliable",
+      "post_cond": "timer.E.duration = T1",
+      "actions": [
+        "set timer E to fire in T1 seconds"
+      ],
+      "modality": "must",
+      "id": "N-S126-003"
+    },
+    {
+      "statement_id": "N-S126-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If Timer F fires while the client transaction is still in the \"Trying\" state, the client transaction SHOULD inform the TU about the timeout, and then it SHOULD enter the \"Terminated\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Terminated",
+      "trigger": "Timer_F_fires",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "TU.notified_of_timeout = true & transaction.state = Terminated",
+      "actions": [
+        "inform TU about timeout",
+        "enter Terminated state"
+      ],
+      "modality": "should",
+      "id": "N-S126-004"
+    },
+    {
+      "statement_id": "N-S126-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a provisional response is received while in the \"Trying\" state, the response MUST be passed to the TU, and then the client transaction SHOULD move to the \"Proceeding\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Proceeding",
+      "trigger": "provisional_response_received",
+      "pre_cond": "transaction.state = Trying & response.status_code = 1xx",
+      "post_cond": "response.passed_to_TU = true & transaction.state = Proceeding",
+      "actions": [
+        "pass response to TU",
+        "move to Proceeding state"
+      ],
+      "modality": "must",
+      "id": "N-S126-005"
+    },
+    {
+      "statement_id": "N-S126-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a final response (status codes 200-699) is received while in the \"Trying\" state, the response MUST be passed to the TU, and the client transaction MUST transition to the \"Completed\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Completed",
+      "trigger": "final_response_received",
+      "pre_cond": "transaction.state = Trying & response.status_code >= 200 & response.status_code <= 699",
+      "post_cond": "response.passed_to_TU = true & transaction.state = Completed",
+      "actions": [
+        "pass response to TU",
+        "transition to Completed state"
+      ],
+      "modality": "must",
+      "id": "N-S126-006"
+    },
+    {
+      "statement_id": "N-S126-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If Timer E fires while in the \"Proceeding\" state, the request MUST be passed to the transport layer for retransmission, and Timer E MUST be reset with a value of T2 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "Timer_E_fires",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "request.retransmitted = true & timer.E.duration = T2",
+      "actions": [
+        "pass request to transport layer for retransmission",
+        "reset Timer E to T2 seconds"
+      ],
+      "modality": "must",
+      "id": "N-S126-007"
+    },
+    {
+      "statement_id": "N-S126-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If timer F fires while in the \"Proceeding\" state, the TU MUST be informed of a timeout, and the client transaction MUST transition to the terminated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Terminated",
+      "trigger": "Timer_F_fires",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "TU.notified_of_timeout = true & transaction.state = Terminated",
+      "actions": [
+        "inform TU of timeout",
+        "transition to Terminated state"
+      ],
+      "modality": "must",
+      "id": "N-S126-008"
+    },
+    {
+      "statement_id": "N-S126-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a final response (status codes 200-699) is received while in the \"Proceeding\" state, the response MUST be passed to the TU, and the client transaction MUST transition to the \"Completed\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Completed",
+      "trigger": "final_response_received",
+      "pre_cond": "transaction.state = Proceeding & response.status_code >= 200 & response.status_code <= 699",
+      "post_cond": "response.passed_to_TU = true & transaction.state = Completed",
+      "actions": [
+        "pass response to TU",
+        "transition to Completed state"
+      ],
+      "modality": "must",
+      "id": "N-S126-009"
+    },
+    {
+      "statement_id": "N-S126-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the client transaction enters the \"Completed\" state, it MUST set Timer K to fire in T4 seconds for unreliable transports, and zero seconds for reliable transports.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": null,
+      "trigger": "enter_Completed_state",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "(transport.type = unreliable & timer.K.duration = T4) | (transport.type = reliable & timer.K.duration = 0)",
+      "actions": [
+        "set Timer K to T4 seconds if transport is unreliable",
+        "set Timer K to 0 seconds if transport is reliable"
+      ],
+      "modality": "must",
+      "id": "N-S126-010"
+    },
+    {
+      "statement_id": "N-S126-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If Timer K fires while in this state, the client transaction MUST transition to the \"Terminated\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": "Terminated",
+      "trigger": "Timer_K_fires",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "transition to Terminated state"
+      ],
+      "modality": "must",
+      "id": "N-S126-011"
+    },
+    {
+      "statement_id": "N-S126-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the transaction is in the terminated state, it MUST be destroyed immediately.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Terminated",
+      "to_state": null,
+      "trigger": "enter_Terminated_state",
+      "pre_cond": "transaction.state = Terminated",
+      "post_cond": "transaction.destroyed = true",
+      "actions": [
+        "destroy transaction immediately"
+      ],
+      "modality": "must",
+      "id": "N-S126-012"
+    }
+  ]
+}

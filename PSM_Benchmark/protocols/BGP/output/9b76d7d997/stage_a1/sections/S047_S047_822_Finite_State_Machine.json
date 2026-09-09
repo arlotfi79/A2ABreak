@@ -1,0 +1,1678 @@
+{
+  "section_id": "S047",
+  "title": "S047 8.2.2 Finite State Machine",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S047 8.2.2 Finite State Machine"
+  ],
+  "url_anchor": "#s047-822-finite-state-machine",
+  "word_count": 4320,
+  "statement_count": 65,
+  "elapsed_seconds": 453.83,
+  "statements": [
+    {
+      "statement_id": "D-S047-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "Initially, the BGP peer FSM is in the Idle state. In this state, BGP FSM refuses all incoming BGP connections for this peer. No resources are allocated to the peer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "state_name": "Idle",
+      "enum_name": "BGPState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Idle"
+    },
+    {
+      "statement_id": "D-S047-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In the Connect state, BGP FSM is waiting for the TCP connection to be completed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "state_name": "Connect",
+      "enum_name": "BGPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Connect"
+    },
+    {
+      "statement_id": "D-S047-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In the Active state, BGP FSM is trying to acquire a peer by listening for, and accepting, a TCP connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "state_name": "Active",
+      "enum_name": "BGPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Active"
+    },
+    {
+      "statement_id": "D-S047-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In the OpenSent state, BGP FSM waits for an OPEN message from its peer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "state_name": "OpenSent",
+      "enum_name": "BGPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OpenSent"
+    },
+    {
+      "statement_id": "D-S047-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In the OpenConfirm state, BGP waits for a KEEPALIVE or NOTIFICATION message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "state_name": "OpenConfirm",
+      "enum_name": "BGPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OpenConfirm"
+    },
+    {
+      "statement_id": "D-S047-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In the Established state, the BGP FSM can exchange UPDATE, NOTIFICATION, and KEEPALIVE messages with its peer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "state_name": "Established",
+      "enum_name": "BGPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Established"
+    },
+    {
+      "statement_id": "D-S047-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to a ManualStart event (Event 1) or an AutomaticStart event (Event 3) in Idle state, the local system initializes all BGP resources for the peer connection, sets ConnectRetryCounter to zero, starts the ConnectRetryTimer with the initial value, initiates a TCP connection to the other BGP peer, listens for a connection that may be initiated by the remote BGP peer, and changes its state to Connect.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Idle",
+      "to_state": "Connect",
+      "trigger": "ManualStart | AutomaticStart",
+      "pre_cond": "protocol.state = Idle",
+      "post_cond": "protocol.state = Connect",
+      "actions": [
+        "initialize all BGP resources for the peer connection",
+        "set ConnectRetryCounter to zero",
+        "start ConnectRetryTimer with initial value",
+        "initiate TCP connection to other BGP peer",
+        "listen for connection from remote BGP peer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to a ManualStart_with_PassiveTcpEstablishment event (Event 4) or AutomaticStart_with_PassiveTcpEstablishment event (Event 5) in Idle state, the local system initializes all BGP resources, sets the ConnectRetryCounter to zero, starts the ConnectRetryTimer with the initial value, listens for a connection that may be initiated by the remote peer, and changes its state to Active.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Idle",
+      "to_state": "Active",
+      "trigger": "ManualStart_with_PassiveTcpEstablishment | AutomaticStart_with_PassiveTcpEstablishment",
+      "pre_cond": "protocol.state = Idle",
+      "post_cond": "protocol.state = Active",
+      "actions": [
+        "initialize all BGP resources",
+        "set ConnectRetryCounter to zero",
+        "start ConnectRetryTimer with initial value",
+        "listen for connection from remote peer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to a ManualStop event (Event 2) in Connect state, the local system drops the TCP connection, releases all BGP resources, sets ConnectRetryCounter to zero, stops the ConnectRetryTimer and sets ConnectRetryTimer to zero, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "pre_cond": "protocol.state = Connect",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "drop the TCP connection",
+        "release all BGP resources",
+        "set ConnectRetryCounter to zero",
+        "stop ConnectRetryTimer and set to zero"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to the ConnectRetryTimer_Expires event (Event 9) in Connect state, the local system drops the TCP connection, restarts the ConnectRetryTimer, stops the DelayOpenTimer and resets the timer to zero, initiates a TCP connection to the other BGP peer, continues to listen for a connection that may be initiated by the remote BGP peer, and stays in the Connect state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Connect",
+      "trigger": "ConnectRetryTimer_Expires",
+      "pre_cond": "protocol.state = Connect",
+      "post_cond": "protocol.state = Connect",
+      "actions": [
+        "drop the TCP connection",
+        "restart the ConnectRetryTimer",
+        "stop the DelayOpenTimer and reset to zero",
+        "initiate TCP connection to other BGP peer",
+        "continue to listen for connection from remote BGP peer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the DelayOpenTimer_Expires event (Event 12) occurs in the Connect state, the local system sends an OPEN message to its peer, sets the HoldTimer to a large value, and changes its state to OpenSent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "OpenSent",
+      "trigger": "DelayOpenTimer_Expires",
+      "pre_cond": "protocol.state = Connect",
+      "post_cond": "protocol.state = OpenSent",
+      "actions": [
+        "send OPEN message to peer",
+        "set HoldTimer to a large value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the BGP FSM receives a TcpConnection_Valid event (Event 14) in Connect state, the TCP connection is processed, and the connection remains in the Connect state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Connect",
+      "trigger": "TcpConnection_Valid",
+      "pre_cond": "protocol.state = Connect",
+      "post_cond": "protocol.state = Connect",
+      "actions": [
+        "process the TCP connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the BGP FSM receives a Tcp_CR_Invalid event (Event 15) in Connect state, the local system rejects the TCP connection, and the connection remains in the Connect state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Connect",
+      "trigger": "Tcp_CR_Invalid",
+      "pre_cond": "protocol.state = Connect",
+      "post_cond": "protocol.state = Connect",
+      "actions": [
+        "reject the TCP connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the TCP connection succeeds (Event 16 or Event 17) in Connect state and the DelayOpen attribute is set to TRUE, the local system stops the ConnectRetryTimer and sets it to zero, sets the DelayOpenTimer to the initial value, and stays in the Connect state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Connect",
+      "trigger": "Tcp_CR_Acked | TcpConnectionConfirmed",
+      "pre_cond": "protocol.state = Connect & session.DelayOpen = TRUE",
+      "post_cond": "protocol.state = Connect",
+      "actions": [
+        "stop ConnectRetryTimer and set to zero",
+        "set DelayOpenTimer to initial value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the TCP connection succeeds (Event 16 or Event 17) in Connect state and the DelayOpen attribute is set to FALSE, the local system stops the ConnectRetryTimer and sets it to zero, completes BGP initialization, sends an OPEN message to its peer, sets the HoldTimer to a large value, and changes its state to OpenSent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "OpenSent",
+      "trigger": "Tcp_CR_Acked | TcpConnectionConfirmed",
+      "pre_cond": "protocol.state = Connect & session.DelayOpen = FALSE",
+      "post_cond": "protocol.state = OpenSent",
+      "actions": [
+        "stop ConnectRetryTimer and set to zero",
+        "complete BGP initialization",
+        "send OPEN message to peer",
+        "set HoldTimer to a large value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the TCP connection fails (Event 18) in Connect state and the DelayOpenTimer is running, the local system restarts the ConnectRetryTimer with the initial value, stops the DelayOpenTimer and resets its value to zero, continues to listen for a connection that may be initiated by the remote BGP peer, and changes its state to Active.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Active",
+      "trigger": "TcpConnectionFails",
+      "pre_cond": "protocol.state = Connect & timer.DelayOpenTimer.running = TRUE",
+      "post_cond": "protocol.state = Active",
+      "actions": [
+        "restart ConnectRetryTimer with initial value",
+        "stop DelayOpenTimer and reset to zero",
+        "continue to listen for connection from remote BGP peer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-017",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the TCP connection fails (Event 18) in Connect state and the DelayOpenTimer is not running, the local system stops the ConnectRetryTimer to zero, drops the TCP connection, releases all BGP resources, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "TcpConnectionFails",
+      "pre_cond": "protocol.state = Connect & timer.DelayOpenTimer.running = FALSE",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "stop ConnectRetryTimer and set to zero",
+        "drop the TCP connection",
+        "release all BGP resources"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-018",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If an OPEN message is received while the DelayOpenTimer is running (Event 20) in Connect state, the local system stops the ConnectRetryTimer, completes the BGP initialization, stops and clears the DelayOpenTimer, sends an OPEN message, sends a KEEPALIVE message, adjusts KeepaliveTimer and HoldTimer, and changes its state to OpenConfirm.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "OpenConfirm",
+      "trigger": "BGPOpen",
+      "pre_cond": "protocol.state = Connect & timer.DelayOpenTimer.running = TRUE",
+      "post_cond": "protocol.state = OpenConfirm",
+      "actions": [
+        "stop ConnectRetryTimer and set to zero",
+        "complete BGP initialization",
+        "stop and clear DelayOpenTimer",
+        "send OPEN message",
+        "send KEEPALIVE message",
+        "start KeepaliveTimer with initial value or reset to zero depending on HoldTimer initial value",
+        "reset HoldTimer to negotiated value or zero depending on HoldTimer initial value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-019",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If BGP message header checking (Event 21) or OPEN message checking detects an error (Event 22) in Connect state, the local system optionally sends a NOTIFICATION with the appropriate error code if SendNOTIFICATIONwithoutOPEN is TRUE, stops the ConnectRetryTimer, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "BGPHeaderErr | BGPOpenMsgErr",
+      "pre_cond": "protocol.state = Connect",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "optionally send NOTIFICATION with appropriate error code if SendNOTIFICATIONwithoutOPEN = TRUE",
+        "stop ConnectRetryTimer and set to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-020",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If a NOTIFICATION message is received with a version error (Event 24) in Connect state while the DelayOpenTimer is running, the local system stops the ConnectRetryTimer, stops and resets the DelayOpenTimer, releases all BGP resources, drops the TCP connection, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "pre_cond": "protocol.state = Connect & timer.DelayOpenTimer.running = TRUE",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "stop ConnectRetryTimer and set to zero",
+        "stop and reset DelayOpenTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-021",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If a NOTIFICATION message is received with a version error (Event 24) in Connect state while the DelayOpenTimer is not running, the local system stops the ConnectRetryTimer, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, performs peer oscillation damping if DampPeerOscillations is True, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "pre_cond": "protocol.state = Connect & timer.DelayOpenTimer.running = FALSE",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "stop ConnectRetryTimer and set to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-022",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to any other events (Events 8, 10-11, 13, 19, 23, 25-28) in Connect state, the local system stops and resets the ConnectRetryTimer if running, stops and resets the DelayOpenTimer if running, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, performs peer oscillation damping if DampPeerOscillations is True, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Connect",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop | HoldTimer_Expires | KeepaliveTimer_Expires | IdleHoldTimer_Expires | BGPOpen | OpenCollisionDump | NotifMsg | KeepAliveMsg | UpdateMsg | UpdateMsgErr",
+      "pre_cond": "protocol.state = Connect",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "stop and reset ConnectRetryTimer if running",
+        "stop and reset DelayOpenTimer if running",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-023",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to a ManualStop event (Event 2) in Active state, the local system optionally sends a NOTIFICATION with a Cease if DelayOpenTimer is running and SendNOTIFICATIONwithoutOPEN is set, releases all BGP resources including stopping the DelayOpenTimer, drops the TCP connection, sets ConnectRetryCounter to zero, stops the ConnectRetryTimer and sets it to zero, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "pre_cond": "protocol.state = Active",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "optionally send NOTIFICATION with Cease if DelayOpenTimer running and SendNOTIFICATIONwithoutOPEN set",
+        "release all BGP resources including stopping DelayOpenTimer",
+        "drop TCP connection",
+        "set ConnectRetryCounter to zero",
+        "stop ConnectRetryTimer and set to zero"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-024",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to a ConnectRetryTimer_Expires event (Event 9) in Active state, the local system restarts the ConnectRetryTimer with initial value, initiates a TCP connection to the other BGP peer, continues to listen for a TCP connection that may be initiated by a remote BGP peer, and changes its state to Connect.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Connect",
+      "trigger": "ConnectRetryTimer_Expires",
+      "pre_cond": "protocol.state = Active",
+      "post_cond": "protocol.state = Connect",
+      "actions": [
+        "restart ConnectRetryTimer with initial value",
+        "initiate TCP connection to other BGP peer",
+        "continue to listen for TCP connection from remote BGP peer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-025",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a DelayOpenTimer_Expires event (Event 12) in Active state, the local system sets the ConnectRetryTimer to zero, stops and clears the DelayOpenTimer, completes the BGP initialization, sends the OPEN message to its remote peer, sets its hold timer to a large value, and changes its state to OpenSent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "OpenSent",
+      "trigger": "DelayOpenTimer_Expires",
+      "pre_cond": "protocol.state = Active",
+      "post_cond": "protocol.state = OpenSent",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "stop and clear DelayOpenTimer",
+        "complete BGP initialization",
+        "send OPEN message to remote peer",
+        "set HoldTimer to a large value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-026",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a TcpConnection_Valid event (Event 14) in Active state, the local system processes the TCP connection flags and stays in the Active state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Active",
+      "trigger": "TcpConnection_Valid",
+      "pre_cond": "protocol.state = Active",
+      "post_cond": "protocol.state = Active",
+      "actions": [
+        "process TCP connection flags"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-027",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a Tcp_CR_Invalid event (Event 15) in Active state, the local system rejects the TCP connection and stays in the Active State.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Active",
+      "trigger": "Tcp_CR_Invalid",
+      "pre_cond": "protocol.state = Active",
+      "post_cond": "protocol.state = Active",
+      "actions": [
+        "reject the TCP connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-028",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to the success of a TCP connection (Event 16 or Event 17) in Active state and the DelayOpen attribute is set to TRUE, the local system stops the ConnectRetryTimer and sets it to zero, sets the DelayOpenTimer to the initial value, and stays in the Active state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Active",
+      "trigger": "Tcp_CR_Acked | TcpConnectionConfirmed",
+      "pre_cond": "protocol.state = Active & session.DelayOpen = TRUE",
+      "post_cond": "protocol.state = Active",
+      "actions": [
+        "stop ConnectRetryTimer and set to zero",
+        "set DelayOpenTimer to initial value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-029",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to the success of a TCP connection (Event 16 or Event 17) in Active state and the DelayOpen attribute is set to FALSE, the local system sets the ConnectRetryTimer to zero, completes the BGP initialization, sends the OPEN message to its peer, sets its HoldTimer to a large value, and changes its state to OpenSent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "OpenSent",
+      "trigger": "Tcp_CR_Acked | TcpConnectionConfirmed",
+      "pre_cond": "protocol.state = Active & session.DelayOpen = FALSE",
+      "post_cond": "protocol.state = OpenSent",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "complete BGP initialization",
+        "send OPEN message to peer",
+        "set HoldTimer to a large value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-030",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a TcpConnectionFails event (Event 18) in Active state, the local system restarts the ConnectRetryTimer with the initial value, stops and clears the DelayOpenTimer, releases all BGP resource, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping if the DampPeerOscillations attribute is set to TRUE, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "TcpConnectionFails",
+      "pre_cond": "protocol.state = Active",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "restart ConnectRetryTimer with initial value",
+        "stop and clear DelayOpenTimer",
+        "release all BGP resources",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-031",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If an OPEN message is received and the DelayOpenTimer is running (Event 20) in Active state, the local system stops the ConnectRetryTimer, stops and clears the DelayOpenTimer, completes the BGP initialization, sends an OPEN message, sends a KEEPALIVE message, adjusts KeepaliveTimer and HoldTimer, and changes its state to OpenConfirm.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "OpenConfirm",
+      "trigger": "BGPOpen",
+      "pre_cond": "protocol.state = Active & timer.DelayOpenTimer.running = TRUE",
+      "post_cond": "protocol.state = OpenConfirm",
+      "actions": [
+        "stop ConnectRetryTimer and set to zero",
+        "stop and clear DelayOpenTimer",
+        "complete BGP initialization",
+        "send OPEN message",
+        "send KEEPALIVE message",
+        "start KeepaliveTimer with initial value or reset to zero depending on HoldTimer value",
+        "reset HoldTimer to negotiated value or zero depending on HoldTimer value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-032",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If BGP message header checking (Event 21) or OPEN message checking detects an error (Event 22) in Active state, the local system optionally sends a NOTIFICATION with the appropriate error code if SendNOTIFICATIONwithoutOPEN is TRUE, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "BGPHeaderErr | BGPOpenMsgErr",
+      "pre_cond": "protocol.state = Active",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "optionally send NOTIFICATION with appropriate error code if SendNOTIFICATIONwithoutOPEN = TRUE",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-033",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If a NOTIFICATION message is received with a version error (Event 24) in Active state while the DelayOpenTimer is running, the local system stops the ConnectRetryTimer, stops and resets the DelayOpenTimer, releases all BGP resources, drops the TCP connection, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "pre_cond": "protocol.state = Active & timer.DelayOpenTimer.running = TRUE",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "stop ConnectRetryTimer and set to zero",
+        "stop and reset DelayOpenTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-034",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If a NOTIFICATION message is received with a version error (Event 24) in Active state while the DelayOpenTimer is not running, the local system sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "pre_cond": "protocol.state = Active & timer.DelayOpenTimer.running = FALSE",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-035",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to any other event (Events 8, 10-11, 13, 19, 23, 25-28) in Active state, the local system sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by one, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Active",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop | HoldTimer_Expires | KeepaliveTimer_Expires | IdleHoldTimer_Expires | BGPOpen | OpenCollisionDump | NotifMsg | KeepAliveMsg | UpdateMsg | UpdateMsgErr",
+      "pre_cond": "protocol.state = Active",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-036",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If a ManualStop event (Event 2) is issued in the OpenSent state, the local system sends the NOTIFICATION with a Cease, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, sets the ConnectRetryCounter to zero, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "pre_cond": "protocol.state = OpenSent",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "set ConnectRetryCounter to zero"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-037",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If an AutomaticStop event (Event 8) is issued in the OpenSent state, the local system sends the NOTIFICATION with a Cease, sets the ConnectRetryTimer to zero, releases all the BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop",
+      "pre_cond": "protocol.state = OpenSent",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-038",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the HoldTimer_Expires (Event 10) in OpenSent state, the local system sends a NOTIFICATION message with the error code Hold Timer Expired, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "HoldTimer_Expires",
+      "pre_cond": "protocol.state = OpenSent",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with error code Hold Timer Expired",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-039",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If a TcpConnectionFails event (Event 18) is received in OpenSent state, the local system closes the BGP connection, restarts the ConnectRetryTimer, continues to listen for a connection that may be initiated by the remote BGP peer, and changes its state to Active.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenSent",
+      "to_state": "Active",
+      "trigger": "TcpConnectionFails",
+      "pre_cond": "protocol.state = OpenSent",
+      "post_cond": "protocol.state = Active",
+      "actions": [
+        "close BGP connection",
+        "restart ConnectRetryTimer",
+        "continue to listen for connection from remote BGP peer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-040",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "When an OPEN message is received with no errors (Event 19) in OpenSent state, the local system resets the DelayOpenTimer to zero, sets the BGP ConnectRetryTimer to zero, sends a KEEPALIVE message, sets a KeepaliveTimer, sets the HoldTimer according to the negotiated value, and changes its state to OpenConfirm.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenSent",
+      "to_state": "OpenConfirm",
+      "trigger": "BGPOpen",
+      "pre_cond": "protocol.state = OpenSent",
+      "post_cond": "protocol.state = OpenConfirm",
+      "actions": [
+        "reset DelayOpenTimer to zero",
+        "set ConnectRetryTimer to zero",
+        "send KEEPALIVE message",
+        "set KeepaliveTimer",
+        "set HoldTimer to negotiated value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-041",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the BGP message header checking (Event 21) or OPEN message checking detects an error (Event 22) in OpenSent state, the local system sends a NOTIFICATION message with the appropriate error code, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "BGPHeaderErr | BGPOpenMsgErr",
+      "pre_cond": "protocol.state = OpenSent",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with appropriate error code",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-042",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If an OpenCollisionDump event (Event 23) is received in the OpenSent state, the local system sends a NOTIFICATION with a Cease, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "OpenCollisionDump",
+      "pre_cond": "protocol.state = OpenSent",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-043",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If a NOTIFICATION message is received with a version error (Event 24) in OpenSent state, the local system sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "pre_cond": "protocol.state = OpenSent",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-044",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to any other event (Events 9, 11-13, 20, 25-28) in OpenSent state, the local system sends the NOTIFICATION with the Error Code Finite State Machine Error, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenSent",
+      "to_state": "Idle",
+      "trigger": "ConnectRetryTimer_Expires | KeepaliveTimer_Expires | DelayOpenTimer_Expires | IdleHoldTimer_Expires | BGPOpenWithDelay | NotifMsg | KeepAliveMsg | UpdateMsg | UpdateMsgErr",
+      "pre_cond": "protocol.state = OpenSent",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Error Code Finite State Machine Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-045",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to a ManualStop event (Event 2) in OpenConfirm state, the local system sends the NOTIFICATION message with a Cease, releases all BGP resources, drops the TCP connection, sets the ConnectRetryCounter to zero, sets the ConnectRetryTimer to zero, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "release all BGP resources",
+        "drop TCP connection",
+        "set ConnectRetryCounter to zero",
+        "set ConnectRetryTimer to zero"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-046",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to the AutomaticStop event (Event 8) in OpenConfirm state, the local system sends the NOTIFICATION message with a Cease, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-047",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the HoldTimer_Expires event (Event 10) occurs in OpenConfirm state before a KEEPALIVE message is received, the local system sends the NOTIFICATION message with the Error Code Hold Timer Expired, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "HoldTimer_Expires",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Error Code Hold Timer Expired",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-048",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a KeepaliveTimer_Expires event (Event 11) in OpenConfirm state, the local system sends a KEEPALIVE message, restarts the KeepaliveTimer, and remains in the OpenConfirmed state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "OpenConfirm",
+      "trigger": "KeepaliveTimer_Expires",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = OpenConfirm",
+      "actions": [
+        "send KEEPALIVE message",
+        "restart KeepaliveTimer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-049",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a TcpConnectionFails event (Event 18) from the underlying TCP or a NOTIFICATION message (Event 25) in OpenConfirm state, the local system sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "TcpConnectionFails | NotifMsg",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-050",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a NOTIFICATION message with a version error (NotifMsgVerErr (Event 24)) in OpenConfirm state, the local system sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "NotifMsgVerErr",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-051",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a valid OPEN message (BGPOpen (Event 19)) in OpenConfirm state and this connection is to be dropped due to connection collision, the local system sends a NOTIFICATION with a Cease, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "BGPOpen",
+      "pre_cond": "protocol.state = OpenConfirm & connection.collision_drop = TRUE",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-052",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the BGP message header checking (BGPHeaderErr (Event 21)) or OPEN message checking detects an error (BGPOpenMsgErr (Event 22)) in OpenConfirm state, the local system sends a NOTIFICATION message with the appropriate error code, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "BGPHeaderErr | BGPOpenMsgErr",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with appropriate error code",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-053",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "When the local system receives an OpenCollisionDump event (Event 23) in OpenConfirm state, the local system sends a NOTIFICATION with a Cease, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "OpenCollisionDump",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-054",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a KEEPALIVE message (KeepAliveMsg (Event 26)) in OpenConfirm state, the local system restarts the HoldTimer and changes its state to Established.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Established",
+      "trigger": "KeepAliveMsg",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = Established",
+      "actions": [
+        "restart HoldTimer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-055",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to any other event (Events 9, 12-13, 20, 27-28) in OpenConfirm state, the local system sends a NOTIFICATION with a code of Finite State Machine Error, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "ConnectRetryTimer_Expires | DelayOpenTimer_Expires | IdleHoldTimer_Expires | BGPOpenWithDelay | UpdateMsg | UpdateMsgErr",
+      "pre_cond": "protocol.state = OpenConfirm",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Error Code Finite State Machine Error",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-056",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to a ManualStop event (Event 2) in Established state, the local system sends the NOTIFICATION message with a Cease, sets the ConnectRetryTimer to zero, deletes all routes associated with this connection, releases BGP resources, drops the TCP connection, sets the ConnectRetryCounter to zero, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "ManualStop",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "delete all routes associated with this connection",
+        "release BGP resources",
+        "drop TCP connection",
+        "set ConnectRetryCounter to zero"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-057",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to an AutomaticStop event (Event 8) in Established state, the local system sends a NOTIFICATION with a Cease, sets the ConnectRetryTimer to zero, deletes all routes associated with this connection, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "AutomaticStop",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "delete all routes associated with this connection",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-058",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the HoldTimer_Expires event occurs (Event 10) in Established state, the local system sends a NOTIFICATION message with the Error Code Hold Timer Expired, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "HoldTimer_Expires",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Error Code Hold Timer Expired",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-059",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the KeepaliveTimer_Expires event occurs (Event 11) in Established state, the local system sends a KEEPALIVE message and restarts its KeepaliveTimer, unless the negotiated HoldTime value is zero.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "KeepaliveTimer_Expires",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Established",
+      "actions": [
+        "send KEEPALIVE message",
+        "restart KeepaliveTimer unless negotiated HoldTime = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-060",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If a valid OPEN message (BGPOpen (Event 19)) is received in Established state and the BGP implementation determines via OpenCollisionDump (Event 23) that this connection needs to be terminated, the local system sends a NOTIFICATION with a Cease, sets the ConnectRetryTimer to zero, deletes all routes associated with this connection, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "OpenCollisionDump",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Cease",
+        "set ConnectRetryTimer to zero",
+        "delete all routes associated with this connection",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-061",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a NOTIFICATION message (Event 24 or Event 25) or a TcpConnectionFails (Event 18) from the underlying TCP in Established state, the local system sets the ConnectRetryTimer to zero, deletes all routes associated with this connection, releases all the BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "TcpConnectionFails | NotifMsgVerErr | NotifMsg",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "set ConnectRetryTimer to zero",
+        "delete all routes associated with this connection",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-062",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives a KEEPALIVE message (Event 26) in Established state, the local system restarts its HoldTimer if the negotiated HoldTime value is non-zero, and remains in the Established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "KeepAliveMsg",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Established",
+      "actions": [
+        "restart HoldTimer if negotiated HoldTime != 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-063",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives an UPDATE message (Event 27) in Established state, the local system processes the message, restarts its HoldTimer if the negotiated HoldTime value is non-zero, and remains in the Established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "UpdateMsg",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Established",
+      "actions": [
+        "process UPDATE message",
+        "restart HoldTimer if negotiated HoldTime != 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-064",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the local system receives an UPDATE message and the UPDATE message error handling procedure detects an error (Event 28) in Established state, the local system sends a NOTIFICATION message with an Update error, sets the ConnectRetryTimer to zero, deletes all routes associated with this connection, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "UpdateMsgErr",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Update error",
+        "set ConnectRetryTimer to zero",
+        "delete all routes associated with this connection",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-065",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "In response to any other event (Events 9, 12-13, 20-22) in Established state, the local system sends a NOTIFICATION message with the Error Code Finite State Machine Error, deletes all routes associated with this connection, sets the ConnectRetryTimer to zero, releases all BGP resources, drops the TCP connection, increments the ConnectRetryCounter by 1, optionally performs peer oscillation damping, and changes its state to Idle.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S047",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": "Idle",
+      "trigger": "ConnectRetryTimer_Expires | DelayOpenTimer_Expires | IdleHoldTimer_Expires | BGPOpenWithDelay | BGPHeaderErr | BGPOpenMsgErr",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "protocol.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Error Code Finite State Machine Error",
+        "delete all routes associated with this connection",
+        "set ConnectRetryTimer to zero",
+        "release all BGP resources",
+        "drop TCP connection",
+        "increment ConnectRetryCounter by 1",
+        "optionally perform peer oscillation damping if DampPeerOscillations = TRUE"
+      ],
+      "modality": "must"
+    }
+  ]
+}

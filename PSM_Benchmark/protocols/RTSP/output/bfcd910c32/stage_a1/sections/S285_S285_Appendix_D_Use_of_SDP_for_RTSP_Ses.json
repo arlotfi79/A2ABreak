@@ -1,0 +1,145 @@
+{
+  "section_id": "S285",
+  "title": "S285 Appendix D. Use of SDP for RTSP Session Descriptions",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S285 Appendix D. Use of SDP for RTSP Session Descriptions"
+  ],
+  "url_anchor": "#s285-appendix-d-use-of-sdp-for-rtsp-session-descriptions",
+  "word_count": 2605,
+  "statement_count": 6,
+  "elapsed_seconds": 63.5,
+  "statements": [
+    {
+      "statement_id": "D-S285-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP requests may include this identifier in the If-Match field (see Section 18.24) to allow session establishment only if this attribute value still corresponds to that of the current description.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S285",
+      "object_name": "SETUP request",
+      "field_name": "If-Match",
+      "field_type": "parameter",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "session establishment proceeds only when session_description.mtag = If-Match.value"
+    },
+    {
+      "statement_id": "D-S285-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP requests may include this identifier in the If-Match field to allow session establishment only if this attribute value still corresponds to that of the current description.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S285",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP request with If-Match header containing mtag value",
+      "pre_cond": "session_description.mtag = If-Match.value",
+      "post_cond": "session.established = true",
+      "actions": [
+        "server allows session establishment"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S285-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "C->M: DESCRIBE rtsp://example.com/movie RTSP/2.0 ... M->C: RTSP/2.0 200 OK ... Content-Type: application/sdp",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S285",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DESCRIBE request",
+      "pre_cond": null,
+      "post_cond": "client.sdp_received = true",
+      "actions": [
+        "server returns SDP in 200 OK response body"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S285-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The presence of a session-level control attribute MUST be interpreted as support for aggregated control.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S285",
+      "object_name": "SDP session description",
+      "field_name": "a=control (session-level)",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "session.aggregate_control_supported = true when session-level a=control is present"
+    },
+    {
+      "statement_id": "D-S285-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "Note that the position of the control URI in the description implies that the client establishes separate RTSP control sessions to the servers audio.example.com and video.example.com.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S285",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SDP received with no session-level a=control attribute",
+      "pre_cond": "session.aggregate_control_supported = false",
+      "post_cond": "session.separate_control_sessions = true",
+      "actions": [
+        "client establishes separate RTSP control sessions per media stream"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S285-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "In this scenario, the server has multiple streams that can be controlled as a whole. In this case, there are both a media-level 'a=control' attribute ... and a session-level 'a=control' attribute ... the client is recommended to establish a single RTSP session to the server.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S285",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SDP received with session-level a=control attribute",
+      "pre_cond": "session.aggregate_control_supported = true",
+      "post_cond": "session.single_control_session = true",
+      "actions": [
+        "client establishes single RTSP session for aggregate control"
+      ],
+      "modality": "should"
+    }
+  ]
+}

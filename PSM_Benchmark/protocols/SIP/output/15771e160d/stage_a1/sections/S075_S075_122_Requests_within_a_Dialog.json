@@ -1,0 +1,161 @@
+{
+  "section_id": "S075",
+  "title": "S075 12.2 Requests within a Dialog",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S075 12.2 Requests within a Dialog"
+  ],
+  "url_anchor": "#s075-122-requests-within-a-dialog",
+  "word_count": 199,
+  "statement_count": 7,
+  "elapsed_seconds": 35.14,
+  "statements": [
+    {
+      "statement_id": "D-S075-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Once a dialog has been established between two UAs, either of them MAY initiate new transactions as needed within the dialog.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S075",
+      "state_name": "ESTABLISHED",
+      "enum_name": "DialogState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "dialog.state = ESTABLISHED"
+    },
+    {
+      "statement_id": "D-S075-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Requests that are target refresh requests update the dialog's remote target URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S075",
+      "object_name": "dialog",
+      "field_name": "remote_target_URI",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S075-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Requests within a dialog do not cause the dialog's route set to be modified.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S075",
+      "object_name": "dialog",
+      "field_name": "route_set",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S075-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The UA sending the request will take the UAC role for the transaction. The UA receiving the request will take the UAS role.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S075",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "ESTABLISHED",
+      "trigger": "new request initiated within dialog",
+      "pre_cond": "dialog.state = ESTABLISHED",
+      "post_cond": "transaction.sender_role = UAC & transaction.receiver_role = UAS",
+      "actions": [
+        "assign UAC role to sending UA",
+        "assign UAS role to receiving UA"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S075-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Requests that are target refresh requests update the dialog's remote target URI, and not the route set formed from the Record-Route.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S075",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "ESTABLISHED",
+      "trigger": "target refresh request received within dialog",
+      "pre_cond": "dialog.state = ESTABLISHED & request.is_target_refresh = true",
+      "post_cond": "dialog.remote_target_URI = updated & dialog.route_set = unchanged",
+      "actions": [
+        "update dialog remote target URI"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S075-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Requests that are not target refresh requests do not modify the dialog's remote target URI.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S075",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "ESTABLISHED",
+      "trigger": "non-target-refresh request received within dialog",
+      "pre_cond": "dialog.state = ESTABLISHED & request.is_target_refresh = false",
+      "post_cond": "dialog.remote_target_URI = unchanged & dialog.route_set = unchanged",
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S075-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "For dialogs that have been established with an INVITE, the only target refresh request defined is re-INVITE.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S075",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "ESTABLISHED",
+      "trigger": "re-INVITE received",
+      "pre_cond": "dialog.state = ESTABLISHED & dialog.established_by = INVITE",
+      "post_cond": "dialog.remote_target_URI = updated",
+      "actions": [
+        "update dialog remote target URI"
+      ],
+      "modality": "must"
+    }
+  ]
+}

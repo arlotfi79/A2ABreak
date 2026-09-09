@@ -1,0 +1,255 @@
+{
+  "states": [
+    "ConnectionOpened",
+    "Greeting",
+    "SessionRejected",
+    "SessionInitialized",
+    "MailTransaction",
+    "DataTransfer",
+    "ConnectionClosed",
+    "MailAccepted",
+    "Queued",
+    "Transmitted",
+    "GiveUp",
+    "Error",
+    "Undeliverable"
+  ],
+  "initial_state": "ConnectionOpened",
+  "final_states": [
+    "ConnectionClosed",
+    "Transmitted",
+    "GiveUp",
+    "Error",
+    "Undeliverable"
+  ],
+  "transitions": [
+    {
+      "from": "ConnectionOpened",
+      "event": "send 220 greeting",
+      "action": "send 220 service ready",
+      "to": "Greeting"
+    },
+    {
+      "from": "ConnectionOpened",
+      "event": "send 554 rejection",
+      "action": "send 554 rejection response",
+      "to": "SessionRejected"
+    },
+    {
+      "from": "Greeting",
+      "event": "receive EHLO accepted",
+      "action": "clear all state tables and buffers",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "Greeting",
+      "event": "receive HELO accepted",
+      "action": "clear all state tables and buffers",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "Greeting",
+      "event": "receive EHLO rejected",
+      "action": "return failure reply",
+      "to": "Greeting"
+    },
+    {
+      "from": "Greeting",
+      "event": "receive HELO rejected",
+      "action": "send error reply",
+      "to": "Greeting"
+    },
+    {
+      "from": "SessionInitialized",
+      "event": "receive EHLO mid session",
+      "action": "clear buffers and reset state",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "SessionInitialized",
+      "event": "receive MAIL accepted",
+      "action": "clear buffers and insert reverse-path",
+      "to": "MailTransaction"
+    },
+    {
+      "from": "SessionInitialized",
+      "event": "receive MAIL rejected",
+      "action": "send error reply",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "MailTransaction",
+      "event": "receive RCPT accepted",
+      "action": "store forward-path",
+      "to": "MailTransaction"
+    },
+    {
+      "from": "MailTransaction",
+      "event": "receive RCPT rejected",
+      "action": "send rejection response",
+      "to": "MailTransaction"
+    },
+    {
+      "from": "MailTransaction",
+      "event": "receive DATA accepted",
+      "action": "send 354 intermediate reply",
+      "to": "DataTransfer"
+    },
+    {
+      "from": "MailTransaction",
+      "event": "receive DATA rejected",
+      "action": "do not send message data",
+      "to": "MailTransaction"
+    },
+    {
+      "from": "DataTransfer",
+      "event": "receive data end accepted",
+      "action": "process stored mail transaction",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "DataTransfer",
+      "event": "receive data end rejected",
+      "action": "send error reply",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "DataTransfer",
+      "event": "send 250 data accepted",
+      "action": "accept delivery responsibility",
+      "to": "MailAccepted"
+    },
+    {
+      "from": "MailTransaction",
+      "event": "receive RSET",
+      "action": "abort transaction and clear buffers",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "MailTransaction",
+      "event": "receive EHLO accepted",
+      "action": "abort transaction and clear buffers",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "SessionRejected",
+      "event": "receive QUIT",
+      "action": "close connection",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "SessionRejected",
+      "event": "receive non QUIT command",
+      "action": "send 503 bad sequence",
+      "to": "SessionRejected"
+    },
+    {
+      "from": "SessionInitialized",
+      "event": "receive QUIT",
+      "action": "send 221 and close connection",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "MailTransaction",
+      "event": "receive QUIT",
+      "action": "abort current transaction",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "Greeting",
+      "event": "receive QUIT",
+      "action": "send 221 and close connection",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "SessionInitialized",
+      "event": "receive RSET",
+      "action": "send 250 OK reply",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "SessionInitialized",
+      "event": "receive NOOP",
+      "action": "send 250 OK reply",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "MailTransaction",
+      "event": "receive NOOP",
+      "action": "send 250 OK reply",
+      "to": "MailTransaction"
+    },
+    {
+      "from": "SessionInitialized",
+      "event": "receive RCPT out of order",
+      "action": "send 503 bad sequence",
+      "to": "SessionInitialized"
+    },
+    {
+      "from": "MailAccepted",
+      "event": "cond delivery fails",
+      "action": "enqueue message with envelope",
+      "to": "Queued"
+    },
+    {
+      "from": "Queued",
+      "event": "timeout retry interval",
+      "action": "attempt delivery",
+      "to": "Queued"
+    },
+    {
+      "from": "Queued",
+      "event": "cond delivery succeeds",
+      "action": "remove from queue",
+      "to": "Transmitted"
+    },
+    {
+      "from": "Queued",
+      "event": "timeout give up time",
+      "action": "notify sender of failure",
+      "to": "GiveUp"
+    },
+    {
+      "from": "Greeting",
+      "event": "send 421 shutdown",
+      "action": "send 421 and close connection",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "SessionInitialized",
+      "event": "send 421 shutdown",
+      "action": "send 421 and close connection",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "MailTransaction",
+      "event": "send 421 shutdown",
+      "action": "send 421 and close connection",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "DataTransfer",
+      "event": "send 421 shutdown",
+      "action": "send 421 and close connection",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "Greeting",
+      "event": "timeout waiting for command",
+      "action": "close connection",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "SessionInitialized",
+      "event": "timeout waiting for command",
+      "action": "close connection",
+      "to": "ConnectionClosed"
+    },
+    {
+      "from": "DataTransfer",
+      "event": "timeout data transfer",
+      "action": "close connection",
+      "to": "ConnectionClosed"
+    }
+  ]
+}

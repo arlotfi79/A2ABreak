@@ -1,0 +1,513 @@
+{
+  "section_id": "S112",
+  "title": "S112 16.11 Stateless Proxy",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S112 16.11 Stateless Proxy"
+  ],
+  "url_anchor": "#s112-1611-stateless-proxy",
+  "word_count": 850,
+  "statement_count": 21,
+  "elapsed_seconds": 190.16,
+  "statements": [
+    {
+      "statement_id": "N-S112-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Furthermore, when handling a request statelessly, an element MUST NOT generate its own 100 (Trying) or any other provisional response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy",
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": "provisional_response.generated = false",
+      "actions": [
+        "do not generate 100 Trying",
+        "do not generate any provisional response"
+      ],
+      "modality": "must",
+      "id": "N-S112-001"
+    },
+    {
+      "statement_id": "N-S112-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless proxy MUST validate a request as described in Section 16.3",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": "request_received",
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": null,
+      "actions": [
+        "validate request per Section 16.3"
+      ],
+      "modality": "must",
+      "id": "N-S112-002"
+    },
+    {
+      "statement_id": "N-S112-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless proxy MUST follow the request processing steps described in Sections 16.4 through 16.5 with the following exception:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": null,
+      "actions": [
+        "follow request processing steps described in Sections 16.4 through 16.5"
+      ],
+      "modality": "must",
+      "id": "N-S112-003"
+    },
+    {
+      "statement_id": "N-S112-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless proxy MUST choose one and only one target from the target set.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_processing",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": "target_set.selected_count = 1",
+      "actions": [
+        "select exactly one target from target set"
+      ],
+      "modality": "must",
+      "id": "N-S112-004"
+    },
+    {
+      "statement_id": "N-S112-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "This choice MUST only rely on fields in the message and time-invariant properties of the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": "target.choice.basis = message.fields | server.time_invariant_properties",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S112-005"
+    },
+    {
+      "statement_id": "N-S112-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "In particular, a retransmitted request MUST be forwarded to the same destination each time it is processed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "retransmitted_request_received",
+      "pre_cond": "proxy.mode = stateless & request.is_retransmission = true",
+      "post_cond": "request.forwarded_to = original_request.forwarded_to",
+      "actions": [
+        "forward retransmitted request to same destination as original"
+      ],
+      "modality": "must",
+      "id": "N-S112-006"
+    },
+    {
+      "statement_id": "N-S112-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Furthermore, CANCEL and non-Routed ACK requests MUST generate the same choice as their associated INVITE.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CANCEL_received | non_Routed_ACK_received",
+      "pre_cond": "proxy.mode = stateless & (request.method = CANCEL | (request.method = ACK & request.is_non_routed = true))",
+      "post_cond": "target.choice = associated_INVITE.target.choice",
+      "actions": [
+        "use same target choice as associated INVITE for CANCEL and non-Routed ACK"
+      ],
+      "modality": "must",
+      "id": "N-S112-007"
+    },
+    {
+      "statement_id": "N-S112-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless proxy MUST follow the request processing steps described in Section 16.6 with the following exceptions:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_processing",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": null,
+      "actions": [
+        "follow request processing steps described in Section 16.6 with exceptions noted"
+      ],
+      "modality": "must",
+      "id": "N-S112-008"
+    },
+    {
+      "statement_id": "N-S112-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "Therefore, the component of the branch parameter that makes it unique MUST be the same each time a retransmitted request is forwarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "retransmitted_request_forwarded",
+      "pre_cond": "proxy.mode = stateless & request.is_retransmission = true",
+      "post_cond": "Via.branch.unique_component = original_request.Via.branch.unique_component",
+      "actions": [
+        "use same unique branch parameter component for each forwarded retransmission"
+      ],
+      "modality": "must",
+      "id": "N-S112-009"
+    },
+    {
+      "statement_id": "N-S112-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "Thus for a stateless proxy, the branch parameter MUST be computed as a combinatoric function of message parameters which are invariant on retransmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": "Via.branch = combinatoric_function(message.retransmission_invariant_parameters)",
+      "actions": [
+        "compute branch parameter as combinatoric function of retransmission-invariant message parameters"
+      ],
+      "modality": "must",
+      "id": "N-S112-010"
+    },
+    {
+      "statement_id": "N-S112-11",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The stateless proxy MAY use any technique it likes to guarantee uniqueness of its branch IDs across transactions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S112-011"
+    },
+    {
+      "statement_id": "N-S112-12",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "However, the following procedure is RECOMMENDED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": null,
+      "actions": [
+        "use recommended procedure for computing branch ID uniqueness"
+      ],
+      "modality": "should",
+      "id": "N-S112-012"
+    },
+    {
+      "statement_id": "N-S112-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "All other message transformations specified in Section 16.6 MUST result in the same transformation of a retransmitted request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "retransmitted_request_forwarded",
+      "pre_cond": "proxy.mode = stateless & request.is_retransmission = true",
+      "post_cond": "message.transformations = original_request.transformations",
+      "actions": [
+        "apply identical message transformations to retransmitted request as applied to original"
+      ],
+      "modality": "must",
+      "id": "N-S112-013"
+    },
+    {
+      "statement_id": "N-S112-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "In particular, if the proxy inserts a Record-Route value or pushes URIs into the Route header field, it MUST place the same values in retransmissions of the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "retransmitted_request_forwarded",
+      "pre_cond": "proxy.mode = stateless & (proxy.inserts_Record_Route = true | proxy.pushes_Route_URIs = true) & request.is_retransmission = true",
+      "post_cond": "outgoing.Record_Route.values = original.Record_Route.values & outgoing.Route.values = original.Route.values",
+      "actions": [
+        "place same Record-Route values in retransmitted request",
+        "place same Route URI values in retransmitted request"
+      ],
+      "modality": "must",
+      "id": "N-S112-014"
+    },
+    {
+      "statement_id": "N-S112-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "As for the Via branch parameter, this implies that the transformations MUST be based on time-invariant configuration or retransmission-invariant properties of the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": "message.transformations.basis = proxy.time_invariant_config | request.retransmission_invariant_properties",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S112-015"
+    },
+    {
+      "statement_id": "N-S112-16",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Stateless proxies MUST NOT perform special processing for CANCEL requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxies"
+      ],
+      "from_state": "request_received",
+      "to_state": null,
+      "trigger": "CANCEL_received",
+      "pre_cond": "proxy.mode = stateless & request.method = CANCEL",
+      "post_cond": null,
+      "actions": [
+        "process CANCEL using same rules as any other request"
+      ],
+      "modality": "must",
+      "id": "N-S112-016"
+    },
+    {
+      "statement_id": "N-S112-17",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When a response arrives at a stateless proxy, the proxy MUST inspect the sent-by value in the first (topmost) Via header field value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": "response_received",
+      "to_state": null,
+      "trigger": "response_arrived",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": null,
+      "actions": [
+        "inspect sent-by value in topmost Via header field"
+      ],
+      "modality": "must",
+      "id": "N-S112-017"
+    },
+    {
+      "statement_id": "N-S112-18",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If that address matches the proxy, (it equals a value this proxy has inserted into previous requests) the proxy MUST remove that header field value from the response and forward the result to the location indicated in the next Via header field value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": "response_received",
+      "to_state": "response_forwarded",
+      "trigger": "via_sent_by_matches_proxy",
+      "pre_cond": "proxy.mode = stateless & Via.topmost.sent_by = proxy.address",
+      "post_cond": "Via.topmost.removed = true & response.forwarded_to = Via.next.address",
+      "actions": [
+        "remove topmost Via header field value from response",
+        "forward response to address indicated in next Via header field value"
+      ],
+      "modality": "must",
+      "id": "N-S112-018"
+    },
+    {
+      "statement_id": "N-S112-19",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy MUST NOT add to, modify, or remove the message body.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": "response_received",
+      "to_state": null,
+      "trigger": "response_arrived",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": "response.body.unchanged = true",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S112-019"
+    },
+    {
+      "statement_id": "N-S112-20",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Unless specified otherwise, the proxy MUST NOT remove any other header field values.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": "response_received",
+      "to_state": null,
+      "trigger": "response_arrived",
+      "pre_cond": "proxy.mode = stateless & !specification_permits_removal",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S112-020"
+    },
+    {
+      "statement_id": "N-S112-21",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If the address does not match the proxy, the message MUST be silently discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "actors": [
+        "stateless proxy"
+      ],
+      "from_state": "response_received",
+      "to_state": "response_discarded",
+      "trigger": "via_sent_by_does_not_match_proxy",
+      "pre_cond": "proxy.mode = stateless & Via.topmost.sent_by != proxy.address",
+      "post_cond": "message.discarded = true",
+      "actions": [
+        "silently discard response"
+      ],
+      "modality": "must",
+      "id": "N-S112-021"
+    }
+  ]
+}

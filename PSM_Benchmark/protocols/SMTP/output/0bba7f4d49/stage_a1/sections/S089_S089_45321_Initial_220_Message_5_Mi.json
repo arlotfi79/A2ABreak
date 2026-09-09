@@ -1,0 +1,75 @@
+{
+  "section_id": "S089",
+  "title": "S089 4.5.3.2.1 Initial 220 Message: 5 Minutes",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S089 4.5.3.2.1 Initial 220 Message: 5 Minutes"
+  ],
+  "url_anchor": "#s089-45321-initial-220-message-5-minutes",
+  "word_count": 52,
+  "statement_count": 3,
+  "elapsed_seconds": 20.47,
+  "statements": [
+    {
+      "statement_id": "D-S089-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "An SMTP client process needs to distinguish between a failed TCP connection and a delay in receiving the initial 220 greeting message.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S089",
+      "state_name": "Waiting for Initial 220 Greeting",
+      "enum_name": "SessionEstablishmentStates",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.tcp_established = true & session.greeting_received = false"
+    },
+    {
+      "statement_id": "D-S089-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "Many SMTP servers accept a TCP connection but delay delivery of the 220 message until their system load permits more mail to be processed.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S089",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TCP Connection Established",
+      "to_state": "Waiting for Initial 220 Greeting",
+      "trigger": "TCP connection accepted by server",
+      "pre_cond": "connection.tcp_established = true",
+      "post_cond": "session.greeting_received = false",
+      "actions": [
+        "start 220-greeting timer (5 minutes)"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S089-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "smtp_fsm",
+      "description": "An SMTP client process needs to distinguish between a failed TCP connection and a delay in receiving the initial 220 greeting message. (Timer: 5 Minutes)",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S089",
+      "object_name": "Initial220Timer",
+      "field_name": "timeout_value",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": [
+        "5 minutes"
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

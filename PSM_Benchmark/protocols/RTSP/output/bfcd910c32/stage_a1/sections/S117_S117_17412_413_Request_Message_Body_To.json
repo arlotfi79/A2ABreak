@@ -1,0 +1,85 @@
+{
+  "section_id": "S117",
+  "title": "S117 17.4.12 413 Request Message Body Too Large",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S117 17.4.12 413 Request Message Body Too Large"
+  ],
+  "url_anchor": "#s117-17412-413-request-message-body-too-large",
+  "word_count": 75,
+  "statement_count": 3,
+  "elapsed_seconds": 12.95,
+  "statements": [
+    {
+      "statement_id": "D-S117-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The agent is refusing to process a request because the request message body is larger than the agent is willing or able to process.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S117",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_body_too_large",
+      "pre_cond": "request.body_size > server.max_acceptable_body_size",
+      "post_cond": "server.sent_response = 413",
+      "actions": [
+        "send 413 Request Message Body Too Large response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S117-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "The agent MAY close the connection to prevent the requesting agent from continuing the request.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S117",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Closed",
+      "trigger": "413_response_sent",
+      "pre_cond": "server.sent_response = 413",
+      "post_cond": "connection.state = Closed",
+      "actions": [
+        "close connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S117-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the condition is temporary, the agent SHOULD include a Retry-After header field to indicate that it is temporary and after what time the requesting agent MAY try again.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S117",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "413_temporary_condition",
+      "pre_cond": "server.body_too_large_condition = temporary",
+      "post_cond": "response.includes_retry_after = true",
+      "actions": [
+        "include Retry-After header in 413 response"
+      ],
+      "modality": "should"
+    }
+  ]
+}

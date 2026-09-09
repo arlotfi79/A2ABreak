@@ -1,0 +1,154 @@
+{
+  "section_id": "S078",
+  "title": "S078 12.2.1.2 Processing the Responses",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S078 12.2.1.2 Processing the Responses"
+  ],
+  "url_anchor": "#s078-12212-processing-the-responses",
+  "word_count": 194,
+  "statement_count": 6,
+  "elapsed_seconds": 54.1,
+  "statements": [
+    {
+      "statement_id": "D-S078-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the client transaction returns a timeout, this is treated as a 408 (Request Timeout) response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "UAC",
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_transaction_timeout",
+      "pre_cond": null,
+      "post_cond": "response.status_code = 408",
+      "actions": [
+        "treat timeout as 408 Request Timeout response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S078-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "When a UAC receives a 2xx response to a target refresh request, it MUST replace the dialog's remote target URI with the URI from the Contact header field in that response, if present.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S078",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_2xx_target_refresh_response",
+      "pre_cond": "response.contact_header != null",
+      "post_cond": "dialog.remote_target_uri = response.contact_uri",
+      "actions": [
+        "replace dialog remote target URI with Contact header URI from response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S078-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the response for a request within a dialog is a 481 (Call/Transaction Does Not Exist), the UAC SHOULD terminate the dialog.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S078",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "receive_481_within_dialog",
+      "pre_cond": null,
+      "post_cond": "dialog.state = Terminated",
+      "actions": [
+        "terminate dialog"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S078-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the response for a request within a dialog is a 408 (Request Timeout), the UAC SHOULD terminate the dialog.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S078",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "receive_408_within_dialog",
+      "pre_cond": null,
+      "post_cond": "dialog.state = Terminated",
+      "actions": [
+        "terminate dialog"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S078-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A UAC SHOULD also terminate a dialog if no response at all is received for the request (the client transaction would inform the TU about the timeout.)",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S078",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "no_response_timeout",
+      "pre_cond": null,
+      "post_cond": "dialog.state = Terminated",
+      "actions": [
+        "terminate dialog"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S078-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "For INVITE initiated dialogs, terminating the dialog consists of sending a BYE.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "terminate_dialog",
+      "pre_cond": "dialog.initiated_by = INVITE",
+      "post_cond": "dialog.state = Terminated",
+      "actions": [
+        "send BYE"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

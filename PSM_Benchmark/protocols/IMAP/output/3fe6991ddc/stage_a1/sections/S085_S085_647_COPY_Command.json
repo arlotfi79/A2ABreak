@@ -1,0 +1,133 @@
+{
+  "section_id": "S085",
+  "title": "S085 6.4.7 COPY Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S085 6.4.7 COPY Command"
+  ],
+  "url_anchor": "#s085-647-copy-command",
+  "word_count": 284,
+  "statement_count": 5,
+  "elapsed_seconds": 35.19,
+  "statements": [
+    {
+      "statement_id": "D-S085-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "COPY command copies the specified message(s) to the end of the specified destination mailbox; result OK - copy completed.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S085",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "COPY command with valid sequence set and existing destination mailbox",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "server.response = OK & server.response_code = COPYUID",
+      "actions": [
+        "copy messages to destination mailbox",
+        "preserve flags and internal date",
+        "send COPYUID response code",
+        "send tagged OK response"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S085-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the destination mailbox does not exist, a server MUST return an error. It MUST NOT automatically create the mailbox. Unless it is certain that the destination mailbox can not be created, the server MUST send the response code '[TRYCREATE]' as the prefix of the text of the tagged NO response.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S085",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "COPY command with non-existent destination mailbox",
+      "pre_cond": "protocol.state = Selected & destination_mailbox.exists = false",
+      "post_cond": "server.response = NO & server.response_code = TRYCREATE",
+      "actions": [
+        "send tagged NO response with [TRYCREATE] prefix"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S085-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the COPY command is unsuccessful for any reason, server implementations MUST restore the destination mailbox to its state before the COPY attempt, i.e., partial copy MUST NOT be done.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S085",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "COPY command failure",
+      "pre_cond": "protocol.state = Selected & copy.successful = false",
+      "post_cond": "destination_mailbox.state = destination_mailbox.state_before_copy",
+      "actions": [
+        "restore destination mailbox to pre-COPY state",
+        "send tagged NO response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S085-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "On successful completion of a COPY, the server returns a COPYUID response code. In the case of a mailbox that has permissions set so that the client can COPY to the mailbox, but not SELECT or EXAMINE it, the server MUST NOT send a COPYUID response code as it would disclose information about the mailbox.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "object_name": "tagged OK response",
+      "field_name": "COPYUID",
+      "field_type": "response code",
+      "required": true,
+      "allowed_values": [
+        "COPYUID uid-validity source-uids destination-uids"
+      ],
+      "guard_semantics": "MUST be sent on COPY success unless mailbox.permission.select = false; MUST NOT be sent if client lacks SELECT or EXAMINE permission on destination; MAY be omitted if mailbox.status = UIDNOTSTICKY"
+    },
+    {
+      "statement_id": "D-S085-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result BAD - command unknown or arguments invalid.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S085",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "COPY command with unknown command or invalid arguments",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "server.response = BAD",
+      "actions": [
+        "send tagged BAD response"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

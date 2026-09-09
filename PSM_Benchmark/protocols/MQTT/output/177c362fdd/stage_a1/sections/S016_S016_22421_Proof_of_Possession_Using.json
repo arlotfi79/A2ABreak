@@ -1,0 +1,85 @@
+{
+  "section_id": "S016",
+  "title": "S016 2.2.4.2.1 Proof of Possession Using a Challenge from the TLS Session",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S016 2.2.4.2.1 Proof of Possession Using a Challenge from the TLS Session"
+  ],
+  "url_anchor": "#s016-22421-proof-of-possession-using-a-challenge-from-the-tls-session",
+  "word_count": 175,
+  "statement_count": 3,
+  "elapsed_seconds": 23.3,
+  "statements": [
+    {
+      "statement_id": "D-S016-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The token is also validated, as described in Section 2.2.5, and the Broker responds with a CONNACK packet with the appropriate response code.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S016",
+      "actors": [
+        "client",
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT received with PoP Authentication Data (token length, token, MAC or signature over TLS exporter content)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "validate_token",
+        "send_CONNACK_with_appropriate_response_code"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S016-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Data inside the Client's CONNECT packet MUST contain the two-byte integer token length, the token, and the keyed message digest (MAC) or the Client signature.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S016",
+      "object_name": "CONNECT",
+      "field_name": "Authentication Data",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "token_length (2 bytes)",
+        "token",
+        "MAC or Client signature over TLS exporter content"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S016-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client cannot reauthenticate using this method during the same TLS session.",
+      "is_inferred": false,
+      "confidence": 0.72,
+      "source_section": "S016",
+      "actors": [
+        "client",
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "reauthentication_attempt_via_PoP_TLS_exporter",
+      "pre_cond": "session.tls_session = active & session.pop_tls_exporter_auth_used = true",
+      "post_cond": null,
+      "actions": [
+        "reject_reauthentication"
+      ],
+      "modality": "must"
+    }
+  ]
+}

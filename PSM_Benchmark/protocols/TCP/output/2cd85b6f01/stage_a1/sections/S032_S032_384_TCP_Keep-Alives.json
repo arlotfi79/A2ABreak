@@ -1,0 +1,93 @@
+{
+  "section_id": "S032",
+  "title": "S032 3.8.4 TCP Keep-Alives",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S032 3.8.4 TCP Keep-Alives"
+  ],
+  "url_anchor": "#s032-384-tcp-keep-alives",
+  "word_count": 249,
+  "statement_count": 4,
+  "elapsed_seconds": 24.85,
+  "statements": [
+    {
+      "statement_id": "D-S032-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "A TCP connection is said to be 'idle' if for some long amount of time there have been no incoming segments received and there is no new or unacknowledged data to be sent.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S032",
+      "state_name": "idle",
+      "enum_name": "TCP_CONNECTION_ACTIVITY_STATE",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.incoming_segments_received = false & connection.new_or_unacknowledged_data_pending = false"
+    },
+    {
+      "statement_id": "D-S032-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "The application MUST be able to turn keep-alives on or off for each TCP connection (MUST-24), and they MUST default to off (MUST-25).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "object_name": "TCP connection",
+      "field_name": "keep_alive_enabled",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "on",
+        "off"
+      ],
+      "guard_semantics": "default = off"
+    },
+    {
+      "statement_id": "D-S032-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "tcp_fsm",
+      "description": "Keep-alive packets MUST only be sent when no sent data is outstanding, and no data or acknowledgment packets have been received for the connection within an interval (MUST-26). This interval MUST be configurable (MUST-27) and MUST default to no less than two hours (MUST-28).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "object_name": "keep-alive timer",
+      "field_name": "keep_alive_interval",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "default >= 7200 seconds; must be configurable"
+    },
+    {
+      "statement_id": "D-S032-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "To confirm that an idle connection is still active, these implementations send a probe segment designed to elicit a response from the TCP peer. Keep-alive packets MUST only be sent when no sent data is outstanding, and no data or acknowledgment packets have been received for the connection within an interval.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S032",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": "idle",
+      "to_state": "idle",
+      "trigger": "keep-alive interval expires",
+      "pre_cond": "connection.keep_alive_enabled = true & connection.sent_data_outstanding = false & connection.data_or_ack_received_within_interval = false",
+      "post_cond": "keep_alive_probe_sent = true",
+      "actions": [
+        "send keep-alive probe segment with SEG.SEQ = SND.NXT-1"
+      ],
+      "modality": "must"
+    }
+  ]
+}

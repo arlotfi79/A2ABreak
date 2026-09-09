@@ -1,0 +1,193 @@
+{
+  "section_id": "S025",
+  "title": "S025 6.2 OPEN Message Error Handling",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S025 6.2 OPEN Message Error Handling"
+  ],
+  "url_anchor": "#s025-62-open-message-error-handling",
+  "word_count": 301,
+  "statement_count": 8,
+  "elapsed_seconds": 47.97,
+  "statements": [
+    {
+      "statement_id": "D-S025-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "All errors detected while processing the OPEN message MUST be indicated by sending the NOTIFICATION message with the Error Code OPEN Message Error.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S025",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_message_error_detected",
+      "pre_cond": null,
+      "post_cond": "notification_sent = true",
+      "actions": [
+        "send NOTIFICATION(Error Code=OPEN Message Error)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the version number in the Version field of the received OPEN message is not supported, then the Error Subcode MUST be set to Unsupported Version Number.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S025",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received_unsupported_version",
+      "pre_cond": "open_message.version_supported = false",
+      "post_cond": "notification_sent = true",
+      "actions": [
+        "send NOTIFICATION(Error Code=OPEN Message Error, Subcode=Unsupported Version Number, Data=largest_locally_supported_version)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the Autonomous System field of the OPEN message is unacceptable, then the Error Subcode MUST be set to Bad Peer AS.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S025",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received_bad_peer_AS",
+      "pre_cond": "open_message.autonomous_system_acceptable = false",
+      "post_cond": "notification_sent = true",
+      "actions": [
+        "send NOTIFICATION(Error Code=OPEN Message Error, Subcode=Bad Peer AS)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the Hold Time field of the OPEN message is unacceptable, then the Error Subcode MUST be set to Unacceptable Hold Time. An implementation MUST reject Hold Time values of one or two seconds.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S025",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received_unacceptable_hold_time",
+      "pre_cond": "open_message.hold_time_acceptable = false | open_message.hold_time = 1 | open_message.hold_time = 2",
+      "post_cond": "notification_sent = true",
+      "actions": [
+        "send NOTIFICATION(Error Code=OPEN Message Error, Subcode=Unacceptable Hold Time)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the BGP Identifier field of the OPEN message is syntactically incorrect, then the Error Subcode MUST be set to Bad BGP Identifier.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S025",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received_bad_BGP_identifier",
+      "pre_cond": "open_message.bgp_identifier_valid = false",
+      "post_cond": "notification_sent = true",
+      "actions": [
+        "send NOTIFICATION(Error Code=OPEN Message Error, Subcode=Bad BGP Identifier)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If one of the Optional Parameters in the OPEN message is not recognized, then the Error Subcode MUST be set to Unsupported Optional Parameters.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S025",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received_unrecognized_optional_parameter",
+      "pre_cond": "open_message.optional_parameter_recognized = false",
+      "post_cond": "notification_sent = true",
+      "actions": [
+        "send NOTIFICATION(Error Code=OPEN Message Error, Subcode=Unsupported Optional Parameters)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If one of the Optional Parameters in the OPEN message is recognized, but is malformed, then the Error Subcode MUST be set to 0 (Unspecific).",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S025",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received_malformed_optional_parameter",
+      "pre_cond": "open_message.optional_parameter_recognized = true & open_message.optional_parameter_well_formed = false",
+      "post_cond": "notification_sent = true",
+      "actions": [
+        "send NOTIFICATION(Error Code=OPEN Message Error, Subcode=Unspecific)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "An implementation that accepts a Hold Time MUST use the negotiated value for the Hold Time.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S025",
+      "object_name": "session",
+      "field_name": "HoldTime",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "hold_time_accepted = true => session.HoldTime = negotiated_hold_time"
+    }
+  ]
+}

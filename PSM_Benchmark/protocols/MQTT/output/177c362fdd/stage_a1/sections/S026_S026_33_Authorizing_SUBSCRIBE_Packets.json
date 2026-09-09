@@ -1,0 +1,128 @@
+{
+  "section_id": "S026",
+  "title": "S026 3.3 Authorizing SUBSCRIBE Packets",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S026 3.3 Authorizing SUBSCRIBE Packets"
+  ],
+  "url_anchor": "#s026-33-authorizing-subscribe-packets",
+  "word_count": 262,
+  "statement_count": 5,
+  "elapsed_seconds": 27.74,
+  "statements": [
+    {
+      "statement_id": "D-S026-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "On receiving the SUBSCRIBE packet, the Broker MUST use the type of packet (i.e., SUBSCRIBE) and the Topic Filter in the packet header to match against the scope field of the stored token or introspection result.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SUBSCRIBE received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "match Topic Filter against scope field of stored token or introspection result"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S026-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "As a response to the SUBSCRIBE packet, the Broker issues a SUBACK packet. For each Topic Filter, the SUBACK packet includes a return code matching the QoS level for the corresponding Topic Filter.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SUBSCRIBE authorized",
+      "pre_cond": "topic_filter = subset_of(token.scope.topic_filter)",
+      "post_cond": null,
+      "actions": [
+        "send SUBACK with QoS return code for each authorized Topic Filter"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S026-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "In the case of failure, the return code is 0x87, indicating that the Client is not authorized.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SUBSCRIBE not authorized",
+      "pre_cond": "topic_filter != subset_of(token.scope.topic_filter)",
+      "post_cond": null,
+      "actions": [
+        "send SUBACK with return code 0x87 (Not Authorized) for each unauthorized Topic Filter"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S026-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MAY return 0x80 (Unspecified error) if they do not want to leak the Topic Names to unauthorized clients.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SUBSCRIBE not authorized",
+      "pre_cond": "topic_filter != subset_of(token.scope.topic_filter)",
+      "post_cond": null,
+      "actions": [
+        "send SUBACK with return code 0x80 (Unspecified Error) instead of 0x87"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S026-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "A reason code is returned for each Topic Filter. Therefore, the Client may receive success codes for a subset of its Topic Filters while being unauthorized for the rest.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S026",
+      "object_name": "SUBACK",
+      "field_name": "reason_code",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "QoS level",
+        "0x87",
+        "0x80"
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

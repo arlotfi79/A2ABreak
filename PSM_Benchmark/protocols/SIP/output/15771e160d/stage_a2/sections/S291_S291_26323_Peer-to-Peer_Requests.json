@@ -1,0 +1,118 @@
+{
+  "section_id": "S291",
+  "title": "S291 26.3.2.3 Peer-to-Peer Requests",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S291 26.3.2.3 Peer-to-Peer Requests"
+  ],
+  "url_anchor": "#s291-26323-peer-to-peer-requests",
+  "word_count": 368,
+  "statement_count": 4,
+  "elapsed_seconds": 48.03,
+  "statements": [
+    {
+      "statement_id": "N-S291-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When Carol wishes to send an INVITE to \"bob@biloxi.com\", her UA SHOULD initiate a TLS connection with the biloxi proxy directly (using the mechanism described in [4] to determine how to best to reach the given Request-URI).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S291",
+      "actors": [
+        "Carol",
+        "Carol's UA",
+        "biloxi proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE_send_intent_no_outbound_proxy",
+      "pre_cond": "ua.outbound_proxy = none & ua.intent = send_INVITE",
+      "post_cond": "tls_connection.established = true",
+      "actions": [
+        "Initiate TLS connection with biloxi proxy directly using Request-URI resolution mechanism"
+      ],
+      "modality": "should",
+      "id": "N-S291-001"
+    },
+    {
+      "statement_id": "N-S291-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When her UA receives a certificate from the biloxi proxy, it SHOULD be verified normally before she passes her INVITE across the TLS connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S291",
+      "actors": [
+        "Carol's UA",
+        "biloxi proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "certificate_received_from_proxy",
+      "pre_cond": "tls_connection.pending = true & certificate.received = true",
+      "post_cond": "certificate.verified = true",
+      "actions": [
+        "Verify received certificate normally",
+        "Pass INVITE across TLS connection only after successful verification"
+      ],
+      "modality": "should",
+      "id": "N-S291-002"
+    },
+    {
+      "statement_id": "N-S291-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The biloxi proxy MAY also have a strict policy that precludes it from even bothering to challenge requests that do not have biloxi.com in the \"domainname\" portion of the From header field - it treats these users as unauthenticated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S291",
+      "actors": [
+        "biloxi proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_with_non_local_From_domain",
+      "pre_cond": "request.From.domainname != \"biloxi.com\"",
+      "post_cond": "request.user.status = unauthenticated",
+      "actions": [
+        "Skip challenge issuance",
+        "Treat requesting user as unauthenticated"
+      ],
+      "modality": "may",
+      "id": "N-S291-003"
+    },
+    {
+      "statement_id": "N-S291-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Carol SHOULD then establish a TCP connection with the designated address and send a new INVITE with a Request-URI containing the received contact address (recomputing the signature in the body as the request is readied).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S291",
+      "actors": [
+        "Carol"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "redirection_response_received",
+      "pre_cond": "redirection_response.received = true & contact_address.available = true",
+      "post_cond": "tcp_connection.established = true & new_INVITE.sent = true & signature.recomputed = true",
+      "actions": [
+        "Establish TCP connection with designated contact address",
+        "Recompute body signature",
+        "Send new INVITE with Request-URI set to received contact address"
+      ],
+      "modality": "should",
+      "id": "N-S291-004"
+    }
+  ]
+}

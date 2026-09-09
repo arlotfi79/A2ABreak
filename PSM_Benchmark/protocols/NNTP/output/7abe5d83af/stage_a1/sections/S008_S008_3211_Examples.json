@@ -1,0 +1,250 @@
+{
+  "section_id": "S008",
+  "title": "S008 3.2.1.1 Examples",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S008 3.2.1.1 Examples"
+  ],
+  "url_anchor": "#s008-3211-examples",
+  "word_count": 316,
+  "statement_count": 10,
+  "elapsed_seconds": 203.69,
+  "statements": [
+    {
+      "statement_id": "D-S008-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "[Server closes connection.] \u2014 example of the server needing to close down immediately after sending a 400 response",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S008",
+      "state_name": "CONNECTION_CLOSED",
+      "enum_name": "ConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S008-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of the server needing to close down immediately: [C] ARTICLE 123 [S] 400 Power supply failed, running on UPS [Server closes connection.]",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "CONNECTION_CLOSED",
+      "trigger": "server_400_immediate_shutdown",
+      "pre_cond": null,
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "send_400_response",
+        "close_connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S008-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Example of an attempt to access a facility not available to this connection: [C] MODE READER [S] 200 Reader mode, posting permitted",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "READER_MODE",
+      "trigger": "MODE_READER_accepted",
+      "pre_cond": null,
+      "post_cond": "session.mode = READER",
+      "actions": [
+        "send_200_Reader_mode_posting_permitted"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S008-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "In reader mode, IHAVE is not available: [C] IHAVE <i.am.an.article.you.will.want@example.com> [S] 500 Permission denied",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "READER_MODE",
+      "to_state": "READER_MODE",
+      "trigger": "IHAVE_command",
+      "pre_cond": "session.mode = READER",
+      "post_cond": null,
+      "actions": [
+        "send_500_Permission_denied"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S008-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Example of an attempt to access a facility requiring authentication: [C] GROUP secret.group [S] 480 Permission denied",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "GROUP_command_unauthenticated",
+      "pre_cond": "session.authenticated = false",
+      "post_cond": null,
+      "actions": [
+        "send_480_Permission_denied"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S008-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Example of a successful attempt following authentication: [C] XSECRET fred flintstone [S] 290 Password for fred accepted [C] GROUP secret.group [S] 211 5 1 20 secret.group selected",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "AUTHENTICATED",
+      "trigger": "XSECRET_success",
+      "pre_cond": null,
+      "post_cond": "session.authenticated = true",
+      "actions": [
+        "send_290_password_accepted"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S008-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Example of an attempt to access a facility requiring privacy: [C] GROUP secret.group [S] 483 Secure connection required",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "GROUP_command_unencrypted",
+      "pre_cond": "session.encrypted = false",
+      "post_cond": null,
+      "actions": [
+        "send_483_Secure_connection_required"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S008-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Example: [C] XENCRYPT [Client and server negotiate encryption on the link] [S] 283 Encrypted link established",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "ENCRYPTED",
+      "trigger": "XENCRYPT_negotiation_success",
+      "pre_cond": null,
+      "post_cond": "session.encrypted = true",
+      "actions": [
+        "negotiate_encryption",
+        "send_283_Encrypted_link_established"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S008-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Example of a need to change mode before a facility is used: [C] GROUP binary.group [S] 401 XHOST Not on this virtual host",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "GROUP_command_wrong_virtual_host",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send_401_not_on_this_virtual_host"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S008-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Example: [C] XHOST binary.news.example.org [S] 290 binary.news.example.org virtual host selected; subsequently [C] GROUP binary.group [S] 211 5 1 77 binary.group selected",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "XHOST_command_success",
+      "pre_cond": null,
+      "post_cond": "session.virtual_host = binary.news.example.org",
+      "actions": [
+        "send_290_virtual_host_selected"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

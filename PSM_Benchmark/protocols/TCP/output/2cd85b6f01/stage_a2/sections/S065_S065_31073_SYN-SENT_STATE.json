@@ -1,0 +1,108 @@
+{
+  "section_id": "S065",
+  "title": "S065 3.10.7.3 SYN-SENT STATE",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S065 3.10.7.3 SYN-SENT STATE"
+  ],
+  "url_anchor": "#s065-31073-syn-sent-state",
+  "word_count": 577,
+  "statement_count": 4,
+  "elapsed_seconds": 107.9,
+  "statements": [
+    {
+      "statement_id": "1-S065-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "A TCP implementation that supports the mitigation described in RFC 5961 SHOULD first check that the sequence number exactly matches RCV.NXT prior to executing the action in the next paragraph.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": null,
+      "trigger": "RST_bit_set",
+      "pre_cond": "protocol.state = SYN-SENT & segment.RST = 1 & implementation.supports_RFC5961_mitigation = true",
+      "post_cond": null,
+      "actions": [
+        "verify SEG.SEQ = RCV.NXT before executing RST processing action"
+      ],
+      "modality": "should",
+      "id": "N-S065-001"
+    },
+    {
+      "statement_id": "2-S065-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "state_machine",
+      "stage": "tcp_fsm",
+      "description": "This step should be reached only if the ACK is ok, or there is no ACK, and the segment did not contain a RST.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [],
+      "from_state": "SYN-SENT",
+      "to_state": null,
+      "trigger": "SYN_bit_check_entry",
+      "pre_cond": "(ACK_acceptable = true | segment.ACK = 0) & segment.RST = 0",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S065-002"
+    },
+    {
+      "statement_id": "3-S065-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "SND.UNA should be advanced to equal SEG.ACK (if there is an ACK), and any segments on the retransmission queue that are thereby acknowledged should be removed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": null,
+      "trigger": "SYN_received_with_acceptable_security_and_ACK",
+      "pre_cond": "protocol.state = SYN-SENT & segment.SYN = 1 & security.compartment_match = true & segment.ACK = 1",
+      "post_cond": "SND.UNA = SEG.ACK & retransmission_queue.acknowledged_segments_removed = true",
+      "actions": [
+        "set SND.UNA = SEG.ACK",
+        "remove acknowledged segments from retransmission queue"
+      ],
+      "modality": "should",
+      "id": "N-S065-003"
+    },
+    {
+      "statement_id": "4-S065-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Data or controls that were queued for transmission MAY be included.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "ESTABLISHED",
+      "trigger": "SYN_received_with_acceptable_ACK_and_SND.UNA_greater_than_ISS",
+      "pre_cond": "protocol.state = SYN-SENT & segment.SYN = 1 & segment.ACK = 1 & SND.UNA > ISS",
+      "post_cond": null,
+      "actions": [
+        "optionally include queued data or controls in outgoing ACK segment"
+      ],
+      "modality": "may",
+      "id": "N-S065-004"
+    }
+  ]
+}

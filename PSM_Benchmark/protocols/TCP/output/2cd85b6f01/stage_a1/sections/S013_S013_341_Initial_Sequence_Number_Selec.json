@@ -1,0 +1,124 @@
+{
+  "section_id": "S013",
+  "title": "S013 3.4.1 Initial Sequence Number Selection",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S013 3.4.1 Initial Sequence Number Selection"
+  ],
+  "url_anchor": "#s013-341-initial-sequence-number-selection",
+  "word_count": 784,
+  "statement_count": 5,
+  "elapsed_seconds": 43.93,
+  "statements": [
+    {
+      "statement_id": "D-S013-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "the TIME-WAIT state limits the rate of connection reuse, protecting against ambiguity about which incarnation of a connection an incoming packet corresponds to",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "state_name": "TIME-WAIT",
+      "enum_name": "TCPState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TIME-WAIT"
+    },
+    {
+      "statement_id": "D-S013-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "Step 1 of three-way handshake: A --> B SYN my sequence number is X",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S013",
+      "actors": [
+        "A",
+        "B"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "active open / send SYN",
+      "pre_cond": null,
+      "post_cond": "peer.received_syn = true & peer.iss_x_known = true",
+      "actions": [
+        "send SYN with ISN=X"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S013-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "Steps 2 and 3 of three-way handshake (combined): A <-- B ACK your sequence number is X / SYN my sequence number is Y",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S013",
+      "actors": [
+        "A",
+        "B"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive SYN",
+      "pre_cond": "peer.received_syn = true",
+      "post_cond": "peer.ack_x_sent = true & peer.syn_y_sent = true",
+      "actions": [
+        "send ACK of sequence number X",
+        "send SYN with ISN=Y"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S013-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "Step 4 of three-way handshake: A --> B ACK your sequence number is Y; completes connection establishment",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S013",
+      "actors": [
+        "A",
+        "B"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive SYN+ACK",
+      "pre_cond": "peer.syn_y_sent = true & peer.ack_x_sent = true",
+      "post_cond": "connection.synchronized = true",
+      "actions": [
+        "send ACK of sequence number Y"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S013-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "For a connection to be established or initialized, the two TCP peers must synchronize on each other's initial sequence numbers via an exchange of segments carrying the SYN control bit",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "object_name": "connection-establishing segment",
+      "field_name": "SYN",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "1"
+      ],
+      "guard_semantics": "must be set during three-way handshake to synchronize ISNs"
+    }
+  ]
+}

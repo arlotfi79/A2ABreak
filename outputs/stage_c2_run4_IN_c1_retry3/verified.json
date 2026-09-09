@@ -1,0 +1,185 @@
+{
+  "findings": [
+    {
+      "finding_id": "F-001",
+      "candidate_id": "retry3:C-001",
+      "title": "Push Notification Authentication Optionality Creates Unauthenticated Webhook Channel Permitting Notification Forgery",
+      "severity": "MEDIUM",
+      "description": "The A2A protocol's PushNotificationConfig type defines the authentication field as optional (authentication?: PushNotificationAuthenticationInfo), permitting fully compliant clients to create push notification configurations with no authentication mechanism. The normative specification's MUST for server self-authentication ('The agent MUST include authentication credentials in the request headers as specified in PushNotificationConfig.authentication field') is conditional on the authentication field being populated and is vacuously satisfied when the field is absent. The token field is also optional with no normative verification semantics defined. Meanwhile, the Streaming & Asynchronous Operations guide states the webhook 'MUST rigorously verify the authenticity of incoming notification requests,' mandating an outcome without providing a mechanism to achieve it when no authentication is configured. The result is that a fully compliant deployment using push notifications without the optional authentication field creates an unauthenticated notification delivery channel: any party who discovers the webhook URL can forge HTTP POST requests containing arbitrary StreamResponse payloads (spoofed task state transitions, malicious artifact references, or fake TASK_STATE_AUTH_REQUIRED directing clients to attacker-controlled auth endpoints), which the client's webhook has no protocol-defined means to distinguish from genuine server notifications.",
+      "fsm_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "authenticated",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Legitimate client authenticates with valid credentials. Server transitions to REQUEST_AUTHORIZED.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 2,
+          "stage": "initiation",
+          "state": "TASK_STATE_NONEXISTENT",
+          "transition": "message_send",
+          "actor": "client",
+          "note": "Client sends message/send with pushNotificationConfig containing only url field. authentication and token fields are omitted (both optional per spec). Server accepts — no normative requirement mandates authentication be present.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 3,
+          "stage": "initiation",
+          "state": "TASK_STATE_SUBMITTED",
+          "transition": "task_creation",
+          "actor": "server",
+          "note": "Server creates task and stores push notification config. Config lacks authentication details — server will deliver unauthenticated POST requests to the webhook URL.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 4,
+          "stage": "task_execution",
+          "state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+          "transition": "create_push_notification_config_requested",
+          "actor": "server",
+          "note": "Push notification config transitions to active. Guard checks only capability support, not that authentication is configured. The unauthenticated notification channel is now established.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 5,
+          "stage": "task_execution",
+          "state": "PUSH_NOTIFICATION_RECEIVED",
+          "transition": "forged_POST_to_webhook",
+          "actor": "attacker",
+          "note": "Attacker who has discovered the webhook URL sends a forged HTTP POST with a StreamResponse payload containing e.g. TASK_STATE_AUTH_REQUIRED directing the client to an attacker-controlled auth endpoint. The FSM does not model the delivery path (server vs attacker); the state PUSH_NOTIFICATION_RECEIVED is reached directly.",
+          "is_reconstructed": true
+        },
+        {
+          "step": 6,
+          "stage": "task_execution",
+          "state": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+          "transition": "webhook_request_received",
+          "actor": "client",
+          "note": "Client's webhook receives the forged notification. The FSM guard expects 'authentication credentials present' but no authentication was configured. The guard is vacuously satisfied. Client acknowledges the forged notification with HTTP 2xx, processing it identically to a genuine notification.",
+          "is_reconstructed": false
+        }
+      ],
+      "missing_primitive": "A mandatory minimum authentication mechanism for all push notification deliveries. The protocol should either: (1) make PushNotificationConfig.authentication REQUIRED rather than optional, or (2) define a built-in notification signing mechanism (e.g., HMAC of the payload using a server-generated key shared at config creation) that applies automatically as a baseline, or (3) make PushNotificationConfig.token REQUIRED and define normative verification semantics for webhook receivers.",
+      "confirmed_absent": true,
+      "confirmed_not_by_design": true,
+      "spec_sections_checked": [
+        "3.1",
+        "4.3",
+        "7.4",
+        "7.5",
+        "13.2",
+        "streaming-and-async topics"
+      ],
+      "preventing_rule_checked_and_absent": true,
+      "source_ids": [
+        "D-3-1-043",
+        "D-3-1-042",
+        "D-13-2-002",
+        "D-13-2-003"
+      ]
+    },
+    {
+      "finding_id": "F-002",
+      "candidate_id": "retry3:C-002",
+      "title": "Absent Server-Initiated Timeout or Failure Transitions from Interrupted Task States Enables Indefinite Resource Holding",
+      "severity": "HIGH",
+      "description": "The A2A task state machine enforces strict transition rules with a normative 'An agent implementation MUST NOT transition a task to an invalid state.' The valid transition table defines exits from interrupted states (TASK_STATE_INPUT_REQUIRED, TASK_STATE_AUTH_REQUIRED) only to TASK_STATE_WORKING (requiring client-provided input/credentials) or TASK_STATE_CANCELED (via the client-initiated CancelTask RPC). Critically, no transition from either interrupted state to TASK_STATE_FAILED exists in the valid transition table, and the protocol defines no server-initiated timeout, expiration, or garbage collection mechanism for tasks in these states. While the server controls task state and the INPUT_REQUIRED→CANCELED transition is technically valid, the protocol provides no defined trigger (timeout, max-duration parameter, or server-side cleanup operation) for when the server should exercise this option. The spec's 'Agents MAY implement context expiration or cleanup policies' is vague delegation addressing context-level concerns without defining task state transition mechanics or reconciling with the MUST NOT constraint. A malicious or disconnected client can drive multiple tasks into interrupted states by sending underspecified messages (triggering INPUT_REQUIRED) or operations requiring secondary credentials (triggering AUTH_REQUIRED), then abandon them. The server holds all associated resources (task state, context, history, push notification configurations) with no protocol-defined mechanism to reclaim them through a FAILED transition that accurately indicates the reason for termination.",
+      "fsm_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "authenticated",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Malicious client authenticates with valid credentials and is authorized.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 2,
+          "stage": "initiation",
+          "state": "TASK_STATE_NONEXISTENT",
+          "transition": "send_message_requested",
+          "actor": "client",
+          "note": "Client sends a deliberately underspecified message. Repeated for N tasks to amplify resource consumption.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 3,
+          "stage": "initiation",
+          "state": "TASK_STATE_WORKING",
+          "transition": "task_processing_continues",
+          "actor": "server",
+          "note": "Server creates task and begins processing. Task transitions to WORKING, then crosses inter-stage to task_execution phase.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 4,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "agent_requests_input",
+          "actor": "server",
+          "note": "Agent determines the underspecified message requires clarification and transitions task to INPUT_REQUIRED. This is normal, compliant server behavior.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 5,
+          "stage": "task_execution",
+          "state": "TASK_STATE_INPUT_REQUIRED",
+          "transition": "input_requested",
+          "actor": "server",
+          "note": "Task crosses inter-stage to interruption phase as INPUT_REQUIRED.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 6,
+          "stage": "interruption",
+          "state": "TASK_STATE_INPUT_REQUIRED",
+          "transition": "none_available_server_side",
+          "actor": "client",
+          "note": "Client disconnects and abandons the task. The FSM defines only two exits: client_sends_input→WORKING or cancel_task_requested→CANCELED. Both require client action. No transition to FAILED exists. No timeout mechanism is defined. The server holds all task resources indefinitely with no protocol-compliant path to FAILED. Repeating steps 2-6 for N tasks creates N permanently stranded tasks.",
+          "is_reconstructed": false
+        }
+      ],
+      "missing_primitive": "Protocol-defined timeout or server-initiated failure transitions from interrupted states. Specifically needed: (1) Valid transitions INPUT_REQUIRED→FAILED and AUTH_REQUIRED→FAILED in the state transition table, (2) A protocol-level timeout mechanism (e.g., a max_interruption_duration field in TaskStatus or AgentCard capabilities), (3) A TASK_TIMEOUT error/reason type that signals the cause of the transition. The existing 'Agents MAY implement context expiration or cleanup policies' is context-level delegation that does not address task state machine constraints.",
+      "confirmed_absent": true,
+      "confirmed_not_by_design": true,
+      "spec_sections_checked": [
+        "3.2",
+        "3.4",
+        "4.1",
+        "4.3",
+        "7.6",
+        "9.4",
+        "life-of-a-task topics",
+        "specification section on state transitions"
+      ],
+      "preventing_rule_checked_and_absent": true,
+      "source_ids": [
+        "D-4-1-007",
+        "D-4-1-009",
+        "D-3-4-001",
+        "D-7-6-001",
+        "N-3-2-004"
+      ]
+    }
+  ],
+  "discarded": [],
+  "verified_properties": [
+    {
+      "property": "Terminal State Immutability",
+      "evidence": "FSM states termination:TASK_STATE_COMPLETED, termination:TASK_STATE_FAILED, termination:TASK_STATE_CANCELED, and termination:TASK_STATE_REJECTED are all marked is_final: true with no outgoing transitions to non-terminal states. The FSM includes a self-loop on termination:TASK_STATE_TERMINAL (trigger: cancel_task) that keeps the task in terminal state rather than allowing any transition. The spec confirms: 'Terminal States (completed, failed, canceled, rejected, unknown) represent permanent endpoints. Once reached, the task cannot transition to any other state, and no further messages can be sent to that taskId.' (spec section 4.1, confirmed via search). The spec also states 'An agent implementation MUST NOT transition a task to an invalid state' and 'Attempting to cancel a task in completed, failed, canceled, rejected, or unknown states MUST result in a TaskNotCancelableError.' No surviving finding involves terminal state immutability."
+    },
+    {
+      "property": "Mandatory Server-Side Request Authentication",
+      "evidence": "FSM includes authentication:SERVER_VALIDATING_REQUEST state with transitions to authentication:authenticated (credentials valid) or authentication:AUTHENTICATION_FAILED (credentials invalid/absent), enforced with modality 'must'. The spec normatively states: 'MUST authenticate every incoming request based on the provided HTTP credentials and its declared authentication requirements from its Agent Card' (spec section 7.4, confirmed via search results from the authoritative specification). Authentication failure results in HTTP 401/403 responses per the spec's SHOULD directives. No surviving finding involves primary channel request authentication."
+    },
+    {
+      "property": "Stream Closure on Terminal/Interrupted State",
+      "evidence": "FSM includes transitions task_execution:STREAM_ACTIVE → task_execution:STREAM_CLOSED with guard 'task.state IN (COMPLETED, FAILED, CANCELED, REJECTED, INPUT_REQUIRED, AUTH_REQUIRED)' and modality 'must'. Similarly, interruption:STREAM_STATE_OPEN → interruption:STREAM_STATE_CLOSED and termination:STREAM_STATE_OPEN → termination:STREAM_STATE_CLOSED transitions exist with matching guards. The spec confirms: 'The stream MUST terminate when the task reaches a terminal state (completed, failed, canceled, or rejected)' (spec section 3.5, confirmed via search). No surviving finding involves stream lifecycle management."
+    }
+  ],
+  "inconclusive": []
+}

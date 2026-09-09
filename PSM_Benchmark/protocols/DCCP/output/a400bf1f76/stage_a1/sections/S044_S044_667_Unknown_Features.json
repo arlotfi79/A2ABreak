@@ -1,0 +1,165 @@
+{
+  "section_id": "S044",
+  "title": "S044 6.6.7 Unknown Features",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S044 6.6.7 Unknown Features"
+  ],
+  "url_anchor": "#s044-667-unknown-features",
+  "word_count": 186,
+  "statement_count": 7,
+  "elapsed_seconds": 30.42,
+  "statements": [
+    {
+      "statement_id": "D-S044-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "On receiving an empty Confirm option for some feature, the CHANGING endpoint MUST transition back to the STABLE state, leaving the feature's value unchanged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S044",
+      "state_name": "STABLE",
+      "enum_name": "FeatureNegotiationState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S044-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "The CHANGING endpoint that issued a Change option awaits a Confirm; it is in the CHANGING state during feature negotiation.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S044",
+      "state_name": "CHANGING",
+      "enum_name": "FeatureNegotiationState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S044-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "On receiving an empty Confirm option for some feature, the CHANGING endpoint MUST transition back to the STABLE state, leaving the feature's value unchanged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S044",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "STABLE",
+      "trigger": "receive_empty_Confirm",
+      "pre_cond": "feature_negotiation.state = CHANGING",
+      "post_cond": "feature_negotiation.state = STABLE & feature.value = feature.value_unchanged",
+      "actions": [
+        "leave feature value unchanged",
+        "enter STABLE state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S044-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "However, if the Change option was Mandatory, the connection MUST be reset.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S044",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "receive_unknown_Mandatory_Change_option",
+      "pre_cond": "Change_option.mandatory = true & feature.known = false",
+      "post_cond": null,
+      "actions": [
+        "reset connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S044-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The CHANGING endpoint SHOULD reset the connection (with Reset Code 5, 'Option Error') if it receives an empty Confirm option for such a feature [required to be understood by all DCCPs].",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S044",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "CLOSED",
+      "trigger": "receive_empty_Confirm_for_required_feature",
+      "pre_cond": "feature_negotiation.state = CHANGING & feature.required = true",
+      "post_cond": null,
+      "actions": [
+        "reset connection with Reset Code 5 (Option Error)"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S044-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints MUST respond to unknown Change options with Empty Confirm options (that is, Confirm options containing no data), which inform the CHANGING endpoint that the feature was not understood.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S044",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_unknown_Change_option",
+      "pre_cond": "Change_option.mandatory = false & feature.known = false",
+      "post_cond": null,
+      "actions": [
+        "send Empty Confirm option"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S044-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints MUST ignore any such options they receive [Confirm options referring to a feature number not understood].",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S044",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_Confirm_for_unknown_feature",
+      "pre_cond": "Confirm_option.feature.known = false",
+      "post_cond": null,
+      "actions": [
+        "ignore Confirm option"
+      ],
+      "modality": "must"
+    }
+  ]
+}

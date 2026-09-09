@@ -1,0 +1,160 @@
+{
+  "section_id": "3.5",
+  "title": "3.5. Task Update Delivery Mechanisms",
+  "depth": 3,
+  "parent_path": [
+    "3. A2A Protocol Operations",
+    "3.5. Task Update Delivery Mechanisms"
+  ],
+  "url_anchor": "#35-task-update-delivery-mechanisms",
+  "word_count": 413,
+  "statement_count": 7,
+  "elapsed_seconds": 83.26,
+  "statements": [
+    {
+      "statement_id": "D-3-5-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "When multiple streams are active for a task: Events MUST be broadcast to all active streams for that task",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "3.5.2",
+      "state_name": "STREAM_ACTIVE",
+      "enum_name": "StreamState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "stream.state = STREAM_ACTIVE"
+    },
+    {
+      "statement_id": "D-3-5-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "streaming",
+      "stage": "termination",
+      "description": "Closing one stream MUST NOT affect other active streams for the same task",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "3.5.2",
+      "state_name": "STREAM_CLOSED",
+      "enum_name": "StreamState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "stream.state = STREAM_CLOSED"
+    },
+    {
+      "statement_id": "D-3-5-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Requires AgentCard.capabilities.streaming to be true",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5.1",
+      "object_name": "AgentCard",
+      "field_name": "capabilities.streaming",
+      "field_type": "boolean",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-5-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Requires AgentCard.capabilities.pushNotifications to be true",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5.1",
+      "object_name": "AgentCard",
+      "field_name": "capabilities.pushNotifications",
+      "field_type": "boolean",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-5-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Events MUST be broadcast to all active streams for that task. Each stream MUST receive the same events in the same order. All implementations MUST deliver events in the order they were generated.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "3.5.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": "STREAM_ACTIVE",
+      "to_state": "STREAM_ACTIVE",
+      "trigger": "task_event_generated",
+      "pre_cond": "stream.state = STREAM_ACTIVE",
+      "post_cond": "event_delivered_to_stream & event_order_preserved",
+      "actions": [
+        "Event broadcast to all active streams for the task",
+        "Event delivered to each active stream in the same order it was generated",
+        "No reordering of events during transmission regardless of protocol binding"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-5-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "An agent MAY serve multiple concurrent streams to one or more clients for the same task. A client reconnecting to a task after a network interruption by opening a new stream.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "3.5.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "STREAM_ACTIVE",
+      "trigger": "stream_open",
+      "pre_cond": null,
+      "post_cond": "stream.state = STREAM_ACTIVE",
+      "actions": [
+        "New stream established for the task",
+        "Stream added to the set of active streams for the task",
+        "Client begins receiving task events on the new stream"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-3-5-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "termination",
+      "description": "Closing one stream MUST NOT affect other active streams for the same task. The task lifecycle is independent of any individual stream's lifecycle.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "3.5.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "STREAM_ACTIVE",
+      "to_state": "STREAM_CLOSED",
+      "trigger": "stream_close",
+      "pre_cond": "stream.state = STREAM_ACTIVE",
+      "post_cond": "stream.state = STREAM_CLOSED & !other_active_streams_affected & task.lifecycle_independent_of_stream",
+      "actions": [
+        "Stream transitions to closed state",
+        "All other active streams for the same task remain unaffected",
+        "Task lifecycle continues independently of the closed stream"
+      ],
+      "modality": "must"
+    }
+  ]
+}

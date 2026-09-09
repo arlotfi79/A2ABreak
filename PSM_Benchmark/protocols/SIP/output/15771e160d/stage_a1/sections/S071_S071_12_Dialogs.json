@@ -1,0 +1,177 @@
+{
+  "section_id": "S071",
+  "title": "S071 12 Dialogs",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S071 12 Dialogs"
+  ],
+  "url_anchor": "#s071-12-dialogs",
+  "word_count": 462,
+  "statement_count": 8,
+  "elapsed_seconds": 38.66,
+  "statements": [
+    {
+      "statement_id": "D-S071-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A dialog can also be in the 'early' state, which occurs when it is created with a provisional response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "state_name": "early",
+      "enum_name": "DialogState",
+      "semantic_type": "active",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "dialog.state = early"
+    },
+    {
+      "statement_id": "D-S071-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A dialog transitions to the 'confirmed' state when a 2xx final response arrives.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "state_name": "confirmed",
+      "enum_name": "DialogState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "dialog.state = confirmed"
+    },
+    {
+      "statement_id": "D-S071-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "For other responses, or if no response arrives at all on that dialog, the early dialog terminates.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S071",
+      "state_name": "terminated",
+      "enum_name": "DialogState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "dialog.state = terminated"
+    },
+    {
+      "statement_id": "D-S071-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A dialog can also be in the 'early' state, which occurs when it is created with a provisional response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": "early",
+      "trigger": "provisional_response_received",
+      "pre_cond": "response.status_code >= 100 & response.status_code < 200",
+      "post_cond": "dialog.state = early",
+      "actions": [
+        "create_dialog",
+        "assign_dialog_id",
+        "initialize_dialog_state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A dialog transitions to the 'confirmed' state when a 2xx final response arrives.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": "early",
+      "to_state": "confirmed",
+      "trigger": "2xx_final_response_received",
+      "pre_cond": "dialog.state = early & response.status_code >= 200 & response.status_code < 300",
+      "post_cond": "dialog.state = confirmed",
+      "actions": [
+        "confirm_dialog"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "For other responses, or if no response arrives at all on that dialog, the early dialog terminates.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S071",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": "early",
+      "to_state": "terminated",
+      "trigger": "non_2xx_final_response_or_no_response",
+      "pre_cond": "dialog.state = early & (response.status_code >= 300 | response.status_code = null)",
+      "post_cond": "dialog.state = terminated",
+      "actions": [
+        "terminate_dialog"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A dialog contains certain pieces of state needed for further message transmissions within the dialog. This state consists of the dialog ID, a local sequence number, a remote sequence number, a local URI, a remote URI, remote target, a boolean flag called 'secure', and a route set.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "object_name": "dialog",
+      "field_name": "secure",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S071-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A dialog is identified at each UA with a dialog ID, which consists of a Call-ID value, a local tag and a remote tag.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "object_name": "dialog",
+      "field_name": "dialog_id",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

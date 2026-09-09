@@ -1,0 +1,110 @@
+{
+  "section_id": "S289",
+  "title": "S289 Appendix H. Backwards-Compatibility Considerations",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S289 Appendix H. Backwards-Compatibility Considerations"
+  ],
+  "url_anchor": "#s289-appendix-h-backwards-compatibility-considerations",
+  "word_count": 288,
+  "statement_count": 4,
+  "elapsed_seconds": 28.46,
+  "statements": [
+    {
+      "statement_id": "D-S289-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The behavior in the server when a Play is received in Play state has changed. Any new PLAY request now takes effect immediately replacing the previous request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S289",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY request received",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Play & session.play_request = new_request",
+      "actions": [
+        "replace current PLAY with new PLAY request immediately"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S289-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "when a client closes its connection, the server may remove the RTSP session",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S289",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "session removed",
+      "trigger": "client closes connection",
+      "pre_cond": "connection.persistent = true & server.rtsp_version = 1.0",
+      "post_cond": "session.state = terminated",
+      "actions": [
+        "remove RTSP session"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S289-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the server chooses not to support RFC 2326, it MUST respond with a 505 (RTSP Version Not Supported) status code. A server MUST NOT respond to an RTSP 1.0 request with an RTSP 2.0 response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S289",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RTSP 1.0 request received",
+      "pre_cond": "server.supports_rfc2326 = false",
+      "post_cond": null,
+      "actions": [
+        "send 505 RTSP Version Not Supported response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S289-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "Clients implementing RTSP 2.0 MAY use an OPTIONS request with an RTSP-Version of 'RTSP/2.0' to determine whether a server supports RTSP 2.0. If the server responds with either an RTSP-Version of 'RTSP/1.0' or a status code of 505, the client will have to use RTSP 1.0 requests.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S289",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPTIONS response received with RTSP/1.0 version or 505 status",
+      "pre_cond": "client.rtsp_version = 2.0 & client.supports_rfc2326 = true",
+      "post_cond": "client.negotiated_version = 1.0",
+      "actions": [
+        "downgrade to RTSP 1.0 for subsequent requests"
+      ],
+      "modality": "may"
+    }
+  ]
+}

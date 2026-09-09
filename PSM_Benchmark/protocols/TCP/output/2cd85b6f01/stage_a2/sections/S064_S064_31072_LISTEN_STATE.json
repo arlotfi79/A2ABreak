@@ -1,0 +1,261 @@
+{
+  "section_id": "S064",
+  "title": "S064 3.10.7.2 LISTEN STATE",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S064 3.10.7.2 LISTEN STATE"
+  ],
+  "url_anchor": "#s064-31072-listen-state",
+  "word_count": 290,
+  "statement_count": 10,
+  "elapsed_seconds": 183.75,
+  "statements": [
+    {
+      "statement_id": "1-S064-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An incoming RST should be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "RST received",
+      "pre_cond": "connection.state = LISTEN & segment.RST = 1",
+      "post_cond": null,
+      "actions": [
+        "ignore RST segment",
+        "return"
+      ],
+      "modality": "should",
+      "id": "N-S064-001"
+    },
+    {
+      "statement_id": "2-S064-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An acceptable reset segment should be formed for any arriving ACK-bearing segment.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "ACK received",
+      "pre_cond": "connection.state = LISTEN & segment.ACK = 1",
+      "post_cond": "RST_segment.formed = true",
+      "actions": [
+        "form RST segment <SEQ=SEG.ACK><CTL=RST>",
+        "return"
+      ],
+      "modality": "should",
+      "id": "N-S064-002"
+    },
+    {
+      "statement_id": "3-S064-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "tcp_fsm",
+      "description": "The RST should be formatted as follows: <SEQ=SEG.ACK><CTL=RST>",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S064-003"
+    },
+    {
+      "statement_id": "4-S064-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Set RCV.NXT to SEG.SEQ+1, IRS is set to SEG.SEQ, and any other control or text should be queued for processing later.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "SYN received",
+      "pre_cond": "connection.state = LISTEN & segment.SYN = 1 & security_match = true",
+      "post_cond": "RCV.NXT = SEG.SEQ + 1 & IRS = SEG.SEQ",
+      "actions": [
+        "set RCV.NXT to SEG.SEQ+1",
+        "set IRS to SEG.SEQ",
+        "queue additional control or text for later processing"
+      ],
+      "modality": "should",
+      "id": "N-S064-004"
+    },
+    {
+      "statement_id": "5-S064-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "ISS should be selected and a SYN segment sent of the form: <SEQ=ISS><ACK=RCV.NXT><CTL=SYN,ACK>",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "SYN received",
+      "pre_cond": "connection.state = LISTEN & segment.SYN = 1 & security_match = true",
+      "post_cond": "ISS.selected = true & SYN_ACK.sent = true",
+      "actions": [
+        "select ISS",
+        "send SYN,ACK segment <SEQ=ISS><ACK=RCV.NXT><CTL=SYN,ACK>"
+      ],
+      "modality": "should",
+      "id": "N-S064-005"
+    },
+    {
+      "statement_id": "6-S064-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "The connection state should be changed to SYN-RECEIVED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "SYN-RECEIVED",
+      "trigger": "SYN received",
+      "pre_cond": "connection.state = LISTEN & segment.SYN = 1 & security_match = true",
+      "post_cond": "connection.state = SYN-RECEIVED",
+      "actions": [
+        "set SND.NXT to ISS+1",
+        "set SND.UNA to ISS",
+        "transition connection state to SYN-RECEIVED"
+      ],
+      "modality": "should",
+      "id": "N-S064-006"
+    },
+    {
+      "statement_id": "7-S064-7",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Note that any other incoming control or data (combined with SYN) will be processed in the SYN-RECEIVED state, but processing of SYN and ACK should not be repeated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "SYN-RECEIVED",
+      "to_state": null,
+      "trigger": "queued control or data from combined SYN segment processed",
+      "pre_cond": "connection.state = SYN-RECEIVED & queued_data.from_combined_SYN = true",
+      "post_cond": null,
+      "actions": [
+        "process additional control or data",
+        "do not reprocess SYN",
+        "do not reprocess ACK"
+      ],
+      "modality": "should",
+      "id": "N-S064-007"
+    },
+    {
+      "statement_id": "8-S064-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the listen was not fully specified (i.e., the remote socket was not fully specified), then the unspecified fields should be filled in now.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "SYN received",
+      "pre_cond": "connection.state = LISTEN & segment.SYN = 1 & listen.fully_specified = false",
+      "post_cond": "remote_socket.fully_specified = true",
+      "actions": [
+        "fill in unspecified remote socket fields from incoming SYN segment"
+      ],
+      "modality": "should",
+      "id": "N-S064-008"
+    },
+    {
+      "statement_id": "9-S064-9",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "This should not be reached.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "non-RST non-ACK non-SYN segment received",
+      "pre_cond": "connection.state = LISTEN & segment.RST = 0 & segment.ACK = 0 & segment.SYN = 0",
+      "post_cond": null,
+      "actions": [
+        "drop segment",
+        "return"
+      ],
+      "modality": "should",
+      "id": "N-S064-009"
+    },
+    {
+      "statement_id": "10-S064-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "tcp_fsm",
+      "description": "Any other control or data-bearing segment (not containing SYN) must have an ACK and thus would have been discarded by the ACK processing in the second step, unless it was first discarded by RST checking in the first step.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S064-010"
+    }
+  ]
+}

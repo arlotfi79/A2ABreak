@@ -1,0 +1,55 @@
+digraph initiation {
+    rankdir=LR;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=10];
+    edge [fontname="Helvetica", fontsize=9];
+
+    // States
+    "TASK_STATE_NONEXISTENT" [fontname="Helvetica", fontsize="10", shape="doublecircle", style="filled,dashed", fillcolor="#d4edda", color="#28a745", label="TASK_STATE\nNONEXISTENT"];
+    "VERSION_NEGOTIATION_ERROR" [fontname="Helvetica", fontsize="10", shape="rectangle", style="filled", fillcolor="#f8d7da", color="#dc3545", label="VERSION_NEGOTIATION\nERROR"];
+    "TASK_STATE_SUBMITTED" [fontname="Helvetica", fontsize="10", shape="circle", style="solid", label="TASK_STATE_SUBMITTED"];
+    "TASK_STATE_WORKING" [fontname="Helvetica", fontsize="10", shape="circle", style="dashed", label="TASK_STATE_WORKING"];
+    "TASK_STATE_REJECTED" [fontname="Helvetica", fontsize="10", shape="rectangle", style="filled,dashed", fillcolor="#f8d7da", color="#dc3545", label="TASK_STATE_REJECTED"];
+    "STREAM_STATE_OPEN" [fontname="Helvetica", fontsize="10", shape="circle", style="dashed", label="STREAM_STATE_OPEN"];
+    "STREAM_CLOSED" [fontname="Helvetica", fontsize="10", shape="rectangle", style="filled,dashed", fillcolor="#f8d7da", color="#dc3545", label="STREAM_CLOSED"];
+
+    // Inter-stage: entry from previous stage
+    "__ENTRY__" [shape=hexagon, label="← prev stage", style=filled, fillcolor="#cce5ff", color="#004085", fontname="Helvetica", fontsize=9];
+    "__ENTRY__" -> "TASK_STATE_NONEXISTENT" [style=dotted, color="#004085", arrowsize=0.7];
+
+    // Inter-stage: exit to next stage
+    "__EXIT__" [shape=hexagon, label="next stage →", style=filled, fillcolor="#fff3cd", color="#856404", fontname="Helvetica", fontsize=9];
+    "TASK_STATE_WORKING" -> "__EXIT__" [style=dotted, color="#856404", arrowsize=0.7, label="task_execution"];
+
+    // Transitions
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_WORKING" [label="send_message_requested", style=solid, color="#28a745", fontcolor="#28a745"];
+    "STREAM_STATE_OPEN" -> "STREAM_CLOSED" [label="message_delivered\n[stream.open = true & stream.mode = MESSAGE_ONLY]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_WORKING" [label="send_message_request_received\n[configuration.returnImmediately = true]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_NONEXISTENT" [label="agent_sends_clarification_message\n[task.created = false]", style=dashed, color="#28a745", fontcolor="#28a745"];
+    "TASK_STATE_SUBMITTED" -> "TASK_STATE_REJECTED" [label="agent_rejects_task\n[task.state = TASK_STATE_SUBMITTED]", style=solid, color="#28a745", fontcolor="#28a745"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_WORKING" [label="POST /message:stream", style=dashed, color="#666666", fontcolor="#666666"];
+    "TASK_STATE_NONEXISTENT" -> "VERSION_NEGOTIATION_ERROR" [label="message_send_request_received\n[request.A2A_Version != null & server.version_supported = false]", style=dashed, color="#666666", fontcolor="#666666"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_SUBMITTED" [label="message_send\n[configuration.pushNotificationConfig != null &\nconfiguration.pushNotificationConfig.url != null]", style=dashed, color="#666666", fontcolor="#666666"];
+    "TASK_STATE_NONEXISTENT" -> "STREAM_STATE_OPEN" [label="POST_message_stream", style=dashed, color="#666666", fontcolor="#666666"];
+    "TASK_STATE_NONEXISTENT" -> "VERSION_NEGOTIATION_ERROR" [label="request_received\n[!server.version_supported]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_SUBMITTED" [label="task_creation", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+
+    // Legend
+    subgraph cluster_legend {
+        label="Legend"; fontsize=9; fontname="Helvetica";
+        style=dotted; color="#aaaaaa";
+        node [fontsize=8, fontname="Helvetica"];
+        L1 [shape=doublecircle, label="initial",    style=filled, fillcolor="#d4edda", color="#28a745"];
+        L2 [shape=rectangle,   label="terminal",   style=filled, fillcolor="#f8d7da", color="#dc3545"];
+        L3 [shape=diamond,     label="error",      style=filled, fillcolor="#fff3cd", color="#fd7e14"];
+        L4 [shape=ellipse,     label="interrupted",style=filled, fillcolor="#cce5ff", color="#004085"];
+        L5 [shape=circle,      label="intermediate"];
+        L6 [shape=circle,      label="inferred",   style=dashed];
+        L1 -> L2 [label="must",   color="#dc3545", fontcolor="#dc3545", fontsize=8];
+        L2 -> L3 [label="should",  color="#fd7e14", fontcolor="#fd7e14", fontsize=8];
+        L3 -> L4 [label="may",    color="#28a745", fontcolor="#28a745", fontsize=8];
+        L4 -> L5 [label="inferred",style=dashed,   color="#666666",    fontsize=8];
+        L5 -> L6 [style=invis];
+    }
+
+}

@@ -1,0 +1,393 @@
+{
+  "section_id": "S062",
+  "title": "S062 9.2.2.2 Aggregating Routing Information",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S062 9.2.2.2 Aggregating Routing Information"
+  ],
+  "url_anchor": "#s062-9222-aggregating-routing-information",
+  "word_count": 745,
+  "statement_count": 16,
+  "elapsed_seconds": 180.56,
+  "statements": [
+    {
+      "statement_id": "N-S062-1",
+      "normative_level": "SHALL NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Routes that have different MULTI_EXIT_DISC attributes SHALL NOT be aggregated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "routes_to_aggregate.MULTI_EXIT_DISC.distinct_values > 1",
+      "post_cond": "routes_to_aggregate.aggregated = false",
+      "actions": [
+        "do not aggregate routes that have different MULTI_EXIT_DISC attributes"
+      ],
+      "modality": "shall",
+      "id": "N-S062-001"
+    },
+    {
+      "statement_id": "N-S062-2",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the aggregated route has an AS_SET as the first element in its AS_PATH attribute, then the router that originates the route SHOULD NOT advertise the MULTI_EXIT_DISC attribute with this route.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "originating router"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "aggregated_route.AS_PATH.first_element.type = AS_SET",
+      "post_cond": "aggregated_route.MULTI_EXIT_DISC.advertised = false",
+      "actions": [
+        "do not advertise MULTI_EXIT_DISC attribute with the aggregated route"
+      ],
+      "modality": "should",
+      "id": "N-S062-002"
+    },
+    {
+      "statement_id": "N-S062-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Path attributes of the same type code may be aggregated, according to the following rules:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "path_attributes.type_code = same_value",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S062-003"
+    },
+    {
+      "statement_id": "N-S062-4",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "When aggregating routes that have different NEXT_HOP attributes, the NEXT_HOP attribute of the aggregated route SHALL identify an interface on the BGP speaker that performs the aggregation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "routes_to_aggregate.NEXT_HOP.distinct_values > 1",
+      "post_cond": "aggregated_route.NEXT_HOP = aggregating_speaker.local_interface",
+      "actions": [
+        "set NEXT_HOP attribute of aggregated route to an interface on the BGP speaker performing aggregation"
+      ],
+      "modality": "shall",
+      "id": "N-S062-004"
+    },
+    {
+      "statement_id": "N-S062-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If at least one route among routes that are aggregated has ORIGIN with the value INCOMPLETE, then the aggregated route MUST have the ORIGIN attribute with the value INCOMPLETE.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "exists(route in routes_to_aggregate: route.ORIGIN = INCOMPLETE)",
+      "post_cond": "aggregated_route.ORIGIN = INCOMPLETE",
+      "actions": [
+        "set ORIGIN attribute of aggregated route to INCOMPLETE"
+      ],
+      "modality": "must",
+      "id": "N-S062-005"
+    },
+    {
+      "statement_id": "N-S062-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Otherwise, if at least one route among routes that are aggregated has ORIGIN with the value EGP, then the aggregated route MUST have the ORIGIN attribute with the value EGP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "!exists(route in routes_to_aggregate: route.ORIGIN = INCOMPLETE) & exists(route in routes_to_aggregate: route.ORIGIN = EGP)",
+      "post_cond": "aggregated_route.ORIGIN = EGP",
+      "actions": [
+        "set ORIGIN attribute of aggregated route to EGP"
+      ],
+      "modality": "must",
+      "id": "N-S062-006"
+    },
+    {
+      "statement_id": "N-S062-7",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the routes to be aggregated have different AS_PATH attributes, then the aggregated AS_PATH attribute SHALL satisfy all of the following conditions:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "routes_to_aggregate.AS_PATH.distinct_values > 1",
+      "post_cond": null,
+      "actions": [
+        "ensure aggregated AS_PATH attribute satisfies all specified conditions"
+      ],
+      "modality": "shall",
+      "id": "N-S062-007"
+    },
+    {
+      "statement_id": "N-S062-8",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "all tuples of type AS_SEQUENCE in the aggregated AS_PATH SHALL appear in all of the AS_PATHs in the initial set of routes to be aggregated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "routes_to_aggregate.AS_PATH.distinct_values > 1",
+      "post_cond": "forall(t in aggregated_AS_PATH: t.type = AS_SEQUENCE => forall(p in initial_AS_PATHs: t in p))",
+      "actions": [
+        "include in aggregated AS_PATH only AS_SEQUENCE tuples present in every initial AS_PATH"
+      ],
+      "modality": "shall",
+      "id": "N-S062-008"
+    },
+    {
+      "statement_id": "N-S062-9",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "all tuples of type AS_SET in the aggregated AS_PATH SHALL appear in at least one of the AS_PATHs in the initial set (they may appear as either AS_SET or AS_SEQUENCE types).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "routes_to_aggregate.AS_PATH.distinct_values > 1",
+      "post_cond": "forall(t in aggregated_AS_PATH: t.type = AS_SET => exists(p in initial_AS_PATHs: t.value in p))",
+      "actions": [
+        "include in aggregated AS_PATH only AS_SET tuples whose value appears in at least one initial AS_PATH"
+      ],
+      "modality": "shall",
+      "id": "N-S062-009"
+    },
+    {
+      "statement_id": "N-S062-10",
+      "normative_level": "SHALL NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "No tuple of type AS_SET with the same value SHALL appear more than once in the aggregated AS_PATH.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "routes_to_aggregate.AS_PATH.distinct_values > 1",
+      "post_cond": "aggregated_AS_PATH.AS_SET_tuples.duplicate_count = 0",
+      "actions": [
+        "eliminate duplicate AS_SET tuples with the same value from the aggregated AS_PATH"
+      ],
+      "modality": "shall",
+      "id": "N-S062-010"
+    },
+    {
+      "statement_id": "N-S062-11",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Multiple tuples of type AS_SEQUENCE with the same value may appear in the aggregated AS_PATH only when adjacent to another tuple of the same type and value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "aggregated_AS_PATH.AS_SEQUENCE_tuples.duplicate_values > 0",
+      "post_cond": "aggregated_AS_PATH.duplicate_AS_SEQUENCE_tuples.are_adjacent = true",
+      "actions": [],
+      "modality": "may",
+      "id": "N-S062-011"
+    },
+    {
+      "statement_id": "N-S062-12",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "An implementation may choose any algorithm that conforms to these rules.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S062-012"
+    },
+    {
+      "statement_id": "N-S062-13",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "At a minimum, a conformant implementation SHALL be able to perform the following algorithm that meets all of the above conditions:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "implement at minimum the specified AS_PATH aggregation algorithm"
+      ],
+      "modality": "shall",
+      "id": "N-S062-013"
+    },
+    {
+      "statement_id": "N-S062-14",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If at least one of the routes to be aggregated has ATOMIC_AGGREGATE path attribute, then the aggregated route SHALL have this attribute as well.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "exists(route in routes_to_aggregate: route.ATOMIC_AGGREGATE = present)",
+      "post_cond": "aggregated_route.ATOMIC_AGGREGATE = present",
+      "actions": [
+        "include ATOMIC_AGGREGATE attribute in the aggregated route"
+      ],
+      "modality": "shall",
+      "id": "N-S062-014"
+    },
+    {
+      "statement_id": "N-S062-15",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Any AGGREGATOR attributes from the routes to be aggregated MUST NOT be included in the aggregated route.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "aggregated_route.AGGREGATOR = absent",
+      "actions": [
+        "exclude all AGGREGATOR attributes inherited from routes to be aggregated from the aggregated route"
+      ],
+      "modality": "must",
+      "id": "N-S062-015"
+    },
+    {
+      "statement_id": "N-S062-16",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "The BGP speaker performing the route aggregation MAY attach a new AGGREGATOR attribute (see Section 5.1.7).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "optionally attach a new AGGREGATOR attribute to the aggregated route"
+      ],
+      "modality": "may",
+      "id": "N-S062-016"
+    }
+  ]
+}

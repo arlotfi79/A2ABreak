@@ -1,0 +1,165 @@
+{
+  "section_id": "S022",
+  "title": "S022 3.4 Logout State",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S022 3.4 Logout State"
+  ],
+  "url_anchor": "#s022-34-logout-state",
+  "word_count": 311,
+  "statement_count": 6,
+  "elapsed_seconds": 94.2,
+  "statements": [
+    {
+      "statement_id": "N-S022-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the client requests the logout state, the server MUST send an untagged BYE response and a tagged OK response to the LOGOUT command before the server closes the connection; and the client MUST read the tagged OK response to the LOGOUT command before the client closes the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Logout",
+      "trigger": "client_LOGOUT_command_received",
+      "pre_cond": "client.requested_logout = true",
+      "post_cond": "server.sent_untagged_BYE = true & server.sent_tagged_OK = true",
+      "actions": [
+        "send untagged BYE response",
+        "send tagged OK response to LOGOUT command",
+        "close connection"
+      ],
+      "modality": "must",
+      "id": "N-S022-001"
+    },
+    {
+      "statement_id": "N-S022-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "If the client requests the logout state, the server MUST send an untagged BYE response and a tagged OK response to the LOGOUT command before the server closes the connection; and the client MUST read the tagged OK response to the LOGOUT command before the client closes the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Logout",
+      "to_state": null,
+      "trigger": "server_tagged_OK_to_LOGOUT_received",
+      "pre_cond": "client.requested_logout = true & server.sent_tagged_OK = true",
+      "post_cond": "client.read_tagged_OK = true",
+      "actions": [
+        "read tagged OK response to LOGOUT command",
+        "close connection"
+      ],
+      "modality": "must",
+      "id": "N-S022-002"
+    },
+    {
+      "statement_id": "N-S022-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server SHOULD NOT unilaterally close the connection without first sending an untagged BYE response that contains the reason for doing so.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Logout",
+      "trigger": "server_initiates_unilateral_close",
+      "pre_cond": "server.unilateral_close_initiated = true",
+      "post_cond": "server.sent_untagged_BYE = true",
+      "actions": [
+        "send untagged BYE response containing reason for closing",
+        "close connection"
+      ],
+      "modality": "should",
+      "id": "N-S022-003"
+    },
+    {
+      "statement_id": "N-S022-4",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "A client SHOULD NOT unilaterally close the connection; instead, it SHOULD issue a LOGOUT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Logout",
+      "trigger": "client_initiates_unilateral_close",
+      "pre_cond": "client.wants_to_close = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S022-004"
+    },
+    {
+      "statement_id": "N-S022-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "A client SHOULD NOT unilaterally close the connection; instead, it SHOULD issue a LOGOUT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Logout",
+      "trigger": "client_wants_to_close_connection",
+      "pre_cond": "client.wants_to_close = true",
+      "post_cond": "client.issued_LOGOUT = true",
+      "actions": [
+        "issue LOGOUT command"
+      ],
+      "modality": "should",
+      "id": "N-S022-005"
+    },
+    {
+      "statement_id": "N-S022-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server detects that the client has unilaterally closed the connection, the server MAY omit the untagged BYE response and simply close its connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Logout",
+      "trigger": "server_detects_client_unilateral_close",
+      "pre_cond": "client.unilaterally_closed = true",
+      "post_cond": "server.connection_closed = true",
+      "actions": [
+        "omit untagged BYE response",
+        "close server connection"
+      ],
+      "modality": "may",
+      "id": "N-S022-006"
+    }
+  ]
+}

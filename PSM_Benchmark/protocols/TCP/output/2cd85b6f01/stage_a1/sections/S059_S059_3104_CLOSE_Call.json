@@ -1,0 +1,136 @@
+{
+  "section_id": "S059",
+  "title": "S059 3.10.4 CLOSE Call",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S059 3.10.4 CLOSE Call"
+  ],
+  "url_anchor": "#s059-3104-close-call",
+  "word_count": 211,
+  "statement_count": 5,
+  "elapsed_seconds": 51.15,
+  "statements": [
+    {
+      "statement_id": "D-S059-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Any outstanding RECEIVEs are returned with 'error: closing' responses. Delete TCB, enter CLOSED state, and return.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S059",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "CLOSED",
+      "trigger": "CLOSE call",
+      "pre_cond": "protocol.state = LISTEN",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "return error:closing to outstanding RECEIVEs",
+        "delete TCB"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S059-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Delete the TCB and return 'error: closing' responses to any queued SENDs, or RECEIVEs.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S059",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "CLOSED",
+      "trigger": "CLOSE call",
+      "pre_cond": "protocol.state = SYN-SENT",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "delete TCB",
+        "return error:closing to queued SENDs and RECEIVEs"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S059-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If no SENDs have been issued and there is no pending data to send, then form a FIN segment and send it, and enter FIN-WAIT-1 state; otherwise, queue for processing after entering ESTABLISHED state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S059",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "SYN-RECEIVED",
+      "to_state": "FIN-WAIT-1",
+      "trigger": "CLOSE call",
+      "pre_cond": "protocol.state = SYN-RECEIVED & sends_issued = false & pending_data = false",
+      "post_cond": "protocol.state = FIN-WAIT-1",
+      "actions": [
+        "form FIN segment",
+        "send FIN segment"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S059-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Queue this until all preceding SENDs have been segmentized, then form a FIN segment and send it. In any case, enter FIN-WAIT-1 state.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S059",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "FIN-WAIT-1",
+      "trigger": "CLOSE call",
+      "pre_cond": "protocol.state = ESTABLISHED",
+      "post_cond": "protocol.state = FIN-WAIT-1",
+      "actions": [
+        "queue CLOSE until preceding SENDs are segmentized",
+        "form FIN segment",
+        "send FIN segment"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S059-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Queue this request until all preceding SENDs have been segmentized; then send a FIN segment, enter LAST-ACK state.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S059",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "CLOSE-WAIT",
+      "to_state": "LAST-ACK",
+      "trigger": "CLOSE call",
+      "pre_cond": "protocol.state = CLOSE-WAIT",
+      "post_cond": "protocol.state = LAST-ACK",
+      "actions": [
+        "queue CLOSE until preceding SENDs are segmentized",
+        "send FIN segment"
+      ],
+      "modality": "must"
+    }
+  ]
+}

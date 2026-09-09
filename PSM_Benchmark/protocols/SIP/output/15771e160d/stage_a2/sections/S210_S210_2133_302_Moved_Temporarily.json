@@ -1,0 +1,114 @@
+{
+  "section_id": "S210",
+  "title": "S210 21.3.3 302 Moved Temporarily",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S210 21.3.3 302 Moved Temporarily"
+  ],
+  "url_anchor": "#s210-2133-302-moved-temporarily",
+  "word_count": 150,
+  "statement_count": 4,
+  "elapsed_seconds": 16.99,
+  "statements": [
+    {
+      "statement_id": "N-S210-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The requesting client SHOULD retry the request at the new address(es) given by the Contact header field (Section 20.10).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S210",
+      "actors": [
+        "requesting client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_302_response",
+      "pre_cond": null,
+      "post_cond": "request.request_uri = contact_header.uri",
+      "actions": [
+        "retry request using URI from Contact header field"
+      ],
+      "modality": "should",
+      "id": "N-S210-001"
+    },
+    {
+      "statement_id": "N-S210-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "Both proxies and UAs MAY cache this URI for the duration of the expiration time.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S210",
+      "actors": [
+        "proxy",
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_302_response",
+      "pre_cond": "expiration_time.explicit = true",
+      "post_cond": "contact_uri.cached = true & contact_uri.cache_duration = expiration_time",
+      "actions": [
+        "cache Contact URI for duration of expiration time"
+      ],
+      "modality": "may",
+      "id": "N-S210-002"
+    },
+    {
+      "statement_id": "N-S210-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "If there is no explicit expiration time, the address is only valid once for recursing, and MUST NOT be cached for future transactions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S210",
+      "actors": [
+        "proxy",
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_302_response",
+      "pre_cond": "expiration_time.explicit = false",
+      "post_cond": "contact_uri.cached = false",
+      "actions": [
+        "do not cache Contact URI for future transactions",
+        "treat Contact URI as valid for single recursion only"
+      ],
+      "modality": "must",
+      "id": "N-S210-003"
+    },
+    {
+      "statement_id": "N-S210-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the URI cached from the Contact header field fails, the Request-URI from the redirected request MAY be tried again a single time.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S210",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "cached_contact_uri_failure",
+      "pre_cond": "contact_uri.cached = true & contact_uri.attempt_failed = true",
+      "post_cond": "request.request_uri = redirected_request.request_uri & retry_count <= 1",
+      "actions": [
+        "retry using original Request-URI from redirected request exactly once"
+      ],
+      "modality": "may",
+      "id": "N-S210-004"
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "section_id": "S129",
+  "title": "S129 8.5.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S129 8.5.2 Description"
+  ],
+  "url_anchor": "#s129-852-description",
+  "word_count": 775,
+  "statement_count": 8,
+  "elapsed_seconds": 34.56,
+  "statements": [
+    {
+      "statement_id": "D-S129-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the information is available, it is returned as a multi-line data block following the 225 response code.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S129",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR command with valid argument and available information",
+      "pre_cond": "session.hdr_information_available = true",
+      "post_cond": "server.response_code = 225",
+      "actions": [
+        "send 225 response",
+        "send multi-line data block"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S129-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is a message-id and no such article exists, a 430 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S129",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR command with message-id argument, article not found",
+      "pre_cond": "HDR.argument_type = message-id & article.exists = false",
+      "post_cond": "server.response_code = 430",
+      "actions": [
+        "send 430 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S129-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is a range or is omitted and the currently selected newsgroup is invalid, a 412 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S129",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR command with range or no argument, no newsgroup selected",
+      "pre_cond": "(HDR.argument_type = range | HDR.argument_type = omitted) & session.newsgroup_selected = false",
+      "post_cond": "server.response_code = 412",
+      "actions": [
+        "send 412 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S129-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is a range and no articles in that number range exist in the currently selected newsgroup, a 423 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S129",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR command with range argument, no articles exist in range",
+      "pre_cond": "HDR.argument_type = range & session.newsgroup_selected = true & articles_in_range.count = 0",
+      "post_cond": "server.response_code = 423",
+      "actions": [
+        "send 423 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S129-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is omitted and the current article number is invalid, a 420 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S129",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR command with no argument, current article number invalid",
+      "pre_cond": "HDR.argument_type = omitted & session.current_article_valid = false",
+      "post_cond": "server.response_code = 420",
+      "actions": [
+        "send 420 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S129-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "A server MAY only allow HDR commands for a limited set of fields; if so, it MUST respond with the generic 503 response to attempts to request other fields.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S129",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR command with disallowed field",
+      "pre_cond": "server.hdr_field_restricted = true & HDR.field_name !in server.allowed_hdr_fields",
+      "post_cond": "server.response_code = 503",
+      "actions": [
+        "send 503 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S129-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is a range or is omitted and the currently selected newsgroup is invalid, a 412 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S129",
+      "object_name": "session",
+      "field_name": "newsgroup_selected",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "Must be valid (true) for HDR with range or no argument to succeed"
+    },
+    {
+      "statement_id": "D-S129-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is omitted and the current article number is invalid, a 420 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S129",
+      "object_name": "session",
+      "field_name": "current_article_valid",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "Must be valid (true) for HDR with no argument to succeed"
+    }
+  ]
+}

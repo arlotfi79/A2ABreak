@@ -1,0 +1,137 @@
+{
+  "section_id": "10.2",
+  "title": "10.2. Service Parameter Transmission",
+  "depth": 3,
+  "parent_path": [
+    "10. gRPC Protocol Binding",
+    "10.2. Service Parameter Transmission"
+  ],
+  "url_anchor": "#102-service-parameter-transmission",
+  "word_count": 139,
+  "statement_count": 5,
+  "elapsed_seconds": 30.02,
+  "statements": [
+    {
+      "statement_id": "N-10.2-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "A2A service parameters defined in Section 3.2.6 MUST be transmitted using gRPC metadata (headers).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_grpc_request",
+      "pre_cond": "request.transport = gRPC",
+      "post_cond": "request.grpc_metadata contains service_parameters",
+      "actions": [
+        "Encode all A2A service parameters as gRPC metadata (headers) in the outgoing request"
+      ],
+      "modality": "must",
+      "id": "N-10-2-001"
+    },
+    {
+      "statement_id": "N-10.2-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Service parameter names MUST be transmitted as gRPC metadata keys",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_grpc_request",
+      "pre_cond": "request.transport = gRPC",
+      "post_cond": "service_parameter.name = grpc_metadata_key",
+      "actions": [
+        "Map each A2A service parameter name to a gRPC metadata key in the outgoing request"
+      ],
+      "modality": "must",
+      "id": "N-10-2-002"
+    },
+    {
+      "statement_id": "N-10.2-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Multiple values for the same service parameter (e.g., A2A-Extensions) SHOULD be comma-separated in a single metadata entry",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_grpc_request",
+      "pre_cond": "request.transport = gRPC & service_parameter.value_count > 1",
+      "post_cond": "service_parameter.grpc_metadata_entry = comma_separated_values",
+      "actions": [
+        "Concatenate multiple values for the same service parameter into a single comma-separated metadata entry"
+      ],
+      "modality": "should",
+      "id": "N-10-2-003"
+    },
+    {
+      "statement_id": "N-10.2-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Implementations MUST extract A2A service parameters from gRPC metadata for processing",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_grpc_request",
+      "pre_cond": "request.transport = gRPC",
+      "post_cond": "service_parameters.extracted = true",
+      "actions": [
+        "Parse gRPC metadata from the incoming request",
+        "Extract all A2A service parameters from the parsed metadata for further processing"
+      ],
+      "modality": "must",
+      "id": "N-10-2-004"
+    },
+    {
+      "statement_id": "N-10.2-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers SHOULD validate required service parameters (e.g., A2A-Version) from metadata",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_grpc_request",
+      "pre_cond": "request.transport = gRPC & service_parameters.extracted = true",
+      "post_cond": "service_parameters.required.validated = true",
+      "actions": [
+        "Check that all required A2A service parameters (e.g., A2A-Version) are present and valid in the gRPC metadata"
+      ],
+      "modality": "should",
+      "id": "N-10-2-005"
+    }
+  ]
+}

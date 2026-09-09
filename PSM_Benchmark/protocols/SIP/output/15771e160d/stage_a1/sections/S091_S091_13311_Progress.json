@@ -1,0 +1,120 @@
+{
+  "section_id": "S091",
+  "title": "S091 13.3.1.1 Progress",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S091 13.3.1.1 Progress"
+  ],
+  "url_anchor": "#s091-13311-progress",
+  "word_count": 209,
+  "statement_count": 5,
+  "elapsed_seconds": 29.03,
+  "statements": [
+    {
+      "statement_id": "D-S091-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Provisional responses between 101 and 199 establish early dialogs.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S091",
+      "state_name": "Early Dialog",
+      "enum_name": "DialogState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S091-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the UAS is not able to answer the invitation immediately, it can choose to indicate some kind of progress to the UAC with a provisional response between 101 and 199. These provisional responses establish early dialogs.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S091",
+      "actors": [
+        "UAS",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Early Dialog",
+      "trigger": "send provisional response (101-199)",
+      "pre_cond": "transaction.invite_received = true & transaction.final_response_sent = false",
+      "post_cond": "session.state = Early Dialog",
+      "actions": [
+        "send provisional response 101-199",
+        "establish early dialog"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S091-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A proxy has the option of canceling a transaction when there is a gap of 3 minutes between responses in a transaction.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S091",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "Early Dialog",
+      "to_state": null,
+      "trigger": "3-minute response gap timer expiry",
+      "pre_cond": "transaction.response_gap >= 180s",
+      "post_cond": null,
+      "actions": [
+        "cancel transaction"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S091-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "To prevent cancellation, the UAS MUST send a non-100 provisional response at every minute, to handle the possibility of lost provisional responses.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S091",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "Early Dialog",
+      "to_state": "Early Dialog",
+      "trigger": "1-minute keepalive timer expiry",
+      "pre_cond": "transaction.final_response_sent = false",
+      "post_cond": "transaction.response_gap = 0",
+      "actions": [
+        "send non-100 provisional response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S091-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Each provisional response MUST indicate the same dialog ID.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S091",
+      "object_name": "provisional response",
+      "field_name": "dialog ID",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

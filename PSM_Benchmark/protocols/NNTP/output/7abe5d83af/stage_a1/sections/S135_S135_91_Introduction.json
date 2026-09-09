@@ -1,0 +1,167 @@
+{
+  "section_id": "S135",
+  "title": "S135 9.1 Introduction",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S135 9.1 Introduction"
+  ],
+  "url_anchor": "#s135-91-introduction",
+  "word_count": 297,
+  "statement_count": 7,
+  "elapsed_seconds": 51.6,
+  "statements": [
+    {
+      "statement_id": "D-S135-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "While the latest response is one that indicates more data is required (in general, a 3xx response), the client sends an instance of <command-continuation> and the server sends another instance of <response>.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S135",
+      "state_name": "Continuation Required",
+      "enum_name": "CommandInteractionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.latest_response_code >= 300 & session.latest_response_code < 400"
+    },
+    {
+      "statement_id": "D-S135-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "The client sends an instance of <command-line>; the server sends an instance of <response>. The initial response line is independent of the command that generated it.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S135",
+      "state_name": "Awaiting Response",
+      "enum_name": "CommandInteractionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S135-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "The client sends an instance of <command-line>; the syntax for the EXAMPLE command is <example-command>.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S135",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Awaiting Response",
+      "trigger": "client sends command-line",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send command-line"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S135-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "If the client is one that immediately streams data, it sends an instance of <command-datastream>.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S135",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Awaiting Response",
+      "trigger": "client immediately streams data",
+      "pre_cond": "client.streams_immediately = true",
+      "post_cond": null,
+      "actions": [
+        "send command-datastream"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S135-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server sends an instance of <response>. If the response is multi-line, the initial line is followed by a <multi-line-data-block>.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S135",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Awaiting Response",
+      "to_state": null,
+      "trigger": "server sends response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S135-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "While the latest response is one that indicates more data is required (in general, a 3xx response), the session enters the Continuation Required state.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S135",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Awaiting Response",
+      "to_state": "Continuation Required",
+      "trigger": "server sends 3xx response",
+      "pre_cond": "session.latest_response_code >= 300 & session.latest_response_code < 400",
+      "post_cond": "session.state = Continuation Required",
+      "actions": [
+        "receive 3xx response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S135-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "While the latest response is one that indicates more data is required (in general, a 3xx response), the client sends an instance of <command-continuation>; the server sends another instance of <response>.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S135",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Continuation Required",
+      "to_state": "Awaiting Response",
+      "trigger": "client sends command-continuation",
+      "pre_cond": "session.state = Continuation Required",
+      "post_cond": null,
+      "actions": [
+        "send command-continuation",
+        "server sends response"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "section_id": "S018",
+  "title": "S018 3.5.2 Reset Generation",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S018 3.5.2 Reset Generation"
+  ],
+  "url_anchor": "#s018-352-reset-generation",
+  "word_count": 429,
+  "statement_count": 3,
+  "elapsed_seconds": 47.26,
+  "statements": [
+    {
+      "statement_id": "1-S018-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "The side of a connection issuing a reset should enter the TIME-WAIT state, as this generally helps to reduce the load on busy servers for reasons described in [70].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "connection"
+      ],
+      "from_state": null,
+      "to_state": "TIME-WAIT",
+      "trigger": "reset_issued",
+      "pre_cond": null,
+      "post_cond": "protocol.state = TIME-WAIT",
+      "actions": [
+        "enter TIME-WAIT state"
+      ],
+      "modality": "should",
+      "id": "N-S018-001"
+    },
+    {
+      "statement_id": "2-S018-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "A reset must not be sent if it is not clear that this is the case.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "segment.clearly_not_intended_for_connection = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S018-002"
+    },
+    {
+      "statement_id": "3-S018-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the connection is in a synchronized state (ESTABLISHED, FIN-WAIT-1, FIN-WAIT-2, CLOSE-WAIT, CLOSING, LAST-ACK, TIME-WAIT), any unacceptable segment (out-of-window sequence number or unacceptable acknowledgment number) must be responded to with an empty acknowledgment segment (without any user data) containing the current send sequence number and an acknowledgment indicating the next sequence number expected to be received, and the connection remains in the same state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "connection"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unacceptable_segment_received",
+      "pre_cond": "(protocol.state = ESTABLISHED | protocol.state = FIN-WAIT-1 | protocol.state = FIN-WAIT-2 | protocol.state = CLOSE-WAIT | protocol.state = CLOSING | protocol.state = LAST-ACK | protocol.state = TIME-WAIT) & (segment.out_of_window = true | segment.ack_unacceptable = true)",
+      "post_cond": "protocol.state = prev(protocol.state)",
+      "actions": [
+        "send empty ACK segment with no user data",
+        "set ACK segment sequence number to current send sequence number",
+        "set ACK field to next sequence number expected to be received"
+      ],
+      "modality": "must",
+      "id": "N-S018-003"
+    }
+  ]
+}

@@ -1,0 +1,621 @@
+{
+  "section_id": "S122",
+  "title": "S122 17.1.1.2 Formal Description",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S122 17.1.1.2 Formal Description"
+  ],
+  "url_anchor": "#s122-17112-formal-description",
+  "word_count": 1122,
+  "statement_count": 25,
+  "elapsed_seconds": 391.06,
+  "statements": [
+    {
+      "statement_id": "N-S122-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The initial state, \"calling\", MUST be entered when the TU initiates a new client transaction with an INVITE request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "TU",
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": "Calling",
+      "trigger": "TU initiates new INVITE client transaction",
+      "pre_cond": null,
+      "post_cond": "transaction.state = Calling",
+      "actions": [
+        "Enter Calling state"
+      ],
+      "modality": "must",
+      "id": "N-S122-001"
+    },
+    {
+      "statement_id": "N-S122-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The client transaction MUST pass the request to the transport layer for transmission (see Section 18).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "transport layer"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "INVITE client transaction created",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "request.passed_to_transport = true",
+      "actions": [
+        "Pass INVITE request to transport layer for transmission"
+      ],
+      "modality": "must",
+      "id": "N-S122-002"
+    },
+    {
+      "statement_id": "N-S122-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "If an unreliable transport is being used, the client transaction MUST start timer A with a value of T1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Enter Calling state",
+      "pre_cond": "transport.type = unreliable",
+      "post_cond": "timer_A.started = true & timer_A.value = T1",
+      "actions": [
+        "Start timer A with value T1"
+      ],
+      "modality": "must",
+      "id": "N-S122-003"
+    },
+    {
+      "statement_id": "N-S122-4",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "If a reliable transport is being used, the client transaction SHOULD NOT start timer A (Timer A controls request retransmissions).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Enter Calling state",
+      "pre_cond": "transport.type = reliable",
+      "post_cond": "timer_A.started = false",
+      "actions": [],
+      "modality": "should",
+      "id": "N-S122-004"
+    },
+    {
+      "statement_id": "N-S122-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "For any transport, the client transaction MUST start timer B with a value of 64*T1 seconds (Timer B controls transaction timeouts).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Enter Calling state",
+      "pre_cond": null,
+      "post_cond": "timer_B.started = true & timer_B.value = 64*T1",
+      "actions": [
+        "Start timer B with value 64*T1"
+      ],
+      "modality": "must",
+      "id": "N-S122-005"
+    },
+    {
+      "statement_id": "N-S122-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When timer A fires, the client transaction MUST retransmit the request by passing it to the transport layer, and MUST reset the timer with a value of 2*T1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "transport layer"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Timer A fires",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "request.retransmitted = true & timer_A.value = 2*T1",
+      "actions": [
+        "Retransmit INVITE request by passing to transport layer",
+        "Reset timer A with value 2*T1"
+      ],
+      "modality": "must",
+      "id": "N-S122-006"
+    },
+    {
+      "statement_id": "N-S122-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When timer A fires 2*T1 seconds later, the request MUST be retransmitted again (assuming the client transaction is still in this state).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Timer A fires",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "request.retransmitted = true",
+      "actions": [
+        "Retransmit INVITE request"
+      ],
+      "modality": "must",
+      "id": "N-S122-007"
+    },
+    {
+      "statement_id": "N-S122-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "This process MUST continue so that the request is retransmitted with intervals that double after each transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Timer A fires repeatedly",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "retransmit_interval = previous_interval * 2",
+      "actions": [
+        "Double retransmission interval after each timer A expiry and retransmit request"
+      ],
+      "modality": "must",
+      "id": "N-S122-008"
+    },
+    {
+      "statement_id": "N-S122-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "These retransmissions SHOULD only be done while the client transaction is in the \"calling\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Timer A fires",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S122-009"
+    },
+    {
+      "statement_id": "N-S122-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "sip",
+      "stage": "sip_fsm",
+      "description": "Elements MAY (though it is NOT RECOMMENDED) use smaller values of T1 within closed, private networks that do not permit general Internet connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "SIP elements"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S122-010"
+    },
+    {
+      "statement_id": "N-S122-11",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "sip",
+      "stage": "sip_fsm",
+      "description": "T1 MAY be chosen larger, and this is RECOMMENDED if it is known in advance (such as on high latency access links) that the RTT is larger.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "SIP elements"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S122-011"
+    },
+    {
+      "statement_id": "N-S122-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Whatever the value of T1, the exponential backoffs on retransmissions described in this section MUST be used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Timer A fires",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": null,
+      "actions": [
+        "Apply exponential backoff to retransmission intervals"
+      ],
+      "modality": "must",
+      "id": "N-S122-012"
+    },
+    {
+      "statement_id": "N-S122-13",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the client transaction is still in the \"Calling\" state when timer B fires, the client transaction SHOULD inform the TU that a timeout has occurred.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Timer B fires",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "TU.notified_of_timeout = true",
+      "actions": [
+        "Inform TU that a timeout has occurred"
+      ],
+      "modality": "should",
+      "id": "N-S122-013"
+    },
+    {
+      "statement_id": "N-S122-14",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The client transaction MUST NOT generate an ACK.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling",
+      "to_state": null,
+      "trigger": "Timer B fires",
+      "pre_cond": "transaction.state = Calling & timer_B.fired = true",
+      "post_cond": "ACK.generated = false",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S122-014"
+    },
+    {
+      "statement_id": "N-S122-15",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In the \"Proceeding\" state, the client transaction SHOULD NOT retransmit the request any longer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "Enter Proceeding state",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "retransmission.active = false",
+      "actions": [
+        "Stop request retransmissions"
+      ],
+      "modality": "should",
+      "id": "N-S122-015"
+    },
+    {
+      "statement_id": "N-S122-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Furthermore, the provisional response MUST be passed to the TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Calling",
+      "to_state": "Proceeding",
+      "trigger": "Provisional response received in Calling state",
+      "pre_cond": "transaction.state = Calling & response.status_code >= 100 & response.status_code <= 199",
+      "post_cond": "provisional_response.passed_to_TU = true & transaction.state = Proceeding",
+      "actions": [
+        "Pass provisional response to TU"
+      ],
+      "modality": "must",
+      "id": "N-S122-016"
+    },
+    {
+      "statement_id": "N-S122-17",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Any further provisional responses MUST be passed up to the TU while in the \"Proceeding\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": null,
+      "trigger": "Provisional response received",
+      "pre_cond": "transaction.state = Proceeding & response.status_code >= 100 & response.status_code <= 199",
+      "post_cond": "provisional_response.passed_to_TU = true",
+      "actions": [
+        "Pass provisional response to TU"
+      ],
+      "modality": "must",
+      "id": "N-S122-017"
+    },
+    {
+      "statement_id": "N-S122-18",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When in either the \"Calling\" or \"Proceeding\" states, reception of a response with status code from 300-699 MUST cause the client transaction to transition to \"Completed\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling | Proceeding",
+      "to_state": "Completed",
+      "trigger": "Response received with status code 300-699",
+      "pre_cond": "(transaction.state = Calling | transaction.state = Proceeding) & response.status_code >= 300 & response.status_code <= 699",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "Transition to Completed state"
+      ],
+      "modality": "must",
+      "id": "N-S122-018"
+    },
+    {
+      "statement_id": "N-S122-19",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The client transaction MUST pass the received response up to the TU, and the client transaction MUST generate an ACK request, even if the transport is reliable (guidelines for constructing the ACK from the response are given in Section 17.1.1.3) and then pass the ACK to the transport layer for transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU",
+        "transport layer"
+      ],
+      "from_state": "Calling | Proceeding",
+      "to_state": "Completed",
+      "trigger": "Response received with status code 300-699",
+      "pre_cond": "(transaction.state = Calling | transaction.state = Proceeding) & response.status_code >= 300 & response.status_code <= 699",
+      "post_cond": "response.passed_to_TU = true & ACK.generated = true & ACK.passed_to_transport = true",
+      "actions": [
+        "Pass received response to TU",
+        "Generate ACK request",
+        "Pass ACK to transport layer for transmission"
+      ],
+      "modality": "must",
+      "id": "N-S122-019"
+    },
+    {
+      "statement_id": "N-S122-20",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The ACK MUST be sent to the same address, port, and transport to which the original request was sent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": null,
+      "trigger": "ACK generation on 300-699 response",
+      "pre_cond": "ACK.generated = true",
+      "post_cond": "ACK.destination_address = original_request.destination_address & ACK.destination_port = original_request.destination_port & ACK.transport = original_request.transport",
+      "actions": [
+        "Send ACK to same address, port, and transport as original INVITE request"
+      ],
+      "modality": "must",
+      "id": "N-S122-020"
+    },
+    {
+      "statement_id": "N-S122-21",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "The client transaction SHOULD start timer D when it enters the \"Completed\" state, with a value of at least 32 seconds for unreliable transports, and a value of zero seconds for reliable transports.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": "Completed",
+      "trigger": "Enter Completed state",
+      "pre_cond": null,
+      "post_cond": "timer_D.started = true & (transport.type = unreliable => timer_D.value >= 32) & (transport.type = reliable => timer_D.value = 0)",
+      "actions": [
+        "Start timer D with value >= 32s for unreliable transport or 0s for reliable transport"
+      ],
+      "modality": "should",
+      "id": "N-S122-021"
+    },
+    {
+      "statement_id": "N-S122-22",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Any retransmissions of the final response that are received while in the \"Completed\" state MUST cause the ACK to be re-passed to the transport layer for retransmission, but the newly received response MUST NOT be passed up to the TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "transport layer",
+        "TU"
+      ],
+      "from_state": "Completed",
+      "to_state": null,
+      "trigger": "Retransmission of final response received",
+      "pre_cond": "transaction.state = Completed & response.is_retransmission = true",
+      "post_cond": "ACK.re_passed_to_transport = true & response.passed_to_TU = false",
+      "actions": [
+        "Re-pass ACK to transport layer for retransmission",
+        "Do not pass retransmitted response to TU"
+      ],
+      "modality": "must",
+      "id": "N-S122-022"
+    },
+    {
+      "statement_id": "N-S122-23",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If timer D fires while the client transaction is in the \"Completed\" state, the client transaction MUST move to the terminated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": "Terminated",
+      "trigger": "Timer D fires",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "Transition to Terminated state"
+      ],
+      "modality": "must",
+      "id": "N-S122-023"
+    },
+    {
+      "statement_id": "N-S122-24",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When in either the \"Calling\" or \"Proceeding\" states, reception of a 2xx response MUST cause the client transaction to enter the \"Terminated\" state, and the response MUST be passed up to the TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Calling | Proceeding",
+      "to_state": "Terminated",
+      "trigger": "2xx response received",
+      "pre_cond": "(transaction.state = Calling | transaction.state = Proceeding) & response.status_code >= 200 & response.status_code <= 299",
+      "post_cond": "transaction.state = Terminated & response.passed_to_TU = true",
+      "actions": [
+        "Transition to Terminated state",
+        "Pass 2xx response to TU"
+      ],
+      "modality": "must",
+      "id": "N-S122-024"
+    },
+    {
+      "statement_id": "N-S122-25",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The client transaction MUST be destroyed the instant it enters the \"Terminated\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Terminated",
+      "to_state": null,
+      "trigger": "Enter Terminated state",
+      "pre_cond": "transaction.state = Terminated",
+      "post_cond": "transaction.destroyed = true",
+      "actions": [
+        "Destroy client transaction immediately"
+      ],
+      "modality": "must",
+      "id": "N-S122-025"
+    }
+  ]
+}

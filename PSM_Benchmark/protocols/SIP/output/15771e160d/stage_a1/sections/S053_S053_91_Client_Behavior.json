@@ -1,0 +1,143 @@
+{
+  "section_id": "S053",
+  "title": "S053 9.1 Client Behavior",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S053 9.1 Client Behavior"
+  ],
+  "url_anchor": "#s053-91-client-behavior",
+  "word_count": 465,
+  "statement_count": 6,
+  "elapsed_seconds": 51.7,
+  "statements": [
+    {
+      "statement_id": "D-S053-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "the client SHOULD then consider the original transaction cancelled",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S053",
+      "state_name": "Cancelled",
+      "enum_name": "OriginalTransactionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S053-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "the client MUST wait for the arrival of a provisional response before sending the CANCEL request",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S053",
+      "state_name": "Waiting for Provisional Response",
+      "enum_name": "ClientCancelState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.provisional_response_received = false"
+    },
+    {
+      "statement_id": "D-S053-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If no provisional response has been received, the CANCEL request MUST NOT be sent; rather, the client MUST wait for the arrival of a provisional response before sending the request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S053",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Waiting for Provisional Response",
+      "trigger": "client decides to send CANCEL",
+      "pre_cond": "transaction.provisional_response_received = false",
+      "post_cond": null,
+      "actions": [
+        "defer CANCEL transmission until provisional response received"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When the client decides to send the CANCEL, it creates a client transaction for the CANCEL and passes it the CANCEL request along with the destination address, port, and transport.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S053",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Waiting for Provisional Response",
+      "to_state": null,
+      "trigger": "provisional response received",
+      "pre_cond": "transaction.provisional_response_received = true & transaction.final_response_received = false",
+      "post_cond": "cancel_transaction.created = true",
+      "actions": [
+        "create client transaction for CANCEL",
+        "pass CANCEL request with destination address, port, and transport"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S053-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the original request has generated a final response, the CANCEL SHOULD NOT be sent, as it is an effective no-op, since CANCEL has no effect on requests that have already generated a final response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S053",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client decides to send CANCEL",
+      "pre_cond": "transaction.final_response_received = true",
+      "post_cond": null,
+      "actions": [
+        "suppress CANCEL transmission"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S053-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If there is no final response for the original request in 64*T1 seconds, the client SHOULD then consider the original transaction cancelled and SHOULD destroy the client transaction handling the original request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S053",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Cancelled",
+      "trigger": "64*T1 timer expiry",
+      "pre_cond": "transaction.final_response_received = false",
+      "post_cond": "transaction.state = Cancelled",
+      "actions": [
+        "consider original transaction cancelled",
+        "destroy client transaction handling original request"
+      ],
+      "modality": "should"
+    }
+  ]
+}

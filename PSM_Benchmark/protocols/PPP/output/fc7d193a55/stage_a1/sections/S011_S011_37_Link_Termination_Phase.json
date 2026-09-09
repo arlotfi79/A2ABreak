@@ -1,0 +1,182 @@
+{
+  "section_id": "S011",
+  "title": "S011 3.7 Link Termination Phase",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S011 3.7 Link Termination Phase"
+  ],
+  "url_anchor": "#s011-37-link-termination-phase",
+  "word_count": 222,
+  "statement_count": 8,
+  "elapsed_seconds": 116.49,
+  "statements": [
+    {
+      "statement_id": "D-S011-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "ppp",
+      "stage": "ppp_fsm",
+      "description": "LCP is used to close the link through an exchange of Terminate packets. When the link is closing, PPP informs the network-layer protocols so that they may take appropriate action.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "state_name": "Link Termination Phase",
+      "enum_name": "PPP Phase",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Link Termination Phase"
+    },
+    {
+      "statement_id": "D-S011-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "ppp",
+      "stage": "ppp_fsm",
+      "description": "PPP SHOULD proceed to the Link Dead phase after the exchange of Terminate packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "state_name": "Link Dead",
+      "enum_name": "PPP Phase",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = Link Dead"
+    },
+    {
+      "statement_id": "D-S011-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "ppp",
+      "stage": "ppp_fsm",
+      "description": "PPP can terminate the link at any time. This might happen because of the loss of carrier, authentication failure, link quality failure, the expiration of an idle-period timer, or the administrative closing of the link.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S011",
+      "actors": [
+        "ppp"
+      ],
+      "from_state": null,
+      "to_state": "Link Termination Phase",
+      "trigger": "loss_of_carrier | authentication_failure | link_quality_failure | idle_period_timer_expiry | administrative_close",
+      "pre_cond": null,
+      "post_cond": "protocol.state = Link Termination Phase",
+      "actions": [
+        "notify network-layer protocols"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S011-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "The sender of the Terminate-Request SHOULD disconnect after receiving a Terminate-Ack. PPP SHOULD proceed to the Link Dead phase.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S011",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": "Link Dead",
+      "trigger": "Terminate-Ack received",
+      "pre_cond": "endpoint.role = Terminate-Request-sender & protocol.state = Link Termination Phase",
+      "post_cond": "protocol.state = Link Dead",
+      "actions": [
+        "signal physical-layer to disconnect"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S011-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "The sender of the Terminate-Request SHOULD disconnect after the Restart counter expires. PPP SHOULD proceed to the Link Dead phase.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S011",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": "Link Dead",
+      "trigger": "Restart counter expires",
+      "pre_cond": "endpoint.role = Terminate-Request-sender & protocol.state = Link Termination Phase",
+      "post_cond": "protocol.state = Link Dead",
+      "actions": [
+        "signal physical-layer to disconnect"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S011-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "The receiver of a Terminate-Request SHOULD wait for the peer to disconnect, and MUST NOT disconnect until at least one Restart time has passed after sending a Terminate-Ack.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S011",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": "Link Dead",
+      "trigger": "peer_disconnected",
+      "pre_cond": "endpoint.role = Terminate-Request-receiver & protocol.state = Link Termination Phase & timer.restart_time_elapsed = true",
+      "post_cond": "protocol.state = Link Dead",
+      "actions": [
+        "disconnect"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S011-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ppp_fsm",
+      "description": "Any non-LCP packets received during this phase MUST be silently discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "actors": [
+        "ppp"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": "Link Termination Phase",
+      "trigger": "non-LCP packet received",
+      "pre_cond": "protocol.state = Link Termination Phase",
+      "post_cond": "protocol.state = Link Termination Phase",
+      "actions": [
+        "silently discard packet"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S011-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "state_machine",
+      "stage": "ppp_fsm",
+      "description": "The sender of the Terminate-Request SHOULD disconnect after receiving a Terminate-Ack, or after the Restart counter expires.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S011",
+      "object_name": "LCP",
+      "field_name": "Restart counter",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

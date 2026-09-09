@@ -1,0 +1,203 @@
+{
+  "section_id": "S027",
+  "title": "S027 4. Token Expiration, Update, and Reauthentication",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S027 4. Token Expiration, Update, and Reauthentication"
+  ],
+  "url_anchor": "#s027-4-token-expiration-update-and-reauthentication",
+  "word_count": 355,
+  "statement_count": 9,
+  "elapsed_seconds": 67.67,
+  "statements": [
+    {
+      "statement_id": "D-S027-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "After sending a DISCONNECT packet, the Network Connection is closed, and no more messages can be sent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "state_name": "Network Connection Closed",
+      "enum_name": "NetworkConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S027-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "To start reauthentication, the Client MUST send an AUTH packet with reason code 0x19 (Reauthentication).",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S027",
+      "state_name": "Reauthenticating",
+      "enum_name": "NetworkConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S027-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST check for token expiration whenever a CONNECT, PUBLISH, or SUBSCRIBE packet is received or sent.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT_or_PUBLISH_or_SUBSCRIBE_received_or_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "check token expiration"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Token expirations may trigger the Broker to send PUBACK, SUBACK, and DISCONNECT packets with the return code set to 'Not authorized'. After sending a DISCONNECT packet, the Network Connection is closed, and no more messages can be sent.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": "Network Connection Closed",
+      "trigger": "token_expiration_detected",
+      "pre_cond": null,
+      "post_cond": "connection.state = Network Connection Closed",
+      "actions": [
+        "send DISCONNECT with return code 'Not authorized'",
+        "close Network Connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S027-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "To start reauthentication, the Client MUST send an AUTH packet with reason code 0x19 (Reauthentication). The Client MUST set the Authentication Method as 'ace' and transport the new token in the Authentication Data.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S027",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "Reauthenticating",
+      "trigger": "reauthentication_initiated",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send AUTH with reason code 0x19 (Reauthentication)",
+        "set Authentication Method to 'ace'",
+        "transport new token in Authentication Data"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker accepts reauthentication requests if the Client has already submitted a token (may be expired), for which it performed proof of possession. Otherwise, the Broker MUST deny the request.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "Reauthenticating",
+      "to_state": null,
+      "trigger": "AUTH_received",
+      "pre_cond": "session.token_submitted = false | session.pop_performed = false",
+      "post_cond": null,
+      "actions": [
+        "deny reauthentication request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the reauthentication fails, the Broker MUST send a DISCONNECT packet with reason code 0x87 (Not Authorized).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "Reauthenticating",
+      "to_state": "Network Connection Closed",
+      "trigger": "reauthentication_failed",
+      "pre_cond": null,
+      "post_cond": "connection.state = Network Connection Closed",
+      "actions": [
+        "send DISCONNECT with reason code 0x87 (Not Authorized)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST set the Authentication Method as 'ace' and transport the new token in the Authentication Data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "object_name": "AUTH",
+      "field_name": "Authentication Method",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "ace"
+      ],
+      "guard_semantics": "reauthentication_in_progress"
+    },
+    {
+      "statement_id": "D-S027-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST set the Authentication Method as 'ace' and transport the new token in the Authentication Data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "object_name": "AUTH",
+      "field_name": "Authentication Data",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "reauthentication_in_progress"
+    }
+  ]
+}

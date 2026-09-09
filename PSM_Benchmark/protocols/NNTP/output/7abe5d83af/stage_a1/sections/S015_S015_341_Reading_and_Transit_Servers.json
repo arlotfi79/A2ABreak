@@ -1,0 +1,111 @@
+{
+  "section_id": "S015",
+  "title": "S015 3.4.1 Reading and Transit Servers",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S015 3.4.1 Reading and Transit Servers"
+  ],
+  "url_anchor": "#s015-341-reading-and-transit-servers",
+  "word_count": 313,
+  "statement_count": 5,
+  "elapsed_seconds": 34.04,
+  "statements": [
+    {
+      "statement_id": "D-S015-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The second use is for the bulk transfer of articles from one store to another... this process is called 'peering' or 'transit'.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S015",
+      "state_name": "TRANSIT",
+      "enum_name": "ServerMode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "server.capability = IHAVE"
+    },
+    {
+      "statement_id": "D-S015-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The first use is 'reading', where the client fetches articles from a large store maintained by the server for immediate or later presentation to a user.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S015",
+      "state_name": "READER",
+      "enum_name": "ServerMode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "server.capability = READER"
+    },
+    {
+      "statement_id": "D-S015-003",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "A server MAY provide different modes of behaviour (transit, reader, or a combination) to different client connections.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S015",
+      "object_name": "server",
+      "field_name": "mode",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "transit",
+        "reader",
+        "combination"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S015-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Except as an effect of the MODE READER command (Section 5.3) on a mode-switching server, once a server advertises either or both of the IHAVE or READER capabilities, it MUST continue to advertise them for the entire session.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S015",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSIT",
+      "to_state": "READER",
+      "trigger": "MODE READER command",
+      "pre_cond": "server.mode_switching = true",
+      "post_cond": "server.capability = READER",
+      "actions": [
+        "server changes advertised capabilities per MODE READER effect"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S015-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Once a server advertises either or both of the IHAVE or READER capabilities, it MUST continue to advertise them for the entire session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "object_name": "session",
+      "field_name": "advertised_capabilities",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "Once set to IHAVE or READER (or both), must remain set for session duration unless MODE READER command is issued on a mode-switching server"
+    }
+  ]
+}

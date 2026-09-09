@@ -1,0 +1,162 @@
+{
+  "section_id": "S040",
+  "title": "S040 5.5 Multiple Commands in Progress (Command Pipelining)",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S040 5.5 Multiple Commands in Progress (Command Pipelining)"
+  ],
+  "url_anchor": "#s040-55-multiple-commands-in-progress-command-pipelining",
+  "word_count": 408,
+  "statement_count": 6,
+  "elapsed_seconds": 60.41,
+  "statements": [
+    {
+      "statement_id": "1-S040-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The client MAY send another command without waiting for the completion result response of a command, subject to ambiguity rules (see below) and flow control constraints on the underlying data stream.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_response_pending",
+      "pre_cond": "ambiguity_rule_satisfied = true & flow_control_satisfied = true",
+      "post_cond": null,
+      "actions": [
+        "send_next_command_without_waiting_for_completion_response"
+      ],
+      "modality": "may",
+      "id": "N-S040-001"
+    },
+    {
+      "statement_id": "2-S040-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Similarly, a server MAY begin processing another command before processing the current command to completion, subject to ambiguity rules.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_command_received_while_command_in_progress",
+      "pre_cond": "ambiguity_rule_satisfied = true",
+      "post_cond": null,
+      "actions": [
+        "begin_processing_next_command_before_current_completes"
+      ],
+      "modality": "may",
+      "id": "N-S040-002"
+    },
+    {
+      "statement_id": "3-S040-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "imap_fsm",
+      "description": "However, any command continuation request responses and command continuations MUST be negotiated before any subsequent command is initiated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_requires_continuation",
+      "pre_cond": "continuation_negotiated = false",
+      "post_cond": "continuation_negotiated = true",
+      "actions": [
+        "complete_continuation_negotiation_before_initiating_subsequent_command"
+      ],
+      "modality": "must",
+      "id": "N-S040-003"
+    },
+    {
+      "statement_id": "4-S040-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server detects a possible ambiguity, it MUST execute commands to completion in the order given by the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_detects_ambiguity",
+      "pre_cond": "ambiguity_detected = true",
+      "post_cond": "commands_executed_in_client_order = true",
+      "actions": [
+        "execute_each_command_to_completion_in_client_given_order"
+      ],
+      "modality": "must",
+      "id": "N-S040-004"
+    },
+    {
+      "statement_id": "5-S040-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Therefore, if the client sends any command other than FETCH, STORE, or SEARCH, it MUST wait for the completion result response before sending a command with message sequence numbers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_sends_command_other_than_FETCH_STORE_SEARCH",
+      "pre_cond": "command.type != FETCH & command.type != STORE & command.type != SEARCH",
+      "post_cond": "completion_result_response_received = true",
+      "actions": [
+        "wait_for_completion_result_response",
+        "then_send_command_with_message_sequence_numbers"
+      ],
+      "modality": "must",
+      "id": "N-S040-005"
+    },
+    {
+      "statement_id": "6-S040-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "If the client sends a UID command, it MUST wait for a completion result response before sending a command that uses message sequence numbers (this may include UID SEARCH).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_sends_UID_command",
+      "pre_cond": "command.type = UID",
+      "post_cond": "completion_result_response_received = true",
+      "actions": [
+        "wait_for_completion_result_response",
+        "then_send_command_using_message_sequence_numbers"
+      ],
+      "modality": "must",
+      "id": "N-S040-006"
+    }
+  ]
+}

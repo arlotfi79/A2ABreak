@@ -1,0 +1,185 @@
+{
+  "section_id": "S056",
+  "title": "S056 7.5.4 Handling Sequence-Invalid Packets",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S056 7.5.4 Handling Sequence-Invalid Packets"
+  ],
+  "url_anchor": "#s056-754-handling-sequence-invalid-packets",
+  "word_count": 445,
+  "statement_count": 8,
+  "elapsed_seconds": 85.85,
+  "statements": [
+    {
+      "statement_id": "D-S056-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints in an unsynchronized state (CLOSED, REQUEST, and LISTEN) might not have enough information to generate a proper DCCP-Reset on the first try.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S056",
+      "state_name": "CLOSED",
+      "enum_name": "DCCP_STATE",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S056-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints in an unsynchronized state (CLOSED, REQUEST, and LISTEN) might not have enough information to generate a proper DCCP-Reset on the first try.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S056",
+      "state_name": "REQUEST",
+      "enum_name": "DCCP_STATE",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S056-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints in an unsynchronized state (CLOSED, REQUEST, and LISTEN) might not have enough information to generate a proper DCCP-Reset on the first try.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S056",
+      "state_name": "LISTEN",
+      "enum_name": "DCCP_STATE",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S056-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Any sequence-invalid DCCP-Sync or DCCP-SyncAck packet MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive sequence-invalid DCCP-Sync or DCCP-SyncAck",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "ignore packet"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A sequence-invalid DCCP-Reset packet MUST elicit a DCCP-Sync packet in response (subject to a possible rate limit). This response packet MUST use a new Sequence Number, and thus will increase GSS; GSR will not change, however, since the received packet was sequence-invalid. The response packet's Acknowledgement Number MUST equal GSR.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive sequence-invalid DCCP-Reset",
+      "pre_cond": null,
+      "post_cond": "endpoint.GSS = endpoint.GSS + 1",
+      "actions": [
+        "send DCCP-Sync with new Sequence Number",
+        "increment GSS",
+        "set DCCP-Sync.AcknowledgementNumber = GSR"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Any other sequence-invalid packet MUST elicit a similar DCCP-Sync packet, except that the response packet's Acknowledgement Number MUST equal the sequence-invalid packet's Sequence Number.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive other sequence-invalid packet",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Sync with new Sequence Number",
+        "set DCCP-Sync.AcknowledgementNumber = received_packet.SequenceNumber"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "On receiving a sequence-valid DCCP-Sync packet, the peer endpoint MUST update its GSR variable and reply with a DCCP-SyncAck packet. The DCCP-SyncAck packet's Acknowledgement Number will equal the DCCP-Sync's Sequence Number.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive sequence-valid DCCP-Sync",
+      "pre_cond": "protocol.state != REQUEST",
+      "post_cond": "endpoint.GSR = DCCP-Sync.SequenceNumber",
+      "actions": [
+        "update GSR to DCCP-Sync.SequenceNumber",
+        "send DCCP-SyncAck with AcknowledgementNumber = DCCP-Sync.SequenceNumber"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "As an exception, if the peer endpoint is in the REQUEST state, it MUST respond with a DCCP-Reset instead of a DCCP-SyncAck. This serves to clean up DCCP A's half-open connection.",
+      "is_inferred": false,
+      "confidence": 0.98,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "receive sequence-valid DCCP-Sync",
+      "pre_cond": "protocol.state = REQUEST",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset"
+      ],
+      "modality": "must"
+    }
+  ]
+}

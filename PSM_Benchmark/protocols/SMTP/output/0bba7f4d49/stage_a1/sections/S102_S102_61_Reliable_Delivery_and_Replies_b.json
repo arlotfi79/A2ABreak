@@ -1,0 +1,125 @@
+{
+  "section_id": "S102",
+  "title": "S102 6.1 Reliable Delivery and Replies by Email",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S102 6.1 Reliable Delivery and Replies by Email"
+  ],
+  "url_anchor": "#s102-61-reliable-delivery-and-replies-by-email",
+  "word_count": 336,
+  "statement_count": 5,
+  "elapsed_seconds": 38.2,
+  "statements": [
+    {
+      "statement_id": "D-S102-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "When the receiver-SMTP accepts a piece of mail (by sending a '250 OK' message in response to DATA), it is accepting responsibility for delivering or relaying the message.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S102",
+      "state_name": "MAIL_ACCEPTED",
+      "enum_name": "ReceiverSMTPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.data_accepted = true"
+    },
+    {
+      "statement_id": "D-S102-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When the receiver-SMTP accepts a piece of mail (by sending a '250 OK' message in response to DATA), it is accepting responsibility for delivering or relaying the message.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": "DATA_TRANSFER",
+      "to_state": "MAIL_ACCEPTED",
+      "trigger": "send_250_OK_response_to_DATA",
+      "pre_cond": "session.state = DATA_TRANSFER & message.end_of_data_received = true",
+      "post_cond": "session.state = MAIL_ACCEPTED & session.delivery_responsibility = true",
+      "actions": [
+        "send 250 OK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S102-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "To avoid receiving duplicate messages as the result of timeouts, a receiver-SMTP MUST seek to minimize the time required to respond to the final <CRLF>.<CRLF> end of data indicator.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": "DATA_TRANSFER",
+      "to_state": "MAIL_ACCEPTED",
+      "trigger": "end_of_data_indicator_received",
+      "pre_cond": "session.state = DATA_TRANSFER",
+      "post_cond": "session.state = MAIL_ACCEPTED",
+      "actions": [
+        "send 250 OK without delay"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S102-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If there is a delivery failure after acceptance of a message, the receiver-SMTP MUST formulate and mail a notification message. This notification MUST be sent using a null ('<>') reverse-path in the envelope.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": "MAIL_ACCEPTED",
+      "to_state": null,
+      "trigger": "delivery_failure_detected",
+      "pre_cond": "session.state = MAIL_ACCEPTED & message.delivery_failure = true & message.return_path != null",
+      "post_cond": "notification_sent = true & notification.reverse_path = null",
+      "actions": [
+        "formulate notification message",
+        "send notification with null reverse-path to envelope return-path address"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S102-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "However, if this address is null ('<>'), the receiver-SMTP MUST NOT send a notification.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": "MAIL_ACCEPTED",
+      "to_state": null,
+      "trigger": "delivery_failure_detected",
+      "pre_cond": "session.state = MAIL_ACCEPTED & message.delivery_failure = true & message.return_path = null",
+      "post_cond": "notification_sent = false",
+      "actions": [
+        "suppress notification"
+      ],
+      "modality": "must"
+    }
+  ]
+}

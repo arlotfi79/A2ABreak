@@ -1,0 +1,88 @@
+{
+  "section_id": "S108",
+  "title": "S108 7.5.1 EXPUNGE Response",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S108 7.5.1 EXPUNGE Response"
+  ],
+  "url_anchor": "#s108-751-expunge-response",
+  "word_count": 283,
+  "statement_count": 3,
+  "elapsed_seconds": 29.03,
+  "statements": [
+    {
+      "statement_id": "1-S108-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "An EXPUNGE response MUST NOT be sent when no command is in progress, nor while responding to a FETCH, STORE, or SEARCH command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server attempts to send EXPUNGE response",
+      "pre_cond": "session.command_in_progress = false | session.active_command = FETCH | session.active_command = STORE | session.active_command = SEARCH",
+      "post_cond": null,
+      "actions": [
+        "suppress EXPUNGE response"
+      ],
+      "modality": "must",
+      "id": "N-S108-001"
+    },
+    {
+      "statement_id": "2-S108-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "An EXPUNGE response MAY be sent during a UID command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server elects to send EXPUNGE response",
+      "pre_cond": "session.active_command = UID_FETCH | session.active_command = UID_STORE | session.active_command = UID_SEARCH",
+      "post_cond": null,
+      "actions": [
+        "send untagged EXPUNGE response"
+      ],
+      "modality": "may",
+      "id": "N-S108-002"
+    },
+    {
+      "statement_id": "3-S108-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The update from the EXPUNGE response MUST be remembered by the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client receives EXPUNGE response",
+      "pre_cond": null,
+      "post_cond": "client.message_sequence_numbers = decremented & client.mailbox_message_count = decremented",
+      "actions": [
+        "decrement sequence numbers of all messages above expunged position",
+        "decrement local mailbox message count"
+      ],
+      "modality": "must",
+      "id": "N-S108-003"
+    }
+  ]
+}

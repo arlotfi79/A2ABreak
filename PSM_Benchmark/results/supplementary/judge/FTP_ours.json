@@ -1,0 +1,664 @@
+{
+ "proto": "FTP",
+ "system": "ours",
+ "gt_states": 10,
+ "gt_transitions": 24,
+ "cand_states": 24,
+ "cand_transitions": 52,
+ "states_matched": 8,
+ "states_P": 0.3333,
+ "states_R": 0.8,
+ "states_F1": 0.4706,
+ "trans_matched": 13,
+ "trans_P": 0.25,
+ "trans_R": 0.5417,
+ "trans_F1": 0.3421,
+ "unmatched_classes": {
+  "real_behavior_not_in_gt": 24,
+  "wrong_or_unsupported": 15
+ },
+ "tokens_in": 4532,
+ "tokens_out": 4701,
+ "cost": 0.140185,
+ "seconds": 60.8,
+ "raw": {
+  "state_matches": [
+   {
+    "gt": "Disconnected",
+    "candidate": "AwaitingInput",
+    "confidence": 0.7,
+    "reason": "Both are the state where USER command is received to begin login"
+   },
+   {
+    "gt": "Connected",
+    "candidate": "NeedPassword",
+    "confidence": 0.85,
+    "reason": "Both await PASS after USER/331"
+   },
+   {
+    "gt": "Authenticated",
+    "candidate": "LoggedIn",
+    "confidence": 0.95,
+    "reason": "Both represent fully logged-in state"
+   },
+   {
+    "gt": "Need_Account",
+    "candidate": "NeedAccount",
+    "confidence": 0.95,
+    "reason": "Both represent needing ACCT"
+   },
+   {
+    "gt": "Accounted",
+    "candidate": null,
+    "confidence": 0.9,
+    "reason": "No separate post-ACCT state in candidate; merges into LoggedIn"
+   },
+   {
+    "gt": "Data_Connection_Ready",
+    "candidate": "EnteringPassiveMode",
+    "confidence": 0.5,
+    "reason": "Partial match: only covers PASV, not PORT"
+   },
+   {
+    "gt": "Data_Transfer",
+    "candidate": "DataTransfer",
+    "confidence": 0.95,
+    "reason": "Both represent active data transfer"
+   },
+   {
+    "gt": "Restart_Point_Set",
+    "candidate": "RestartPending",
+    "confidence": 0.95,
+    "reason": "Both represent REST marker set, awaiting transfer command"
+   },
+   {
+    "gt": "Awaiting_RNTO",
+    "candidate": "RenamePending",
+    "confidence": 0.95,
+    "reason": "Both represent RNFR sent, awaiting RNTO"
+   },
+   {
+    "gt": "Logged_Out",
+    "candidate": "Closed",
+    "confidence": 0.9,
+    "reason": "Both represent session termination"
+   }
+  ],
+  "transition_matches": [
+   {
+    "gt_index": 0,
+    "gt": {
+     "from": "Disconnected",
+     "event": "receive USER",
+     "action": "reply 331",
+     "to": "Connected"
+    },
+    "candidate_index": 5,
+    "candidate": {
+     "from": "AwaitingInput",
+     "event": "receive USER 331",
+     "action": "send 331 need password",
+     "to": "NeedPassword"
+    },
+    "confidence": 0.9,
+    "reason": "USER\u2192331\u2192NeedPassword matches USER\u2192331\u2192Connected"
+   },
+   {
+    "gt_index": 1,
+    "gt": {
+     "from": "Connected",
+     "event": "receive PASS",
+     "action": "reply 230",
+     "to": "Authenticated"
+    },
+    "candidate_index": 7,
+    "candidate": {
+     "from": "NeedPassword",
+     "event": "receive PASS 230",
+     "action": "send 230 user logged in",
+     "to": "LoggedIn"
+    },
+    "confidence": 0.95,
+    "reason": "PASS\u2192230\u2192LoggedIn matches"
+   },
+   {
+    "gt_index": 2,
+    "gt": {
+     "from": "Connected",
+     "event": "receive PASS",
+     "action": "reply 530",
+     "to": "Disconnected"
+    },
+    "candidate_index": 9,
+    "candidate": {
+     "from": "NeedPassword",
+     "event": "receive PASS 530",
+     "action": "send 530 login failed",
+     "to": "AwaitingInput"
+    },
+    "confidence": 0.9,
+    "reason": "PASS\u2192530\u2192back to initial login state"
+   },
+   {
+    "gt_index": 3,
+    "gt": {
+     "from": "Connected",
+     "event": "receive PASS",
+     "action": "reply 332",
+     "to": "Need_Account"
+    },
+    "candidate_index": 8,
+    "candidate": {
+     "from": "NeedPassword",
+     "event": "receive PASS 332",
+     "action": "send 332 need account",
+     "to": "NeedAccount"
+    },
+    "confidence": 0.95,
+    "reason": "PASS\u2192332\u2192NeedAccount matches"
+   },
+   {
+    "gt_index": 4,
+    "gt": {
+     "from": "Need_Account",
+     "event": "receive ACCT",
+     "action": "reply 230",
+     "to": "Accounted"
+    },
+    "candidate_index": 10,
+    "candidate": {
+     "from": "NeedAccount",
+     "event": "receive ACCT 230",
+     "action": "send 230 user logged in",
+     "to": "LoggedIn"
+    },
+    "confidence": 0.85,
+    "reason": "ACCT\u2192230\u2192LoggedIn; Accounted merges into LoggedIn"
+   },
+   {
+    "gt_index": 5,
+    "gt": {
+     "from": "Need_Account",
+     "event": "receive ACCT",
+     "action": "reply 332",
+     "to": "Need_Account"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No self-loop ACCT\u2192332 on NeedAccount in candidate"
+   },
+   {
+    "gt_index": 6,
+    "gt": {
+     "from": "Authenticated",
+     "event": "receive ACCT",
+     "action": "reply 230",
+     "to": "Accounted"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No ACCT transition from LoggedIn in candidate"
+   },
+   {
+    "gt_index": 7,
+    "gt": {
+     "from": "Authenticated",
+     "event": "receive ACCT",
+     "action": "reply 332",
+     "to": "Authenticated"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No ACCT self-loop on LoggedIn in candidate"
+   },
+   {
+    "gt_index": 8,
+    "gt": {
+     "from": "Authenticated",
+     "event": "receive PASV",
+     "action": "reply 227",
+     "to": "Data_Connection_Ready"
+    },
+    "candidate_index": 11,
+    "candidate": {
+     "from": "LoggedIn",
+     "event": "receive PASV 227",
+     "action": "send 227 entering passive",
+     "to": "EnteringPassiveMode"
+    },
+    "confidence": 0.9,
+    "reason": "PASV\u2192227 matches"
+   },
+   {
+    "gt_index": 9,
+    "gt": {
+     "from": "Authenticated",
+     "event": "receive PORT",
+     "action": "reply 200",
+     "to": "Data_Connection_Ready"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No PORT transition from LoggedIn in candidate"
+   },
+   {
+    "gt_index": 10,
+    "gt": {
+     "from": "Data_Connection_Ready",
+     "event": "receive RETR",
+     "action": "reply 150",
+     "to": "Data_Transfer"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No RETR from EnteringPassiveMode; candidate uses generic service command from LoggedIn"
+   },
+   {
+    "gt_index": 11,
+    "gt": {
+     "from": "Data_Connection_Ready",
+     "event": "receive STOR",
+     "action": "reply 150",
+     "to": "Data_Transfer"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No STOR from EnteringPassiveMode"
+   },
+   {
+    "gt_index": 12,
+    "gt": {
+     "from": "Data_Connection_Ready",
+     "event": "receive APPE",
+     "action": "reply 150",
+     "to": "Data_Transfer"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No APPE from EnteringPassiveMode"
+   },
+   {
+    "gt_index": 13,
+    "gt": {
+     "from": "Data_Transfer",
+     "event": "Transfer Complete",
+     "action": "reply 226",
+     "to": "Authenticated"
+    },
+    "candidate_index": 19,
+    "candidate": {
+     "from": "DataTransfer",
+     "event": "receive reply 2yz",
+     "action": "close data connection",
+     "to": "LoggedIn"
+    },
+    "confidence": 0.75,
+    "reason": "Transfer complete\u21922xx\u2192LoggedIn matches semantically"
+   },
+   {
+    "gt_index": 14,
+    "gt": {
+     "from": "Data_Transfer",
+     "event": "receive QUIT",
+     "action": "reply 221",
+     "to": "Logged_Out"
+    },
+    "candidate_index": 18,
+    "candidate": {
+     "from": "DataTransfer",
+     "event": "receive QUIT",
+     "action": "close connection after result",
+     "to": "Closed"
+    },
+    "confidence": 0.9,
+    "reason": "QUIT during transfer\u2192Closed matches"
+   },
+   {
+    "gt_index": 15,
+    "gt": {
+     "from": "Authenticated",
+     "event": "receive REST",
+     "action": "reply 350",
+     "to": "Restart_Point_Set"
+    },
+    "candidate_index": 16,
+    "candidate": {
+     "from": "LoggedIn",
+     "event": "receive REST 350",
+     "action": "send 350 restart marker",
+     "to": "RestartPending"
+    },
+    "confidence": 0.95,
+    "reason": "REST\u2192350\u2192RestartPending matches"
+   },
+   {
+    "gt_index": 16,
+    "gt": {
+     "from": "Restart_Point_Set",
+     "event": "receive RETR",
+     "action": "reply 150",
+     "to": "Data_Transfer"
+    },
+    "candidate_index": 25,
+    "candidate": {
+     "from": "RestartPending",
+     "event": "send transfer command",
+     "action": "send transfer command",
+     "to": "DataTransfer"
+    },
+    "confidence": 0.6,
+    "reason": "Generic transfer command from RestartPending\u2192DataTransfer; RETR is one such command"
+   },
+   {
+    "gt_index": 17,
+    "gt": {
+     "from": "Restart_Point_Set",
+     "event": "receive STOR",
+     "action": "reply 150",
+     "to": "Data_Transfer"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "Already matched candidate 25 to RETR; no separate STOR transition"
+   },
+   {
+    "gt_index": 18,
+    "gt": {
+     "from": "Restart_Point_Set",
+     "event": "receive APPE",
+     "action": "reply 150",
+     "to": "Data_Transfer"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No separate APPE from RestartPending"
+   },
+   {
+    "gt_index": 19,
+    "gt": {
+     "from": "Authenticated",
+     "event": "receive RNFR",
+     "action": "reply 350",
+     "to": "Awaiting_RNTO"
+    },
+    "candidate_index": 14,
+    "candidate": {
+     "from": "LoggedIn",
+     "event": "receive RNFR 350",
+     "action": "send 350 pending info",
+     "to": "RenamePending"
+    },
+    "confidence": 0.95,
+    "reason": "RNFR\u2192350\u2192RenamePending matches"
+   },
+   {
+    "gt_index": 20,
+    "gt": {
+     "from": "Awaiting_RNTO",
+     "event": "receive RNTO",
+     "action": "reply 250",
+     "to": "Authenticated"
+    },
+    "candidate_index": 15,
+    "candidate": {
+     "from": "RenamePending",
+     "event": "receive RNTO 250",
+     "action": "rename file send 250",
+     "to": "LoggedIn"
+    },
+    "confidence": 0.95,
+    "reason": "RNTO\u2192250\u2192LoggedIn matches"
+   },
+   {
+    "gt_index": 21,
+    "gt": {
+     "from": "Authenticated",
+     "event": "receive QUIT",
+     "action": "reply 221",
+     "to": "Logged_Out"
+    },
+    "candidate_index": 17,
+    "candidate": {
+     "from": "LoggedIn",
+     "event": "receive QUIT",
+     "action": "close control connection",
+     "to": "Closed"
+    },
+    "confidence": 0.9,
+    "reason": "QUIT\u2192Closed matches"
+   },
+   {
+    "gt_index": 22,
+    "gt": {
+     "from": "Accounted",
+     "event": "receive QUIT",
+     "action": "reply 221",
+     "to": "Logged_Out"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No Accounted state in candidate"
+   },
+   {
+    "gt_index": 23,
+    "gt": {
+     "from": "Restart_Point_Set",
+     "event": "receive QUIT",
+     "action": "reply 221",
+     "to": "Logged_Out"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No QUIT from RestartPending in candidate"
+   }
+  ],
+  "unmatched_candidate_transitions": [
+   {
+    "candidate_index": 0,
+    "class": "real_behavior_not_in_gt",
+    "reason": "TCP connection establishment before 220 greeting; GT starts post-connection"
+   },
+   {
+    "candidate_index": 1,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server sending 220 ready reply; GT omits this initial greeting step"
+   },
+   {
+    "candidate_index": 2,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server sending 120 delayed reply; valid FTP behavior not in GT"
+   },
+   {
+    "candidate_index": 3,
+    "class": "real_behavior_not_in_gt",
+    "reason": "421 service not available; valid FTP error handling not in GT"
+   },
+   {
+    "candidate_index": 4,
+    "class": "real_behavior_not_in_gt",
+    "reason": "USER\u2192230 direct login without password; valid FTP behavior not in GT"
+   },
+   {
+    "candidate_index": 6,
+    "class": "real_behavior_not_in_gt",
+    "reason": "USER\u2192332 need account directly; valid FTP behavior not in GT"
+   },
+   {
+    "candidate_index": 12,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Generic service command from LoggedIn to DataTransfer; covers RETR/STOR/APPE but skips Data_Connection_Ready"
+   },
+   {
+    "candidate_index": 13,
+    "class": "real_behavior_not_in_gt",
+    "reason": "ABOR during transfer returning to LoggedIn; valid FTP behavior"
+   },
+   {
+    "candidate_index": 20,
+    "class": "real_behavior_not_in_gt",
+    "reason": "ABOR when idle; valid FTP behavior"
+   },
+   {
+    "candidate_index": 21,
+    "class": "real_behavior_not_in_gt",
+    "reason": "TYPE command handling; valid FTP behavior not in GT"
+   },
+   {
+    "candidate_index": 22,
+    "class": "real_behavior_not_in_gt",
+    "reason": "STOR access denied 550; valid error handling not in GT"
+   },
+   {
+    "candidate_index": 23,
+    "class": "real_behavior_not_in_gt",
+    "reason": "REIN command reinitializing session; valid FTP behavior"
+   },
+   {
+    "candidate_index": 24,
+    "class": "real_behavior_not_in_gt",
+    "reason": "REIN with 120 delay; valid FTP behavior"
+   },
+   {
+    "candidate_index": 26,
+    "class": "real_behavior_not_in_gt",
+    "reason": "USER re-login from LoggedIn; valid FTP behavior"
+   },
+   {
+    "candidate_index": 27,
+    "class": "real_behavior_not_in_gt",
+    "reason": "MKD access denied; valid FTP behavior"
+   },
+   {
+    "candidate_index": 28,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Data connection PASV from Active; part of data connection sub-FSM"
+   },
+   {
+    "candidate_index": 29,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Data connection initiation from Listen; data connection sub-FSM"
+   },
+   {
+    "candidate_index": 30,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Data connection close on completion; data connection sub-FSM"
+   },
+   {
+    "candidate_index": 31,
+    "class": "real_behavior_not_in_gt",
+    "reason": "ABOR closing data connection; data connection sub-FSM"
+   },
+   {
+    "candidate_index": 32,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Port change closing data; data connection sub-FSM"
+   },
+   {
+    "candidate_index": 33,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Control closed closing data; data connection sub-FSM"
+   },
+   {
+    "candidate_index": 34,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Irrecoverable error closing data; data connection sub-FSM"
+   },
+   {
+    "candidate_index": 35,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server close data with 250; data connection sub-FSM"
+   },
+   {
+    "candidate_index": 36,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Transfer prep from DataConnClosed; data connection sub-FSM"
+   },
+   {
+    "candidate_index": 37,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side generic command FSM (B\u2192W); not server-side protocol behavior matching GT"
+   },
+   {
+    "candidate_index": 38,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side reply handling (W\u2192W on 1xx); client FSM not in GT"
+   },
+   {
+    "candidate_index": 39,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side reply handling (W\u2192S on 2xx); client FSM"
+   },
+   {
+    "candidate_index": 40,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side reply handling (W\u2192E on 3xx); client FSM"
+   },
+   {
+    "candidate_index": 41,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side reply handling (W\u2192F on 4xx/5xx); client FSM"
+   },
+   {
+    "candidate_index": 42,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side RNFR command (B\u2192W); client FSM"
+   },
+   {
+    "candidate_index": 43,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side reply handling variant; client FSM"
+   },
+   {
+    "candidate_index": 44,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side RNTO from E; client FSM"
+   },
+   {
+    "candidate_index": 45,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side reply handling variant; client FSM"
+   },
+   {
+    "candidate_index": 46,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side REST command; client FSM"
+   },
+   {
+    "candidate_index": 47,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side transfer from E; client FSM"
+   },
+   {
+    "candidate_index": 48,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side REST reply handling; client FSM"
+   },
+   {
+    "candidate_index": 49,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side USER command; client FSM"
+   },
+   {
+    "candidate_index": 50,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side USER reply handling; client FSM"
+   },
+   {
+    "candidate_index": 51,
+    "class": "wrong_or_unsupported",
+    "reason": "Client-side USER 3xx to PASS_W; client FSM"
+   }
+  ]
+ }
+}

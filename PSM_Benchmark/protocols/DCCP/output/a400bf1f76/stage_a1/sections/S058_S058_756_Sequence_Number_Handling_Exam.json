@@ -1,0 +1,228 @@
+{
+  "section_id": "S058",
+  "title": "S058 7.5.6 Sequence Number Handling Examples",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S058 7.5.6 Sequence Number Handling Examples"
+  ],
+  "url_anchor": "#s058-756-sequence-number-handling-examples",
+  "word_count": 171,
+  "statement_count": 10,
+  "elapsed_seconds": 65.22,
+  "statements": [
+    {
+      "statement_id": "D-S058-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "CLOSED state of DCCP A after a crash, before reconnection attempt in the half-open connection recovery example.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S058",
+      "state_name": "CLOSED",
+      "enum_name": "DCCPState",
+      "semantic_type": "terminal",
+      "is_initial": true,
+      "is_final": true,
+      "invariant_cond": "protocol.state = CLOSED"
+    },
+    {
+      "statement_id": "D-S058-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "OPEN state of DCCP B during the half-open connection recovery example, representing an established connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S058",
+      "state_name": "OPEN",
+      "enum_name": "DCCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OPEN"
+    },
+    {
+      "statement_id": "D-S058-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "REQUEST state of DCCP A during the half-open connection recovery example, representing an in-progress connection initiation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S058",
+      "state_name": "REQUEST",
+      "enum_name": "DCCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = REQUEST"
+    },
+    {
+      "statement_id": "D-S058-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "After a crash, DCCP A transitions from CLOSED to REQUEST by sending a DCCP-Request (half-open recovery example: DCCP-Request(seq 400)).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S058",
+      "actors": [
+        "DCCP A"
+      ],
+      "from_state": "CLOSED",
+      "to_state": "REQUEST",
+      "trigger": "local application open request after crash",
+      "pre_cond": "protocol.state = CLOSED",
+      "post_cond": "protocol.state = REQUEST",
+      "actions": [
+        "send DCCP-Request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S058-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "DCCP B, in OPEN state, receives a DCCP-Request whose sequence number is out of the appropriate sequence number window, and responds by sending a DCCP-Sync; DCCP B remains in OPEN.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S058",
+      "actors": [
+        "DCCP B"
+      ],
+      "from_state": "OPEN",
+      "to_state": "OPEN",
+      "trigger": "receive DCCP-Request with seqno out of range",
+      "pre_cond": "protocol.state = OPEN & received_seqno out of appropriate_sequence_number_window",
+      "post_cond": "protocol.state = OPEN",
+      "actions": [
+        "send DCCP-Sync"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S058-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "DCCP A, in REQUEST state, receives DCCP-Sync from DCCP B (half-open peer) and responds by sending DCCP-Reset; DCCP A remains in REQUEST.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S058",
+      "actors": [
+        "DCCP A"
+      ],
+      "from_state": "REQUEST",
+      "to_state": "REQUEST",
+      "trigger": "receive DCCP-Sync while in REQUEST",
+      "pre_cond": "protocol.state = REQUEST",
+      "post_cond": "protocol.state = REQUEST",
+      "actions": [
+        "send DCCP-Reset"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S058-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "DCCP B, in OPEN state, receives DCCP-Reset from DCCP A and aborts, transitioning to CLOSED (half-open connection recovery).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S058",
+      "actors": [
+        "DCCP B"
+      ],
+      "from_state": "OPEN",
+      "to_state": "CLOSED",
+      "trigger": "receive DCCP-Reset",
+      "pre_cond": "protocol.state = OPEN",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "abort connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S058-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "DCCP B, whose sequence number is out of DCCP A's appropriate sequence number window after a burst of loss, sends a DCCP-Sync; upon receiving DCCP-SyncAck, both sides update GSS/GSR state (first burst-loss example).",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S058",
+      "actors": [
+        "DCCP B",
+        "DCCP A"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive packet with seqno out of appropriate sequence number window",
+      "pre_cond": "received_seqno out of appropriate_sequence_number_window",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Sync"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S058-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "DCCP A receives DCCP-Sync with an acknowledgement number out of range (from attacker-injected packet causing DCCP B to send Sync) and ignores it; state is unchanged.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S058",
+      "actors": [
+        "DCCP A"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive DCCP-Sync with ackno out of range",
+      "pre_cond": "received_ackno out of appropriate_sequence_number_window",
+      "post_cond": null,
+      "actions": [
+        "ignore DCCP-Sync"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S058-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "After DCCP B aborts and closes due to receiving Reset in the half-open recovery example, DCCP A (still in REQUEST) retransmits DCCP-Request to re-establish the connection.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S058",
+      "actors": [
+        "DCCP A"
+      ],
+      "from_state": "REQUEST",
+      "to_state": "REQUEST",
+      "trigger": "retransmit DCCP-Request after Reset sent",
+      "pre_cond": "protocol.state = REQUEST",
+      "post_cond": "protocol.state = REQUEST",
+      "actions": [
+        "send DCCP-Request"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

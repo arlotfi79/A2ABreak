@@ -1,0 +1,82 @@
+{
+  "section_id": "S005",
+  "title": "S005 3.1.1 Multi-line Data Blocks",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S005 3.1.1 Multi-line Data Blocks"
+  ],
+  "url_anchor": "#s005-311-multi-line-data-blocks",
+  "word_count": 384,
+  "statement_count": 3,
+  "elapsed_seconds": 28.52,
+  "statements": [
+    {
+      "statement_id": "D-S005-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "In a multi-line response, the block immediately follows the CRLF at the end of the initial line of the response.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S005",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "RECEIVING_MULTILINE_BLOCK",
+      "trigger": "CRLF at end of initial response line",
+      "pre_cond": "response.type = multi-line",
+      "post_cond": null,
+      "actions": [
+        "begin reading multi-line data block"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S005-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "The lines of the block MUST be followed by a terminating line consisting of a single termination octet followed by a CRLF pair. The terminating line MUST NOT be considered part of the multi-line block.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S005",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "RECEIVING_MULTILINE_BLOCK",
+      "to_state": null,
+      "trigger": "terminating line received (dot CRLF)",
+      "pre_cond": "connection.state = RECEIVING_MULTILINE_BLOCK",
+      "post_cond": "multiline_block.complete = true",
+      "actions": [
+        "discard terminating line",
+        "undo dot-stuffing",
+        "signal end of multi-line block"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S005-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "A multi-line data block is used in certain commands and responses, consisting of a sequence of zero or more lines followed by a terminating line.",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "S005",
+      "state_name": "RECEIVING_MULTILINE_BLOCK",
+      "enum_name": "DataTransferState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = RECEIVING_MULTILINE_BLOCK"
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "section_id": "S079",
+  "title": "S079 12.2.2 UAS Behavior",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S079 12.2.2 UAS Behavior"
+  ],
+  "url_anchor": "#s079-1222-uas-behavior",
+  "word_count": 597,
+  "statement_count": 8,
+  "elapsed_seconds": 96.34,
+  "statements": [
+    {
+      "statement_id": "N-S079-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Based on the To tag, the UAS MAY either accept or reject the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_with_unmatched_To_tag",
+      "pre_cond": "request.To.tag != null & dialog_match = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S079-001"
+    },
+    {
+      "statement_id": "N-S079-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "UAs wishing to support this capability must take into consideration some issues such as choosing monotonically increasing CSeq sequence numbers even across reboots, reconstructing the route set, and accepting out-of-range RTP timestamps and sequence numbers.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S079-002"
+    },
+    {
+      "statement_id": "N-S079-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the UAS wishes to reject the request because it does not wish to recreate the dialog, it MUST respond to the request with a 481 (Call/Transaction Does Not Exist) status code and pass that to the server transaction.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_with_unmatched_To_tag",
+      "pre_cond": "dialog_match = false & UAS.wishes_to_reject = true",
+      "post_cond": null,
+      "actions": [
+        "send 481 response",
+        "pass response to server transaction"
+      ],
+      "modality": "must",
+      "id": "N-S079-003"
+    },
+    {
+      "statement_id": "N-S079-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the remote sequence number is empty, it MUST be set to the value of the sequence number in the CSeq header field value in the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mid_dialog_request_received",
+      "pre_cond": "dialog.remote_seq = empty",
+      "post_cond": "dialog.remote_seq = request.CSeq",
+      "actions": [
+        "set dialog remote sequence number to CSeq value from request"
+      ],
+      "modality": "must",
+      "id": "N-S079-004"
+    },
+    {
+      "statement_id": "N-S079-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the remote sequence number was not empty, but the sequence number of the request is lower than the remote sequence number, the request is out of order and MUST be rejected with a 500 (Server Internal Error) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mid_dialog_request_received",
+      "pre_cond": "dialog.remote_seq != empty & request.CSeq < dialog.remote_seq",
+      "post_cond": null,
+      "actions": [
+        "send 500 response"
+      ],
+      "modality": "must",
+      "id": "N-S079-005"
+    },
+    {
+      "statement_id": "N-S079-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "a UAS SHOULD be prepared to receive and process requests with CSeq values more than one higher than the previous received request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mid_dialog_request_received",
+      "pre_cond": "dialog.remote_seq != empty & request.CSeq > dialog.remote_seq + 1",
+      "post_cond": null,
+      "actions": [
+        "accept and process request with CSeq more than one higher than previous"
+      ],
+      "modality": "should",
+      "id": "N-S079-006"
+    },
+    {
+      "statement_id": "N-S079-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The UAS MUST then set the remote sequence number to the value of the sequence number in the CSeq header field value in the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mid_dialog_request_received_in_order",
+      "pre_cond": "dialog.remote_seq != empty & request.CSeq > dialog.remote_seq",
+      "post_cond": "dialog.remote_seq = request.CSeq",
+      "actions": [
+        "set dialog remote sequence number to CSeq value from request"
+      ],
+      "modality": "must",
+      "id": "N-S079-007"
+    },
+    {
+      "statement_id": "N-S079-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When a UAS receives a target refresh request, it MUST replace the dialog's remote target URI with the URI from the Contact header field in that request, if present.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "target_refresh_request_received",
+      "pre_cond": "request.Contact != null",
+      "post_cond": "dialog.remote_target_URI = request.Contact.URI",
+      "actions": [
+        "replace dialog remote target URI with URI from Contact header of request"
+      ],
+      "modality": "must",
+      "id": "N-S079-008"
+    }
+  ]
+}

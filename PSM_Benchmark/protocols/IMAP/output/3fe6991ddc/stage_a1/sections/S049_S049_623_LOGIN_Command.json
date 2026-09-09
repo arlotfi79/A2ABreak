@@ -1,0 +1,145 @@
+{
+  "section_id": "S049",
+  "title": "S049 6.2.3 LOGIN Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S049 6.2.3 LOGIN Command"
+  ],
+  "url_anchor": "#s049-623-login-command",
+  "word_count": 281,
+  "statement_count": 6,
+  "elapsed_seconds": 27.34,
+  "statements": [
+    {
+      "statement_id": "D-S049-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "OK - login completed, now in authenticated state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "state_name": "Authenticated",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Authenticated"
+    },
+    {
+      "statement_id": "D-S049-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "OK - login completed, now in authenticated state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "LOGIN_OK",
+      "pre_cond": "session.capability.LOGINDISABLED = false & session.secure = true",
+      "post_cond": "protocol.state = Authenticated",
+      "actions": [
+        "send tagged OK response",
+        "optionally include CAPABILITY response code in tagged OK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S049-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "NO - login failure: user name or password rejected",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "LOGIN_NO",
+      "pre_cond": null,
+      "post_cond": "protocol.state = Not Authenticated",
+      "actions": [
+        "send tagged NO response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S049-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "BAD - command unknown or arguments invalid",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "LOGIN_BAD",
+      "pre_cond": null,
+      "post_cond": "protocol.state = Not Authenticated",
+      "actions": [
+        "send tagged BAD response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S049-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "A client implementation MUST NOT send a LOGIN command if the LOGINDISABLED capability is advertised.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "object_name": "LOGIN command",
+      "field_name": "LOGINDISABLED",
+      "field_type": "capability flag",
+      "required": true,
+      "allowed_values": [
+        "false"
+      ],
+      "guard_semantics": "session.capability.LOGINDISABLED = false"
+    },
+    {
+      "statement_id": "D-S049-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Clients MUST NOT use LOGIN on unsecure networks. Unless the client is accessing IMAP service on an Implicit TLS port, the STARTTLS command has been negotiated, or some other mechanism that protects the session from password snooping has been provided.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "object_name": "LOGIN command",
+      "field_name": "session_secure",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "implicit_tls",
+        "starttls_negotiated",
+        "other_protection_mechanism"
+      ],
+      "guard_semantics": "session.secure = true"
+    }
+  ]
+}

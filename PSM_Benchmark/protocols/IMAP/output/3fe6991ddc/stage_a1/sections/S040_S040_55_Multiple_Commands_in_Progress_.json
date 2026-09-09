@@ -1,0 +1,175 @@
+{
+  "section_id": "S040",
+  "title": "S040 5.5 Multiple Commands in Progress (Command Pipelining)",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S040 5.5 Multiple Commands in Progress (Command Pipelining)"
+  ],
+  "url_anchor": "#s040-55-multiple-commands-in-progress-command-pipelining",
+  "word_count": 408,
+  "statement_count": 7,
+  "elapsed_seconds": 59.28,
+  "statements": [
+    {
+      "statement_id": "D-S040-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The client MAY send another command without waiting for the completion result response of a command, subject to ambiguity rules and flow control constraints on the underlying data stream.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S040",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client sends additional command without waiting for completion result",
+      "pre_cond": "ambiguity_rules_satisfied = true & flow_control_satisfied = true",
+      "post_cond": null,
+      "actions": [
+        "send next command"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S040-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server MAY begin processing another command before processing the current command to completion, subject to ambiguity rules.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S040",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server begins processing next command before current command completes",
+      "pre_cond": "ambiguity_rules_satisfied = true",
+      "post_cond": null,
+      "actions": [
+        "begin processing next command"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S040-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Any command continuation request responses and command continuations MUST be negotiated before any subsequent command is initiated.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S040",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "initiation of subsequent command",
+      "pre_cond": "command_continuation_negotiated = true",
+      "post_cond": null,
+      "actions": [
+        "initiate subsequent command"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S040-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server detects a possible ambiguity, it MUST execute commands to completion in the order given by the client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S040",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ambiguity detected in pipelined command sequence",
+      "pre_cond": "ambiguity_detected = true",
+      "post_cond": "commands_executed_in_client_order = true",
+      "actions": [
+        "execute commands to completion in order given by client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S040-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "If the client sends any command other than FETCH, STORE, or SEARCH, it MUST wait for the completion result response before sending a command with message sequence numbers.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S040",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client sends command other than FETCH, STORE, or SEARCH",
+      "pre_cond": "command_type != FETCH & command_type != STORE & command_type != SEARCH",
+      "post_cond": "completion_result_received = true",
+      "actions": [
+        "wait for completion result response before sending command with message sequence numbers"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S040-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "If the client sends a UID command, it MUST wait for a completion result response before sending a command that uses message sequence numbers.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S040",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client sends UID command",
+      "pre_cond": "command_type = UID",
+      "post_cond": "completion_result_received = true",
+      "actions": [
+        "wait for completion result response before sending command with message sequence numbers"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S040-007",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Servers are prohibited from sending EXPUNGE responses while any of FETCH, STORE, or SEARCH commands are in progress.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S040",
+      "object_name": "untagged EXPUNGE response",
+      "field_name": "command_in_progress",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": [
+        "!FETCH",
+        "!STORE",
+        "!SEARCH"
+      ],
+      "guard_semantics": "EXPUNGE response prohibited when command_in_progress = FETCH | command_in_progress = STORE | command_in_progress = SEARCH"
+    }
+  ]
+}

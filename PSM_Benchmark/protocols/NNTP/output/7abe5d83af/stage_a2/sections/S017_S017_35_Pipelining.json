@@ -1,0 +1,248 @@
+{
+  "section_id": "S017",
+  "title": "S017 3.5 Pipelining",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S017 3.5 Pipelining"
+  ],
+  "url_anchor": "#s017-35-pipelining",
+  "word_count": 357,
+  "statement_count": 10,
+  "elapsed_seconds": 186.84,
+  "statements": [
+    {
+      "statement_id": "N-S017-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "Except where stated otherwise, a client MAY use pipelining.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S017-001"
+    },
+    {
+      "statement_id": "N-S017-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST allow pipelining and MUST NOT throw away any text received after a command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "pipelined_commands_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "accept pipelined commands"
+      ],
+      "modality": "must",
+      "id": "N-S017-002"
+    },
+    {
+      "statement_id": "N-S017-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST allow pipelining and MUST NOT throw away any text received after a command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "text_received_after_command",
+      "pre_cond": null,
+      "post_cond": "server.input_buffer.discarded = false",
+      "actions": [
+        "retain all text received after a command"
+      ],
+      "modality": "must",
+      "id": "N-S017-003"
+    },
+    {
+      "statement_id": "N-S017-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Irrespective of whether pipelining is used, the server MUST process commands in the order they are sent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "commands_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "process commands in received order"
+      ],
+      "modality": "must",
+      "id": "N-S017-004"
+    },
+    {
+      "statement_id": "N-S017-5",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "nntp_fsm",
+      "description": "If the specific description of a command says it \"MUST NOT be pipelined\", that command MUST end any pipeline of commands.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "command.label = \"MUST NOT be pipelined\"",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S017-005"
+    },
+    {
+      "statement_id": "N-S017-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "If the specific description of a command says it \"MUST NOT be pipelined\", that command MUST end any pipeline of commands.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": "pipeline_active",
+      "to_state": "awaiting_response",
+      "trigger": "non_pipelineable_command_sent",
+      "pre_cond": "command.label = \"MUST NOT be pipelined\"",
+      "post_cond": "pipeline.active = false",
+      "actions": [
+        "end pipeline",
+        "await response before sending next command"
+      ],
+      "modality": "must",
+      "id": "N-S017-006"
+    },
+    {
+      "statement_id": "N-S017-7",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "That is, the client MUST NOT send any following command until it receives the CRLF at the end of the response from the command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": "awaiting_response",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "command.label = \"MUST NOT be pipelined\" & !received(response_CRLF)",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S017-007"
+    },
+    {
+      "statement_id": "N-S017-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MAY ignore any data received after the command and before the CRLF at the end of the response is sent to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "data_received_after_non_pipelineable_command",
+      "pre_cond": "command.label = \"MUST NOT be pipelined\" & !sent(response_CRLF)",
+      "post_cond": null,
+      "actions": [
+        "ignore received data"
+      ],
+      "modality": "may",
+      "id": "N-S017-008"
+    },
+    {
+      "statement_id": "N-S017-9",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "The initial connection must not be part of a pipeline; that is, the client MUST NOT send any command until it receives the CRLF at the end of the greeting.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": "connecting",
+      "to_state": null,
+      "trigger": "connection_established",
+      "pre_cond": "!received(greeting_CRLF)",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S017-009"
+    },
+    {
+      "statement_id": "N-S017-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "If the client uses blocking system calls to send commands, it MUST ensure that the amount of text sent in pipelining does not cause a deadlock between transmission and reception.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "client.uses_blocking_system_calls = true",
+      "post_cond": null,
+      "actions": [
+        "limit pipelined data volume to prevent transmission deadlock"
+      ],
+      "modality": "must",
+      "id": "N-S017-010"
+    }
+  ]
+}

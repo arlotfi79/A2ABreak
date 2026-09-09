@@ -1,0 +1,142 @@
+{
+  "section_id": "S111",
+  "title": "S111 8. Sample IMAP4rev2 Connection",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S111 8. Sample IMAP4rev2 Connection"
+  ],
+  "url_anchor": "#s111-8-sample-imap4rev2-connection",
+  "word_count": 293,
+  "statement_count": 5,
+  "elapsed_seconds": 39.74,
+  "statements": [
+    {
+      "statement_id": "D-S111-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Server sends greeting '* OK [CAPABILITY STARTTLS AUTH=SCRAM-SHA-256 LOGINDISABLED IMAP4rev2] IMAP4rev2 Service Ready' upon connection establishment on a non-TLS port.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S111",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Not Authenticated",
+      "trigger": "TCP connection established",
+      "pre_cond": null,
+      "post_cond": "connection.tls = false & connection.authenticated = false",
+      "actions": [
+        "send greeting with CAPABILITY including STARTTLS, AUTH=SCRAM-SHA-256, LOGINDISABLED, IMAP4rev2"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S111-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Client issues STARTTLS; server responds OK 'Proceed with TLS negotiation'; TLS negotiation follows.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S111",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "STARTTLS command",
+      "pre_cond": "connection.tls = false",
+      "post_cond": "connection.tls = true",
+      "actions": [
+        "send tagged OK response",
+        "perform TLS negotiation"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S111-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Client issues AUTHENTICATE SCRAM-SHA-256; after SASL exchange, server responds 'A001 OK SCRAM-SHA-256 authentication successful'.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S111",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "AUTHENTICATE SCRAM-SHA-256 success",
+      "pre_cond": "connection.tls = true & session.authenticated = false",
+      "post_cond": "session.authenticated = true",
+      "actions": [
+        "complete SASL SCRAM-SHA-256 exchange",
+        "send tagged OK SCRAM-SHA-256 authentication successful"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S111-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Client issues SELECT inbox; server responds '* LIST', '* EXISTS', '* FLAGS', '* OK [UIDVALIDITY ...]', and tagged 'a002 OK [READ-WRITE] SELECT completed'.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S111",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Selected",
+      "trigger": "SELECT command",
+      "pre_cond": "session.authenticated = true",
+      "post_cond": "session.mailbox_selected = true & session.access_mode = READ-WRITE",
+      "actions": [
+        "send EXISTS untagged response",
+        "send FLAGS untagged response",
+        "send UIDVALIDITY OK untagged response",
+        "send LIST untagged response",
+        "send tagged OK [READ-WRITE] SELECT completed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S111-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Client issues LOGOUT; server responds '* BYE IMAP4rev2 server terminating connection' followed by 'a006 OK LOGOUT completed'.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S111",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Logout",
+      "trigger": "LOGOUT command",
+      "pre_cond": "session.mailbox_selected = true",
+      "post_cond": "connection.active = false",
+      "actions": [
+        "send BYE untagged response",
+        "send tagged OK LOGOUT completed",
+        "terminate connection"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

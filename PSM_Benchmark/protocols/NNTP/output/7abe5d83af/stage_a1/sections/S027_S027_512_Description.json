@@ -1,0 +1,181 @@
+{
+  "section_id": "S027",
+  "title": "S027 5.1.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S027 5.1.2 Description"
+  ],
+  "url_anchor": "#s027-512-description",
+  "word_count": 252,
+  "statement_count": 8,
+  "elapsed_seconds": 74.62,
+  "statements": [
+    {
+      "statement_id": "D-S027-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "There is no command presented by the client upon initial connection to the server. The server MUST present an appropriate response code as a greeting to the client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S027",
+      "state_name": "INITIAL_CONNECT",
+      "enum_name": "NNTPConnectionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S027-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server will accept further commands from the client including POST, the server MUST present a 200 greeting code.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S027",
+      "state_name": "POSTING_ALLOWED",
+      "enum_name": "NNTPConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S027-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server will accept further commands from the client, but the client is not authorized to post articles using the POST command, the server MUST present a 201 greeting code.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S027",
+      "state_name": "POSTING_PROHIBITED",
+      "enum_name": "NNTPConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S027-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Otherwise, the server MUST present a 400 or 502 greeting code and then immediately close the connection.",
+      "is_inferred": true,
+      "confidence": 0.95,
+      "source_section": "S027",
+      "state_name": "CONNECTION_CLOSED",
+      "enum_name": "NNTPConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S027-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server will accept further commands from the client including POST, the server MUST present a 200 greeting code.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "INITIAL_CONNECT",
+      "to_state": "POSTING_ALLOWED",
+      "trigger": "server_accepts_post",
+      "pre_cond": null,
+      "post_cond": "server.accepts_post = true & server.accepts_commands = true",
+      "actions": [
+        "send_200_greeting"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server will accept further commands from the client, but the client is not authorized to post articles using the POST command, the server MUST present a 201 greeting code.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "INITIAL_CONNECT",
+      "to_state": "POSTING_PROHIBITED",
+      "trigger": "server_accepts_commands_no_post",
+      "pre_cond": null,
+      "post_cond": "server.accepts_commands = true & server.accepts_post = false",
+      "actions": [
+        "send_201_greeting"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "400 SHOULD be used if the issue is only temporary (for example, because of load) and the client can expect to be able to connect successfully at some point in the future without making any changes. The server MUST present a 400 greeting code and then immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "INITIAL_CONNECT",
+      "to_state": "CONNECTION_CLOSED",
+      "trigger": "service_temporarily_unavailable",
+      "pre_cond": "connection.issue_temporary = true",
+      "post_cond": null,
+      "actions": [
+        "send_400_greeting",
+        "close_connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "502 MUST be used if the client is not permitted under any circumstances to interact with the server, and MAY be used if the server has insufficient information to determine whether the issue is temporary or permanent. The server MUST present a 502 greeting code and then immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "INITIAL_CONNECT",
+      "to_state": "CONNECTION_CLOSED",
+      "trigger": "service_permanently_refused",
+      "pre_cond": "connection.client_permitted = false | connection.issue_temporary_unknown = true",
+      "post_cond": null,
+      "actions": [
+        "send_502_greeting",
+        "close_connection"
+      ],
+      "modality": "must"
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "section_id": "S087",
+  "title": "S087 13.2.2.3 4xx, 5xx and 6xx Responses",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S087 13.2.2.3 4xx, 5xx and 6xx Responses"
+  ],
+  "url_anchor": "#s087-13223-4xx-5xx-and-6xx-responses",
+  "word_count": 97,
+  "statement_count": 5,
+  "elapsed_seconds": 19.99,
+  "statements": [
+    {
+      "statement_id": "D-S087-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "After having received the non-2xx final response the UAC core considers the INVITE transaction completed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "state_name": "Completed",
+      "enum_name": "INVITE_Client_Transaction_State",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Completed"
+    },
+    {
+      "statement_id": "D-S087-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "All early dialogs are considered terminated upon reception of the non-2xx final response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "state_name": "Terminated",
+      "enum_name": "Dialog_State",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "dialog.state = Terminated"
+    },
+    {
+      "statement_id": "D-S087-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "All early dialogs are considered terminated upon reception of the non-2xx final response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "Early",
+      "to_state": "Terminated",
+      "trigger": "non-2xx final response received",
+      "pre_cond": "dialog.state = Early",
+      "post_cond": "dialog.state = Terminated",
+      "actions": [
+        "terminate all early dialogs"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S087-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "After having received the non-2xx final response the UAC core considers the INVITE transaction completed. The INVITE client transaction handles the generation of ACKs for the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "actors": [
+        "UAC core",
+        "INVITE client transaction"
+      ],
+      "from_state": null,
+      "to_state": "Completed",
+      "trigger": "non-2xx final response received",
+      "pre_cond": null,
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "generate ACK for non-2xx final response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S087-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Subsequent final responses (which would only arrive under error conditions) MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S087",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "Completed",
+      "to_state": "Completed",
+      "trigger": "subsequent final response received",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "ignore subsequent final response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

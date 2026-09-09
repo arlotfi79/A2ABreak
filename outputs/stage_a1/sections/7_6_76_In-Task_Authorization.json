@@ -1,0 +1,121 @@
+{
+  "section_id": "7.6",
+  "title": "7.6. In-Task Authorization",
+  "depth": 3,
+  "parent_path": [
+    "7. Authentication and Authorization",
+    "7.6. In-Task Authorization"
+  ],
+  "url_anchor": "#76-in-task-authorization",
+  "word_count": 630,
+  "statement_count": 5,
+  "elapsed_seconds": 99.63,
+  "statements": [
+    {
+      "statement_id": "D-7-6-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "A2A provides the capability for agents to delegate the fulfillment of this authorization to the client via the TASK_STATE_AUTH_REQUIRED Task state. This provides agents a fallback path for requesting authorization by passing the responsibility to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6",
+      "state_name": "TASK_STATE_AUTH_REQUIRED",
+      "enum_name": "TaskState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-7-6-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "To request that a client fulfills an authorization request, the agent MUST transition the TaskState to TASK_STATE_AUTH_REQUIRED",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_required",
+      "pre_cond": "agent.requires_authorization = true",
+      "post_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Agent transitions TaskState to TASK_STATE_AUTH_REQUIRED",
+        "Agent includes a TaskStatus message explaining the required authorization"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-7-6-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "MUST include a TaskStatus message explaining the required authorization, unless the details of the authorization have been negotiated out-of-band or via an extension",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "object_name": "TaskStatus",
+      "field_name": "message",
+      "field_type": "Message",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-7-6-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "The agent MAY immediately continue Task processing after receiving the credential, without a requirement that clients send a follow-up message.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": null,
+      "trigger": "credential_received",
+      "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED & agent.credential_received = true",
+      "post_cond": "task.state != TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Agent receives credential out-of-band",
+        "Agent immediately resumes Task processing without requiring client follow-up message"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-7-6-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "If the client is itself an A2A agent actively processing a Task, the client may further delegate the authorization request to its client by transitioning its own Task to TASK_STATE_AUTH_REQUIRED.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "7.6.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_delegation",
+      "pre_cond": "client.is_a2a_agent = true & upstream_task.state = TASK_STATE_AUTH_REQUIRED",
+      "post_cond": "client.task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Client transitions its own Task to TASK_STATE_AUTH_REQUIRED",
+        "Client follows all In-Task Authorization Agent Responsibilities"
+      ],
+      "modality": "may"
+    }
+  ]
+}

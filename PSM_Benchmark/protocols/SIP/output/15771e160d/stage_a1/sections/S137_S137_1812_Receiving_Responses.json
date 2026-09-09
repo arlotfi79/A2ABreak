@@ -1,0 +1,86 @@
+{
+  "section_id": "S137",
+  "title": "S137 18.1.2 Receiving Responses",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S137 18.1.2 Receiving Responses"
+  ],
+  "url_anchor": "#s137-1812-receiving-responses",
+  "word_count": 136,
+  "statement_count": 3,
+  "elapsed_seconds": 15.87,
+  "statements": [
+    {
+      "statement_id": "D-S137-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When a response is received, if the value of the 'sent-by' parameter in the top Via header field value does not correspond to a value that the client transport is configured to insert into requests, the response MUST be silently discarded.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S137",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response received",
+      "pre_cond": "via.sent_by != client_transport.configured_sent_by",
+      "post_cond": null,
+      "actions": [
+        "silently discard response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S137-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If there are any client transactions in existence, the client transport uses the matching procedures of Section 17.1.3 to attempt to match the response to an existing transaction. If there is a match, the response MUST be passed to that transaction.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S137",
+      "actors": [
+        "client transport",
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response received",
+      "pre_cond": "via.sent_by = client_transport.configured_sent_by & client_transaction.exists = true & transaction.match = true",
+      "post_cond": null,
+      "actions": [
+        "pass response to matching client transaction"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S137-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If there is no match, the response MUST be passed to the core (whether it be stateless proxy, stateful proxy, or UA) for further processing. Handling of these 'stray' responses is dependent on the core (a proxy will forward them, while a UA will discard, for example).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S137",
+      "actors": [
+        "client transport",
+        "core"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response received with no matching transaction",
+      "pre_cond": "via.sent_by = client_transport.configured_sent_by & transaction.match = false",
+      "post_cond": null,
+      "actions": [
+        "pass response to core for further processing"
+      ],
+      "modality": "must"
+    }
+  ]
+}

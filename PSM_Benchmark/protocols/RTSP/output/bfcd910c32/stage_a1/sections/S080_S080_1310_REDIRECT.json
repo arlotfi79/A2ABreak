@@ -1,0 +1,261 @@
+{
+  "section_id": "S080",
+  "title": "S080 13.10 REDIRECT",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S080 13.10 REDIRECT"
+  ],
+  "url_anchor": "#s080-1310-redirect",
+  "word_count": 929,
+  "statement_count": 11,
+  "elapsed_seconds": 56.42,
+  "statements": [
+    {
+      "statement_id": "D-S080-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "When no Terminate-Reason 'time' parameter is included in a REDIRECT request, the client SHALL perform the redirection immediately and return a response to the server. The server shall consider the session to be terminated and can free any associated state after it receives the successful (2xx) response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S080",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "session terminated",
+      "trigger": "REDIRECT received (no Terminate-Reason time parameter)",
+      "pre_cond": "session.terminate_reason.time = null",
+      "post_cond": "session.state = terminated",
+      "actions": [
+        "client performs redirection immediately",
+        "client returns 2xx response",
+        "server frees associated session state"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S080-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MAY close the signaling connection upon receiving the response, and the client SHOULD close the signaling connection after sending the 2xx response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S080",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "connection closed",
+      "trigger": "2xx response to REDIRECT sent/received",
+      "pre_cond": "session.state = terminated",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "server closes signaling connection",
+        "client closes signaling connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S080-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "If the REDIRECT request times out following the rules in Section 10.4, the server MAY terminate the session or transport connection that would be redirected by the request.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S080",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "session terminated",
+      "trigger": "REDIRECT request timeout",
+      "pre_cond": null,
+      "post_cond": "session.state = terminated | connection.state = closed",
+      "actions": [
+        "server terminates session or transport connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S080-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "After a REDIRECT request has been processed, a client that wants to continue to receive media for the resource identified by the Request-URI will have to establish a new session with the designated host. If the URI given in the Location header is a valid resource URI, a client SHOULD issue a DESCRIBE request for the URI.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S080",
+      "actors": [
+        "client"
+      ],
+      "from_state": "session terminated",
+      "to_state": null,
+      "trigger": "REDIRECT processed, Location contains valid resource URI",
+      "pre_cond": "redirect.location.uri = valid_resource_uri",
+      "post_cond": null,
+      "actions": [
+        "client issues DESCRIBE request for Location URI",
+        "client establishes new session with designated host"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S080-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server that needs to terminate a session or all its sessions and lacks an alternative server to redirect to, SHALL instead use TEARDOWN requests.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S080",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server must terminate session(s), no alternative server available",
+      "pre_cond": "redirect.alternative_server = null",
+      "post_cond": null,
+      "actions": [
+        "server sends TEARDOWN request"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S080-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The server MAY simply cease to provide service when the deadline time has been reached, or it can issue a TEARDOWN request to the remaining sessions.",
+      "is_inferred": false,
+      "confidence": 0.82,
+      "source_section": "S080",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "session terminated",
+      "trigger": "Terminate-Reason time deadline reached",
+      "pre_cond": "session.terminate_reason.time != null & current_time >= terminate_reason.time",
+      "post_cond": "session.state = terminated",
+      "actions": [
+        "server ceases providing service",
+        "server issues TEARDOWN to remaining sessions"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S080-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "Any intervening proxies SHOULD do all of the following in the order listed: 1. respond to the REDIRECT request, 2. disconnect the control channel from the requesting server, 3. connect to the server at the given host address, 4. pass the REDIRECT request to each applicable client.",
+      "is_inferred": false,
+      "confidence": 0.87,
+      "source_section": "S080",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT without Session header received at proxy",
+      "pre_cond": "redirect.session_header = null",
+      "post_cond": "proxy.connection = connected_to_new_server",
+      "actions": [
+        "proxy responds to REDIRECT",
+        "proxy disconnects control channel from requesting server",
+        "proxy connects to new server at given host address",
+        "proxy passes REDIRECT to each applicable client"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S080-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A client may receive a REDIRECT request with a Session header, if and only if, an end-to-end session has been established.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S080",
+      "object_name": "REDIRECT request",
+      "field_name": "Session header",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "session.state = established"
+    },
+    {
+      "statement_id": "D-S080-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The REDIRECT request SHALL contain a Terminate-Reason header (Section 18.52) to inform the client of the reason for the request.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S080",
+      "object_name": "REDIRECT request",
+      "field_name": "Terminate-Reason header",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S080-010",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "A REDIRECT request with a Session header... The REQUIRED Location header MUST contain a complete absolute URI pointing to the resource to which the client SHOULD reconnect.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S080",
+      "object_name": "REDIRECT request (with Session header)",
+      "field_name": "Location header",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": "complete absolute URI",
+      "guard_semantics": "redirect.session_header != null"
+    },
+    {
+      "statement_id": "D-S080-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client should have terminated the session and closed the connection before the redirection time-line terminated.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S080",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "connection closed",
+      "trigger": "Terminate-Reason time deadline approaching",
+      "pre_cond": "session.terminate_reason.time != null & current_time < terminate_reason.time",
+      "post_cond": "session.state = terminated & connection.state = closed",
+      "actions": [
+        "client terminates session",
+        "client closes connection"
+      ],
+      "modality": "should"
+    }
+  ]
+}

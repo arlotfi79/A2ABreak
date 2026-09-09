@@ -1,0 +1,112 @@
+{
+  "section_id": "S063",
+  "title": "S063 13.4.2 Aggregated Sessions",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S063 13.4.2 Aggregated Sessions"
+  ],
+  "url_anchor": "#s063-1342-aggregated-sessions",
+  "word_count": 243,
+  "statement_count": 4,
+  "elapsed_seconds": 30.41,
+  "statements": [
+    {
+      "statement_id": "N-S063-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "In an aggregated session, the PLAY request MUST contain an aggregated control URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_sent",
+      "pre_cond": "session.type = aggregated",
+      "post_cond": "request.uri = aggregated_control_uri",
+      "actions": [
+        "include aggregated control URI in PLAY request"
+      ],
+      "modality": "must",
+      "id": "N-S063-001"
+    },
+    {
+      "statement_id": "N-S063-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server MUST respond with a 460 error (Only Aggregate Operation Allowed) if the client PLAY Request-URI is for a single media.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "session.type = aggregated & request.uri = single_media_uri",
+      "post_cond": "response.code = 460",
+      "actions": [
+        "send 460 Only Aggregate Operation Allowed response"
+      ],
+      "modality": "must",
+      "id": "N-S063-002"
+    },
+    {
+      "statement_id": "N-S063-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The media in an aggregate MUST be played in sync.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Playing",
+      "to_state": null,
+      "trigger": "aggregate_playback_started",
+      "pre_cond": "session.type = aggregated & session.state = Playing",
+      "post_cond": "session.media_streams.synchronized = true",
+      "actions": [
+        "play all media streams in the aggregate in sync"
+      ],
+      "modality": "must",
+      "id": "N-S063-003"
+    },
+    {
+      "statement_id": "N-S063-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "a PLAY request MAY be pipelined (Section 12) after those additional SETUP requests without awaiting their responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "additional_SETUP_requests_sent",
+      "pre_cond": "session.initial_setup_completed = true & session.additional_setup_pending = true",
+      "post_cond": "PLAY_request.pipelined = true",
+      "actions": [
+        "pipeline PLAY request after additional SETUP requests without awaiting SETUP responses"
+      ],
+      "modality": "may",
+      "id": "N-S063-004"
+    }
+  ]
+}

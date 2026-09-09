@@ -1,0 +1,231 @@
+{
+  "section_id": "S102",
+  "title": "S102 16.1 Overview",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S102 16.1 Overview"
+  ],
+  "url_anchor": "#s102-161-overview",
+  "word_count": 484,
+  "statement_count": 9,
+  "elapsed_seconds": 105.78,
+  "statements": [
+    {
+      "statement_id": "1-S102-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The element MAY respond with any appropriate error code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "proxy element",
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "proxy_decides_to_respond_directly",
+      "pre_cond": "element.decides_to_respond_directly = true",
+      "post_cond": null,
+      "actions": [
+        "send appropriate error response"
+      ],
+      "modality": "may",
+      "id": "N-S102-001"
+    },
+    {
+      "statement_id": "2-S102-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "sip_fsm",
+      "description": "When responding directly to a request, the element is playing the role of a UAS and MUST behave as described in Section 8.2.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "proxy element",
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": "UAS",
+      "trigger": "responding_directly_to_request",
+      "pre_cond": "element.responding_directly = true",
+      "post_cond": "element.role = UAS",
+      "actions": [
+        "adopt UAS role",
+        "behave per Section 8.2"
+      ],
+      "modality": "must",
+      "id": "N-S102-002"
+    },
+    {
+      "statement_id": "3-S102-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy MAY choose to \"fork\" a request, routing it to multiple destinations.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": "stateful",
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "proxy.mode = stateful",
+      "post_cond": null,
+      "actions": [
+        "fork request to multiple destinations"
+      ],
+      "modality": "may",
+      "id": "N-S102-003"
+    },
+    {
+      "statement_id": "4-S102-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Any request that is forwarded to more than one location MUST be handled statefully.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": "stateful",
+      "trigger": "request_forwarded_to_multiple_locations",
+      "pre_cond": "request.forwarded_location_count > 1",
+      "post_cond": "proxy.mode = stateful",
+      "actions": [
+        "handle request statefully"
+      ],
+      "modality": "must",
+      "id": "N-S102-004"
+    },
+    {
+      "statement_id": "5-S102-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "In some circumstances, a proxy MAY forward requests using stateful transports (such as TCP) without being transaction-stateful.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S102-005"
+    },
+    {
+      "statement_id": "6-S102-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "For instance, a proxy MAY forward a request from one TCP connection to another transaction statelessly as long as it places enough information in the message to be able to forward the response down the same connection the request arrived on.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_on_TCP",
+      "pre_cond": "transport.type = TCP & proxy.message_contains_sufficient_routing_info = true",
+      "post_cond": null,
+      "actions": [
+        "forward request transaction-statelessly",
+        "embed sufficient routing info for response return path"
+      ],
+      "modality": "may",
+      "id": "N-S102-006"
+    },
+    {
+      "statement_id": "7-S102-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Requests forwarded between different types of transports where the proxy's TU must take an active role in ensuring reliable delivery on one of the transports MUST be forwarded transaction statefully.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": "transaction-stateful",
+      "trigger": "request_forwarded_between_different_transport_types",
+      "pre_cond": "transport.ingress_type != transport.egress_type & proxy.TU.active_reliable_delivery_required = true",
+      "post_cond": "proxy.mode = transaction_stateful",
+      "actions": [
+        "forward request transaction-statefully"
+      ],
+      "modality": "must",
+      "id": "N-S102-007"
+    },
+    {
+      "statement_id": "8-S102-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy MAY transition to stateless operation at any time during the processing of a request, so long as it did not do anything that would otherwise prevent it from being stateless initially (forking, for example, or generation of a 100 response).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": "stateful",
+      "to_state": "stateless",
+      "trigger": "transition_to_stateless_initiated",
+      "pre_cond": "proxy.mode = stateful & proxy.forked = false & proxy.generated_100 = false",
+      "post_cond": "proxy.mode = stateless & proxy.transaction_state = discarded",
+      "actions": [
+        "discard all transaction state"
+      ],
+      "modality": "may",
+      "id": "N-S102-008"
+    },
+    {
+      "statement_id": "9-S102-9",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy SHOULD NOT initiate a CANCEL request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "stateful",
+      "to_state": "stateless",
+      "trigger": "transition_to_stateless_initiated",
+      "pre_cond": "proxy.transitioning_to_stateless = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S102-009"
+    }
+  ]
+}

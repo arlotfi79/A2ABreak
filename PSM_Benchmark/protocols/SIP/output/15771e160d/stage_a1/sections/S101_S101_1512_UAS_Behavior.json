@@ -1,0 +1,90 @@
+{
+  "section_id": "S101",
+  "title": "S101 15.1.2 UAS Behavior",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S101 15.1.2 UAS Behavior"
+  ],
+  "url_anchor": "#s101-1512-uas-behavior",
+  "word_count": 217,
+  "statement_count": 3,
+  "elapsed_seconds": 26.2,
+  "statements": [
+    {
+      "statement_id": "D-S101-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS core receiving a BYE request checks if it matches an existing dialog. If the BYE does not match an existing dialog, the UAS core SHOULD generate a 481 (Call/Transaction Does Not Exist) response and pass that to the server transaction.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S101",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "BYE_received_no_matching_dialog",
+      "pre_cond": "dialog.match = false",
+      "post_cond": null,
+      "actions": [
+        "generate 481 response",
+        "pass response to server transaction"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S101-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A UAS core receiving a BYE request for an existing dialog MUST follow the procedures of Section 12.2.2 to process the request. Once done, the UAS SHOULD terminate the session (and therefore stop sending and listening for media). The UAS core MUST generate a 2xx response to the BYE, and MUST pass that to the server transaction for transmission.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S101",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "BYE_received_matching_dialog",
+      "pre_cond": "dialog.match = true",
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "process BYE per Section 12.2.2",
+        "terminate session",
+        "stop sending media",
+        "stop listening for media",
+        "generate 2xx response",
+        "pass 2xx response to server transaction"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S101-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The UAS MUST still respond to any pending requests received for that dialog. It is RECOMMENDED that a 487 (Request Terminated) response be generated to those pending requests.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S101",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "Terminated",
+      "to_state": null,
+      "trigger": "pending_request_received",
+      "pre_cond": "session.state = Terminated & request.dialog = terminated_dialog",
+      "post_cond": null,
+      "actions": [
+        "generate 487 (Request Terminated) response"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "section_id": "S181",
+  "title": "S181 18.33 Pipelined-Requests",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S181 18.33 Pipelined-Requests"
+  ],
+  "url_anchor": "#s181-1833-pipelined-requests",
+  "word_count": 435,
+  "statement_count": 8,
+  "elapsed_seconds": 76.47,
+  "statements": [
+    {
+      "statement_id": "N-S181-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Upon receiving a request with the Pipelined-Requests, the responding agent MUST look up if there exists a binding between this Pipelined-Requests identifier for the current persistent connection and an RTSP session ID.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S181",
+      "actors": [
+        "responding agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_with_Pipelined-Requests_header",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "lookup_binding(Pipelined-Requests_identifier, persistent_connection, RTSP_session_ID)"
+      ],
+      "modality": "must",
+      "id": "N-S181-001"
+    },
+    {
+      "statement_id": "N-S181-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "If there does not exist a mapping and no Session header is included in the request, the responding agent MUST create a binding upon the successful completion of a session creating request, i.e., SETUP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S181",
+      "actors": [
+        "responding agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_completed_successfully",
+      "pre_cond": "binding.exists = false & request.Session_header.present = false",
+      "post_cond": "binding.created = true",
+      "actions": [
+        "create_binding(Pipelined-Requests_identifier, session_ID)"
+      ],
+      "modality": "must",
+      "id": "N-S181-002"
+    },
+    {
+      "statement_id": "N-S181-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "A binding MUST NOT be created, if the request failed to create an RTSP session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S181",
+      "actors": [
+        "responding agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_creation_failed",
+      "pre_cond": "session.creation_failed = true",
+      "post_cond": "binding.created = false",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S181-003"
+    },
+    {
+      "statement_id": "N-S181-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "In case the request contains both a Session header and the Pipelined-Requests header, the Pipelined-Requests header MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S181",
+      "actors": [
+        "responding agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_with_both_Session_and_Pipelined-Requests_headers",
+      "pre_cond": "request.Session_header.present = true & request.Pipelined-Requests_header.present = true",
+      "post_cond": null,
+      "actions": [
+        "ignore_Pipelined-Requests_header"
+      ],
+      "modality": "must",
+      "id": "N-S181-004"
+    },
+    {
+      "statement_id": "N-S181-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "When responding to any request that contained the Pipelined-Requests header, the server MUST also include the Session header when a binding to a session context exists.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S181",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "responding_to_request_with_Pipelined-Requests_header",
+      "pre_cond": "binding.session_context.exists = true",
+      "post_cond": null,
+      "actions": [
+        "include_Session_header_in_response"
+      ],
+      "modality": "must",
+      "id": "N-S181-005"
+    },
+    {
+      "statement_id": "N-S181-6",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "An RTSP agent that knows the session identifier SHOULD NOT use the Pipelined-Requests header in any request and only use the Session header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S181",
+      "actors": [
+        "RTSP agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "agent.session_identifier.known = true",
+      "post_cond": null,
+      "actions": [
+        "omit_Pipelined-Requests_header",
+        "use_Session_header"
+      ],
+      "modality": "should",
+      "id": "N-S181-006"
+    },
+    {
+      "statement_id": "N-S181-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server MUST delete the Pipelined-Requests identifier and its binding to a session upon the termination of that session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S181",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_termination",
+      "pre_cond": null,
+      "post_cond": "binding.Pipelined-Requests_identifier.deleted = true",
+      "actions": [
+        "delete_Pipelined-Requests_identifier",
+        "delete_binding(Pipelined-Requests_identifier, session_ID)"
+      ],
+      "modality": "must",
+      "id": "N-S181-007"
+    },
+    {
+      "statement_id": "N-S181-8",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Despite the previous mandate, RTSP agents are RECOMMENDED not to reuse identifiers to allow for better error handling and logging.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S181",
+      "actors": [
+        "RTSP agents"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S181-008"
+    }
+  ]
+}

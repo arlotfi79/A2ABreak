@@ -1,0 +1,147 @@
+{
+  "section_id": "4.3",
+  "title": "4.3. Push Notification Objects",
+  "depth": 3,
+  "parent_path": [
+    "4. Protocol Data Model",
+    "4.3. Push Notification Objects"
+  ],
+  "url_anchor": "#43-push-notification-objects",
+  "word_count": 342,
+  "statement_count": 6,
+  "elapsed_seconds": 66.88,
+  "statements": [
+    {
+      "statement_id": "D-4-3-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "push_notification",
+      "stage": "authentication",
+      "description": "scheme: HTTP Authentication Scheme from the IANA registry. Examples: Bearer, Basic, Digest. Scheme names are case-insensitive per RFC 9110 Section 11.1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3.2",
+      "object_name": "AuthenticationInfo",
+      "field_name": "scheme",
+      "field_type": "string",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-4-3-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "push_notification",
+      "stage": "authentication",
+      "description": "credentials: Push Notification credentials. Format depends on the scheme (e.g., token for Bearer).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3.2",
+      "object_name": "AuthenticationInfo",
+      "field_name": "credentials",
+      "field_type": "string",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-4-3-003",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "The webhook payload is a StreamResponse object containing exactly one of the following: task: A Task object with the current task state; message: A Message object containing a message response; statusUpdate: A TaskStatusUpdateEvent indicating a status change; artifactUpdate: A TaskArtifactUpdateEvent indicating artifact updates",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3.3",
+      "object_name": "StreamResponse",
+      "field_name": null,
+      "field_type": null,
+      "required": null,
+      "allowed_values": [
+        "task",
+        "message",
+        "statusUpdate",
+        "artifactUpdate"
+      ],
+      "guard_semantics": "exactly one of allowed_values must be present in StreamResponse webhook payload; becomes NuXMV INVAR not a per-transition guard"
+    },
+    {
+      "statement_id": "D-4-3-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "When a task update occurs, the agent sends an HTTP POST request to the configured webhook URL. The payload uses the same StreamResponse format as streaming operations. The agent MUST include authentication credentials in the request headers as specified in the PushNotificationConfig.authentication field.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "4.3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_update_occurs",
+      "pre_cond": "push_notification_config.webhook_url != null & push_notification_config.authentication != null",
+      "post_cond": "http_post.sent = true & http_post.authorization_header_present = true & http_post.body.type = StreamResponse",
+      "actions": [
+        "Agent sends HTTP POST request to configured webhook URL",
+        "Agent includes Authorization header with authentication scheme and credentials from PushNotificationConfig.authentication",
+        "Agent sets Content-Type header to application/json",
+        "Agent includes StreamResponse object as the request body"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-4-3-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients MUST respond with HTTP 2xx status codes to acknowledge successful receipt. Clients MUST validate the task ID matches an expected task. Clients SHOULD process notifications idempotently, as duplicate deliveries may occur.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "4.3.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_received",
+      "pre_cond": null,
+      "post_cond": "client.response_status >= 200 & client.response_status < 300 & client.task_id_validated = true",
+      "actions": [
+        "Client validates that task ID in payload matches an expected task",
+        "Client processes notification idempotently",
+        "Client responds with HTTP 2xx status code to acknowledge receipt"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-4-3-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MUST attempt delivery at least once for each configured webhook. Agents MAY implement retry logic with exponential backoff for failed deliveries. Agents MAY stop attempting delivery after a configured number of consecutive failures.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "4.3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_delivery_failed",
+      "pre_cond": "http_post.sent = true & client.response_status < 200 | client.response_status >= 300",
+      "post_cond": "push_notification.delivery_attempts >= 1",
+      "actions": [
+        "Agent records delivery failure",
+        "Agent optionally retries with exponential backoff",
+        "Agent optionally stops delivery after configured consecutive failure threshold is reached"
+      ],
+      "modality": "must"
+    }
+  ]
+}

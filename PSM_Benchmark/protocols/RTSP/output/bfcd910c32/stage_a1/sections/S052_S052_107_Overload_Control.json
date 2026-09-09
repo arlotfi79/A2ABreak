@@ -1,0 +1,158 @@
+{
+  "section_id": "S052",
+  "title": "S052 10.7 Overload Control",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S052 10.7 Overload Control"
+  ],
+  "url_anchor": "#s052-107-overload-control",
+  "word_count": 718,
+  "statement_count": 6,
+  "elapsed_seconds": 55.67,
+  "statements": [
+    {
+      "statement_id": "D-S052-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "In such a situation, where none of the RTSP servers/proxies/addresses can handle the request, the RTSP agent has to wait before it can send any new requests to the RTSP server.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "server",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "all_servers_unavailable",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "suspend_new_requests"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S052-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "Any additional request to a specific address MUST be delayed according to the Retry-After headers received.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "503_or_553_response_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "delay_requests_per_retry_after_header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S052-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "timer",
+      "stage": "rtsp_fsm",
+      "description": "For addresses where no response was received or TCP timeout occurred, an initial wait timer SHOULD be set to 5 seconds.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tcp_timeout_or_no_response_received",
+      "pre_cond": null,
+      "post_cond": "wait_timer = 5",
+      "actions": [
+        "set_wait_timer_to_5_seconds"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S052-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "timer",
+      "stage": "rtsp_fsm",
+      "description": "That timer MUST be doubled for each additional failure to connect or receive response until the value exceeds 30 minutes when the timer's mean value may be set to 30 minutes.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "additional_connection_failure",
+      "pre_cond": "wait_timer <= 1800",
+      "post_cond": "wait_timer = wait_timer * 2",
+      "actions": [
+        "double_wait_timer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S052-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "timer",
+      "stage": "rtsp_fsm",
+      "description": "Until the value exceeds 30 minutes when the timer's mean value may be set to 30 minutes. It is REQUIRED not to set the same value in the timer for each scheduling, but instead to add a variation to the mean value, resulting in picking a random value within the range of 0.5 to 1.5 times the mean value.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "wait_timer_exceeds_30_minutes",
+      "pre_cond": "wait_timer > 1800",
+      "post_cond": "wait_timer_mean = 1800",
+      "actions": [
+        "set_mean_wait_timer_to_30_minutes",
+        "randomize_timer_within_0.5_to_1.5_times_mean"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S052-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "rtsp_fsm",
+      "description": "For addresses where no response was received or TCP timeout occurred, an initial wait timer SHOULD be set to 5 seconds. That timer MUST be doubled for each additional failure.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S052",
+      "object_name": "RTSP agent retry scheduler",
+      "field_name": "wait_timer",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "initial=5s",
+        "max_mean=1800s",
+        "actual=random(0.5*mean, 1.5*mean)"
+      ],
+      "guard_semantics": "Controls delay before next connection attempt after TCP timeout or no response; doubles on each additional failure up to 30-minute mean"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "section_id": "6.3",
+  "title": "6.3. Multi-Turn Interaction",
+  "depth": 3,
+  "parent_path": [
+    "6. Common Workflows & Examples",
+    "6.3. Multi-Turn Interaction"
+  ],
+  "url_anchor": "#63-multi-turn-interaction",
+  "word_count": 107,
+  "statement_count": 6,
+  "elapsed_seconds": 52.03,
+  "statements": [
+    {
+      "statement_id": "D-6-3-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Agent requires additional input to complete a task; task status state is TASK_STATE_INPUT_REQUIRED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "6.3",
+      "state_name": "TASK_STATE_INPUT_REQUIRED",
+      "enum_name": "TaskState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-6-3-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "task_execution",
+      "description": "Follow-up message object includes taskId field to associate the message with an existing task: {\"taskId\": \"task-uuid\", \"role\": \"ROLE_USER\", \"parts\": [{\"text\": \"From San Francisco to New York\"}], \"messageId\": \"msg-2\"}",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "6.3",
+      "object_name": "Message",
+      "field_name": "taskId",
+      "field_type": "string",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-6-3-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Task response object includes id field and status object; status object includes state field set to TASK_STATE_INPUT_REQUIRED and a message field containing the agent's clarifying question",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "6.3",
+      "object_name": "TaskStatus",
+      "field_name": "state",
+      "field_type": "TaskState",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-6-3-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Task status object includes a message field (role: ROLE_AGENT) containing the agent's request for additional information when state is TASK_STATE_INPUT_REQUIRED",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "6.3",
+      "object_name": "TaskStatus",
+      "field_name": "message",
+      "field_type": "Message",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-6-3-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Agent responds to initial message send with TASK_STATE_INPUT_REQUIRED when it requires additional input to complete the task; response includes agent message asking for clarification",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "6.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_INPUT_REQUIRED",
+      "trigger": "message_send",
+      "pre_cond": null,
+      "post_cond": "task.state = TASK_STATE_INPUT_REQUIRED & task.status.message != null",
+      "actions": [
+        "server creates task with id task-uuid",
+        "server sets task.status.state to TASK_STATE_INPUT_REQUIRED",
+        "server includes agent clarification message in task.status.message",
+        "server returns HTTP 200 with task object"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-6-3-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Client sends follow-up message with taskId referencing the existing task to provide the additional input requested while task is in TASK_STATE_INPUT_REQUIRED",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "6.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TASK_STATE_INPUT_REQUIRED",
+      "to_state": null,
+      "trigger": "message_send",
+      "pre_cond": "task.state = TASK_STATE_INPUT_REQUIRED & message.taskId != null",
+      "post_cond": null,
+      "actions": [
+        "client sends POST /message:send with message.taskId set to existing task id",
+        "client provides requested additional input in message.parts",
+        "client assigns new messageId msg-2 to follow-up message"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

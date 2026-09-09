@@ -1,0 +1,171 @@
+{
+  "section_id": "S036",
+  "title": "S036 5.3.3 Examples",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S036 5.3.3 Examples"
+  ],
+  "url_anchor": "#s036-533-examples",
+  "word_count": 221,
+  "statement_count": 7,
+  "elapsed_seconds": 54.73,
+  "statements": [
+    {
+      "statement_id": "D-S036-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "MODE READER command on a transit-only server: server responds '502 Transit service only' and closes connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S036",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connection Closed",
+      "trigger": "MODE READER",
+      "pre_cond": "server.mode = transit_only",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "send 502 Transit service only",
+        "close connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "MODE READER command on a server that provides reading facilities: server responds '200 Reader mode, posting permitted'.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S036",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Reader Mode Posting Permitted",
+      "trigger": "MODE READER",
+      "pre_cond": "server.capability = READER",
+      "post_cond": "session.mode = reader & session.posting = permitted",
+      "actions": [
+        "send 200 Reader mode, posting permitted"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "MODE READER command on a mode-switching server: server transitions from transit mode to reader mode and responds '200 Reader mode, posting permitted'; capabilities change accordingly.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S036",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Transit Mode",
+      "to_state": "Reader Mode Posting Permitted",
+      "trigger": "MODE READER",
+      "pre_cond": "server.capability = MODE-READER",
+      "post_cond": "session.mode = reader & session.posting = permitted & server.capability = READER",
+      "actions": [
+        "send 200 Reader mode, posting permitted",
+        "switch advertised capabilities to reader mode set"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "MODE READER command where the client is not permitted to post: server responds '201 NNTP Service Ready, posting prohibited'.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S036",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Reader Mode Posting Prohibited",
+      "trigger": "MODE READER",
+      "pre_cond": "client.posting_permitted = false",
+      "post_cond": "session.mode = reader & session.posting = prohibited",
+      "actions": [
+        "send 201 NNTP Service Ready, posting prohibited"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "IHAVE command issued in reader mode: server responds '500 Permission denied'; session remains in reader mode.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S036",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Reader Mode Posting Permitted",
+      "to_state": "Reader Mode Posting Permitted",
+      "trigger": "IHAVE",
+      "pre_cond": "session.mode = reader",
+      "post_cond": "session.mode = reader",
+      "actions": [
+        "send 500 Permission denied"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Reader mode, posting permitted: the session state entered after a successful MODE READER where the client is allowed to post.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S036",
+      "state_name": "Reader Mode Posting Permitted",
+      "enum_name": "SessionMode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.mode = reader & session.posting = permitted"
+    },
+    {
+      "statement_id": "D-S036-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Reader mode, posting prohibited: the session state entered after a successful MODE READER where the client is not permitted to post (201 response).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S036",
+      "state_name": "Reader Mode Posting Prohibited",
+      "enum_name": "SessionMode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.mode = reader & session.posting = prohibited"
+    }
+  ]
+}

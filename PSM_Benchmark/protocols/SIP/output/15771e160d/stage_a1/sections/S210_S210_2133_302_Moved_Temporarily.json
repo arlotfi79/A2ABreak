@@ -1,0 +1,85 @@
+{
+  "section_id": "S210",
+  "title": "S210 21.3.3 302 Moved Temporarily",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S210 21.3.3 302 Moved Temporarily"
+  ],
+  "url_anchor": "#s210-2133-302-moved-temporarily",
+  "word_count": 150,
+  "statement_count": 3,
+  "elapsed_seconds": 19.36,
+  "statements": [
+    {
+      "statement_id": "D-S210-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The requesting client SHOULD retry the request at the new address(es) given by the Contact header field. The Request-URI of the new request uses the value of the Contact header field in the response.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S210",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "302 Moved Temporarily received",
+      "pre_cond": null,
+      "post_cond": "request.request_uri = response.contact_header_value",
+      "actions": [
+        "retry request at Contact header URI"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S210-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If there is no explicit expiration time, the address is only valid once for recursing, and MUST NOT be cached for future transactions.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S210",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "302 Moved Temporarily received with no expiration time",
+      "pre_cond": "response.expires = null & response.contact.expires_param = null",
+      "post_cond": "contact_uri.cached = false",
+      "actions": [
+        "use Contact URI for single recursion only",
+        "do not cache Contact URI for future transactions"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S210-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the URI cached from the Contact header field fails, the Request-URI from the redirected request MAY be tried again a single time.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S210",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "cached Contact URI failure",
+      "pre_cond": "contact_uri.attempt_failed = true",
+      "post_cond": null,
+      "actions": [
+        "retry original redirected Request-URI once"
+      ],
+      "modality": "may"
+    }
+  ]
+}

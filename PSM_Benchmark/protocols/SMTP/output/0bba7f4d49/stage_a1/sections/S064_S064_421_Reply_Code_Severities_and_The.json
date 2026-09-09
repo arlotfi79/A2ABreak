@@ -1,0 +1,166 @@
+{
+  "section_id": "S064",
+  "title": "S064 4.2.1 Reply Code Severities and Theory",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S064 4.2.1 Reply Code Severities and Theory"
+  ],
+  "url_anchor": "#s064-421-reply-code-severities-and-theory",
+  "word_count": 871,
+  "statement_count": 7,
+  "elapsed_seconds": 41.55,
+  "statements": [
+    {
+      "statement_id": "D-S064-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "2yz Positive Completion reply: The requested action has been successfully completed. A new request may be initiated.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S064",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "READY_FOR_NEW_REQUEST",
+      "trigger": "2yz_reply_received",
+      "pre_cond": null,
+      "post_cond": "session.action_complete = true",
+      "actions": [
+        "complete_requested_action",
+        "allow_new_request_initiation"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S064-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "3yz Positive Intermediate reply: The command has been accepted, but the requested action is being held in abeyance, pending receipt of further information. The SMTP client should send another command specifying this information.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S064",
+      "state_name": "PENDING_FURTHER_INFO",
+      "enum_name": "SMTP_SESSION_STATES",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.reply_category = 3yz"
+    },
+    {
+      "statement_id": "D-S064-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "3yz Positive Intermediate reply: command accepted, action held in abeyance pending further information; SMTP client should send another command specifying this information. Used in command sequence groups (i.e., in DATA).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S064",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "PENDING_FURTHER_INFO",
+      "trigger": "3yz_reply_received",
+      "pre_cond": null,
+      "post_cond": "session.state = PENDING_FURTHER_INFO",
+      "actions": [
+        "hold_action_in_abeyance",
+        "send_further_info_command"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S064-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "4yz Transient Negative Completion reply: The command was not accepted, and the requested action did not occur. The sender should return to the beginning of the command sequence (if any). The SMTP client SHOULD try again.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S064",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "COMMAND_SEQUENCE_START",
+      "trigger": "4yz_reply_received",
+      "pre_cond": null,
+      "post_cond": "session.retry_eligible = true",
+      "actions": [
+        "return_to_beginning_of_command_sequence",
+        "schedule_retry"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S064-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "4yz Transient Negative: sender should return to the beginning of the command sequence (if any).",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S064",
+      "state_name": "COMMAND_SEQUENCE_START",
+      "enum_name": "SMTP_SESSION_STATES",
+      "semantic_type": "initial",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S064-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "5yz Permanent Negative Completion reply: The command was not accepted and the requested action did not occur. The SMTP client SHOULD NOT repeat the exact request (in the same sequence).",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S064",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "5yz_reply_received",
+      "pre_cond": null,
+      "post_cond": "session.permanent_failure = true",
+      "actions": [
+        "abort_current_request",
+        "prohibit_exact_request_repeat"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S064-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "In a multiline reply, the reply code on each of the lines MUST be the same. The client will be able to identify these cases from the current context.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S064",
+      "object_name": "multiline_reply",
+      "field_name": "reply_code",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "section_id": "S094",
+  "title": "S094 4.5.3.2.6 DATA Termination: 10 Minutes.",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S094 4.5.3.2.6 DATA Termination: 10 Minutes."
+  ],
+  "url_anchor": "#s094-45326-data-termination-10-minutes",
+  "word_count": 78,
+  "statement_count": 4,
+  "elapsed_seconds": 27.34,
+  "statements": [
+    {
+      "statement_id": "D-S094-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "This is while awaiting the '250 OK' reply [after sending the final period terminating the message data].",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S094",
+      "state_name": "AWAITING_DATA_250_OK",
+      "enum_name": "DATA_PHASE_STATES",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.data_final_period_sent = true & session.reply_received = false"
+    },
+    {
+      "statement_id": "D-S094-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "smtp_fsm",
+      "description": "DATA Termination: 10 Minutes. This is while awaiting the '250 OK' reply.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S094",
+      "object_name": "DATA_TERMINATION_TIMER",
+      "field_name": "timeout_value",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": [
+        "10 minutes"
+      ],
+      "guard_semantics": "timer.active = true while session.state = AWAITING_DATA_250_OK"
+    },
+    {
+      "statement_id": "D-S094-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "When the receiver gets the final period terminating the message data, it typically performs processing to deliver the message to a user mailbox.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S094",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AWAITING_DATA_250_OK",
+      "to_state": null,
+      "trigger": "final_period_received",
+      "pre_cond": "session.state = AWAITING_DATA_250_OK",
+      "post_cond": "server.message_accepted = true",
+      "actions": [
+        "process_message_delivery",
+        "send_250_OK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S094-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "A spurious timeout at this point would be very wasteful and would typically result in delivery of multiple copies of the message, since it has been successfully sent and the server has accepted responsibility for delivery.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S094",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AWAITING_DATA_250_OK",
+      "to_state": null,
+      "trigger": "DATA_TERMINATION_TIMER_expired",
+      "pre_cond": "session.state = AWAITING_DATA_250_OK & timer.DATA_TERMINATION_TIMER.elapsed >= 10_minutes",
+      "post_cond": "session.timeout_occurred = true",
+      "actions": [
+        "abort_connection"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

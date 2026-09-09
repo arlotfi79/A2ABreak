@@ -1,0 +1,165 @@
+{
+  "section_id": "S023",
+  "title": "S023 3.1 Session Initiation",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S023 3.1 Session Initiation"
+  ],
+  "url_anchor": "#s023-31-session-initiation",
+  "word_count": 213,
+  "statement_count": 7,
+  "elapsed_seconds": 127.84,
+  "statements": [
+    {
+      "statement_id": "D-S023-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "An SMTP session is initiated when a client opens a connection to a server and the server responds with an opening message.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S023",
+      "state_name": "Connection Opened",
+      "enum_name": "SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "connection.established = true & session.greeting_sent = false"
+    },
+    {
+      "statement_id": "D-S023-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "The SMTP protocol allows a server to formally reject a mail session while still allowing the initial connection: a 554 response MAY be given in the initial connection opening message instead of the 220. A server taking this approach MUST still wait for the client to send a QUIT before closing the connection and SHOULD respond to any intervening commands with '503 bad sequence of commands'.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S023",
+      "state_name": "Session Rejected",
+      "enum_name": "SessionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.greeting_code = 554"
+    },
+    {
+      "statement_id": "D-S023-003",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "A 554 response MAY be given in the initial connection opening message instead of the 220.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S023",
+      "object_name": "initial connection opening message",
+      "field_name": "response_code",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "220",
+        "554"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S023-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "An SMTP session is initiated when a client opens a connection to a server and the server responds with an opening message (220).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S023",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Connection Opened",
+      "to_state": "Session Initiated",
+      "trigger": "server sends 220 greeting",
+      "pre_cond": "session.state = Connection Opened",
+      "post_cond": "session.greeting_code = 220",
+      "actions": [
+        "send 220 greeting"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S023-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "A 554 response MAY be given in the initial connection opening message instead of the 220 to formally reject a mail session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S023",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Connection Opened",
+      "to_state": "Session Rejected",
+      "trigger": "server sends 554 greeting",
+      "pre_cond": "session.state = Connection Opened",
+      "post_cond": "session.greeting_code = 554",
+      "actions": [
+        "send 554 greeting"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S023-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "A server taking this approach MUST still wait for the client to send a QUIT before closing the connection.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S023",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Session Rejected",
+      "to_state": "Connection Closed",
+      "trigger": "QUIT received",
+      "pre_cond": "session.state = Session Rejected",
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "close connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S023-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "A server SHOULD respond to any intervening commands with '503 bad sequence of commands' after sending 554 on connection opening.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S023",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Session Rejected",
+      "to_state": "Session Rejected",
+      "trigger": "non-QUIT command received",
+      "pre_cond": "session.state = Session Rejected",
+      "post_cond": "session.state = Session Rejected",
+      "actions": [
+        "send 503 bad sequence of commands"
+      ],
+      "modality": "should"
+    }
+  ]
+}

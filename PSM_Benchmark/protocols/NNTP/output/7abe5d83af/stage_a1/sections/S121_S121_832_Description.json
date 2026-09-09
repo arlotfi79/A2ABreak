@@ -1,0 +1,179 @@
+{
+  "section_id": "S121",
+  "title": "S121 8.3.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S121 8.3.2 Description"
+  ],
+  "url_anchor": "#s121-832-description",
+  "word_count": 724,
+  "statement_count": 7,
+  "elapsed_seconds": 39.73,
+  "statements": [
+    {
+      "statement_id": "D-S121-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the information is available, it is returned as a multi-line data block following the 224 response code.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S121",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "224_overview_follows",
+      "trigger": "OVER_command_received",
+      "pre_cond": "article.exists = true",
+      "post_cond": "server.sends_multiline_block = true",
+      "actions": [
+        "send 224 response",
+        "send multi-line data block with overview fields"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S121-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a message-id and no such article exists, a 430 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "430_no_article_with_that_message_id",
+      "trigger": "OVER_command_with_message_id",
+      "pre_cond": "command.argument_type = message_id & article.exists = false",
+      "post_cond": null,
+      "actions": [
+        "send 430 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S121-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a range or is omitted and the currently selected newsgroup is invalid, a 412 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "412_no_newsgroup_selected",
+      "trigger": "OVER_command_with_range_or_omitted",
+      "pre_cond": "session.newsgroup_selected = false & (command.argument_type = range | command.argument_type = omitted)",
+      "post_cond": null,
+      "actions": [
+        "send 412 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S121-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a range and no articles in that number range exist in the currently selected newsgroup, including the case where the second number is less than the first one, a 423 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "423_no_articles_in_range",
+      "trigger": "OVER_command_with_range",
+      "pre_cond": "command.argument_type = range & session.newsgroup_selected = true & range.articles_exist = false",
+      "post_cond": null,
+      "actions": [
+        "send 423 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S121-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is omitted and the current article number is invalid, a 420 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "420_current_article_number_invalid",
+      "trigger": "OVER_command_with_omitted_argument",
+      "pre_cond": "command.argument_type = omitted & session.newsgroup_selected = true & session.current_article_number_valid = false",
+      "post_cond": null,
+      "actions": [
+        "send 420 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S121-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Support for the first (message-id) form is optional. If it is supported, the OVER capability line MUST include the argument MSGID. Otherwise, the capability line MUST NOT include this argument, and the OVER command MUST return the generic response code 503 when this form is used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "503_program_fault",
+      "trigger": "OVER_command_with_message_id",
+      "pre_cond": "server.capability.OVER_MSGID = false & command.argument_type = message_id",
+      "post_cond": null,
+      "actions": [
+        "send 503 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S121-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If it is supported, the OVER capability line MUST include the argument MSGID.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "object_name": "OVER_capability_line",
+      "field_name": "MSGID",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "MSGID"
+      ],
+      "guard_semantics": "server.supports_OVER_message_id_form = true"
+    }
+  ]
+}

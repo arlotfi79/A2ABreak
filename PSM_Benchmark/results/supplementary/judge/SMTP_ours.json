@@ -1,0 +1,550 @@
+{
+ "proto": "SMTP",
+ "system": "ours",
+ "gt_states": 7,
+ "gt_transitions": 22,
+ "cand_states": 13,
+ "cand_transitions": 38,
+ "states_matched": 6,
+ "states_P": 0.4615,
+ "states_R": 0.8571,
+ "states_F1": 0.6,
+ "trans_matched": 9,
+ "trans_P": 0.2368,
+ "trans_R": 0.4091,
+ "trans_F1": 0.3,
+ "unmatched_classes": {
+  "real_behavior_not_in_gt": 28,
+  "duplicate_or_alias": 1
+ },
+ "tokens_in": 3818,
+ "tokens_out": 4067,
+ "cost": 0.12076500000000001,
+ "seconds": 52.4,
+ "raw": {
+  "state_matches": [
+   {
+    "gt": "Connection Established",
+    "candidate": "Greeting",
+    "confidence": 0.6,
+    "reason": "After TCP connection opened and 220 sent, waiting for EHLO/HELO - maps to the state before greeting exchange completes"
+   },
+   {
+    "gt": "Greeted",
+    "candidate": "SessionInitialized",
+    "confidence": 0.95,
+    "reason": "Both represent state after successful EHLO/HELO, ready for MAIL FROM"
+   },
+   {
+    "gt": "Mail Transaction Started",
+    "candidate": "MailTransaction",
+    "confidence": 0.8,
+    "reason": "Both represent state after MAIL FROM accepted; candidate merges RCPT phase too"
+   },
+   {
+    "gt": "Recipient Specified",
+    "candidate": null,
+    "confidence": 0.9,
+    "reason": "Candidate merges this into MailTransaction, no separate state"
+   },
+   {
+    "gt": "Data Entry",
+    "candidate": "DataTransfer",
+    "confidence": 0.95,
+    "reason": "Both represent the data transfer phase after DATA/354"
+   },
+   {
+    "gt": "Message Accepted",
+    "candidate": "MailAccepted",
+    "confidence": 0.7,
+    "reason": "Both represent post-message-acceptance, though candidate focuses on delivery responsibility"
+   },
+   {
+    "gt": "Session Terminated",
+    "candidate": "ConnectionClosed",
+    "confidence": 0.95,
+    "reason": "Both represent the session/connection being closed"
+   }
+  ],
+  "transition_matches": [
+   {
+    "gt_index": 0,
+    "gt": {
+     "from": "Connection Established",
+     "event": "receive EHLO or HELO after 220 greeting",
+     "action": "send HELO",
+     "to": "Greeted"
+    },
+    "candidate_index": 2,
+    "candidate": {
+     "from": "Greeting",
+     "event": "receive EHLO accepted",
+     "action": "clear all state tables and buffers",
+     "to": "SessionInitialized"
+    },
+    "confidence": 0.7,
+    "reason": "Both transition from initial state to greeted/initialized after EHLO accepted"
+   },
+   {
+    "gt_index": 1,
+    "gt": {
+     "from": "Greeted",
+     "event": "receive MAIL FROM",
+     "action": "send MAIL FROM",
+     "to": "Mail Transaction Started"
+    },
+    "candidate_index": 7,
+    "candidate": {
+     "from": "SessionInitialized",
+     "event": "receive MAIL accepted",
+     "action": "clear buffers and insert reverse-path",
+     "to": "MailTransaction"
+    },
+    "confidence": 0.85,
+    "reason": "Both transition from greeted to mail transaction on MAIL command"
+   },
+   {
+    "gt_index": 2,
+    "gt": {
+     "from": "Mail Transaction Started",
+     "event": "receive RCPT TO",
+     "action": "send RCPT TO",
+     "to": "Recipient Specified"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "Candidate has no separate Recipient Specified state; RCPT stays in MailTransaction"
+   },
+   {
+    "gt_index": 3,
+    "gt": {
+     "from": "Recipient Specified",
+     "event": "receive DATA",
+     "action": "send DATA 354",
+     "to": "Data Entry"
+    },
+    "candidate_index": 11,
+    "candidate": {
+     "from": "MailTransaction",
+     "event": "receive DATA accepted",
+     "action": "send 354 intermediate reply",
+     "to": "DataTransfer"
+    },
+    "confidence": 0.75,
+    "reason": "Both transition to data transfer on DATA command with 354 reply; source states differ but semantically close"
+   },
+   {
+    "gt_index": 4,
+    "gt": {
+     "from": "Data Entry",
+     "event": "cond message ended with <CRLF>.<CRLF>",
+     "action": "send message body",
+     "to": "Message Accepted"
+    },
+    "candidate_index": 15,
+    "candidate": {
+     "from": "DataTransfer",
+     "event": "send 250 data accepted",
+     "action": "accept delivery responsibility",
+     "to": "MailAccepted"
+    },
+    "confidence": 0.65,
+    "reason": "Both represent successful completion of data transfer leading to message accepted"
+   },
+   {
+    "gt_index": 5,
+    "gt": {
+     "from": "Message Accepted",
+     "event": "receive QUIT",
+     "action": "send QUIT",
+     "to": "Session Terminated"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No QUIT transition from MailAccepted in candidate"
+   },
+   {
+    "gt_index": 6,
+    "gt": {
+     "from": "Greeted",
+     "event": "receive RSET",
+     "action": "send RSET",
+     "to": "Greeted"
+    },
+    "candidate_index": 23,
+    "candidate": {
+     "from": "SessionInitialized",
+     "event": "receive RSET",
+     "action": "send 250 OK reply",
+     "to": "SessionInitialized"
+    },
+    "confidence": 0.9,
+    "reason": "Both are RSET self-loop in greeted/initialized state"
+   },
+   {
+    "gt_index": 7,
+    "gt": {
+     "from": "Mail Transaction Started",
+     "event": "receive RSET",
+     "action": "send RSET",
+     "to": "Greeted"
+    },
+    "candidate_index": 16,
+    "candidate": {
+     "from": "MailTransaction",
+     "event": "receive RSET",
+     "action": "abort transaction and clear buffers",
+     "to": "SessionInitialized"
+    },
+    "confidence": 0.9,
+    "reason": "Both reset from mail transaction back to greeted/initialized"
+   },
+   {
+    "gt_index": 8,
+    "gt": {
+     "from": "Recipient Specified",
+     "event": "receive RSET",
+     "action": "send RSET",
+     "to": "Greeted"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No separate Recipient Specified state in candidate"
+   },
+   {
+    "gt_index": 9,
+    "gt": {
+     "from": "Data Entry",
+     "event": "receive RSET before message is complete",
+     "action": "send RSET",
+     "to": "Greeted"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No RSET from DataTransfer in candidate"
+   },
+   {
+    "gt_index": 10,
+    "gt": {
+     "from": "Message Accepted",
+     "event": "receive RSET",
+     "action": "send RSET",
+     "to": "Greeted"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No RSET from MailAccepted in candidate"
+   },
+   {
+    "gt_index": 11,
+    "gt": {
+     "from": "Greeted",
+     "event": "receive VRFY",
+     "action": "send VRFY",
+     "to": "Greeted"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No VRFY transitions in candidate"
+   },
+   {
+    "gt_index": 12,
+    "gt": {
+     "from": "Greeted",
+     "event": "receive EXPN",
+     "action": "send EXPN; reply 250",
+     "to": "Greeted"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No EXPN transitions in candidate"
+   },
+   {
+    "gt_index": 13,
+    "gt": {
+     "from": "Mail Transaction Started",
+     "event": "receive VRFY or EXPN",
+     "action": "send VRFY; send EXPN",
+     "to": "Mail Transaction Started"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No VRFY/EXPN in candidate"
+   },
+   {
+    "gt_index": 14,
+    "gt": {
+     "from": "Recipient Specified",
+     "event": "receive VRFY or EXPN",
+     "action": "send VRFY; send EXPN",
+     "to": "Recipient Specified"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No VRFY/EXPN in candidate"
+   },
+   {
+    "gt_index": 15,
+    "gt": {
+     "from": "Data Entry",
+     "event": "receive VRFY or EXPN",
+     "action": "send VRFY; send EXPN",
+     "to": "Data Entry"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No VRFY/EXPN in candidate"
+   },
+   {
+    "gt_index": 16,
+    "gt": {
+     "from": "Message Accepted",
+     "event": "receive VRFY or EXPN",
+     "action": "send VRFY; send EXPN",
+     "to": "Message Accepted"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No VRFY/EXPN in candidate"
+   },
+   {
+    "gt_index": 17,
+    "gt": {
+     "from": "Connection Established",
+     "event": "receive QUIT",
+     "action": "send QUIT",
+     "to": "Session Terminated"
+    },
+    "candidate_index": 22,
+    "candidate": {
+     "from": "Greeting",
+     "event": "receive QUIT",
+     "action": "send 221 and close connection",
+     "to": "ConnectionClosed"
+    },
+    "confidence": 0.7,
+    "reason": "Both handle QUIT from initial/greeting state to closed"
+   },
+   {
+    "gt_index": 18,
+    "gt": {
+     "from": "Greeted",
+     "event": "receive QUIT",
+     "action": "send QUIT",
+     "to": "Session Terminated"
+    },
+    "candidate_index": 20,
+    "candidate": {
+     "from": "SessionInitialized",
+     "event": "receive QUIT",
+     "action": "send 221 and close connection",
+     "to": "ConnectionClosed"
+    },
+    "confidence": 0.9,
+    "reason": "Both handle QUIT from greeted/initialized to closed"
+   },
+   {
+    "gt_index": 19,
+    "gt": {
+     "from": "Mail Transaction Started",
+     "event": "receive QUIT",
+     "action": "send QUIT",
+     "to": "Session Terminated"
+    },
+    "candidate_index": 21,
+    "candidate": {
+     "from": "MailTransaction",
+     "event": "receive QUIT",
+     "action": "abort current transaction",
+     "to": "ConnectionClosed"
+    },
+    "confidence": 0.85,
+    "reason": "Both handle QUIT from mail transaction to closed"
+   },
+   {
+    "gt_index": 20,
+    "gt": {
+     "from": "Recipient Specified",
+     "event": "receive QUIT",
+     "action": "send QUIT",
+     "to": "Session Terminated"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No separate Recipient Specified state in candidate"
+   },
+   {
+    "gt_index": 21,
+    "gt": {
+     "from": "Data Entry",
+     "event": "receive QUIT before finishing data",
+     "action": "send QUIT",
+     "to": "Session Terminated"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No QUIT from DataTransfer in candidate"
+   }
+  ],
+  "unmatched_candidate_transitions": [
+   {
+    "candidate_index": 0,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server sending 220 greeting upon connection open is valid SMTP behavior not modeled in GT"
+   },
+   {
+    "candidate_index": 1,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server rejecting connection with 554 is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 3,
+    "class": "duplicate_or_alias",
+    "reason": "HELO accepted is an alias of EHLO accepted (GT index 0 match); same transition with HELO instead of EHLO"
+   },
+   {
+    "candidate_index": 4,
+    "class": "real_behavior_not_in_gt",
+    "reason": "EHLO rejection with failure reply is valid SMTP error handling"
+   },
+   {
+    "candidate_index": 5,
+    "class": "real_behavior_not_in_gt",
+    "reason": "HELO rejection is valid SMTP error handling"
+   },
+   {
+    "candidate_index": 6,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Re-issuing EHLO mid-session to reset state is valid per RFC 5321"
+   },
+   {
+    "candidate_index": 8,
+    "class": "real_behavior_not_in_gt",
+    "reason": "MAIL rejected with error reply is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 9,
+    "class": "real_behavior_not_in_gt",
+    "reason": "RCPT accepted staying in MailTransaction is valid; GT has separate state but this is the same protocol step"
+   },
+   {
+    "candidate_index": 10,
+    "class": "real_behavior_not_in_gt",
+    "reason": "RCPT rejected is valid SMTP error handling"
+   },
+   {
+    "candidate_index": 12,
+    "class": "real_behavior_not_in_gt",
+    "reason": "DATA rejected is valid SMTP error handling"
+   },
+   {
+    "candidate_index": 13,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Data end accepted returning to SessionInitialized represents successful completion ready for next transaction"
+   },
+   {
+    "candidate_index": 14,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Data end rejected is valid SMTP error handling"
+   },
+   {
+    "candidate_index": 17,
+    "class": "real_behavior_not_in_gt",
+    "reason": "EHLO during mail transaction resetting state is valid per RFC 5321"
+   },
+   {
+    "candidate_index": 18,
+    "class": "real_behavior_not_in_gt",
+    "reason": "QUIT from SessionRejected is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 19,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Rejecting non-QUIT commands in rejected session is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 24,
+    "class": "real_behavior_not_in_gt",
+    "reason": "NOOP command is valid SMTP behavior not in GT"
+   },
+   {
+    "candidate_index": 25,
+    "class": "real_behavior_not_in_gt",
+    "reason": "NOOP in mail transaction is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 26,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Out-of-order RCPT rejection is valid SMTP error handling"
+   },
+   {
+    "candidate_index": 27,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Delivery failure queuing is valid SMTP relay behavior"
+   },
+   {
+    "candidate_index": 28,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Queue retry is valid SMTP relay behavior"
+   },
+   {
+    "candidate_index": 29,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Successful delivery from queue is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 30,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Give-up timeout with sender notification is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 31,
+    "class": "real_behavior_not_in_gt",
+    "reason": "421 shutdown from Greeting is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 32,
+    "class": "real_behavior_not_in_gt",
+    "reason": "421 shutdown from SessionInitialized is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 33,
+    "class": "real_behavior_not_in_gt",
+    "reason": "421 shutdown from MailTransaction is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 34,
+    "class": "real_behavior_not_in_gt",
+    "reason": "421 shutdown from DataTransfer is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 35,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Timeout in Greeting is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 36,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Timeout in SessionInitialized is valid SMTP behavior"
+   },
+   {
+    "candidate_index": 37,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Timeout during data transfer is valid SMTP behavior"
+   }
+  ]
+ }
+}

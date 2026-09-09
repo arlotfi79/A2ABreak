@@ -1,0 +1,128 @@
+{
+  "section_id": "S117",
+  "title": "S117 11.3 Client Handling of Unsolicited Responses Not Suitable for the",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S117 11.3 Client Handling of Unsolicited Responses Not Suitable for the"
+  ],
+  "url_anchor": "#s117-113-client-handling-of-unsolicited-responses-not-suitable-for-the",
+  "word_count": 232,
+  "statement_count": 6,
+  "elapsed_seconds": 57.93,
+  "statements": [
+    {
+      "statement_id": "D-S117-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Many server responses and response codes are only meaningful in authenticated or even selected state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S117",
+      "state_name": "authenticated",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S117-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Many server responses and response codes are only meaningful in authenticated or even selected state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S117",
+      "state_name": "selected",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S117-003",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Before authentication, clients SHOULD ignore any responses other than CAPABILITY and server status responses (Section 7.1), as well as any response codes other than CAPABILITY.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S117",
+      "object_name": "client",
+      "field_name": "processable_responses",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "CAPABILITY",
+        "server status responses"
+      ],
+      "guard_semantics": "protocol.state = not-authenticated"
+    },
+    {
+      "statement_id": "D-S117-004",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Clients SHOULD ignore the ALERT response code until after TLS (whether using STARTTLS or TLS negotiation on an Implicit TLS port) or a SASL security layer with confidentiality protection has been successfully negotiated.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S117",
+      "object_name": "client",
+      "field_name": "ALERT_response_code",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "session.tls_negotiated = true | session.sasl_confidentiality_layer = true"
+    },
+    {
+      "statement_id": "D-S117-005",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Unless explicitly allowed by an IMAP extension, when not in selected state, clients MUST ignore responses / response codes related to message and mailbox status such as FLAGS, EXIST, EXPUNGE, and FETCH.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S117",
+      "object_name": "client",
+      "field_name": "processable_responses",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "protocol.state != selected"
+    },
+    {
+      "statement_id": "D-S117-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Nothing prevents a server (or an on-path attacker) from sending such invalid responses in cleartext before STARTTLS/AUTHENTICATE commands are issued. Before authentication, clients SHOULD ignore any responses other than CAPABILITY and server status responses.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S117",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "not-authenticated",
+      "to_state": "authenticated",
+      "trigger": "STARTTLS or AUTHENTICATE command issued",
+      "pre_cond": "protocol.state = not-authenticated",
+      "post_cond": "protocol.state = authenticated",
+      "actions": [
+        "issue STARTTLS or AUTHENTICATE command",
+        "expand set of processable server responses"
+      ],
+      "modality": "should"
+    }
+  ]
+}

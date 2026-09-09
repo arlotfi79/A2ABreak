@@ -1,0 +1,426 @@
+{
+  "states": [
+    "Calling",
+    "Trying",
+    "Proceeding",
+    "Completed",
+    "Confirmed",
+    "Terminated",
+    "Early",
+    "Established",
+    "Ringing",
+    "STATELESS",
+    "Queued",
+    "RedirectProcessing",
+    "RequestFailed",
+    "Retransmitting2xx",
+    "ACKReceived",
+    "Cancelled",
+    "TLS_CONNECTING",
+    "CERTIFICATE_VERIFICATION",
+    "CERTIFICATE_INVALID",
+    "REGISTER_SENT",
+    "CHALLENGED",
+    "REGISTERED"
+  ],
+  "initial_state": "Calling",
+  "final_states": [
+    "Terminated",
+    "RequestFailed",
+    "Cancelled",
+    "CERTIFICATE_INVALID",
+    "REGISTERED"
+  ],
+  "transitions": [
+    {
+      "from": "Calling",
+      "event": "timeout TimerA",
+      "action": "retransmit INVITE request",
+      "to": "Calling"
+    },
+    {
+      "from": "Calling",
+      "event": "receive 1xx",
+      "action": "pass response to TU",
+      "to": "Proceeding"
+    },
+    {
+      "from": "Calling",
+      "event": "receive 3xx to 6xx",
+      "action": "pass response to TU; generate ACK; start TimerD",
+      "to": "Completed"
+    },
+    {
+      "from": "Calling",
+      "event": "receive 2xx",
+      "action": "pass 2xx to TU",
+      "to": "Terminated"
+    },
+    {
+      "from": "Calling",
+      "event": "timeout TimerB",
+      "action": "inform TU of timeout",
+      "to": "Terminated"
+    },
+    {
+      "from": "Calling",
+      "event": "cond TransportError",
+      "action": "inform TU destroy transaction",
+      "to": "Terminated"
+    },
+    {
+      "from": "Trying",
+      "event": "timeout TimerE",
+      "action": "retransmit request",
+      "to": "Trying"
+    },
+    {
+      "from": "Trying",
+      "event": "receive RequestRetransmit",
+      "action": "discard retransmission",
+      "to": "Trying"
+    },
+    {
+      "from": "Trying",
+      "event": "receive 1xx",
+      "action": "pass response to TU",
+      "to": "Proceeding"
+    },
+    {
+      "from": "Trying",
+      "event": "send Provisional",
+      "action": "pass response to transport",
+      "to": "Proceeding"
+    },
+    {
+      "from": "Trying",
+      "event": "receive FinalResponse",
+      "action": "pass response to TU",
+      "to": "Completed"
+    },
+    {
+      "from": "Trying",
+      "event": "send FinalResponse",
+      "action": "send response",
+      "to": "Completed"
+    },
+    {
+      "from": "Trying",
+      "event": "timeout TimerF",
+      "action": "inform TU of timeout",
+      "to": "Terminated"
+    },
+    {
+      "from": "Trying",
+      "event": "cond TransportError",
+      "action": "inform TU of failure",
+      "to": "Terminated"
+    },
+    {
+      "from": "Trying",
+      "event": "receive 180Ringing",
+      "action": "start alerting",
+      "to": "Ringing"
+    },
+    {
+      "from": "Proceeding",
+      "event": "receive 1xx",
+      "action": "pass response to TU",
+      "to": "Proceeding"
+    },
+    {
+      "from": "Proceeding",
+      "event": "timeout TimerE",
+      "action": "retransmit request",
+      "to": "Proceeding"
+    },
+    {
+      "from": "Proceeding",
+      "event": "send Provisional",
+      "action": "pass to transport",
+      "to": "Proceeding"
+    },
+    {
+      "from": "Proceeding",
+      "event": "receive RequestRetransmit",
+      "action": "retransmit last response",
+      "to": "Proceeding"
+    },
+    {
+      "from": "Proceeding",
+      "event": "receive 3xx to 6xx",
+      "action": "pass response to TU; generate ACK; start TimerD",
+      "to": "Completed"
+    },
+    {
+      "from": "Proceeding",
+      "event": "receive FinalResponse",
+      "action": "pass response to TU",
+      "to": "Completed"
+    },
+    {
+      "from": "Proceeding",
+      "event": "send 3xx to 6xx",
+      "action": "pass to transport; start TimerG TimerH",
+      "to": "Completed"
+    },
+    {
+      "from": "Proceeding",
+      "event": "send FinalResponse",
+      "action": "pass to transport",
+      "to": "Completed"
+    },
+    {
+      "from": "Proceeding",
+      "event": "receive 2xx",
+      "action": "pass 2xx to TU",
+      "to": "Terminated"
+    },
+    {
+      "from": "Proceeding",
+      "event": "send 2xx",
+      "action": "pass to transport",
+      "to": "Terminated"
+    },
+    {
+      "from": "Proceeding",
+      "event": "timeout TimerF",
+      "action": "inform TU of timeout",
+      "to": "Terminated"
+    },
+    {
+      "from": "Proceeding",
+      "event": "cond TransportError",
+      "action": "inform TU",
+      "to": "Terminated"
+    },
+    {
+      "from": "Proceeding",
+      "event": "receive 600BusyEverywhere",
+      "action": "terminate session",
+      "to": "Terminated"
+    },
+    {
+      "from": "Completed",
+      "event": "timeout TimerG",
+      "action": "retransmit response",
+      "to": "Completed"
+    },
+    {
+      "from": "Completed",
+      "event": "receive RequestRetransmit",
+      "action": "retransmit response",
+      "to": "Completed"
+    },
+    {
+      "from": "Completed",
+      "event": "receive ResponseRetransmit",
+      "action": "re-pass ACK to transport",
+      "to": "Completed"
+    },
+    {
+      "from": "Completed",
+      "event": "receive ACK",
+      "action": "set TimerI",
+      "to": "Confirmed"
+    },
+    {
+      "from": "Completed",
+      "event": "timeout TimerD",
+      "action": "destroy transaction",
+      "to": "Terminated"
+    },
+    {
+      "from": "Completed",
+      "event": "timeout TimerH",
+      "action": "inform TU",
+      "to": "Terminated"
+    },
+    {
+      "from": "Completed",
+      "event": "timeout TimerK",
+      "action": "destroy transaction",
+      "to": "Terminated"
+    },
+    {
+      "from": "Completed",
+      "event": "timeout TimerJ",
+      "action": "destroy transaction",
+      "to": "Terminated"
+    },
+    {
+      "from": "Completed",
+      "event": "cond TransportError",
+      "action": "inform TU",
+      "to": "Terminated"
+    },
+    {
+      "from": "Confirmed",
+      "event": "timeout TimerI",
+      "action": "destroy transaction",
+      "to": "Terminated"
+    },
+    {
+      "from": "Early",
+      "event": "receive 2xxFinal",
+      "action": "confirm dialog",
+      "to": "Established"
+    },
+    {
+      "from": "Early",
+      "event": "receive NonTwoxxFinal",
+      "action": "terminate dialog",
+      "to": "Terminated"
+    },
+    {
+      "from": "Early",
+      "event": "timeout 64T1",
+      "action": "terminate early dialog",
+      "to": "Terminated"
+    },
+    {
+      "from": "Early",
+      "event": "send ProvisionalRetransmit",
+      "action": "retransmit provisional response",
+      "to": "Early"
+    },
+    {
+      "from": "Ringing",
+      "event": "receive 200OK",
+      "action": "establish session send ACK",
+      "to": "Established"
+    },
+    {
+      "from": "Ringing",
+      "event": "receive ErrorResponse",
+      "action": "terminate session",
+      "to": "Terminated"
+    },
+    {
+      "from": "Established",
+      "event": "receive reINVITE",
+      "action": "update session parameters",
+      "to": "Established"
+    },
+    {
+      "from": "Established",
+      "event": "receive reINVITERejected",
+      "action": "maintain prior parameters",
+      "to": "Established"
+    },
+    {
+      "from": "Established",
+      "event": "receive TargetRefresh",
+      "action": "update remote target URI",
+      "to": "Established"
+    },
+    {
+      "from": "Established",
+      "event": "receive BYE",
+      "action": "terminate session and dialog",
+      "to": "Terminated"
+    },
+    {
+      "from": "Established",
+      "event": "send BYE",
+      "action": "terminate session and dialog",
+      "to": "Terminated"
+    },
+    {
+      "from": "Established",
+      "event": "timeout 2xxNoACK",
+      "action": "send BYE",
+      "to": "Terminated"
+    },
+    {
+      "from": "Established",
+      "event": "receive 481or408",
+      "action": "terminate dialog",
+      "to": "Terminated"
+    },
+    {
+      "from": "Established",
+      "event": "cond ClientTimeout",
+      "action": "terminate dialog",
+      "to": "Terminated"
+    },
+    {
+      "from": "STATELESS",
+      "event": "receive Request",
+      "action": "generate and send response",
+      "to": "STATELESS"
+    },
+    {
+      "from": "STATELESS",
+      "event": "receive Retransmission",
+      "action": "regenerate response",
+      "to": "STATELESS"
+    },
+    {
+      "from": "STATELESS",
+      "event": "receive ACK",
+      "action": "discard ACK",
+      "to": "STATELESS"
+    },
+    {
+      "from": "STATELESS",
+      "event": "receive CANCEL",
+      "action": "discard CANCEL",
+      "to": "STATELESS"
+    },
+    {
+      "from": "RedirectProcessing",
+      "event": "cond ContactFailure",
+      "action": "try next address in set",
+      "to": "RedirectProcessing"
+    },
+    {
+      "from": "RedirectProcessing",
+      "event": "cond TargetSetExhausted",
+      "action": "fail request",
+      "to": "RequestFailed"
+    },
+    {
+      "from": "Retransmitting2xx",
+      "event": "receive ACK",
+      "action": "cease 2xx retransmissions",
+      "to": "ACKReceived"
+    },
+    {
+      "from": "Queued",
+      "event": "cond StatusUpdate",
+      "action": "send 182 Queued response",
+      "to": "Queued"
+    },
+    {
+      "from": "TLS_CONNECTING",
+      "event": "cond TLSHandshakeComplete",
+      "action": "verify certificate",
+      "to": "CERTIFICATE_VERIFICATION"
+    },
+    {
+      "from": "CERTIFICATE_VERIFICATION",
+      "event": "cond CertificateValid",
+      "action": "send REGISTER over TLS",
+      "to": "REGISTER_SENT"
+    },
+    {
+      "from": "CERTIFICATE_VERIFICATION",
+      "event": "cond CertificateInvalid",
+      "action": "abort registration",
+      "to": "CERTIFICATE_INVALID"
+    },
+    {
+      "from": "REGISTER_SENT",
+      "event": "receive 401Challenge",
+      "action": "inspect challenge realm",
+      "to": "CHALLENGED"
+    },
+    {
+      "from": "CHALLENGED",
+      "event": "send CredentialedREGISTER",
+      "action": "resubmit REGISTER with credentials",
+      "to": "REGISTERED"
+    }
+  ]
+}

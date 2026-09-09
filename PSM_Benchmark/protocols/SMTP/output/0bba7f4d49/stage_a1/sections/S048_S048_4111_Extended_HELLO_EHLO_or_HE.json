@@ -1,0 +1,169 @@
+{
+  "section_id": "S048",
+  "title": "S048 4.1.1.1 Extended HELLO (EHLO) or HELLO (HELO)",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S048 4.1.1.1 Extended HELLO (EHLO) or HELLO (HELO)"
+  ],
+  "url_anchor": "#s048-4111-extended-hello-ehlo-or-hello-helo",
+  "word_count": 558,
+  "statement_count": 7,
+  "elapsed_seconds": 63.23,
+  "statements": [
+    {
+      "statement_id": "D-S048-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "These commands, and a '250 OK' reply to one of them, confirm that both the SMTP client and the SMTP server are in the initial state, that is, there is no transaction in progress and all state tables and buffers are cleared.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "state_name": "initial state",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "transaction.in_progress = false & state_tables.cleared = true & buffers.cleared = true"
+    },
+    {
+      "statement_id": "D-S048-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "A client SMTP SHOULD start an SMTP session by issuing the EHLO command.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S048",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session start",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send EHLO command"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S048-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "These commands, and a '250 OK' reply to one of them, confirm that both the SMTP client and the SMTP server are in the initial state, that is, there is no transaction in progress and all state tables and buffers are cleared.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "initial state",
+      "trigger": "EHLO or HELO + 250 OK reply",
+      "pre_cond": null,
+      "post_cond": "transaction.in_progress = false & state_tables.cleared = true & buffers.cleared = true",
+      "actions": [
+        "clear all state tables",
+        "clear all buffers",
+        "reset transaction state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S048-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "A client MUST issue HELO or EHLO before starting a mail transaction.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S048",
+      "actors": [
+        "client"
+      ],
+      "from_state": "initial state",
+      "to_state": null,
+      "trigger": "mail transaction start",
+      "pre_cond": "client.sent_EHLO = true | client.sent_HELO = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S048-005",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "A client MUST issue HELO or EHLO before starting a mail transaction.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "object_name": "mail transaction",
+      "field_name": "greeting command",
+      "field_type": "command",
+      "required": true,
+      "allowed_values": [
+        "EHLO",
+        "HELO"
+      ],
+      "guard_semantics": "client.sent_EHLO = true | client.sent_HELO = true"
+    },
+    {
+      "statement_id": "D-S048-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the SMTP server supports the SMTP service extensions, it will give a successful response, a failure response, or an error response. If the SMTP server, in violation of this specification, does not support any SMTP service extensions, it will generate an error response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "EHLO command received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 250 successful response | send failure response | send error response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S048-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Older client SMTP systems MAY use HELO instead of EHLO, and servers MUST support the HELO command and reply properly to it.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "initial state",
+      "trigger": "HELO command received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send proper HELO reply"
+      ],
+      "modality": "must"
+    }
+  ]
+}

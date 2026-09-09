@@ -1,0 +1,136 @@
+{
+  "section_id": "S160",
+  "title": "S160 18.12 Connection",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S160 18.12 Connection"
+  ],
+  "url_anchor": "#s160-1812-connection",
+  "word_count": 228,
+  "statement_count": 5,
+  "elapsed_seconds": 60.69,
+  "statements": [
+    {
+      "statement_id": "1-S160-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "It MUST NOT be communicated by proxies over further connections.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S160",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "proxy_message_forwarding",
+      "pre_cond": null,
+      "post_cond": "connection_options.forwarded_beyond_proxy = false",
+      "actions": [
+        "suppress_connection_options_on_further_connections"
+      ],
+      "modality": "must",
+      "id": "N-S160-001"
+    },
+    {
+      "statement_id": "2-S160-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "RTSP 2.0 proxies MUST parse the Connection header field before a message is forwarded and, for each connection-token in this field, remove any header field(s) from the message with the same name as the connection-token.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S160",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_forwarding",
+      "pre_cond": "message.forwarding = true",
+      "post_cond": "message.connection_token_headers_removed = true",
+      "actions": [
+        "parse_Connection_header",
+        "remove_headers_matching_connection_tokens_from_message"
+      ],
+      "modality": "must",
+      "id": "N-S160-002"
+    },
+    {
+      "statement_id": "3-S160-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "Message headers listed in the Connection header MUST NOT include end-to-end headers, such as Cache-Control.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S160",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S160-003"
+    },
+    {
+      "statement_id": "4-S160-4",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "For example, \"Connection: close in either the request or the response-header fields\" indicates that the connection SHOULD NOT be considered \"persistent\" (Section 10.2) after the current request/response is complete.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S160",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "persistent",
+      "to_state": "non-persistent",
+      "trigger": "request_response_complete",
+      "pre_cond": "Connection.option = \"close\"",
+      "post_cond": "connection.persistent = false",
+      "actions": [
+        "mark_connection_non_persistent"
+      ],
+      "modality": "should",
+      "id": "N-S160-004"
+    },
+    {
+      "statement_id": "5-S160-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The use of the connection option \"close\" in RTSP messages SHOULD be limited to error messages when the server is unable to recover and therefore sees it necessary to close the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S160",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "closed",
+      "trigger": "server_unrecoverable_error",
+      "pre_cond": "server.error = true & server.recoverable = false",
+      "post_cond": "connection.close_option_set = true",
+      "actions": [
+        "set_close_connection_option_in_error_response",
+        "close_connection"
+      ],
+      "modality": "should",
+      "id": "N-S160-005"
+    }
+  ]
+}

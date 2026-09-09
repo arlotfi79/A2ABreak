@@ -1,0 +1,89 @@
+{
+  "section_id": "S092",
+  "title": "S092 16.2 Invalidation after Updates or Deletions",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S092 16.2 Invalidation after Updates or Deletions"
+  ],
+  "url_anchor": "#s092-162-invalidation-after-updates-or-deletions",
+  "word_count": 248,
+  "statement_count": 3,
+  "elapsed_seconds": 34.99,
+  "statements": [
+    {
+      "statement_id": "1-S092-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Some RTSP methods MUST cause a cache to invalidate an entity.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S092",
+      "actors": [
+        "cache"
+      ],
+      "from_state": "valid",
+      "to_state": "invalid",
+      "trigger": "DESCRIBE_or_SETUP_method_processed",
+      "pre_cond": "cache.entity.state = valid",
+      "post_cond": "cache.entity.state = invalid",
+      "actions": [
+        "invalidate entity referred to by Request-URI",
+        "invalidate entity referred to by Location header if present",
+        "invalidate entity referred to by Content-Location header if present"
+      ],
+      "modality": "must",
+      "id": "N-S092-001"
+    },
+    {
+      "statement_id": "2-S092-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "In order to prevent DoS attacks, an invalidation based on the URI in a Location or Content-Location header MUST only be performed if the host part is the same as in the Request-URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S092",
+      "actors": [
+        "cache"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "header.host_part = request_uri.host_part",
+      "post_cond": null,
+      "actions": [
+        "perform Location/Content-Location-based invalidation only when host part matches Request-URI host part"
+      ],
+      "modality": "must",
+      "id": "N-S092-002"
+    },
+    {
+      "statement_id": "3-S092-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "A cache that passes through requests for methods it does not understand SHOULD invalidate any entities referred to by the Request-URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S092",
+      "actors": [
+        "cache"
+      ],
+      "from_state": "valid",
+      "to_state": "invalid",
+      "trigger": "unknown_method_passed_through",
+      "pre_cond": "cache.method_understood = false",
+      "post_cond": "cache.entity.state = invalid",
+      "actions": [
+        "invalidate all entities referred to by Request-URI"
+      ],
+      "modality": "should",
+      "id": "N-S092-003"
+    }
+  ]
+}

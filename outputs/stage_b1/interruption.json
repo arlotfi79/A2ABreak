@@ -1,0 +1,801 @@
+{
+  "stage": "interruption",
+  "fsm_input": {
+    "states": [
+      {
+        "id": "D-3-4-001",
+        "state_name": "TASK_STATE_INPUT_REQUIRED",
+        "semantic_type": "interrupted",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "interruption",
+        "source_section": "3.4.3"
+      },
+      {
+        "id": "D-4-1-007",
+        "state_name": "TASK_STATE_INPUT_REQUIRED",
+        "semantic_type": "interrupted",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "interruption",
+        "source_section": "4.1.3"
+      },
+      {
+        "id": "D-7-6-001",
+        "state_name": "TASK_STATE_AUTH_REQUIRED",
+        "semantic_type": "interrupted",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "interruption",
+        "source_section": "7.6"
+      },
+      {
+        "id": "D-12-5-002",
+        "state_name": null,
+        "semantic_type": "interrupted",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "interruption",
+        "source_section": "12.5"
+      },
+      {
+        "id": "D-Appendix A- Migratio-002",
+        "state_name": "LEGACY_NAME_DEPRECATED",
+        "semantic_type": "interrupted",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "legacy_name.deprecated = true & legacy_name.warning_noted = true",
+        "stage": "interruption",
+        "source_section": "Appendix A"
+      }
+    ],
+    "transitions": [
+      {
+        "id": "D-3-1-041",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "any_cancelable_non_terminal_state",
+        "to_state": "TASK_STATE_CANCELED",
+        "trigger": "cancel_task_requested",
+        "pre_cond": "!task.state.is_terminal",
+        "post_cond": "task.state = TASK_STATE_CANCELED (if successful); task.state unchanged or terminal (if cancellation fails)",
+        "modality": "MAY",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.1.5"
+      },
+      {
+        "id": "D-3-4-007",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_INPUT_REQUIRED",
+        "trigger": null,
+        "pre_cond": "task.state = TASK_STATE_WORKING",
+        "post_cond": "task.state = TASK_STATE_INPUT_REQUIRED",
+        "modality": "can",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4.3"
+      },
+      {
+        "id": "D-7-6-002",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "TASK_STATE_AUTH_REQUIRED",
+        "trigger": "authorization_required",
+        "pre_cond": "agent.requires_authorization = true",
+        "post_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "7.6.1"
+      },
+      {
+        "id": "N-7-6-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": "TASK_STATE_AUTH_REQUIRED",
+        "trigger": "authorization_required",
+        "pre_cond": null,
+        "post_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+        "modality": "must",
+        "actors": [
+          "agent"
+        ],
+        "source_section": "7.6.1"
+      },
+      {
+        "id": "N-7-6-003",
+        "category": "BEHAVIORAL",
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_AUTH_REQUIRED",
+        "trigger": "authorization_required",
+        "pre_cond": "!(authorization.negotiated_out_of_band = true | authorization.negotiated_via_extension = true)",
+        "post_cond": "task.status.message.included = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "7.6.1"
+      },
+      {
+        "id": "N-7-6-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "authorization_required",
+        "pre_cond": "!(in_band_mechanism.negotiated_out_of_band = true | in_band_mechanism.negotiated_via_extension = true)",
+        "post_cond": "credential.reception_channel = out_of_band",
+        "modality": "must",
+        "actors": [
+          "agent"
+        ],
+        "source_section": "7.6.1"
+      },
+      {
+        "id": "N-7-6-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": "TASK_STATE_AUTH_REQUIRED",
+        "trigger": "task_state_set_to_auth_required",
+        "pre_cond": "credential.reception_channel = out_of_band & task.state = TASK_STATE_AUTH_REQUIRED",
+        "post_cond": "stream.active = true",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "7.6.1"
+      },
+      {
+        "id": "N-7-6-006",
+        "category": "BEHAVIORAL",
+        "from_state": "TASK_STATE_AUTH_REQUIRED",
+        "to_state": null,
+        "trigger": "credential_received",
+        "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED AND credential_received_out_of_band = true",
+        "post_cond": "Task processing has resumed",
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "7.6.1"
+      },
+      {
+        "id": "N-7-6-007",
+        "category": "BEHAVIORAL",
+        "from_state": "TASK_STATE_AUTH_REQUIRED",
+        "to_state": "TASK_STATE_AUTH_REQUIRED",
+        "trigger": "message_received",
+        "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "7.6.1"
+      },
+      {
+        "id": "D-7-6-005",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "TASK_STATE_AUTH_REQUIRED",
+        "trigger": "authorization_delegation",
+        "pre_cond": "client.is_a2a_agent = true & client.is_actively_processing_task = true & received_task.state = TASK_STATE_AUTH_REQUIRED",
+        "post_cond": "client.task.state = TASK_STATE_AUTH_REQUIRED",
+        "modality": "may",
+        "actors": [
+          "client"
+        ],
+        "source_section": "7.6.2"
+      },
+      {
+        "id": "N-7-6-008",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": "TASK_STATE_AUTH_REQUIRED",
+        "trigger": "authorization_delegation_required",
+        "pre_cond": "client.is_a2a_agent = true & client.task is actively being processed",
+        "post_cond": "client.task.state = TASK_STATE_AUTH_REQUIRED",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "7.6.2"
+      },
+      {
+        "id": "N-7-6-009",
+        "category": "BEHAVIORAL",
+        "from_state": "TASK_STATE_AUTH_REQUIRED",
+        "to_state": null,
+        "trigger": "task_auth_required_received",
+        "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED & client.active_response_stream.open = false",
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "7.6.2"
+      },
+      {
+        "id": "D-9-4-013",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "TASK_STATE_CANCELED",
+        "trigger": "CancelTask",
+        "pre_cond": "!(task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED)",
+        "post_cond": "task.state = TASK_STATE_CANCELED",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "9.4.5"
+      },
+      {
+        "id": "D-10-3-018",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "in_progress",
+        "to_state": "canceled",
+        "trigger": "CancelTask",
+        "pre_cond": "!(task.state = completed | task.state = failed | task.state = canceled | task.state = rejected)",
+        "post_cond": "task.state = canceled",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "10.3"
+      },
+      {
+        "id": "D-11-7-009",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "STREAM_STATE_OPEN",
+        "to_state": "STREAM_STATE_CLOSED",
+        "trigger": "task_reached_terminal_or_interrupted_state",
+        "pre_cond": "stream.open = true & (task.state = terminal | task.state = interrupted)",
+        "post_cond": "stream.open = false",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "11.7"
+      },
+      {
+        "id": "D-12-5-004",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": null,
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "12.5"
+      },
+      {
+        "id": "D-Appendix A- Migratio-006",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "LEGACY_NAME_INTRODUCED",
+        "to_state": "LEGACY_NAME_DEPRECATED",
+        "trigger": "version_0_4_x_release",
+        "pre_cond": "legacy_name.documented = true & legacy_name.alias_present = true",
+        "post_cond": "legacy_name.deprecated = true & legacy_name.warning_noted = true",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "Appendix A"
+      }
+    ]
+  },
+  "statements": [
+    {
+      "statement_id": "D-3-1-041",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "Requests the cancellation of an ongoing task. The server will attempt to cancel the task, but success is not guaranteed (e.g., the task might have already completed or failed, or cancellation might not be supported at its current stage). The operation attempts to cancel the specified task and returns its updated state.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "3.1.5",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "any_cancelable_non_terminal_state",
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "cancel_task_requested",
+      "pre_cond": "!task.state.is_terminal",
+      "post_cond": "task.state = TASK_STATE_CANCELED (if successful); task.state unchanged or terminal (if cancellation fails)",
+      "actions": [
+        "cancellation attempted on specified task",
+        "updated task state returned to client"
+      ],
+      "modality": "MAY"
+    },
+    {
+      "statement_id": "D-3-4-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "Agents can request additional input mid-processing by transitioning a task to the input-required state",
+      "is_inferred": true,
+      "confidence": 1.0,
+      "source_section": "3.4.3",
+      "state_name": "TASK_STATE_INPUT_REQUIRED",
+      "enum_name": "TaskState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-3-4-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "Agents can request additional input mid-processing by transitioning a task to the input-required state",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "3.4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_INPUT_REQUIRED",
+      "trigger": null,
+      "pre_cond": "task.state = TASK_STATE_WORKING",
+      "post_cond": "task.state = TASK_STATE_INPUT_REQUIRED",
+      "actions": [
+        "Agent transitions task to input-required state",
+        "Agent signals to client that additional input is required"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-4-1-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "Indicates that the agent requires additional user input to proceed. This is an interrupted state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.1.3",
+      "state_name": "TASK_STATE_INPUT_REQUIRED",
+      "enum_name": "TaskState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-7-6-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "A2A provides the capability for agents to delegate the fulfillment of this authorization to the client via the TASK_STATE_AUTH_REQUIRED Task state. This provides agents a fallback path for requesting authorization by passing the responsibility to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6",
+      "state_name": "TASK_STATE_AUTH_REQUIRED",
+      "enum_name": "TaskState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-7-6-002",
+      "normative_level": "REQUIREMENT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "in_task_authorization",
+      "description": "To request that a client fulfills an authorization request, the agent MUST transition the TaskState to TASK_STATE_AUTH_REQUIRED",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_required",
+      "pre_cond": "agent.requires_authorization = true",
+      "post_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Agent transitions TaskState to TASK_STATE_AUTH_REQUIRED",
+        "Agent includes a TaskStatus message explaining the required authorization"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "N-7-6-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "interruption",
+      "description": "MUST transition the TaskState to TASK_STATE_AUTH_REQUIRED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_required",
+      "pre_cond": null,
+      "post_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Transition the TaskState to TASK_STATE_AUTH_REQUIRED"
+      ],
+      "modality": "must",
+      "id": "N-7-6-002"
+    },
+    {
+      "statement_id": "N-7-6-003",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "MUST include a TaskStatus message explaining the required authorization, unless the details of the authorization have been negotiated out-of-band or via an extension",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_required",
+      "pre_cond": "!(authorization.negotiated_out_of_band = true | authorization.negotiated_via_extension = true)",
+      "post_cond": "task.status.message.included = true",
+      "actions": [
+        "Include a TaskStatus message that explains the required authorization"
+      ],
+      "modality": "must",
+      "id": "N-7-6-003"
+    },
+    {
+      "statement_id": "N-7-6-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "interruption",
+      "description": "Agents MUST arrange to receive credentials via an out-of-band means, unless an in-band mechanism has been negotiated out-of-band or via an extension.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authorization_required",
+      "pre_cond": "!(in_band_mechanism.negotiated_out_of_band = true | in_band_mechanism.negotiated_via_extension = true)",
+      "post_cond": "credential.reception_channel = out_of_band",
+      "actions": [
+        "Arrange to receive credentials via an out-of-band means"
+      ],
+      "modality": "must",
+      "id": "N-7-6-004"
+    },
+    {
+      "statement_id": "N-7-6-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "interruption",
+      "description": "If the credential is received out-of-band, the agent SHOULD maintain any active response streams with the client after setting the TaskState to TASK_STATE_AUTH_REQUIRED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "task_state_set_to_auth_required",
+      "pre_cond": "credential.reception_channel = out_of_band & task.state = TASK_STATE_AUTH_REQUIRED",
+      "post_cond": "stream.active = true",
+      "actions": [
+        "Maintain any active response streams with the client after setting the TaskState to TASK_STATE_AUTH_REQUIRED"
+      ],
+      "modality": "should",
+      "id": "N-7-6-005"
+    },
+    {
+      "statement_id": "N-7-6-006",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "The agent MAY immediately continue Task processing after receiving the credential, without a requirement that clients send a follow-up message.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": null,
+      "trigger": "credential_received",
+      "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED AND credential_received_out_of_band = true",
+      "post_cond": "Task processing has resumed",
+      "actions": [
+        "Immediately continue Task processing after receiving the credential without waiting for a client follow-up message"
+      ],
+      "modality": "may",
+      "id": "N-7-6-006"
+    },
+    {
+      "statement_id": "N-7-6-007",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "Agents SHOULD support receiving messages directed to the Task while the Task remains in TASK_STATE_AUTH_REQUIRED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "message_received",
+      "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "post_cond": null,
+      "actions": [
+        "Accept and process messages directed to the Task while Task remains in TASK_STATE_AUTH_REQUIRED"
+      ],
+      "modality": "should",
+      "id": "N-7-6-007"
+    },
+    {
+      "statement_id": "D-7-6-005",
+      "normative_level": "PERMISSION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "in_task_authorization",
+      "description": "If the client is itself an A2A agent actively processing a Task, the client may further delegate the authorization request to its client by transitioning its own Task to TASK_STATE_AUTH_REQUIRED.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "7.6.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_delegation",
+      "pre_cond": "client.is_a2a_agent = true & client.is_actively_processing_task = true & received_task.state = TASK_STATE_AUTH_REQUIRED",
+      "post_cond": "client.task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Client transitions its own Task to TASK_STATE_AUTH_REQUIRED",
+        "Client SHOULD follow all In-Task Authorization Agent Responsibilities"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "N-7-6-008",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "interruption",
+      "description": "The client SHOULD follow all In-Task Authorization Agent Responsibilities.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "7.6.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_delegation_required",
+      "pre_cond": "client.is_a2a_agent = true & client.task is actively being processed",
+      "post_cond": "client.task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Follow all In-Task Authorization Agent Responsibilities when delegating the authorization request to the client's own client"
+      ],
+      "modality": "should",
+      "id": "N-7-6-008"
+    },
+    {
+      "statement_id": "N-7-6-009",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "interruption",
+      "description": "To avoid this, a client SHOULD perform one of the following: Subscribe to a stream of events for the Task using the Subscribe to Task operation / Register a webhook to receive events, if supported by the agent, using the Create Push Notification Config operation / Begin polling the Task using the Get Task operation",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "7.6.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": null,
+      "trigger": "task_auth_required_received",
+      "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED & client.active_response_stream.open = false",
+      "post_cond": null,
+      "actions": [
+        "Subscribe to a stream of events for the Task using the Subscribe to Task operation, OR",
+        "Register a webhook to receive events using the Create Push Notification Config operation, OR",
+        "Begin polling the Task using the Get Task operation"
+      ],
+      "modality": "should",
+      "id": "N-7-6-009"
+    },
+    {
+      "statement_id": "D-9-4-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "Cancels an ongoing task.",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "9.4.5",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "CancelTask",
+      "pre_cond": "!(task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED)",
+      "post_cond": "task.state = TASK_STATE_CANCELED",
+      "actions": [
+        "client sends CancelTask request with task id",
+        "server cancels the ongoing task"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-10-3-018",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "CancelTask: Cancels a task in progress.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "10.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "in_progress",
+      "to_state": "canceled",
+      "trigger": "CancelTask",
+      "pre_cond": "!(task.state = completed | task.state = failed | task.state = canceled | task.state = rejected)",
+      "post_cond": "task.state = canceled",
+      "actions": [
+        "Server cancels the task currently in progress",
+        "Server returns updated Task object reflecting canceled state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-11-7-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "interruption",
+      "description": "until the task reaches a terminal or interrupted state, at which point the stream closes. Implementations SHOULD avoid re-ordering events and MAY optionally resend a final Task snapshot before closing.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "11.7",
+      "actors": [
+        "server"
+      ],
+      "from_state": "STREAM_STATE_OPEN",
+      "to_state": "STREAM_STATE_CLOSED",
+      "trigger": "task_reached_terminal_or_interrupted_state",
+      "pre_cond": "stream.open = true & (task.state = terminal | task.state = interrupted)",
+      "post_cond": "stream.open = false",
+      "actions": [
+        "Server optionally resends final Task snapshot before closing",
+        "Server closes SSE stream"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-12-5-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "streaming",
+      "stage": "interruption",
+      "description": "Reconnection: Define behavior for connection interruption and resumption",
+      "is_inferred": true,
+      "confidence": 0.2,
+      "source_section": "12.5",
+      "state_name": null,
+      "enum_name": null,
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-12-5-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "interruption_and_resumption",
+      "description": "Reconnection: Define behavior for connection interruption and resumption",
+      "is_inferred": true,
+      "confidence": 0.4,
+      "source_section": "12.5",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-Appendix A- Migratio-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "interruption",
+      "description": "0.4.x: Legacy names marked 'deprecated' in SDKs and schemas; warning notes added.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "Appendix A",
+      "state_name": "LEGACY_NAME_DEPRECATED",
+      "enum_name": "LegacyNameLifecycle",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "legacy_name.deprecated = true & legacy_name.warning_noted = true"
+    },
+    {
+      "statement_id": "D-Appendix A- Migratio-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "interruption",
+      "description": "0.4.x: Legacy names marked 'deprecated' in SDKs and schemas; warning notes added.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "Appendix A",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "LEGACY_NAME_INTRODUCED",
+      "to_state": "LEGACY_NAME_DEPRECATED",
+      "trigger": "version_0_4_x_release",
+      "pre_cond": "legacy_name.documented = true & legacy_name.alias_present = true",
+      "post_cond": "legacy_name.deprecated = true & legacy_name.warning_noted = true",
+      "actions": [
+        "Legacy names marked deprecated in SDKs and schemas",
+        "Warning notes added"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

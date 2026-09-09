@@ -1,0 +1,853 @@
+{
+ "states": [
+  "Initial",
+  "Starting",
+  "Closed",
+  "Stopped",
+  "Closing",
+  "Stopping",
+  "ReqSent",
+  "AckRcvd",
+  "AckSent",
+  "Opened",
+  "Dead",
+  "Establish",
+  "Authenticate",
+  "Network",
+  "Terminate"
+ ],
+ "initial_state": "Initial",
+ "final_states": [
+  "Dead"
+ ],
+ "transitions": [
+  {
+   "from": "Dead",
+   "event": "Up",
+   "action": "begin link establishment",
+   "to": "Establish"
+  },
+  {
+   "from": "Establish",
+   "event": "cond LCP opened",
+   "action": "begin authentication",
+   "to": "Authenticate"
+  },
+  {
+   "from": "Establish",
+   "event": "cond establish fail",
+   "action": "",
+   "to": "Dead"
+  },
+  {
+   "from": "Establish",
+   "event": "receive non LCP packet",
+   "action": "silently discard non-LCP packet",
+   "to": "Establish"
+  },
+  {
+   "from": "Authenticate",
+   "event": "cond auth success",
+   "action": "begin network layer protocol negotiation",
+   "to": "Network"
+  },
+  {
+   "from": "Authenticate",
+   "event": "cond auth fail",
+   "action": "begin link termination",
+   "to": "Terminate"
+  },
+  {
+   "from": "Authenticate",
+   "event": "cond auth exceeded",
+   "action": "proceed to link termination",
+   "to": "Terminate"
+  },
+  {
+   "from": "Authenticate",
+   "event": "receive LCP ConfigReq",
+   "action": "return to link establishment",
+   "to": "Establish"
+  },
+  {
+   "from": "Authenticate",
+   "event": "receive non auth packet",
+   "action": "silently discard received packet",
+   "to": "Authenticate"
+  },
+  {
+   "from": "Network",
+   "event": "cond closing",
+   "action": "begin link termination",
+   "to": "Terminate"
+  },
+  {
+   "from": "Network",
+   "event": "receive LCP ConfigReq",
+   "action": "return to link establishment",
+   "to": "Establish"
+  },
+  {
+   "from": "Terminate",
+   "event": "Down",
+   "action": "",
+   "to": "Dead"
+  },
+  {
+   "from": "Terminate",
+   "event": "timeout restart counter",
+   "action": "signal physical layer disconnect",
+   "to": "Dead"
+  },
+  {
+   "from": "Terminate",
+   "event": "receive non LCP packet",
+   "action": "silently discard packet",
+   "to": "Terminate"
+  },
+  {
+   "from": "Terminate",
+   "event": "receive TerminateReq",
+   "action": "wait for peer to disconnect",
+   "to": "Dead"
+  },
+  {
+   "from": "Terminate",
+   "event": "cond termination complete",
+   "action": "transition to link dead",
+   "to": "Dead"
+  },
+  {
+   "from": "Initial",
+   "event": "receive lower layer up (Up)",
+   "action": "send This-Layer-Up (tlu)",
+   "to": "Closed"
+  },
+  {
+   "from": "Initial",
+   "event": "receive administrative Open (Open)",
+   "action": "send This-Layer-Started (tls)",
+   "to": "Starting"
+  },
+  {
+   "from": "Initial",
+   "event": "Close",
+   "action": "",
+   "to": "Initial"
+  },
+  {
+   "from": "Starting",
+   "event": "receive lower layer up (Up)",
+   "action": "send Initialize-Restart-Count (irc), send Configure-Request (scr)",
+   "to": "ReqSent"
+  },
+  {
+   "from": "Starting",
+   "event": "Open",
+   "action": "",
+   "to": "Starting"
+  },
+  {
+   "from": "Starting",
+   "event": "Close",
+   "action": "signal this layer finished",
+   "to": "Initial"
+  },
+  {
+   "from": "Closed",
+   "event": "receive lower layer down (Down)",
+   "action": "send This-Layer-Finished (tlf)",
+   "to": "Initial"
+  },
+  {
+   "from": "Closed",
+   "event": "receive administrative Open (Open)",
+   "action": "send Initialize-Restart-Count (irc), send Configure-Request (scr)",
+   "to": "ReqSent"
+  },
+  {
+   "from": "Closed",
+   "event": "receive administrative Close (Close)",
+   "action": "",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RCR plus",
+   "action": "send Terminate-Ack",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RCR minus",
+   "action": "send Terminate-Ack",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RCA",
+   "action": "send Terminate-Ack",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RCN",
+   "action": "send Terminate-Ack",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RTR",
+   "action": "send Terminate-Ack",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RTA",
+   "action": "",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RUC",
+   "action": "send Code-Reject",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RXJ plus",
+   "action": "",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RXJ minus",
+   "action": "signal this layer finished",
+   "to": "Closed"
+  },
+  {
+   "from": "Closed",
+   "event": "receive RXR",
+   "action": "",
+   "to": "Closed"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive lower layer up (Up)",
+   "action": "send This-Layer-Started (tls)",
+   "to": "Starting"
+  },
+  {
+   "from": "Stopped",
+   "event": "Open",
+   "action": "",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive administrative Close (Close)",
+   "action": "send This-Layer-Finished (tlf)",
+   "to": "Closed"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RCR plus",
+   "action": "initialize restart count; send Configure-Request; send Configure-Ack",
+   "to": "AckSent"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RCR minus",
+   "action": "initialize restart count; send Configure-Request; send Configure-Nak",
+   "to": "ReqSent"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RCA",
+   "action": "send Terminate-Ack",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RCN",
+   "action": "send Terminate-Ack",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RTR",
+   "action": "send Terminate-Ack",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RTA",
+   "action": "",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RUC",
+   "action": "send Code-Reject",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RXJ plus",
+   "action": "",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RXJ minus",
+   "action": "signal this layer finished",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopped",
+   "event": "receive RXR",
+   "action": "",
+   "to": "Stopped"
+  },
+  {
+   "from": "Closing",
+   "event": "Down",
+   "action": "",
+   "to": "Initial"
+  },
+  {
+   "from": "Closing",
+   "event": "Open",
+   "action": "",
+   "to": "Stopping"
+  },
+  {
+   "from": "Closing",
+   "event": "Close",
+   "action": "",
+   "to": "Closing"
+  },
+  {
+   "from": "Closing",
+   "event": "timeout TO plus",
+   "action": "send Terminate-Request",
+   "to": "Closing"
+  },
+  {
+   "from": "Closing",
+   "event": "timeout counter expired (TO-)",
+   "action": "send This-Layer-Finished (tlf)",
+   "to": "Closed"
+  },
+  {
+   "from": "Closing",
+   "event": "receive RCR plus",
+   "action": "",
+   "to": "Closing"
+  },
+  {
+   "from": "Closing",
+   "event": "receive RCR minus",
+   "action": "",
+   "to": "Closing"
+  },
+  {
+   "from": "Closing",
+   "event": "receive RCA",
+   "action": "",
+   "to": "Closing"
+  },
+  {
+   "from": "Closing",
+   "event": "receive RCN",
+   "action": "",
+   "to": "Closing"
+  },
+  {
+   "from": "Closing",
+   "event": "receive RTR",
+   "action": "send Terminate-Ack",
+   "to": "Closing"
+  },
+  {
+   "from": "Closing",
+   "event": "receive RTA",
+   "action": "signal this layer finished",
+   "to": "Closed"
+  },
+  {
+   "from": "Closing",
+   "event": "receive Terminate-Ack (RTA)",
+   "action": "send This-Layer-Finished (tlf)",
+   "to": "Closing"
+  },
+  {
+   "from": "Closing",
+   "event": "receive RXJ plus",
+   "action": "",
+   "to": "Closing"
+  },
+  {
+   "from": "Closing",
+   "event": "receive RXJ minus",
+   "action": "signal this layer finished",
+   "to": "Closed"
+  },
+  {
+   "from": "Closing",
+   "event": "receive RXR",
+   "action": "",
+   "to": "Closing"
+  },
+  {
+   "from": "Stopping",
+   "event": "Down",
+   "action": "",
+   "to": "Starting"
+  },
+  {
+   "from": "Stopping",
+   "event": "Open",
+   "action": "",
+   "to": "Stopping"
+  },
+  {
+   "from": "Stopping",
+   "event": "Close",
+   "action": "",
+   "to": "Closing"
+  },
+  {
+   "from": "Stopping",
+   "event": "timeout TO plus",
+   "action": "send Terminate-Request",
+   "to": "Stopping"
+  },
+  {
+   "from": "Stopping",
+   "event": "timeout TO minus",
+   "action": "signal this layer finished",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopping",
+   "event": "receive RCR plus",
+   "action": "",
+   "to": "Stopping"
+  },
+  {
+   "from": "Stopping",
+   "event": "timeout counter > 0 (TO+)",
+   "action": "send Terminate-Request (str)",
+   "to": "Stopping"
+  },
+  {
+   "from": "Stopping",
+   "event": "timeout counter expired (TO-)",
+   "action": "send This-Layer-Finished (tlf)",
+   "to": "Stopping"
+  },
+  {
+   "from": "Stopping",
+   "event": "receive RCN",
+   "action": "",
+   "to": "Stopping"
+  },
+  {
+   "from": "Stopping",
+   "event": "receive RTR",
+   "action": "send Terminate-Ack",
+   "to": "Stopping"
+  },
+  {
+   "from": "Stopping",
+   "event": "receive RTA",
+   "action": "signal this layer finished",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopping",
+   "event": "receive RUC",
+   "action": "send Code-Reject",
+   "to": "Stopping"
+  },
+  {
+   "from": "Stopping",
+   "event": "receive Terminate-Ack (RTA)",
+   "action": "send This-Layer-Finished (tlf)",
+   "to": "Stopping"
+  },
+  {
+   "from": "Stopping",
+   "event": "receive RXJ minus",
+   "action": "signal this layer finished",
+   "to": "Stopped"
+  },
+  {
+   "from": "Stopping",
+   "event": "receive RXR",
+   "action": "",
+   "to": "Stopping"
+  },
+  {
+   "from": "ReqSent",
+   "event": "Down",
+   "action": "",
+   "to": "Starting"
+  },
+  {
+   "from": "ReqSent",
+   "event": "Open",
+   "action": "",
+   "to": "ReqSent"
+  },
+  {
+   "from": "ReqSent",
+   "event": "Close",
+   "action": "initialize restart count; send Terminate-Request",
+   "to": "Closing"
+  },
+  {
+   "from": "ReqSent",
+   "event": "timeout TO plus",
+   "action": "send Configure-Request",
+   "to": "ReqSent"
+  },
+  {
+   "from": "ReqSent",
+   "event": "receive administrative Close (Close)",
+   "action": "send Terminate-Request (str), send Initialize-Restart-Count (irc)",
+   "to": "Stopped"
+  },
+  {
+   "from": "ReqSent",
+   "event": "timeout counter > 0 (TO+)",
+   "action": "send Configure-Request (scr)",
+   "to": "AckSent"
+  },
+  {
+   "from": "ReqSent",
+   "event": "timeout counter expired (TO-)",
+   "action": "send This-Layer-Finished (tlf)",
+   "to": "ReqSent"
+  },
+  {
+   "from": "ReqSent",
+   "event": "receive Configure-Request (RCR+)",
+   "action": "send Configure-Ack (sca)",
+   "to": "AckRcvd"
+  },
+  {
+   "from": "ReqSent",
+   "event": "receive RCN",
+   "action": "initialize restart count; send Configure-Request",
+   "to": "ReqSent"
+  },
+  {
+   "from": "ReqSent",
+   "event": "receive Configure-Ack (RCA)",
+   "action": "send Initialize-Restart-Count (irc)",
+   "to": "ReqSent"
+  },
+  {
+   "from": "ReqSent",
+   "event": "receive RTA",
+   "action": "",
+   "to": "ReqSent"
+  },
+  {
+   "from": "ReqSent",
+   "event": "receive RUC",
+   "action": "send Code-Reject",
+   "to": "ReqSent"
+  },
+  {
+   "from": "ReqSent",
+   "event": "receive RXJ plus",
+   "action": "",
+   "to": "ReqSent"
+  },
+  {
+   "from": "ReqSent",
+   "event": "receive RXJ minus",
+   "action": "signal this layer finished",
+   "to": "Stopped"
+  },
+  {
+   "from": "ReqSent",
+   "event": "receive RXR",
+   "action": "",
+   "to": "ReqSent"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "Down",
+   "action": "",
+   "to": "Starting"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "Open",
+   "action": "",
+   "to": "AckRcvd"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "Close",
+   "action": "initialize restart count; send Terminate-Request",
+   "to": "Closing"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "timeout TO plus",
+   "action": "send Configure-Request",
+   "to": "ReqSent"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "timeout TO minus",
+   "action": "signal this layer finished",
+   "to": "Stopped"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive administrative Close (Close)",
+   "action": "send Terminate-Request (str), send Initialize-Restart-Count (irc)",
+   "to": "Opened"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive RCR minus",
+   "action": "send Configure-Nak",
+   "to": "AckRcvd"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive RCA",
+   "action": "send Configure-Request",
+   "to": "ReqSent"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive Configure-Request (RCR+)",
+   "action": "send Configure-Ack (sca), send This-Layer-Up (tlu)",
+   "to": "ReqSent"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive RTR",
+   "action": "send Terminate-Ack",
+   "to": "ReqSent"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive RTA",
+   "action": "",
+   "to": "ReqSent"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive Configure-Nak/Rej (RCN)",
+   "action": "send Configure-Request (scr)",
+   "to": "AckRcvd"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive RXJ plus",
+   "action": "",
+   "to": "ReqSent"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive RXJ minus",
+   "action": "signal this layer finished",
+   "to": "Stopped"
+  },
+  {
+   "from": "AckRcvd",
+   "event": "receive RXR",
+   "action": "",
+   "to": "AckRcvd"
+  },
+  {
+   "from": "AckSent",
+   "event": "Down",
+   "action": "",
+   "to": "Starting"
+  },
+  {
+   "from": "AckSent",
+   "event": "Open",
+   "action": "",
+   "to": "AckSent"
+  },
+  {
+   "from": "AckSent",
+   "event": "Close",
+   "action": "initialize restart count; send Terminate-Request",
+   "to": "Closing"
+  },
+  {
+   "from": "AckSent",
+   "event": "timeout TO plus",
+   "action": "send Configure-Request",
+   "to": "AckSent"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive administrative Close (Close)",
+   "action": "send Terminate-Request (str), send Initialize-Restart-Count (irc)",
+   "to": "Stopped"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive RCR plus",
+   "action": "send Configure-Ack",
+   "to": "AckSent"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive RCR minus",
+   "action": "send Configure-Nak",
+   "to": "ReqSent"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive RCA",
+   "action": "initialize restart count; signal this layer up",
+   "to": "Opened"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive Configure-Request (RCR-)",
+   "action": "send Configure-Request (scr)",
+   "to": "AckSent"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive Configure-Ack (RCA)",
+   "action": "send This-Layer-Up (tlu)",
+   "to": "ReqSent"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive RTA",
+   "action": "",
+   "to": "AckSent"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive RUC",
+   "action": "send Code-Reject",
+   "to": "AckSent"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive RXJ plus",
+   "action": "",
+   "to": "AckSent"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive RXJ minus",
+   "action": "signal this layer finished",
+   "to": "Stopped"
+  },
+  {
+   "from": "AckSent",
+   "event": "receive RXR",
+   "action": "",
+   "to": "AckSent"
+  },
+  {
+   "from": "Opened",
+   "event": "Down",
+   "action": "signal this layer down",
+   "to": "Starting"
+  },
+  {
+   "from": "Opened",
+   "event": "Open",
+   "action": "",
+   "to": "Opened"
+  },
+  {
+   "from": "Opened",
+   "event": "Close",
+   "action": "signal this layer down; initialize restart count; send Terminate-Request",
+   "to": "Closing"
+  },
+  {
+   "from": "Opened",
+   "event": "receive administrative Close (Close)",
+   "action": "send Terminate-Request (str), send Initialize-Restart-Count (irc)",
+   "to": "AckSent"
+  },
+  {
+   "from": "Opened",
+   "event": "receive RCR minus",
+   "action": "signal this layer down; send Configure-Request; send Configure-Nak",
+   "to": "ReqSent"
+  },
+  {
+   "from": "Opened",
+   "event": "receive RCA",
+   "action": "signal this layer down; send Configure-Request",
+   "to": "ReqSent"
+  },
+  {
+   "from": "Opened",
+   "event": "receive RCN",
+   "action": "signal this layer down; send Configure-Request",
+   "to": "ReqSent"
+  },
+  {
+   "from": "Opened",
+   "event": "receive RTR",
+   "action": "signal this layer down; zero restart count; send Terminate-Ack",
+   "to": "Stopping"
+  },
+  {
+   "from": "Opened",
+   "event": "receive Terminate-Request (RTR)",
+   "action": "send Terminate-Request (str)",
+   "to": "ReqSent"
+  },
+  {
+   "from": "Opened",
+   "event": "receive RUC",
+   "action": "send Code-Reject",
+   "to": "Opened"
+  },
+  {
+   "from": "Opened",
+   "event": "receive RXJ plus",
+   "action": "",
+   "to": "Opened"
+  },
+  {
+   "from": "Opened",
+   "event": "receive RXJ minus",
+   "action": "signal this layer down; initialize restart count; send Terminate-Request",
+   "to": "Stopping"
+  },
+  {
+   "from": "Opened",
+   "event": "receive Protocol Reject",
+   "action": "stop sending indicated protocol",
+   "to": "Opened"
+  },
+  {
+   "from": "Opened",
+   "event": "receive Echo Request",
+   "action": "send Echo-Reply",
+   "to": "Opened"
+  },
+  {
+   "from": "Opened",
+   "event": "send Discard Request",
+   "action": "send Discard-Request packet",
+   "to": "Opened"
+  }
+ ]
+}

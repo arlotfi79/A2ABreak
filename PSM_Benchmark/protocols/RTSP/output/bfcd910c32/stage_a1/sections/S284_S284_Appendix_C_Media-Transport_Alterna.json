@@ -1,0 +1,245 @@
+{
+  "section_id": "S284",
+  "title": "S284 Appendix C. Media-Transport Alternatives",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S284 Appendix C. Media-Transport Alternatives"
+  ],
+  "url_anchor": "#s284-appendix-c-media-transport-alternatives",
+  "word_count": 6469,
+  "statement_count": 10,
+  "elapsed_seconds": 110.27,
+  "statements": [
+    {
+      "statement_id": "D-S284-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "After sending (receiving) a 2xx reply for a SETUP method for a non-interleaved RTP/AVP/TCP media stream, the active party SHOULD initiate the TCP connection as soon as possible.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S284",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "2xx reply for SETUP (non-interleaved RTP/AVP/TCP) sent or received",
+      "pre_cond": "session.transport = RTP/AVP/TCP & session.interleaved = false",
+      "post_cond": null,
+      "actions": [
+        "initiate TCP connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S284-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client MUST NOT send a PLAY request prior to the establishment of all the TCP connections negotiated using SETUP for the session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S284",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send PLAY request",
+      "pre_cond": "session.all_tcp_connections_established = true",
+      "post_cond": null,
+      "actions": [
+        "send PLAY request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S284-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In case the server receives a PLAY request in a session that has not yet established all the TCP connections, it MUST respond using the 464 (Data Transport Not Ready Yet) error code.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S284",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY request received",
+      "pre_cond": "session.all_tcp_connections_established = false",
+      "post_cond": null,
+      "actions": [
+        "respond 464 Data Transport Not Ready Yet"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S284-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A successful PAUSE request for media being transported over RTP/AVP/TCP pauses the flow of packets over the connections, without closing the connections.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S284",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "successful PAUSE request",
+      "pre_cond": "session.transport = RTP/AVP/TCP",
+      "post_cond": "session.packet_flow = paused & session.tcp_connections = open",
+      "actions": [
+        "pause packet flow over TCP connections",
+        "keep TCP connections open"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S284-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A successful TEARDOWN request signals that the TCP connections for RTP and RTCP are to be closed by the RTSP client as soon as possible.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S284",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "successful TEARDOWN request",
+      "pre_cond": "session.transport = RTP/AVP/TCP",
+      "post_cond": "session.tcp_connections = closed",
+      "actions": [
+        "close TCP connections for RTP and RTCP"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S284-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If all transport specs require SRTP but no MIKEY parameter or other supported keying method is included, the server SHALL respond with 403 (Forbidden).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S284",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP request received",
+      "pre_cond": "setup.all_transports_require_srtp = true & setup.supported_keying_method_present = false",
+      "post_cond": null,
+      "actions": [
+        "respond 403 Forbidden"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S284-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A transport spec using SRTP and MIKEY is selected but an error is encountered in the MIKEY processing. In this case, an RTSP error response code of 466 (Key Management Error) SHALL be used.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S284",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "MIKEY processing error on SETUP request",
+      "pre_cond": "setup.transport_spec_uses_srtp = true & setup.transport_spec_uses_mikey = true & mikey.processing_error = true",
+      "post_cond": null,
+      "actions": [
+        "respond 466 Key Management Error"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S284-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client receives the SETUP response and, if the response code indicates a successful request, it decodes the MIKEY message and establishes the SRTP cryptographic context from the parameters in the MIKEY response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S284",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "2xx SETUP response with MIKEY parameter received",
+      "pre_cond": "setup.response_code = 2xx & setup.mikey_parameter_present = true",
+      "post_cond": "session.srtp_context_established = true",
+      "actions": [
+        "decode MIKEY message",
+        "establish SRTP cryptographic context"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S284-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "RTCP traffic from the RTSP client to the RTSP server MUST function as keep-alive. This requires an RTSP server supporting RTP to use the received RTCP packets as indications that the client desires the related RTSP session to be kept alive.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S284",
+      "object_name": "RTSP session",
+      "field_name": "RTCP keep-alive",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S284-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client forms the MIKEY Initiator message using RSA-R mode in unicast mode. The MIKEY message is base64-encoded and becomes the value of the MIKEY parameter included in the transport specification(s) specifying an SRTP-based profile (SAVP, SAVPF) in the SETUP request.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S284",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP request for SRTP-based profile (SAVP or SAVPF)",
+      "pre_cond": "session.profile = SAVP | session.profile = SAVPF",
+      "post_cond": null,
+      "actions": [
+        "form MIKEY Initiator message (RSA-R unicast mode)",
+        "base64-encode MIKEY message",
+        "include MIKEY parameter in SETUP request transport specification"
+      ],
+      "modality": "shall"
+    }
+  ]
+}

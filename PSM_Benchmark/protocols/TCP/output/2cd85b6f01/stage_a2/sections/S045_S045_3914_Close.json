@@ -1,0 +1,113 @@
+{
+  "section_id": "S045",
+  "title": "S045 3.9.1.4 Close",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S045 3.9.1.4 Close"
+  ],
+  "url_anchor": "#s045-3914-close",
+  "word_count": 258,
+  "statement_count": 4,
+  "elapsed_seconds": 86.13,
+  "statements": [
+    {
+      "statement_id": "1-S045-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "tcp_fsm",
+      "description": "Thus, it should be acceptable to make several SEND calls, followed by a CLOSE, and expect all the data to be sent to the destination.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S045",
+      "actors": [
+        "user",
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S045-001"
+    },
+    {
+      "statement_id": "2-S045-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "tcp_fsm",
+      "description": "It should also be clear that users should continue to RECEIVE on CLOSING connections since the remote peer may be trying to transmit the last of its data.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S045",
+      "actors": [
+        "user",
+        "peer"
+      ],
+      "from_state": "CLOSING",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "connection.state = CLOSING",
+      "post_cond": null,
+      "actions": [
+        "Continue issuing RECEIVE calls on connection in CLOSING state"
+      ],
+      "modality": "should",
+      "id": "N-S045-002"
+    },
+    {
+      "statement_id": "3-S045-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "It may happen (if the user-level protocol is not well thought out) that the closing side is unable to get rid of all its data before timing out.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S045",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CLOSING",
+      "to_state": "ABORT",
+      "trigger": "transmission_timeout",
+      "pre_cond": "connection.state = CLOSING & endpoint.pending_data_flushed = false & timer.retransmission_timeout = true",
+      "post_cond": "connection.close_converted_to_abort = true",
+      "actions": [
+        "Convert CLOSE to ABORT",
+        "TCP peer gives up on connection"
+      ],
+      "modality": "may",
+      "id": "N-S045-003"
+    },
+    {
+      "statement_id": "4-S045-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "tcp_fsm",
+      "description": "The user may CLOSE the connection at any time on their own initiative, or in response to various prompts from the TCP implementation (e.g., remote close executed, transmission timeout exceeded, destination inaccessible).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S045",
+      "actors": [
+        "user",
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CLOSE command | remote_close_executed | transmission_timeout_exceeded | destination_inaccessible",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Issue CLOSE command on connection"
+      ],
+      "modality": "may",
+      "id": "N-S045-004"
+    }
+  ]
+}

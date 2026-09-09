@@ -1,0 +1,169 @@
+{
+  "section_id": "S060",
+  "title": "S060 13.3.1 Changing Transport Parameters",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S060 13.3.1 Changing Transport Parameters"
+  ],
+  "url_anchor": "#s060-1331-changing-transport-parameters",
+  "word_count": 353,
+  "statement_count": 7,
+  "elapsed_seconds": 56.25,
+  "statements": [
+    {
+      "statement_id": "D-S060-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A client MAY issue a SETUP request for a stream that is already set up or playing in the session to change transport parameters, which a server MAY allow.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S060",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "SETUP (change transport parameters)",
+      "pre_cond": "protocol.state = Ready | protocol.state = Play",
+      "post_cond": "transport_parameters_changed = true",
+      "actions": [
+        "server allows transport parameter change",
+        "server sends SETUP response"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S060-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If it does not allow the changing of parameters, it MUST respond with error 455 (Method Not Valid in This State).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S060",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "SETUP (change transport parameters, rejected)",
+      "pre_cond": "protocol.state = Ready | protocol.state = Play",
+      "post_cond": "protocol.state = protocol.state",
+      "actions": [
+        "send 455 Method Not Valid in This State"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S060-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If a client receives a 455 error when trying to change transport parameters while the server is in Play state, it MAY try to put the server in Ready state using PAUSE before issuing the SETUP request again.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S060",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Ready",
+      "trigger": "PAUSE (after receiving 455)",
+      "pre_cond": "protocol.state = Play & received_455 = true",
+      "post_cond": "protocol.state = Ready",
+      "actions": [
+        "client sends PAUSE",
+        "server transitions to Ready state"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S060-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If that also fails, the changing of transport parameters will require that the client perform a TEARDOWN of the affected media and then set it up again.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S060",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "TEARDOWN (affected media)",
+      "pre_cond": "received_455 = true & pause_setup_failed = true",
+      "post_cond": "protocol.state = Init",
+      "actions": [
+        "client sends TEARDOWN for affected media",
+        "media session terminated"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S060-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In a SETUP response for a request to change the transport parameters while in Play state, the server MUST include the Range header to indicate at what point the new transport parameters will be used.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S060",
+      "object_name": "SETUP response",
+      "field_name": "Range",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "protocol.state = Play"
+    },
+    {
+      "statement_id": "D-S060-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If RTP is used for delivery, the server MUST also include the RTP-Info header to indicate at what timestamp and RTP sequence number the change will take place.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S060",
+      "object_name": "SETUP response",
+      "field_name": "RTP-Info",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "protocol.state = Play & rtp_used = true"
+    },
+    {
+      "statement_id": "D-S060-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the transport-parameters change that happened while in Play state results in a change of synchronization-related information, for example, changing RTP SSRC, the server MUST include the necessary synchronization information in the SETUP response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S060",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "SETUP (transport change causing sync info change)",
+      "pre_cond": "protocol.state = Play & sync_info_changed = true",
+      "post_cond": "sync_info_included_in_response = true",
+      "actions": [
+        "include synchronization information in SETUP response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

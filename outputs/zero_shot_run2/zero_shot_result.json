@@ -1,0 +1,298 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "C-001",
+      "title": "Agent Card Forgery via Non-Mandatory Signing in Registry-Mediated Discovery",
+      "attack_scenario": "Attacker compromises or operates a curated agent registry/catalog (a discovery method explicitly supported by the spec). The attacker serves a forged Agent Card that points to the attacker's A2A endpoint but claims to be a legitimate agent. Because Agent Card digital signing is MAY (optional) and client signature verification is only SHOULD (not MUST), a fully compliant legitimate server may produce unsigned cards and a fully compliant client has no signature to verify. The client trusts the forged card, authenticates to the attacker's endpoint using its real credentials, and delegates a task containing sensitive data. The attacker gains the client's authentication tokens, task payloads, and any sensitive data contained in Messages and Parts.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "discovery",
+          "state": "REGISTRY_QUERIED",
+          "transition": "registry_returns_agent_card",
+          "actor": "client",
+          "note": "Client queries a registry/catalog (a spec-supported discovery method) and receives a forged unsigned Agent Card pointing to attacker's URL."
+        },
+        {
+          "step": 2,
+          "stage": "discovery",
+          "state": "AGENT_CARD_RECEIVED",
+          "transition": "signature_absent_no_verification_possible",
+          "actor": "client",
+          "note": "Card has no signature field. Client follows SHOULD verify when present, but nothing is present. Card is accepted per spec."
+        },
+        {
+          "step": 3,
+          "stage": "authentication",
+          "state": "CREDENTIALS_TRANSMITTED",
+          "transition": "client_authenticates_to_forged_endpoint",
+          "actor": "client",
+          "note": "Client obtains credentials out-of-band and sends them in HTTP Authorization header to attacker's endpoint as directed by forged Agent Card."
+        },
+        {
+          "step": 4,
+          "stage": "initiation",
+          "state": "TASK_SUBMITTED",
+          "transition": "task_sent_to_attacker",
+          "actor": "client",
+          "note": "Client sends tasks/send with sensitive task payload and credentials to attacker-controlled server, which impersonates the legitimate agent."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "discovery",
+          "state_name": "AGENT_CARD_RECEIVED",
+          "actor": "client",
+          "relevance": "The client accepts the Agent Card from a registry without any mandatory cryptographic verification of the card's origin or integrity, because signing is MAY and verification is SHOULD."
+        },
+        {
+          "stage": "authentication",
+          "state_name": "CREDENTIALS_TRANSMITTED",
+          "actor": "client",
+          "relevance": "The client transmits valid credentials to the endpoint specified in the forged card. The protocol has no mechanism to bind the card's declared identity to the actual endpoint's identity beyond TLS, which only verifies the attacker's domain, not that the card content is authentic."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "discovery",
+          "from_state": "REGISTRY_QUERIED",
+          "to_stage": "discovery",
+          "to_state": "AGENT_CARD_RECEIVED",
+          "trigger": "registry_returns_card_json",
+          "relevance": "The protocol supports registry/catalog discovery but defines no mandatory integrity verification for cards obtained through these intermediaries. TLS protects the registry connection, not the card content."
+        },
+        {
+          "from_stage": "discovery",
+          "from_state": "AGENT_CARD_RECEIVED",
+          "to_stage": "authentication",
+          "to_state": "CREDENTIALS_TRANSMITTED",
+          "trigger": "client_follows_card_securitySchemes",
+          "relevance": "Client proceeds to authenticate against the endpoint URL declared in the forged card. No protocol-level check binds the card's claimed provider identity to the endpoint."
+        }
+      ],
+      "missing_primitive": "Mandatory Agent Card signing (MUST instead of MAY), mandatory client signature verification (MUST instead of SHOULD), and a trust anchor mechanism (e.g., PKI or certificate transparency log) that binds Agent Card identities to verified keys, especially for cards discovered through intermediaries.",
+      "why_compliance_does_not_prevent": "The spec states 'Agent Cards MAY be digitally signed' (Section 4.4.7/8.5) and 'Clients SHOULD verify signatures when present.' A fully compliant server that chooses not to sign (MAY permits this) produces cards with no signature. A fully compliant client that encounters an unsigned card has nothing to verify. There is no MUST-level requirement that would force either party to ensure card authenticity when the card is delivered through a registry or catalog rather than directly from the agent's own domain.",
+      "spec_sections_searched": [
+        "4.4.7",
+        "8.5",
+        "8.6",
+        "3.1.11",
+        "13.1"
+      ],
+      "preliminary_confidence": "HIGH"
+    },
+    {
+      "candidate_id": "C-002",
+      "title": "Delegation Chain Privilege Escalation via Absent Monotonic Attenuation",
+      "attack_scenario": "In a multi-agent workflow, Client A delegates a task to Agent B with specific OAuth-scoped credentials. Agent B, acting as a client to Agent C, re-delegates the task or a sub-task. The A2A protocol defines no delegation token or capability-bounding mechanism that would constrain Agent B's re-delegation scope to be at most equal to (or a subset of) what Client A originally granted. A malicious or compromised Agent B can re-delegate with broader scope, additional skills, or to agents that Client A never authorized. Agent B gains the ability to escalate the effective privilege of the delegation chain beyond what the original user or client intended, potentially triggering actions on Agent C that should never have been authorized.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "initiation",
+          "state": "TASK_SUBMITTED",
+          "transition": "client_A_delegates_to_agent_B",
+          "actor": "client",
+          "note": "Client A sends a task to Agent B with an OAuth token scoped to specific skills. A2A protocol carries the token in the HTTP header but defines no delegation-scope metadata in the task payload."
+        },
+        {
+          "step": 2,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "agent_B_becomes_client_to_agent_C",
+          "actor": "server",
+          "note": "Agent B processes the task and decides to delegate a sub-task to Agent C. B acts as an A2A client to C. The protocol has no mechanism for B to carry forward A's original scope constraints."
+        },
+        {
+          "step": 3,
+          "stage": "initiation",
+          "state": "TASK_SUBMITTED_TO_C",
+          "transition": "re_delegation_with_broader_scope",
+          "actor": "client",
+          "note": "Agent B authenticates to Agent C using its own credentials (obtained out-of-band per spec). The scope may be broader than what Client A authorized. No protocol primitive prevents this."
+        },
+        {
+          "step": 4,
+          "stage": "task_execution",
+          "state": "TASK_STATE_COMPLETED",
+          "transition": "unauthorized_action_executed",
+          "actor": "server",
+          "note": "Agent C executes actions that Client A never intended to authorize. Results flow back through B to A without any indication of scope violation."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "task_execution",
+          "state_name": "TASK_STATE_WORKING",
+          "actor": "server",
+          "relevance": "While Agent B is in WORKING state, it can initiate new A2A connections as a client. The protocol defines no constraint on what Agent B can delegate onward."
+        },
+        {
+          "stage": "task_execution",
+          "state_name": "TASK_STATE_AUTH_REQUIRED",
+          "actor": "server",
+          "relevance": "The spec supports chaining TASK_STATE_AUTH_REQUIRED states across delegation hops, but this is for acquiring additional credentials, not for constraining delegation scope."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "task_execution",
+          "from_state": "TASK_STATE_WORKING",
+          "to_stage": "initiation",
+          "to_state": "TASK_SUBMITTED_TO_DOWNSTREAM",
+          "trigger": "agent_decides_to_delegate",
+          "relevance": "The transition from executing a task to delegating a sub-task crosses a trust boundary. The protocol defines no capability token or scope-bounding artifact to carry with the re-delegation."
+        }
+      ],
+      "missing_primitive": "A delegation capability token (e.g., based on macaroons or OAuth token exchange with scope attenuation) that is cryptographically bound to the original authorization scope and enforces monotonic privilege reduction across delegation hops. The protocol needs a mandatory mechanism where each re-delegation can only narrow, never broaden, the set of permitted actions.",
+      "why_compliance_does_not_prevent": "The spec states 'Authorization logic is implementation-specific' and supports delegation chains via TASK_STATE_AUTH_REQUIRED chaining, but defines no mechanism for propagating or constraining authorization scope across hops. Agent B authenticates to Agent C using its own credentials obtained out-of-band. The original client's scope constraints are not represented in any protocol-level artifact. Even fully compliant implementations of A, B, and C cannot enforce that B's re-delegation stays within A's intended scope because the protocol provides no primitive for expressing or verifying this constraint.",
+      "spec_sections_searched": [
+        "13.1",
+        "4.2",
+        "3.1",
+        "8.3"
+      ],
+      "preliminary_confidence": "HIGH"
+    },
+    {
+      "candidate_id": "C-003",
+      "title": "Indirect Prompt Injection via Agent Card Metadata Fields",
+      "attack_scenario": "A malicious A2A server (fully protocol-compliant) embeds adversarial LLM instructions within its Agent Card's natural-language fields (description, skills.description, skills.examples, skills.tags). When a client agent's LLM-based reasoning engine processes the fetched Agent Card to plan task delegation, the injected instructions in the metadata fields are interpreted as directives. This causes the client to: (a) route sensitive user data to the attacker's agent instead of the intended agent, (b) skip security checks that the LLM would otherwise perform, or (c) invoke the attacker's agent with elevated data access. The attacker gains exfiltrated PII, confidential task data, or control over the client's delegation decisions. The A2A specification explicitly lacks cross-agent prompt injection controls.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "discovery",
+          "state": "AGENT_CARD_PUBLISHED",
+          "transition": "malicious_card_served",
+          "actor": "server",
+          "note": "Malicious but fully A2A-compliant server publishes an Agent Card with adversarial instructions embedded in the 'description' and 'skills[].description' fields. These are valid free-text strings per the spec."
+        },
+        {
+          "step": 2,
+          "stage": "discovery",
+          "state": "AGENT_CARD_RECEIVED",
+          "transition": "card_parsed_into_llm_context",
+          "actor": "client",
+          "note": "Client fetches the Agent Card and feeds the description and skills metadata into its LLM reasoning context for task planning. The protocol defines no boundary between metadata and instruction."
+        },
+        {
+          "step": 3,
+          "stage": "initiation",
+          "state": "TASK_ROUTING_DECISION",
+          "transition": "llm_influenced_by_injected_instructions",
+          "actor": "client",
+          "note": "The LLM interprets the injected metadata as task-routing instructions, causing the client to delegate a task (including sensitive data) to the attacker's agent instead of a legitimate one."
+        },
+        {
+          "step": 4,
+          "stage": "task_execution",
+          "state": "TASK_STATE_COMPLETED",
+          "transition": "sensitive_data_exfiltrated",
+          "actor": "server",
+          "note": "Attacker's agent receives the task with sensitive user data, completes it nominally, and exfiltrates the data. The client sees a normal completed task."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "discovery",
+          "state_name": "AGENT_CARD_RECEIVED",
+          "actor": "client",
+          "relevance": "Agent Card natural-language fields are consumed by LLM reasoning engines. The protocol defines no content-type boundary, sanitization requirement, or structural isolation between card metadata and executable LLM instructions."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "discovery",
+          "from_state": "AGENT_CARD_RECEIVED",
+          "to_stage": "initiation",
+          "to_state": "TASK_ROUTING_DECISION",
+          "trigger": "llm_processes_card_metadata",
+          "relevance": "The transition from card parsing to task routing is the injection point. The protocol treats description fields as opaque text with no security boundary, enabling metadata-to-instruction confusion."
+        }
+      ],
+      "missing_primitive": "A mandatory content boundary mechanism that isolates Agent Card metadata fields from LLM instruction space. This could include: (1) a protocol-level requirement that card description fields MUST NOT be injected directly into LLM prompts without sanitization, (2) structured capability declarations that avoid free-text entirely for security-critical routing decisions, or (3) a signed capability attestation from a trusted registry that clients use for routing instead of self-declared natural language descriptions.",
+      "why_compliance_does_not_prevent": "The spec explicitly acknowledges that 'A2A does not include any specific security control against cross-agent prompt injection.' All Agent Card description fields (name, description, skills.description, skills.examples) are free-text strings with no protocol-defined sanitization or boundary enforcement. A malicious server that embeds adversarial instructions in these fields is fully protocol-compliant. A client that processes these fields through its LLM for task planning is following the intended discovery workflow. The protocol provides no mechanism to distinguish legitimate capability descriptions from injected adversarial instructions.",
+      "spec_sections_searched": [
+        "4.4.1",
+        "4.4.2",
+        "8.5",
+        "13.1",
+        "13.2"
+      ],
+      "preliminary_confidence": "HIGH"
+    },
+    {
+      "candidate_id": "C-004",
+      "title": "Task Message Replay Due to Absent Mandatory Replay Protection",
+      "attack_scenario": "An attacker with network access (e.g., a compromised proxy, CDN, or log system that can observe encrypted traffic after TLS termination at a load balancer) captures a valid tasks/send JSON-RPC request including the Authorization header and task payload. The attacker replays this request to the A2A server. Because send message idempotency is MAY (optional) and messageId-based deduplication is optional ('Agents may utilize the messageId'), a fully compliant server that does not implement replay detection will process the replayed message as a new legitimate request. The attacker gains: duplicate task execution (e.g., duplicate financial transactions, duplicate orders), state corruption of the target task, or resource exhaustion from repeated task submissions.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "legitimate_message_sent",
+          "actor": "client",
+          "note": "Legitimate client sends tasks/send with valid Authorization header, messageId, and task payload. The message is observed at a TLS termination point."
+        },
+        {
+          "step": 2,
+          "stage": "task_execution",
+          "state": "MESSAGE_CAPTURED",
+          "transition": "attacker_captures_request",
+          "actor": "attacker",
+          "note": "Attacker captures the complete HTTP request including authorization credentials and JSON-RPC payload from a point after TLS termination."
+        },
+        {
+          "step": 3,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "replayed_message_accepted",
+          "actor": "server",
+          "note": "Attacker replays the captured request. Server authenticates it (valid token), and since idempotency is MAY and messageId dedup is optional, processes it as a new message."
+        },
+        {
+          "step": 4,
+          "stage": "task_execution",
+          "state": "TASK_STATE_COMPLETED",
+          "transition": "duplicate_execution",
+          "actor": "server",
+          "note": "Server executes the duplicated task action (e.g., financial transaction, data modification) causing concrete harm."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "task_execution",
+          "state_name": "TASK_STATE_WORKING",
+          "actor": "server",
+          "relevance": "The server is actively processing tasks and will accept new valid messages. Without mandatory replay detection, replayed messages are indistinguishable from legitimate ones."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "task_execution",
+          "from_state": "MESSAGE_RECEIVED",
+          "to_stage": "task_execution",
+          "to_state": "TASK_STATE_WORKING",
+          "trigger": "message_authenticated_and_processed",
+          "relevance": "The server authenticates the replayed message using valid credentials and processes it. The protocol defines no mandatory nonce, timestamp window, or sequence number that would allow detection of replayed messages."
+        }
+      ],
+      "missing_primitive": "Mandatory replay protection at the protocol level: (1) A MUST-level requirement for nonce or unique request identifiers that servers MUST track and reject duplicates, (2) a mandatory short-window timestamp validation for requests, and (3) mandatory messageId-based deduplication (upgrading the current 'may utilize' to MUST).",
+      "why_compliance_does_not_prevent": "The spec states 'Send Message operations MAY be idempotent' and 'Agents may utilize the messageId to detect duplicate messages.' Both are explicitly optional. A fully compliant server that authenticates every request (MUST) but does not implement idempotency or messageId dedup (both optional) will accept replayed requests. The protocol defines no mandatory nonce, timestamp-window, or sequence-number mechanism. Even a server following every MUST and SHOULD in the specification has no protocol-defined tool to detect replayed messages.",
+      "spec_sections_searched": [
+        "3.1.1",
+        "3.1.2",
+        "4.3",
+        "13.1"
+      ],
+      "preliminary_confidence": "MEDIUM"
+    }
+  ],
+  "structural_observations": [
+    "The A2A protocol deliberately externalizes authorization ('Authorization logic is implementation-specific') and credential management ('Credentials MUST be obtained out-of-band'). While this avoids reinventing identity management, it creates a structural gap: the protocol defines how to carry credentials but not how to scope, attenuate, or constrain them across multi-agent delegation chains. This is the root cause of C-002.",
+    "The protocol's Agent Card serves a dual role as both a machine-readable capability manifest and an LLM-consumable description. These two purposes have fundamentally different security requirements: machine-readable fields need schema validation while LLM-consumed fields need instruction-boundary enforcement. The spec makes no distinction, creating the structural basis for C-003.",
+    "Many critical security mechanisms use RFC 2119 SHOULD/MAY language rather than MUST: Agent Card signing (MAY), signature verification (SHOULD), webhook URL validation (SHOULD NOT blindly trust), TLS certificate verification (SHOULD), idempotency (MAY), messageId deduplication ('may utilize'). This means a fully spec-compliant deployment can omit all of these protections simultaneously while remaining compliant.",
+    "The protocol supports three interaction patterns (synchronous, SSE streaming, push notifications) with significantly different security profiles, but applies the same underspecified security model to all three. Push notifications have the weakest security posture because they reverse the connection direction, yet the webhook authentication mechanism is entirely optional.",
+    "The spec's well-known URI discovery model (/.well-known/agent-card.json) creates a predictable reconnaissance surface. Any party that knows a domain hosts an A2A agent can enumerate its capabilities, supported authentication schemes, internal skill descriptions, and endpoint URLs without authentication. The spec notes this concern (Agent Cards can contain sensitive information) but provides no mandatory protection for the discovery endpoint.",
+    "The protocol supports the TASK_STATE_AUTH_REQUIRED state for in-task credential acquisition, enabling chains of auth-required states across delegation hops. However, this mechanism is designed for acquiring additional credentials, not for enforcing that delegated authority remains within the original authorization scope. This creates an asymmetry where the protocol supports escalating credential requirements but not constraining them."
+  ]
+}

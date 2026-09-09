@@ -1,0 +1,210 @@
+{
+  "section_id": "S056",
+  "title": "S056 6.3.5 DELETE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S056 6.3.5 DELETE Command"
+  ],
+  "url_anchor": "#s056-635-delete-command",
+  "word_count": 528,
+  "statement_count": 8,
+  "elapsed_seconds": 109.65,
+  "statements": [
+    {
+      "statement_id": "N-S056-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The DELETE command MUST NOT remove inferior hierarchical names.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DELETE_command_received",
+      "pre_cond": null,
+      "post_cond": "mailbox.inferior_hierarchical_names.removed = false",
+      "actions": [
+        "retain all inferior hierarchical names of the deleted mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S056-001"
+    },
+    {
+      "statement_id": "N-S056-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "For example, if a mailbox \"foo\" has an inferior \"foo.bar\" (assuming \".\" is the hierarchy delimiter character), removing \"foo\" MUST NOT remove \"foo.bar\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DELETE_command_received",
+      "pre_cond": "mailbox.has_inferior_hierarchical_names = true",
+      "post_cond": "inferior_mailbox.removed = false",
+      "actions": [
+        "do not remove inferior hierarchical names when deleting a parent mailbox name"
+      ],
+      "modality": "must",
+      "id": "N-S056-002"
+    },
+    {
+      "statement_id": "N-S056-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server implementation does not permit deleting the name while inferior hierarchical names exist, then it SHOULD disallow the DELETE command by returning a tagged NO response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DELETE_command_received",
+      "pre_cond": "mailbox.has_inferior_hierarchical_names = true & server.permits_delete_with_inferiors = false",
+      "post_cond": "response.type = tagged_NO",
+      "actions": [
+        "return tagged NO response to disallow DELETE"
+      ],
+      "modality": "should",
+      "id": "N-S056-003"
+    },
+    {
+      "statement_id": "N-S056-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The NO response SHOULD include the HASCHILDREN response code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DELETE_command_rejected_with_NO",
+      "pre_cond": "response.type = tagged_NO & DELETE_rejected_due_to_inferior_names = true",
+      "post_cond": "response.response_code = HASCHILDREN",
+      "actions": [
+        "include HASCHILDREN response code in the tagged NO response"
+      ],
+      "modality": "should",
+      "id": "N-S056-004"
+    },
+    {
+      "statement_id": "N-S056-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Alternatively, the server MAY allow the DELETE command, but it sets the \\Noselect mailbox name attribute for that name.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DELETE_command_received",
+      "pre_cond": "mailbox.has_inferior_hierarchical_names = true",
+      "post_cond": "mailbox.deleted = true & mailbox.attribute = \\Noselect",
+      "actions": [
+        "allow DELETE command to succeed",
+        "set \\Noselect mailbox name attribute on the deleted name"
+      ],
+      "modality": "may",
+      "id": "N-S056-005"
+    },
+    {
+      "statement_id": "N-S056-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The value of the highest-used unique identifier of the deleted mailbox MUST be preserved so that a new mailbox created with the same name will not reuse the identifiers of the former incarnation, unless the new incarnation has a different unique identifier validity value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DELETE_command_OK",
+      "pre_cond": null,
+      "post_cond": "mailbox.highest_uid.preserved = true",
+      "actions": [
+        "preserve the highest-used unique identifier value of the deleted mailbox for future mailbox creation with the same name"
+      ],
+      "modality": "must",
+      "id": "N-S056-006"
+    },
+    {
+      "statement_id": "N-S056-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server decides to convert (normalize) the mailbox name, it SHOULD return an untagged LIST with the \"\\NonExistent\" attribute and OLDNAME extended data item, with the OLDNAME value being the supplied mailbox name and the name parameter being the normalized mailbox name.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DELETE_command_with_mailbox_name_normalization",
+      "pre_cond": "server.normalizes_mailbox_name = true",
+      "post_cond": "response.includes_untagged_LIST = true & untagged_LIST.attribute = \\NonExistent & untagged_LIST.has_OLDNAME_extended_data = true",
+      "actions": [
+        "return untagged LIST response with \\NonExistent attribute",
+        "include OLDNAME extended data item with original supplied mailbox name as value and normalized name as the name parameter"
+      ],
+      "modality": "should",
+      "id": "N-S056-007"
+    },
+    {
+      "statement_id": "N-S056-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailboxes deleted in one IMAP session MAY be announced to other IMAP sessions using an unsolicited LIST response, containing the \"\\NonExistent\" attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "server",
+        "session"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mailbox_deleted_in_session",
+      "pre_cond": "mailbox.deleted = true & other_sessions.exist = true",
+      "post_cond": null,
+      "actions": [
+        "send unsolicited LIST response containing \\NonExistent attribute to other active IMAP sessions"
+      ],
+      "modality": "may",
+      "id": "N-S056-008"
+    }
+  ]
+}

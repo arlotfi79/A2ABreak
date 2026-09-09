@@ -1,0 +1,380 @@
+{
+  "section_id": "13.2",
+  "title": "13.2. Push Notification Security",
+  "depth": 3,
+  "parent_path": [
+    "13. Security Considerations",
+    "13.2. Push Notification Security"
+  ],
+  "url_anchor": "#132-push-notification-security",
+  "word_count": 245,
+  "statement_count": 15,
+  "elapsed_seconds": 96.84,
+  "statements": [
+    {
+      "statement_id": "N-13.2-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MUST include authentication credentials in webhook requests as specified in PushNotificationConfig.authentication",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_sent",
+      "pre_cond": null,
+      "post_cond": "webhook_request.authentication = push_notification_config.authentication",
+      "actions": [
+        "Include authentication credentials in the outgoing webhook request as specified in PushNotificationConfig.authentication"
+      ],
+      "modality": "must",
+      "id": "N-13-2-001"
+    },
+    {
+      "statement_id": "N-13.2-002",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents SHOULD implement reasonable timeout values for webhook requests (recommended: 10-30 seconds)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement reasonable timeout values for webhook requests (recommended range: 10-30 seconds)"
+      ],
+      "modality": "should",
+      "id": "N-13-2-002"
+    },
+    {
+      "statement_id": "N-13.2-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents SHOULD implement retry logic with exponential backoff for failed deliveries",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_delivery_failed",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement retry logic with exponential backoff when webhook delivery fails"
+      ],
+      "modality": "should",
+      "id": "N-13-2-003"
+    },
+    {
+      "statement_id": "N-13.2-004",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MAY stop attempting delivery after a configured number of consecutive failures",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_delivery_failed",
+      "pre_cond": "push_notification.consecutive_failure_count >= push_notification.configured_max_failures",
+      "post_cond": "push_notification.delivery_stopped = true",
+      "actions": [
+        "Stop attempting webhook delivery after a configured number of consecutive failures"
+      ],
+      "modality": "may",
+      "id": "N-13-2-004"
+    },
+    {
+      "statement_id": "N-13.2-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents SHOULD validate webhook URLs to prevent SSRF (Server-Side Request Forgery) attacks:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_config_received",
+      "pre_cond": null,
+      "post_cond": "push_notification_config.url.validated = true",
+      "actions": [
+        "Reject private IP ranges (127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)",
+        "Reject localhost and link-local addresses",
+        "Implement URL allowlists where appropriate"
+      ],
+      "modality": "should",
+      "id": "N-13-2-005"
+    },
+    {
+      "statement_id": "N-13.2-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients MUST validate webhook authenticity using the provided authentication credentials",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_received",
+      "pre_cond": null,
+      "post_cond": "webhook.authenticity_validated = true",
+      "actions": [
+        "Validate the authenticity of the incoming webhook using the provided authentication credentials"
+      ],
+      "modality": "must",
+      "id": "N-13-2-006"
+    },
+    {
+      "statement_id": "N-13.2-007",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients SHOULD verify the task ID in the payload matches an expected task they created",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_received",
+      "pre_cond": null,
+      "post_cond": "webhook_payload.task_id = client.expected_task_id",
+      "actions": [
+        "Verify that the task ID in the webhook payload matches a task ID the client previously created"
+      ],
+      "modality": "should",
+      "id": "N-13-2-007"
+    },
+    {
+      "statement_id": "N-13.2-008",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients MUST respond with HTTP 2xx status codes to acknowledge successful receipt",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_received",
+      "pre_cond": null,
+      "post_cond": "webhook_response.status_code >= 200 & webhook_response.status_code < 300",
+      "actions": [
+        "Respond to the webhook request with an HTTP 2xx status code to acknowledge successful receipt"
+      ],
+      "modality": "must",
+      "id": "N-13-2-008"
+    },
+    {
+      "statement_id": "N-13.2-009",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients SHOULD process notifications idempotently, as duplicate deliveries may occur",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Process incoming push notifications idempotently to safely handle duplicate deliveries"
+      ],
+      "modality": "should",
+      "id": "N-13-2-009"
+    },
+    {
+      "statement_id": "N-13.2-010",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients SHOULD implement rate limiting to prevent webhook flooding",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement rate limiting on the webhook receiver endpoint to prevent webhook flooding"
+      ],
+      "modality": "should",
+      "id": "N-13-2-010"
+    },
+    {
+      "statement_id": "N-13.2-011",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients SHOULD use HTTPS endpoints for webhook URLs to ensure confidentiality",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_config_set",
+      "pre_cond": null,
+      "post_cond": "push_notification_config.url.scheme = HTTPS",
+      "actions": [
+        "Use HTTPS endpoints for webhook URLs to ensure confidentiality of notification payloads"
+      ],
+      "modality": "should",
+      "id": "N-13-2-011"
+    },
+    {
+      "statement_id": "N-13.2-012",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Webhook URLs SHOULD use HTTPS to protect payload confidentiality in transit",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_config_set",
+      "pre_cond": null,
+      "post_cond": "push_notification_config.url.scheme = HTTPS",
+      "actions": [
+        "Use HTTPS scheme for webhook URLs to protect payload confidentiality in transit"
+      ],
+      "modality": "should",
+      "id": "N-13-2-012"
+    },
+    {
+      "statement_id": "N-13.2-013",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Authentication tokens in PushNotificationConfig SHOULD be treated as secrets and rotated periodically",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Treat authentication tokens in PushNotificationConfig as secrets",
+        "Rotate authentication tokens in PushNotificationConfig periodically"
+      ],
+      "modality": "should",
+      "id": "N-13-2-013"
+    },
+    {
+      "statement_id": "N-13.2-014",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents SHOULD securely store push notification configurations and credentials",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Securely store push notification configurations and associated credentials"
+      ],
+      "modality": "should",
+      "id": "N-13-2-014"
+    },
+    {
+      "statement_id": "N-13.2-015",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients SHOULD use unique, single-purpose tokens for each push notification configuration",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_config_set",
+      "pre_cond": null,
+      "post_cond": "push_notification_config.token.unique = true & push_notification_config.token.single_purpose = true",
+      "actions": [
+        "Use a unique, single-purpose token for each individual push notification configuration"
+      ],
+      "modality": "should",
+      "id": "N-13-2-015"
+    }
+  ]
+}

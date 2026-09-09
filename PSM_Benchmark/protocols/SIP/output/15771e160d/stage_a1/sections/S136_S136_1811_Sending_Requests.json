@@ -1,0 +1,119 @@
+{
+  "section_id": "S136",
+  "title": "S136 18.1.1 Sending Requests",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S136 18.1.1 Sending Requests"
+  ],
+  "url_anchor": "#s136-1811-sending-requests",
+  "word_count": 877,
+  "statement_count": 5,
+  "elapsed_seconds": 38.81,
+  "statements": [
+    {
+      "statement_id": "D-S136-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "sip_fsm",
+      "description": "If a request is destined to an IP address, port, and transport to which an existing connection is open, it is RECOMMENDED that this connection be used to send the request, but another connection MAY be opened and used.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S136",
+      "state_name": "OPEN",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = OPEN"
+    },
+    {
+      "statement_id": "D-S136-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a request is within 200 bytes of the path MTU, or if it is larger than 1300 bytes and the path MTU is unknown, the request MUST be sent using an RFC 2914 congestion controlled transport protocol, such as TCP. If this causes a change in the transport protocol from the one indicated in the top Via, the value in the top Via MUST be changed.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S136",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_size >= path_MTU - 200 | (request_size > 1300 & path_MTU = unknown)",
+      "pre_cond": "transport.protocol = UDP",
+      "post_cond": "transport.protocol = TCP & via_top.transport = TCP",
+      "actions": [
+        "switch_transport_to_TCP",
+        "update_top_Via_transport"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S136-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If an element sends a request over TCP because of these message size constraints, and that request would have otherwise been sent over UDP, if the attempt to establish the connection generates either an ICMP Protocol Not Supported, or results in a TCP reset, the element SHOULD retry the request, using UDP.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S136",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TCP_connect_ICMP_not_supported | TCP_connect_reset",
+      "pre_cond": "transport.protocol = TCP & transport.original_protocol = UDP",
+      "post_cond": "transport.protocol = UDP",
+      "actions": [
+        "retry_request_over_UDP"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S136-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "sip_fsm",
+      "description": "If a request is destined to an IP address, port, and transport to which an existing connection is open, it is RECOMMENDED that this connection be used to send the request, but another connection MAY be opened and used.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S136",
+      "actors": [
+        "client"
+      ],
+      "from_state": "OPEN",
+      "to_state": "OPEN",
+      "trigger": "send_request",
+      "pre_cond": "connection.state = OPEN & connection.remote_addr = request.dest_addr & connection.remote_port = request.dest_port & connection.transport = request.transport",
+      "post_cond": "request.sent = true",
+      "actions": [
+        "reuse_existing_connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S136-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Before a request is sent, the client transport MUST insert a value of the 'sent-by' field into the Via header field. This field contains an IP address or host name, and port.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S136",
+      "object_name": "Via",
+      "field_name": "sent-by",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "must be set before request is sent"
+    }
+  ]
+}

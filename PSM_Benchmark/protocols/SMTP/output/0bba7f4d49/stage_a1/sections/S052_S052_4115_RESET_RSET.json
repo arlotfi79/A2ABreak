@@ -1,0 +1,111 @@
+{
+  "section_id": "S052",
+  "title": "S052 4.1.1.5 RESET (RSET)",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S052 4.1.1.5 RESET (RSET)"
+  ],
+  "url_anchor": "#s052-4115-reset-rset",
+  "word_count": 216,
+  "statement_count": 4,
+  "elapsed_seconds": 76.17,
+  "statements": [
+    {
+      "statement_id": "D-S052-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "This command specifies that the current mail transaction will be aborted. Any stored sender, recipients, and mail data MUST be discarded, and all buffers and state tables cleared. The receiver MUST send a '250 OK' reply to a RSET command with no arguments. A reset command may be issued by the client at any time.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RSET",
+      "pre_cond": null,
+      "post_cond": "transaction.sender = null & transaction.recipients = null & transaction.mail_data = null & session.buffers_cleared = true",
+      "actions": [
+        "discard stored sender",
+        "discard stored recipients",
+        "discard mail data",
+        "clear all buffers and state tables",
+        "send 250 OK reply"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S052-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "It is effectively equivalent to a NOOP (i.e., it has no effect) if issued immediately after EHLO, before EHLO is issued in the session, after an end of data indicator has been sent and acknowledged, or immediately before a QUIT.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S052",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RSET",
+      "pre_cond": "protocol.state = <immediately after EHLO> | protocol.state = <before EHLO issued> | protocol.state = <after end of data acknowledged> | protocol.state = <immediately before QUIT>",
+      "post_cond": null,
+      "actions": [
+        "send 250 OK reply"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S052-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "An SMTP server MUST NOT close the connection as the result of receiving a RSET; that action is reserved for QUIT (see Section 4.1.1.10).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S052",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RSET",
+      "pre_cond": null,
+      "post_cond": "connection.closed = false",
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S052-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "SMTP servers SHOULD be prepared for this condition and SHOULD treat it as if a QUIT had been received before the connection disappeared.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S052",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TCP connection closed or reset indication",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "treat as if QUIT received"
+      ],
+      "modality": "should"
+    }
+  ]
+}

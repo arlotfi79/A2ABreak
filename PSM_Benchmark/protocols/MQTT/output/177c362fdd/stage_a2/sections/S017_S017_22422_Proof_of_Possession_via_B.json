@@ -1,0 +1,136 @@
+{
+  "section_id": "S017",
+  "title": "S017 2.2.4.2.2 Proof of Possession via Broker-generated Challenge/Response",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S017 2.2.4.2.2 Proof of Possession via Broker-generated Challenge/Response"
+  ],
+  "url_anchor": "#s017-22422-proof-of-possession-via-broker-generated-challengeresponse",
+  "word_count": 371,
+  "statement_count": 5,
+  "elapsed_seconds": 77.33,
+  "statements": [
+    {
+      "statement_id": "N-S017-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Authentication Data inside the Client's CONNECT contains only the two-byte integer token length and the token (as shown in Figure 4), the Broker MUST respond with an AUTH packet with the authenticated reason code set to 0x18 (Continue Authentication).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "CONNECT_received",
+      "to_state": "challenge_sent",
+      "trigger": "CONNECT_received_with_token_only_Authentication_Data",
+      "pre_cond": "connect.Authentication_Data = token_length_and_token_only",
+      "post_cond": "auth_packet.reason_code = 0x18",
+      "actions": [
+        "send AUTH packet with reason code 0x18 (Continue Authentication)"
+      ],
+      "modality": "must",
+      "id": "N-S017-001"
+    },
+    {
+      "statement_id": "N-S017-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Method MUST be set to \"ace\", and the Authentication Data MUST NOT be empty and MUST contain an 8-byte RS nonce as a challenge for the Client (Figure 5).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "auth_packet.Authentication_Method = \"ace\"",
+      "actions": [
+        "set Authentication Method field to \"ace\" in Broker AUTH packet"
+      ],
+      "modality": "must",
+      "id": "N-S017-002"
+    },
+    {
+      "statement_id": "N-S017-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Method MUST be set to \"ace\", and the Authentication Data MUST NOT be empty and MUST contain an 8-byte RS nonce as a challenge for the Client (Figure 5).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "auth_packet.Authentication_Data != empty",
+      "actions": [
+        "ensure Authentication Data in Broker AUTH packet is non-empty"
+      ],
+      "modality": "must",
+      "id": "N-S017-003"
+    },
+    {
+      "statement_id": "N-S017-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Method MUST be set to \"ace\", and the Authentication Data MUST NOT be empty and MUST contain an 8-byte RS nonce as a challenge for the Client (Figure 5).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "challenge_sent",
+      "to_state": null,
+      "trigger": "broker_sends_AUTH_challenge",
+      "pre_cond": "protocol.state = challenge_sent",
+      "post_cond": "auth_packet.Authentication_Data.contains_RS_nonce = true & auth_packet.Authentication_Data.RS_nonce.length_bytes = 8",
+      "actions": [
+        "include 8-byte RS nonce in Authentication Data of Broker AUTH packet as challenge"
+      ],
+      "modality": "must",
+      "id": "N-S017-004"
+    },
+    {
+      "statement_id": "N-S017-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MAY also reauthenticate using this challenge-response flow, as described in Section 4.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "actors": [
+        "Client"
+      ],
+      "from_state": "connected",
+      "to_state": "reauthenticating",
+      "trigger": "client_initiates_reauthentication",
+      "pre_cond": "protocol.state = connected",
+      "post_cond": "protocol.state = reauthenticating",
+      "actions": [
+        "initiate challenge-response reauthentication flow as described in Section 4"
+      ],
+      "modality": "may",
+      "id": "N-S017-005"
+    }
+  ]
+}

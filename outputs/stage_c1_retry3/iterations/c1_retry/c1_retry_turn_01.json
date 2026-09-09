@@ -1,0 +1,265 @@
+{
+  "pipeline_stage": "stage_c1",
+  "protocol_phase": "c1_retry",
+  "turn": 1,
+  "status": "complete",
+  "finish_reason": "stop",
+  "web_search": {
+    "executed": true,
+    "mode": "server_side_single_request",
+    "queries": [],
+    "tool_use_blocks": 0,
+    "result_blocks": 0,
+    "requests_billed": 9
+  },
+  "web_searches": [],
+  "raw_text_len": 18195,
+  "raw_text": "Based on my comprehensive analysis of the protocol specification and FSM, I've identified two new vulnerability candidates that pass all three mandatory pre-reporting filters. Let me verify the key spec sections for each before finalizing.```json\n{\n  \"candidates\": [\n    {\n      \"candidate_id\": \"C-001\",\n      \"title\": \"Push Notification Authentication Optionality Permits Notification Forgery on Unprotected Webhook Channels\",\n      \"protocol_phase\": \"task_execution\",\n      \"attack_scenario\": \"The PushNotificationConfig.authentication field is optional. When a client creates a push notification config without the authentication field (which the protocol permits), the server's MUST to authenticate itself is conditional ('according to the scheme specified in PushNotificationConfig.authentication') and is vacuously satisfied by doing nothing. The PushNotificationConfig.token field is also optional and has no defined verification semantics in the normative spec. Result: the server delivers HTTP POST notifications to the webhook URL with no authentication or integrity mechanism. An attacker who discovers the webhook URL (through network observation, log access, or endpoint enumeration) can forge push notifications containing arbitrary StreamResponse payloads with spoofed task states (e.g., fake TASK_STATE_COMPLETED with malicious artifact references, or fake TASK_STATE_AUTH_REQUIRED directing the client to an attacker-controlled auth endpoint). The client's webhook has no protocol-defined mechanism to distinguish genuine from forged notifications. While the non-normative streaming-and-async guide states the webhook 'MUST rigorously verify the authenticity,' this MUST is impossible to fulfill when no authentication mechanism is configured. The recommended GetTask follow-up pattern is described with 'typically' rather than MUST, meaning clients may act directly on forged payloads. This is distinct from F-005 (webhook URL ownership) which concerns outbound SSRF; this concerns the inbound authentication gap on the notification channel itself.\",\n      \"preliminary_trace\": [\n        {\n          \"step\": 1,\n          \"stage\": \"authentication\",\n          \"state\": \"authenticated\",\n          \"transition\": \"A2A_protocol_operations_request\",\n          \"actor\": \"server\",\n          \"note\": \"Legitimate client authenticates with valid credentials to the A2A server.\"\n        },\n        {\n          \"step\": 2,\n          \"stage\": \"initiation\",\n          \"state\": \"TASK_STATE_NONEXISTENT\",\n          \"transition\": \"message_send\",\n          \"actor\": \"client\",\n          \"note\": \"Client sends message/send with pushNotificationConfig containing only url field. authentication and token fields are omitted (both optional per spec). Server accepts the config — no protocol requirement mandates authentication be present.\"\n        },\n        {\n          \"step\": 3,\n          \"stage\": \"initiation\",\n          \"state\": \"TASK_STATE_SUBMITTED\",\n          \"transition\": \"task_creation\",\n          \"actor\": \"server\",\n          \"note\": \"Server creates task and registers push notification config. Config transitions to ACTIVE. No authentication details stored — server will deliver unauthenticated POST requests.\"\n        },\n        {\n          \"step\": 4,\n          \"stage\": \"task_execution\",\n          \"state\": \"PUSH_NOTIFICATION_CONFIG_NONEXISTENT\",\n          \"transition\": \"create_push_notification_config_requested\",\n          \"actor\": \"server\",\n          \"note\": \"Push notification config becomes active. Guard checks only capability support, not that authentication is configured.\"\n        },\n        {\n          \"step\": 5,\n          \"stage\": \"task_execution\",\n          \"state\": \"PUSH_NOTIFICATION_CONFIG_ACTIVE\",\n          \"transition\": \"task state change triggers notification delivery\",\n          \"actor\": \"server\",\n          \"note\": \"Attacker who has discovered the webhook URL sends a forged HTTP POST with a StreamResponse payload containing TASK_STATE_AUTH_REQUIRED and a DataPart directing the client to an attacker-controlled auth endpoint. The webhook has no authentication token, no signature, and no protocol-defined mechanism to verify the notification is genuine.\"\n        },\n        {\n          \"step\": 6,\n          \"stage\": \"task_execution\",\n          \"state\": \"PUSH_NOTIFICATION_RECEIVED\",\n          \"transition\": \"webhook_request_received\",\n          \"actor\": \"client\",\n          \"note\": \"Client's webhook receives the forged notification. Guard checks only 'webhook_request received with authentication credentials present' but NO credentials were configured. Client may act on forged payload — following the fake auth endpoint, or treating a fake COMPLETED status as genuine.\"\n        }\n      ],\n      \"involved_states\": [\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"PUSH_NOTIFICATION_CONFIG_ACTIVE\",\n          \"actor\": \"shared\",\n          \"relevance\": \"Config is active with no authentication mechanism configured — the protocol permits this configuration, creating an unauthenticated notification delivery channel.\"\n        },\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"PUSH_NOTIFICATION_RECEIVED\",\n          \"actor\": \"shared\",\n          \"relevance\": \"Notification is received at the webhook. Without authentication in the config, the guard for PUSH_NOTIFICATION_ACKNOWLEDGED ('authentication credentials present') cannot be satisfied for forgery detection.\"\n        },\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"PUSH_NOTIFICATION_ACKNOWLEDGED\",\n          \"actor\": \"client\",\n          \"relevance\": \"Client acknowledges the notification (HTTP 2xx response). Forged notification is processed identically to genuine notification because no authentication differentiator exists.\"\n        }\n      ],\n      \"involved_transitions\": [\n        {\n          \"from_stage\": \"task_execution\",\n          \"from_state\": \"PUSH_NOTIFICATION_CONFIG_NONEXISTENT\",\n          \"to_stage\": \"task_execution\",\n          \"to_state\": \"PUSH_NOTIFICATION_CONFIG_ACTIVE\",\n          \"trigger\": \"create_push_notification_config_requested\",\n          \"relevance\": \"Guard checks only capability support, not that PushNotificationConfig.authentication is populated. Config activates without authentication, creating an unprotected channel.\"\n        },\n        {\n          \"from_stage\": \"task_execution\",\n          \"from_state\": \"PUSH_NOTIFICATION_RECEIVED\",\n          \"to_stage\": \"task_execution\",\n          \"to_state\": \"PUSH_NOTIFICATION_ACKNOWLEDGED\",\n          \"trigger\": \"webhook_request_received\",\n          \"relevance\": \"Guard mentions 'authentication credentials present' but these are the server's credentials TO the webhook. When PushNotificationConfig.authentication is omitted, no credentials exist to validate, so any POST to the URL passes.\"\n        }\n      ],\n      \"missing_primitive\": \"A mandatory minimum authentication mechanism for all push notification deliveries, regardless of whether PushNotificationConfig.authentication is configured. For example: (1) mandate that PushNotificationConfig.authentication is REQUIRED rather than optional, or (2) define a built-in notification signing mechanism (e.g., HMAC of the payload using a server-generated key shared at config creation time) that applies automatically when no explicit authentication scheme is configured, or (3) mandate that PushNotificationConfig.token is REQUIRED and define normative verification semantics (how it must be included in notifications and validated by webhooks).\",\n      \"why_compliance_does_not_prevent\": \"The normative spec's MUST for server self-authentication is conditional: 'MUST authenticate itself... according to the scheme specified in PushNotificationConfig.authentication.' When authentication is not specified (the field is optional), the MUST is vacuously satisfied. The PushNotificationConfig.token field is also optional with no defined verification semantics. A fully compliant server omitting authentication from unauthenticated configs, and a fully compliant client accepting all POST requests at its webhook (since no authentication was configured to validate against), creates a channel where forged notifications are indistinguishable from genuine ones.\",\n      \"spec_sections_searched\": [\"3.1\", \"4.3\", \"7.4\", \"7.5\", \"13.2\", \"streaming-and-async topics\"],\n      \"preliminary_confidence\": \"MEDIUM\"\n    },\n    {\n      \"candidate_id\": \"C-002\",\n      \"title\": \"Protocol State Machine Defines No Server-Initiated Escape from Interrupted Task States, Enabling Indefinite Resource Holding by Abandoned Clients\",\n      \"protocol_phase\": \"interruption\",\n      \"attack_scenario\": \"The A2A task state machine defines strict transition rules and explicitly states 'An agent implementation MUST NOT transition a task to an invalid state.' The interrupted states (TASK_STATE_INPUT_REQUIRED and TASK_STATE_AUTH_REQUIRED) have exactly three defined exits: (1) client provides input/credentials → WORKING, (2) client cancels → CANCELED, (3) AUTH_REQUIRED self-loop on message_received. Critically, there is NO defined transition from INPUT_REQUIRED → FAILED or AUTH_REQUIRED → FAILED. A server cannot unilaterally fail a task stuck in an interrupted state because doing so would violate the state machine. A malicious or disconnected client can exploit this: (a) authenticate to the server, (b) create multiple tasks, (c) drive each task to INPUT_REQUIRED (by sending underspecified messages that require clarification) or AUTH_REQUIRED (by triggering operations needing secondary credentials), and (d) abandon the tasks. The server now holds resources (task state, LLM context, memory, potential database entries) for each task indefinitely, with no protocol-compliant mechanism to reclaim them. Unlike CancelTask (which is client-initiated), there is no server-initiated timeout or garbage collection transition in the state machine. This differs from F-001-run3 (circular auth chains) which requires multi-agent mesh topology — this attack requires only a single client and a single server.\",\n      \"preliminary_trace\": [\n        {\n          \"step\": 1,\n          \"stage\": \"authentication\",\n          \"state\": \"authenticated\",\n          \"transition\": \"A2A_protocol_operations_request\",\n          \"actor\": \"server\",\n          \"note\": \"Malicious client authenticates with valid credentials.\"\n        },\n        {\n          \"step\": 2,\n          \"stage\": \"initiation\",\n          \"state\": \"TASK_STATE_NONEXISTENT\",\n          \"transition\": \"send_message_requested\",\n          \"actor\": \"client\",\n          \"note\": \"Client sends a deliberately underspecified message. Repeated for N tasks.\"\n        },\n        {\n          \"step\": 3,\n          \"stage\": \"initiation\",\n          \"state\": \"TASK_STATE_WORKING\",\n          \"transition\": \"task_processing_continues\",\n          \"actor\": \"server\",\n          \"note\": \"Server creates task and begins processing. Task transitions to WORKING via inter-stage transition to task_execution.\"\n        },\n        {\n          \"step\": 4,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_WORKING\",\n          \"transition\": \"agent_requests_input\",\n          \"actor\": \"server\",\n          \"note\": \"Agent determines the underspecified message requires clarification and transitions task to INPUT_REQUIRED. This is a normal, compliant server behavior.\"\n        },\n        {\n          \"step\": 5,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"transition\": \"input_requested (inter-stage to interruption)\",\n          \"actor\": \"server\",\n          \"note\": \"Task crosses to interruption phase as INPUT_REQUIRED. The FSM defines only two exits: client_sends_input → WORKING, or cancel_task_requested → CANCELED. NO transition to FAILED exists.\"\n        },\n        {\n          \"step\": 6,\n          \"stage\": \"interruption\",\n          \"state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"transition\": \"(no transition — client disconnects)\",\n          \"actor\": \"client\",\n          \"note\": \"Client abandons the task and disconnects. The task remains in INPUT_REQUIRED indefinitely. The server holds all task resources (state, context, history, potential open push notification configs). The protocol provides no timeout transition and no server-initiated path to FAILED or any terminal state. Repeating steps 2-6 for N tasks creates N permanently stranded tasks consuming server resources.\"\n        }\n      ],\n      \"involved_states\": [\n        {\n          \"stage\": \"interruption\",\n          \"state_name\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"actor\": \"shared\",\n          \"relevance\": \"This interrupted state has no server-initiated exit to any terminal state. The only defined exits require client action (send input or cancel). A disconnected client leaves the task permanently stranded.\"\n        },\n        {\n          \"stage\": \"interruption\",\n          \"state_name\": \"TASK_STATE_AUTH_REQUIRED\",\n          \"actor\": \"shared\",\n          \"relevance\": \"Same issue — no transition to FAILED or any terminal state without client action. Tasks stuck in AUTH_REQUIRED also hold resources indefinitely with no server escape.\"\n        },\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"TASK_STATE_FAILED\",\n          \"actor\": \"server\",\n          \"relevance\": \"This terminal state exists but is reachable only from TASK_STATE_WORKING. No transition from INPUT_REQUIRED or AUTH_REQUIRED to FAILED exists in the state machine.\"\n        }\n      ],\n      \"involved_transitions\": [\n        {\n          \"from_stage\": \"task_execution\",\n          \"from_state\": \"TASK_STATE_WORKING\",\n          \"to_stage\": \"task_execution\",\n          \"to_state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"trigger\": \"agent_requests_input\",\n          \"relevance\": \"Entry point to the stranded state. Once in INPUT_REQUIRED, the server cannot transition to FAILED.\"\n        },\n        {\n          \"from_stage\": \"interruption\",\n          \"from_state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"to_stage\": \"interruption\",\n          \"to_state\": \"TASK_STATE_WORKING\",\n          \"trigger\": \"client_sends_input\",\n          \"relevance\": \"One of only two exits from INPUT_REQUIRED. Requires client action that will never come from an abandoned client.\"\n        },\n        {\n          \"from_stage\": \"interruption\",\n          \"from_state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"to_stage\": \"interruption\",\n          \"to_state\": \"TASK_STATE_CANCELED\",\n          \"trigger\": \"cancel_task_requested\",\n          \"relevance\": \"The other exit from INPUT_REQUIRED. Also requires client action (CancelTask RPC). An abandoned client will never send this.\"\n        }\n      ],\n      \"missing_primitive\": \"Protocol-defined timeout transitions from interrupted states to terminal states. Specifically: (1) A normative transition INPUT_REQUIRED → FAILED triggered by a server-defined timeout, (2) A normative transition AUTH_REQUIRED → FAILED triggered by a server-defined timeout, (3) A protocol-level configurable or mandatory maximum duration for interrupted states (e.g., a timeout field in TaskStatus or a server-declared max-interruption-duration in the agent card), and (4) A TASK_TIMEOUT error type that signals the reason for the transition. Without these, a compliant server that enforces strict state machine compliance cannot reclaim resources from abandoned tasks in interrupted states.\",\n      \"why_compliance_does_not_prevent\": \"The spec explicitly states 'An agent implementation MUST NOT transition a task to an invalid state.' The state machine defines no transition from INPUT_REQUIRED or AUTH_REQUIRED to FAILED (or any other terminal state except CANCELED, which requires client initiation). A fully compliant server CANNOT fail an abandoned task in an interrupted state because doing so would violate the state machine MUST. The server can only wait for client action that will never come. Full compliance by all parties (server follows the state machine, client is absent) results in indefinite resource holding with no protocol escape.\",\n      \"spec_sections_searched\": [\"3.2\", \"3.4\", \"4.1\", \"7.6\", \"9.4\", \"life-of-a-task topics\"],\n      \"preliminary_confidence\": \"HIGH\"\n    }\n  ],\n  \"structural_observations\": [\n    \"The referenceTaskIds field on Message allows clients to reference arbitrary task IDs for context. The protocol defines no authorization validation for these references — a client could reference task IDs belonging to other clients, potentially causing the server to load and incorporate context from other sessions into its processing. While this shares the root cause with F-004 (no task-to-identity binding), the attack vector is distinct: indirect information leakage through agent context pollution rather than direct task CRUD operations. However, it was not reported as a separate candidate because the underlying missing primitive (task-level access control) is the same.\",\n    \"The protocol's push notification security model exhibits an asymmetry with the primary request channel: client-to-server requests MUST always be authenticated (every incoming request), but server-to-client push notifications have only conditional authentication (depends on optional PushNotificationConfig.authentication). This creates a tier of communication with weaker security guarantees for the server-initiated direction.\",\n    \"The ListTasks operation combined with the absence of task-to-identity binding (F-004) potentially enables any authenticated client to enumerate all tasks on a server. While this is an additional consequence of the F-004 gap, it significantly increases the attack surface by providing task ID discovery without requiring prior knowledge.\",\n    \"The task state machine's interrupted states (INPUT_REQUIRED, AUTH_REQUIRED) occupy a unique position: they are non-terminal (the task is 'active') but all exit transitions require external (client) action. This creates an asymmetry where the server is responsible for resource management but lacks protocol authority to reclaim resources from tasks in these states. Every other non-terminal state (SUBMITTED, WORKING) has server-initiated exits to terminal states.\"\n  ]\n}\n```",
+  "fsm": {
+    "candidates": [
+      {
+        "candidate_id": "C-001",
+        "title": "Push Notification Authentication Optionality Permits Notification Forgery on Unprotected Webhook Channels",
+        "protocol_phase": "task_execution",
+        "attack_scenario": "The PushNotificationConfig.authentication field is optional. When a client creates a push notification config without the authentication field (which the protocol permits), the server's MUST to authenticate itself is conditional ('according to the scheme specified in PushNotificationConfig.authentication') and is vacuously satisfied by doing nothing. The PushNotificationConfig.token field is also optional and has no defined verification semantics in the normative spec. Result: the server delivers HTTP POST notifications to the webhook URL with no authentication or integrity mechanism. An attacker who discovers the webhook URL (through network observation, log access, or endpoint enumeration) can forge push notifications containing arbitrary StreamResponse payloads with spoofed task states (e.g., fake TASK_STATE_COMPLETED with malicious artifact references, or fake TASK_STATE_AUTH_REQUIRED directing the client to an attacker-controlled auth endpoint). The client's webhook has no protocol-defined mechanism to distinguish genuine from forged notifications. While the non-normative streaming-and-async guide states the webhook 'MUST rigorously verify the authenticity,' this MUST is impossible to fulfill when no authentication mechanism is configured. The recommended GetTask follow-up pattern is described with 'typically' rather than MUST, meaning clients may act directly on forged payloads. This is distinct from F-005 (webhook URL ownership) which concerns outbound SSRF; this concerns the inbound authentication gap on the notification channel itself.",
+        "preliminary_trace": [
+          {
+            "step": 1,
+            "stage": "authentication",
+            "state": "authenticated",
+            "transition": "A2A_protocol_operations_request",
+            "actor": "server",
+            "note": "Legitimate client authenticates with valid credentials to the A2A server."
+          },
+          {
+            "step": 2,
+            "stage": "initiation",
+            "state": "TASK_STATE_NONEXISTENT",
+            "transition": "message_send",
+            "actor": "client",
+            "note": "Client sends message/send with pushNotificationConfig containing only url field. authentication and token fields are omitted (both optional per spec). Server accepts the config — no protocol requirement mandates authentication be present."
+          },
+          {
+            "step": 3,
+            "stage": "initiation",
+            "state": "TASK_STATE_SUBMITTED",
+            "transition": "task_creation",
+            "actor": "server",
+            "note": "Server creates task and registers push notification config. Config transitions to ACTIVE. No authentication details stored — server will deliver unauthenticated POST requests."
+          },
+          {
+            "step": 4,
+            "stage": "task_execution",
+            "state": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+            "transition": "create_push_notification_config_requested",
+            "actor": "server",
+            "note": "Push notification config becomes active. Guard checks only capability support, not that authentication is configured."
+          },
+          {
+            "step": 5,
+            "stage": "task_execution",
+            "state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+            "transition": "task state change triggers notification delivery",
+            "actor": "server",
+            "note": "Attacker who has discovered the webhook URL sends a forged HTTP POST with a StreamResponse payload containing TASK_STATE_AUTH_REQUIRED and a DataPart directing the client to an attacker-controlled auth endpoint. The webhook has no authentication token, no signature, and no protocol-defined mechanism to verify the notification is genuine."
+          },
+          {
+            "step": 6,
+            "stage": "task_execution",
+            "state": "PUSH_NOTIFICATION_RECEIVED",
+            "transition": "webhook_request_received",
+            "actor": "client",
+            "note": "Client's webhook receives the forged notification. Guard checks only 'webhook_request received with authentication credentials present' but NO credentials were configured. Client may act on forged payload — following the fake auth endpoint, or treating a fake COMPLETED status as genuine."
+          }
+        ],
+        "involved_states": [
+          {
+            "stage": "task_execution",
+            "state_name": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+            "actor": "shared",
+            "relevance": "Config is active with no authentication mechanism configured — the protocol permits this configuration, creating an unauthenticated notification delivery channel."
+          },
+          {
+            "stage": "task_execution",
+            "state_name": "PUSH_NOTIFICATION_RECEIVED",
+            "actor": "shared",
+            "relevance": "Notification is received at the webhook. Without authentication in the config, the guard for PUSH_NOTIFICATION_ACKNOWLEDGED ('authentication credentials present') cannot be satisfied for forgery detection."
+          },
+          {
+            "stage": "task_execution",
+            "state_name": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+            "actor": "client",
+            "relevance": "Client acknowledges the notification (HTTP 2xx response). Forged notification is processed identically to genuine notification because no authentication differentiator exists."
+          }
+        ],
+        "involved_transitions": [
+          {
+            "from_stage": "task_execution",
+            "from_state": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+            "to_stage": "task_execution",
+            "to_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+            "trigger": "create_push_notification_config_requested",
+            "relevance": "Guard checks only capability support, not that PushNotificationConfig.authentication is populated. Config activates without authentication, creating an unprotected channel."
+          },
+          {
+            "from_stage": "task_execution",
+            "from_state": "PUSH_NOTIFICATION_RECEIVED",
+            "to_stage": "task_execution",
+            "to_state": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+            "trigger": "webhook_request_received",
+            "relevance": "Guard mentions 'authentication credentials present' but these are the server's credentials TO the webhook. When PushNotificationConfig.authentication is omitted, no credentials exist to validate, so any POST to the URL passes."
+          }
+        ],
+        "missing_primitive": "A mandatory minimum authentication mechanism for all push notification deliveries, regardless of whether PushNotificationConfig.authentication is configured. For example: (1) mandate that PushNotificationConfig.authentication is REQUIRED rather than optional, or (2) define a built-in notification signing mechanism (e.g., HMAC of the payload using a server-generated key shared at config creation time) that applies automatically when no explicit authentication scheme is configured, or (3) mandate that PushNotificationConfig.token is REQUIRED and define normative verification semantics (how it must be included in notifications and validated by webhooks).",
+        "why_compliance_does_not_prevent": "The normative spec's MUST for server self-authentication is conditional: 'MUST authenticate itself... according to the scheme specified in PushNotificationConfig.authentication.' When authentication is not specified (the field is optional), the MUST is vacuously satisfied. The PushNotificationConfig.token field is also optional with no defined verification semantics. A fully compliant server omitting authentication from unauthenticated configs, and a fully compliant client accepting all POST requests at its webhook (since no authentication was configured to validate against), creates a channel where forged notifications are indistinguishable from genuine ones.",
+        "spec_sections_searched": [
+          "3.1",
+          "4.3",
+          "7.4",
+          "7.5",
+          "13.2",
+          "streaming-and-async topics"
+        ],
+        "preliminary_confidence": "MEDIUM"
+      },
+      {
+        "candidate_id": "C-002",
+        "title": "Protocol State Machine Defines No Server-Initiated Escape from Interrupted Task States, Enabling Indefinite Resource Holding by Abandoned Clients",
+        "protocol_phase": "interruption",
+        "attack_scenario": "The A2A task state machine defines strict transition rules and explicitly states 'An agent implementation MUST NOT transition a task to an invalid state.' The interrupted states (TASK_STATE_INPUT_REQUIRED and TASK_STATE_AUTH_REQUIRED) have exactly three defined exits: (1) client provides input/credentials → WORKING, (2) client cancels → CANCELED, (3) AUTH_REQUIRED self-loop on message_received. Critically, there is NO defined transition from INPUT_REQUIRED → FAILED or AUTH_REQUIRED → FAILED. A server cannot unilaterally fail a task stuck in an interrupted state because doing so would violate the state machine. A malicious or disconnected client can exploit this: (a) authenticate to the server, (b) create multiple tasks, (c) drive each task to INPUT_REQUIRED (by sending underspecified messages that require clarification) or AUTH_REQUIRED (by triggering operations needing secondary credentials), and (d) abandon the tasks. The server now holds resources (task state, LLM context, memory, potential database entries) for each task indefinitely, with no protocol-compliant mechanism to reclaim them. Unlike CancelTask (which is client-initiated), there is no server-initiated timeout or garbage collection transition in the state machine. This differs from F-001-run3 (circular auth chains) which requires multi-agent mesh topology — this attack requires only a single client and a single server.",
+        "preliminary_trace": [
+          {
+            "step": 1,
+            "stage": "authentication",
+            "state": "authenticated",
+            "transition": "A2A_protocol_operations_request",
+            "actor": "server",
+            "note": "Malicious client authenticates with valid credentials."
+          },
+          {
+            "step": 2,
+            "stage": "initiation",
+            "state": "TASK_STATE_NONEXISTENT",
+            "transition": "send_message_requested",
+            "actor": "client",
+            "note": "Client sends a deliberately underspecified message. Repeated for N tasks."
+          },
+          {
+            "step": 3,
+            "stage": "initiation",
+            "state": "TASK_STATE_WORKING",
+            "transition": "task_processing_continues",
+            "actor": "server",
+            "note": "Server creates task and begins processing. Task transitions to WORKING via inter-stage transition to task_execution."
+          },
+          {
+            "step": 4,
+            "stage": "task_execution",
+            "state": "TASK_STATE_WORKING",
+            "transition": "agent_requests_input",
+            "actor": "server",
+            "note": "Agent determines the underspecified message requires clarification and transitions task to INPUT_REQUIRED. This is a normal, compliant server behavior."
+          },
+          {
+            "step": 5,
+            "stage": "task_execution",
+            "state": "TASK_STATE_INPUT_REQUIRED",
+            "transition": "input_requested (inter-stage to interruption)",
+            "actor": "server",
+            "note": "Task crosses to interruption phase as INPUT_REQUIRED. The FSM defines only two exits: client_sends_input → WORKING, or cancel_task_requested → CANCELED. NO transition to FAILED exists."
+          },
+          {
+            "step": 6,
+            "stage": "interruption",
+            "state": "TASK_STATE_INPUT_REQUIRED",
+            "transition": "(no transition — client disconnects)",
+            "actor": "client",
+            "note": "Client abandons the task and disconnects. The task remains in INPUT_REQUIRED indefinitely. The server holds all task resources (state, context, history, potential open push notification configs). The protocol provides no timeout transition and no server-initiated path to FAILED or any terminal state. Repeating steps 2-6 for N tasks creates N permanently stranded tasks consuming server resources."
+          }
+        ],
+        "involved_states": [
+          {
+            "stage": "interruption",
+            "state_name": "TASK_STATE_INPUT_REQUIRED",
+            "actor": "shared",
+            "relevance": "This interrupted state has no server-initiated exit to any terminal state. The only defined exits require client action (send input or cancel). A disconnected client leaves the task permanently stranded."
+          },
+          {
+            "stage": "interruption",
+            "state_name": "TASK_STATE_AUTH_REQUIRED",
+            "actor": "shared",
+            "relevance": "Same issue — no transition to FAILED or any terminal state without client action. Tasks stuck in AUTH_REQUIRED also hold resources indefinitely with no server escape."
+          },
+          {
+            "stage": "task_execution",
+            "state_name": "TASK_STATE_FAILED",
+            "actor": "server",
+            "relevance": "This terminal state exists but is reachable only from TASK_STATE_WORKING. No transition from INPUT_REQUIRED or AUTH_REQUIRED to FAILED exists in the state machine."
+          }
+        ],
+        "involved_transitions": [
+          {
+            "from_stage": "task_execution",
+            "from_state": "TASK_STATE_WORKING",
+            "to_stage": "task_execution",
+            "to_state": "TASK_STATE_INPUT_REQUIRED",
+            "trigger": "agent_requests_input",
+            "relevance": "Entry point to the stranded state. Once in INPUT_REQUIRED, the server cannot transition to FAILED."
+          },
+          {
+            "from_stage": "interruption",
+            "from_state": "TASK_STATE_INPUT_REQUIRED",
+            "to_stage": "interruption",
+            "to_state": "TASK_STATE_WORKING",
+            "trigger": "client_sends_input",
+            "relevance": "One of only two exits from INPUT_REQUIRED. Requires client action that will never come from an abandoned client."
+          },
+          {
+            "from_stage": "interruption",
+            "from_state": "TASK_STATE_INPUT_REQUIRED",
+            "to_stage": "interruption",
+            "to_state": "TASK_STATE_CANCELED",
+            "trigger": "cancel_task_requested",
+            "relevance": "The other exit from INPUT_REQUIRED. Also requires client action (CancelTask RPC). An abandoned client will never send this."
+          }
+        ],
+        "missing_primitive": "Protocol-defined timeout transitions from interrupted states to terminal states. Specifically: (1) A normative transition INPUT_REQUIRED → FAILED triggered by a server-defined timeout, (2) A normative transition AUTH_REQUIRED → FAILED triggered by a server-defined timeout, (3) A protocol-level configurable or mandatory maximum duration for interrupted states (e.g., a timeout field in TaskStatus or a server-declared max-interruption-duration in the agent card), and (4) A TASK_TIMEOUT error type that signals the reason for the transition. Without these, a compliant server that enforces strict state machine compliance cannot reclaim resources from abandoned tasks in interrupted states.",
+        "why_compliance_does_not_prevent": "The spec explicitly states 'An agent implementation MUST NOT transition a task to an invalid state.' The state machine defines no transition from INPUT_REQUIRED or AUTH_REQUIRED to FAILED (or any other terminal state except CANCELED, which requires client initiation). A fully compliant server CANNOT fail an abandoned task in an interrupted state because doing so would violate the state machine MUST. The server can only wait for client action that will never come. Full compliance by all parties (server follows the state machine, client is absent) results in indefinite resource holding with no protocol escape.",
+        "spec_sections_searched": [
+          "3.2",
+          "3.4",
+          "4.1",
+          "7.6",
+          "9.4",
+          "life-of-a-task topics"
+        ],
+        "preliminary_confidence": "HIGH"
+      }
+    ],
+    "structural_observations": [
+      "The referenceTaskIds field on Message allows clients to reference arbitrary task IDs for context. The protocol defines no authorization validation for these references — a client could reference task IDs belonging to other clients, potentially causing the server to load and incorporate context from other sessions into its processing. While this shares the root cause with F-004 (no task-to-identity binding), the attack vector is distinct: indirect information leakage through agent context pollution rather than direct task CRUD operations. However, it was not reported as a separate candidate because the underlying missing primitive (task-level access control) is the same.",
+      "The protocol's push notification security model exhibits an asymmetry with the primary request channel: client-to-server requests MUST always be authenticated (every incoming request), but server-to-client push notifications have only conditional authentication (depends on optional PushNotificationConfig.authentication). This creates a tier of communication with weaker security guarantees for the server-initiated direction.",
+      "The ListTasks operation combined with the absence of task-to-identity binding (F-004) potentially enables any authenticated client to enumerate all tasks on a server. While this is an additional consequence of the F-004 gap, it significantly increases the attack surface by providing task ID discovery without requiring prior knowledge.",
+      "The task state machine's interrupted states (INPUT_REQUIRED, AUTH_REQUIRED) occupy a unique position: they are non-terminal (the task is 'active') but all exit transitions require external (client) action. This creates an asymmetry where the server is responsible for resource management but lacks protocol authority to reclaim resources from tasks in these states. Every other non-terminal state (SUBMITTED, WORKING) has server-initiated exits to terminal states."
+    ]
+  },
+  "cost": {
+    "pipeline_stage": "stage_c1",
+    "protocol_phase": "c1_retry",
+    "model": "anthropic/claude-opus-4-6",
+    "turn": 1,
+    "input_tokens": 541096,
+    "output_tokens": 22085,
+    "total_tokens": 563181,
+    "cumulative_input_tokens": 541096,
+    "cumulative_output_tokens": 22085,
+    "cumulative_total_tokens": 563181,
+    "elapsed_seconds": 513.01,
+    "timestamp": "2026-05-19T23:03:01Z",
+    "cost_usd": 3.347605,
+    "web_search_requests": 9,
+    "web_search_executed": true,
+    "web_search_queries": []
+  },
+  "timestamp": "2026-05-19T23:03:01Z"
+}

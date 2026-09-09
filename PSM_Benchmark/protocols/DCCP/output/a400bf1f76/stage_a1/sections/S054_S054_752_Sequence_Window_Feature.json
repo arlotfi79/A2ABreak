@@ -1,0 +1,100 @@
+{
+  "section_id": "S054",
+  "title": "S054 7.5.2 Sequence Window Feature",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S054 7.5.2 Sequence Window Feature"
+  ],
+  "url_anchor": "#s054-752-sequence-window-feature",
+  "word_count": 288,
+  "statement_count": 4,
+  "elapsed_seconds": 35.01,
+  "statements": [
+    {
+      "statement_id": "D-S054-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "New connections start with Sequence Window 100 for both endpoints.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S054",
+      "object_name": "connection",
+      "field_name": "Sequence Window",
+      "field_type": "feature",
+      "required": true,
+      "allowed_values": [
+        "100"
+      ],
+      "guard_semantics": "initial value at connection establishment for both endpoints"
+    },
+    {
+      "statement_id": "D-S054-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "The minimum valid Sequence Window value is Wmin = 32. The maximum valid Sequence Window value is Wmax = 2^46 - 1 = 70368744177663. Change options suggesting Sequence Window values out of this range are invalid and MUST be handled accordingly.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S054",
+      "object_name": "Change option",
+      "field_name": "Sequence Window",
+      "field_type": "feature",
+      "required": true,
+      "allowed_values": [
+        "32..70368744177663"
+      ],
+      "guard_semantics": "values outside [Wmin, Wmax] are invalid and must be rejected"
+    },
+    {
+      "statement_id": "D-S054-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints SHOULD send Change L(Sequence Window) options, as necessary, as the connection progresses.",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S054",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection progresses / anticipated in-flight packet count changes",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Change L(Sequence Window, W)"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S054-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "An endpoint MUST NOT persistently send more than its Sequence Window number of packets per round-trip time; that is, DCCP A MUST NOT persistently send more than Sequence Window/A packets per RTT.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S054",
+      "actors": [
+        "endpoint",
+        "DCCP A"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "packet send rate exceeds Sequence Window / RTT",
+      "pre_cond": "endpoint.packets_sent_per_RTT > endpoint.Sequence_Window",
+      "post_cond": null,
+      "actions": [
+        "cease persistent over-sending beyond Sequence Window/A per RTT"
+      ],
+      "modality": "must"
+    }
+  ]
+}

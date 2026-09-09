@@ -1,0 +1,135 @@
+{
+  "section_id": "S010",
+  "title": "S010 3.3.1 Capability Descriptions",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S010 3.3.1 Capability Descriptions"
+  ],
+  "url_anchor": "#s010-331-capability-descriptions",
+  "word_count": 304,
+  "statement_count": 5,
+  "elapsed_seconds": 71.76,
+  "statements": [
+    {
+      "statement_id": "N-S010-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "nntp_fsm",
+      "description": "Each capability line consists of one or more tokens, which MUST be separated by one or more space or TAB characters.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S010-001"
+    },
+    {
+      "statement_id": "N-S010-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST ensure that the capability list accurately reflects the capabilities (including extensions) currently available.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CAPABILITIES_command_received",
+      "pre_cond": null,
+      "post_cond": "capability_list.reflects_current_capabilities = true",
+      "actions": [
+        "Return a capability list that accurately reflects all capabilities and extensions currently available"
+      ],
+      "modality": "must",
+      "id": "N-S010-002"
+    },
+    {
+      "statement_id": "N-S010-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If a capability is only available with the server in a certain state (for example, only after authentication), the list MUST only include the capability label when the server is in that state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CAPABILITIES_command_received",
+      "pre_cond": "server.state = capability_required_state",
+      "post_cond": "capability_list.includes(capability_label) = (server.state = capability_required_state)",
+      "actions": [
+        "Include capability label in capability list only when server is in the state where that capability is available",
+        "Omit capability label from capability list when server is not in the required state"
+      ],
+      "modality": "must",
+      "id": "N-S010-003"
+    },
+    {
+      "statement_id": "N-S010-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Similarly, if only some of the commands in an extension will be available, or if the behaviour of the extension will change in some other manner, according to the state of the server, this MUST be indicated by different arguments in the capability line.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CAPABILITIES_command_received",
+      "pre_cond": "server.state = affects_extension_behavior | server.state = affects_extension_command_availability",
+      "post_cond": "capability_line.arguments.reflects_state_dependent_behavior = true",
+      "actions": [
+        "Emit different capability line arguments to reflect state-dependent extension availability or behavioral changes"
+      ],
+      "modality": "must",
+      "id": "N-S010-004"
+    },
+    {
+      "statement_id": "N-S010-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "In order to interoperate with such versions, clients MUST be prepared to receive lines beginning with other characters and MUST ignore any they do not understand.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CAPABILITIES_response_received",
+      "pre_cond": "capability_line.first_character != letter",
+      "post_cond": "client.unknown_capability_line_discarded = true",
+      "actions": [
+        "Accept capability response lines beginning with non-letter characters without aborting processing",
+        "Ignore any capability lines that the client does not understand"
+      ],
+      "modality": "must",
+      "id": "N-S010-005"
+    }
+  ]
+}

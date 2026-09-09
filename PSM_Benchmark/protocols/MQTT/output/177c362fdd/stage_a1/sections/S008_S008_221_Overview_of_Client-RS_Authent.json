@@ -1,0 +1,128 @@
+{
+  "section_id": "S008",
+  "title": "S008 2.2.1 Overview of Client-RS Authentication Methods over TLS and MQTT",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S008 2.2.1 Overview of Client-RS Authentication Methods over TLS and MQTT"
+  ],
+  "url_anchor": "#s008-221-overview-of-client-rs-authentication-methods-over-tls-and-mqtt",
+  "word_count": 499,
+  "statement_count": 5,
+  "elapsed_seconds": 35.51,
+  "statements": [
+    {
+      "statement_id": "D-S008-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST authenticate to the Broker either over MQTT or TLS before performing any other action.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "pre-authenticated",
+      "to_state": "authenticated",
+      "trigger": "authenticate",
+      "pre_cond": null,
+      "post_cond": "client.authenticated = true",
+      "actions": [
+        "authenticate to broker over MQTT or TLS"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S008-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The token is transported inside the CONNECT packet and MUST be validated using one of the methods described in Section 2.2.2 (TLS:Anon,MQTT:ace).",
+      "is_inferred": false,
+      "confidence": 0.82,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT packet received",
+      "pre_cond": "connection.auth_mode = TLS:Anon,MQTT:ace",
+      "post_cond": "connection.token_validated = true",
+      "actions": [
+        "extract token from CONNECT packet",
+        "validate token"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S008-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The token is transported inside the CONNECT packet (for TLS:Anon,MQTT:ace option).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S008",
+      "object_name": "CONNECT",
+      "field_name": "token",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "connection.auth_mode = TLS:Anon,MQTT:ace"
+    },
+    {
+      "statement_id": "D-S008-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "When the Client uses TLS:Anon,MQTT:None, the Client can only publish or subscribe to public topics.",
+      "is_inferred": false,
+      "confidence": 0.78,
+      "source_section": "S008",
+      "actors": [
+        "client"
+      ],
+      "from_state": "authenticated",
+      "to_state": null,
+      "trigger": "publish or subscribe",
+      "pre_cond": "connection.auth_mode = TLS:Anon,MQTT:None",
+      "post_cond": "session.topic_scope = public_only",
+      "actions": [
+        "restrict publish/subscribe to public topics"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S008-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST authenticate the Broker during the TLS handshake.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S008",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TLS handshake",
+      "to_state": "broker authenticated",
+      "trigger": "TLS handshake",
+      "pre_cond": null,
+      "post_cond": "server.authenticated = true",
+      "actions": [
+        "validate broker public key or certificate against rs_cnf parameter"
+      ],
+      "modality": "must"
+    }
+  ]
+}

@@ -1,0 +1,260 @@
+{
+  "section_id": "3.4",
+  "title": "3.4. Multi-Turn Interactions",
+  "depth": 3,
+  "parent_path": [
+    "3. A2A Protocol Operations",
+    "3.4. Multi-Turn Interactions"
+  ],
+  "url_anchor": "#34-multi-turn-interactions",
+  "word_count": 565,
+  "statement_count": 12,
+  "elapsed_seconds": 220.96,
+  "statements": [
+    {
+      "statement_id": "D-3-4-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "Agents can request additional input mid-processing by transitioning a task to the input-required state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4.3",
+      "state_name": "TASK_STATE_INPUT_REQUIRED",
+      "enum_name": "TaskState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-3-4-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "The generated taskId MUST be included in the Task object returned to the client; Agents MUST generate a unique taskId for each new task they create",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4.2",
+      "object_name": "Task",
+      "field_name": "taskId",
+      "field_type": "string",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-4-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "A contextId logically groups multiple Task objects and Message objects that are part of the same conversational context; if an agent generates a new contextId, it MUST be included in the response (either Task or Message)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4.1",
+      "object_name": "Task",
+      "field_name": "contextId",
+      "field_type": "string",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-4-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "task_execution",
+      "description": "Agents MAY generate a new contextId when processing a Message that does not include a contextId field; if generated, it MUST be included in the response (either Task or Message); clients MAY include the contextId in subsequent messages to indicate continuation of a previous interaction",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4.1",
+      "object_name": "Message",
+      "field_name": "contextId",
+      "field_type": "string",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-4-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "task_execution",
+      "description": "When a client includes a taskId in a Message, it MUST reference an existing task; clients MAY use taskId (with or without contextId) to continue or refine a specific task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4.2",
+      "object_name": "Message",
+      "field_name": "taskId",
+      "field_type": "string",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-4-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "task_execution",
+      "description": "Clients SHOULD use the referenceTaskIds field in Message to explicitly reference related tasks",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4.3",
+      "object_name": "Message",
+      "field_name": "referenceTaskIds",
+      "field_type": "array of string",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-4-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "interruption",
+      "description": "Agents can request additional input mid-processing by transitioning a task to the input-required state",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "3.4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_INPUT_REQUIRED",
+      "trigger": null,
+      "pre_cond": "task.state = TASK_STATE_WORKING",
+      "post_cond": "task.state = TASK_STATE_INPUT_REQUIRED",
+      "actions": [
+        "Agent transitions task to input-required state",
+        "Agent signals to client that additional input is required"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-3-4-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "The client continues the interaction by sending a new message with the same taskId and contextId",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "3.4.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TASK_STATE_INPUT_REQUIRED",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "message_received",
+      "pre_cond": "task.state = TASK_STATE_INPUT_REQUIRED & message.taskId = task.taskId & message.contextId = task.contextId",
+      "post_cond": "task.state = TASK_STATE_WORKING",
+      "actions": [
+        "Client sends new message with same taskId and contextId",
+        "Agent resumes processing the task"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-3-4-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Agents MUST reject messages containing mismatching contextId and taskId (i.e., the provided contextId is different from that of the referenced Task)",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_received",
+      "pre_cond": "message.taskId != null & message.contextId != null & task.taskId = message.taskId & message.contextId != task.contextId",
+      "post_cond": "request.rejected = true",
+      "actions": [
+        "Agent rejects the message with an error"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-4-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Agents MUST return a TaskNotFoundError if the provided taskId does not correspond to an existing task",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.4.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_received",
+      "pre_cond": "message.taskId != null & task.found = false",
+      "post_cond": "response.error = TaskNotFoundError",
+      "actions": [
+        "Agent returns TaskNotFoundError to client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-4-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "context",
+      "stage": "initiation",
+      "description": "If an agent cannot accept a client-provided contextId, it MUST reject the request with an error and MUST NOT generate a new contextId for the response",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.4.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_received",
+      "pre_cond": "message.contextId != null & agent.contextId_acceptable = false",
+      "post_cond": "request.rejected = true & response.contextId = null",
+      "actions": [
+        "Agent rejects the request with an error",
+        "Agent does not generate a new contextId for the response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-4-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Agents MUST infer contextId from the task if only taskId is provided",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "3.4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_received",
+      "pre_cond": "message.taskId != null & message.contextId = null",
+      "post_cond": "effective_contextId = task.contextId & task.taskId = message.taskId",
+      "actions": [
+        "Agent resolves the referenced task by message.taskId",
+        "Agent infers effective contextId from the referenced task's contextId"
+      ],
+      "modality": "must"
+    }
+  ]
+}

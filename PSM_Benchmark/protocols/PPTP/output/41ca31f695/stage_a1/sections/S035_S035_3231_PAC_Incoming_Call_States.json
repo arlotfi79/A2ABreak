@@ -1,0 +1,180 @@
+{
+  "section_id": "S035",
+  "title": "S035 3.2.3.1 PAC Incoming Call States",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S035 3.2.3.1 PAC Incoming Call States"
+  ],
+  "url_anchor": "#s035-3231-pac-incoming-call-states",
+  "word_count": 229,
+  "statement_count": 8,
+  "elapsed_seconds": 30.08,
+  "statements": [
+    {
+      "statement_id": "D-S035-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "idle: The PAC detects an incoming call on one of its telco interfaces. The PAC sends an Incoming-Call-Request message and moves to the wait_reply state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "state_name": "idle",
+      "enum_name": "PAC_IncomingCall_States",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S035-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "wait_reply: The PAC receives an Incoming-Call-Reply message indicating non-willingness to accept the call and moves back into the idle state. If the reply message indicates that the call is accepted, the PAC sends an Incoming-Call-Connected message and enters the established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "state_name": "wait_reply",
+      "enum_name": "PAC_IncomingCall_States",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = wait_reply"
+    },
+    {
+      "statement_id": "D-S035-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "established: Data is exchanged over the tunnel. The call may be cleared following an event on the telco connection, receipt of a Call-Clear-Request, or a local reason.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "state_name": "established",
+      "enum_name": "PAC_IncomingCall_States",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = established"
+    },
+    {
+      "statement_id": "D-S035-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Ring/Send Incoming Call Request: PAC detects incoming call, sends Incoming-Call-Request and moves to wait_reply state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "idle",
+      "to_state": "wait_reply",
+      "trigger": "Ring detected (incoming call on telco interface)",
+      "pre_cond": "session.state = idle",
+      "post_cond": "session.state = wait_reply",
+      "actions": [
+        "send Incoming-Call-Request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S035-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Receive Incoming Call Reply Not Accepting: PAC receives Incoming-Call-Reply indicating non-willingness to accept and moves back to idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "wait_reply",
+      "to_state": "idle",
+      "trigger": "Receive Incoming-Call-Reply (not accepting)",
+      "pre_cond": "session.state = wait_reply",
+      "post_cond": "session.state = idle",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S035-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Abort/Send Call Disconnect Notify from wait_reply back to idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "wait_reply",
+      "to_state": "idle",
+      "trigger": "Abort",
+      "pre_cond": "session.state = wait_reply",
+      "post_cond": "session.state = idle",
+      "actions": [
+        "send Call-Disconnect-Notify"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S035-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Receive Incoming Call Reply Accepting/Answer call; Send Call Connected: PAC answers the call and sends Incoming-Call-Connected, entering established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "wait_reply",
+      "to_state": "established",
+      "trigger": "Receive Incoming-Call-Reply (accepting)",
+      "pre_cond": "session.state = wait_reply",
+      "post_cond": "session.state = established",
+      "actions": [
+        "answer call",
+        "send Incoming-Call-Connected"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S035-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Receive Clear Call Request or telco call dropped or local disconnect/Send Call Disconnect Notify: PAC transitions from established back to idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "Receive Call-Clear-Request | telco call dropped | local disconnect",
+      "pre_cond": "session.state = established",
+      "post_cond": "session.state = idle",
+      "actions": [
+        "send Call-Disconnect-Notify"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "section_id": "S018",
+  "title": "S018 4.6 Counters and Timers",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S018 4.6 Counters and Timers"
+  ],
+  "url_anchor": "#s018-46-counters-and-timers",
+  "word_count": 364,
+  "statement_count": 13,
+  "elapsed_seconds": 90.85,
+  "statements": [
+    {
+      "statement_id": "N-S018-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "ppp_fsm",
+      "description": "The Restart timer MUST be configurable, but SHOULD default to three (3) seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "make Restart timer configurable"
+      ],
+      "modality": "must",
+      "id": "N-S018-001"
+    },
+    {
+      "statement_id": "N-S018-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "ppp_fsm",
+      "description": "The Restart timer MUST be configurable, but SHOULD default to three (3) seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "restart_timer.default = 3",
+      "actions": [
+        "set Restart timer default value to 3 seconds"
+      ],
+      "modality": "should",
+      "id": "N-S018-002"
+    },
+    {
+      "statement_id": "N-S018-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "ppp_fsm",
+      "description": "The Restart timer SHOULD be based on the speed of the link.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "derive Restart timer value from link speed"
+      ],
+      "modality": "should",
+      "id": "N-S018-003"
+    },
+    {
+      "statement_id": "N-S018-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "ppp_fsm",
+      "description": "Higher speed links, or links with low switching latency, SHOULD have correspondingly faster retransmission times.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "link.speed = high | link.switching_latency = low",
+      "post_cond": null,
+      "actions": [
+        "configure Restart timer for faster retransmission times on high-speed or low-latency links"
+      ],
+      "modality": "should",
+      "id": "N-S018-004"
+    },
+    {
+      "statement_id": "N-S018-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "ppp_fsm",
+      "description": "Instead of a constant value, the Restart timer MAY begin at an initial small value and increase to the configured final value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "start Restart timer at a small initial value and exponentially increase toward the configured final value"
+      ],
+      "modality": "may",
+      "id": "N-S018-005"
+    },
+    {
+      "statement_id": "N-S018-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "ppp_fsm",
+      "description": "Each successive value less than the final value SHOULD be at least twice the previous value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Timeout",
+      "pre_cond": "restart_timer.current_value < restart_timer.final_value",
+      "post_cond": "restart_timer.next_value >= restart_timer.current_value * 2",
+      "actions": [
+        "set next Restart timer interval to at least twice the current interval"
+      ],
+      "modality": "should",
+      "id": "N-S018-006"
+    },
+    {
+      "statement_id": "N-S018-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "ppp_fsm",
+      "description": "The initial value SHOULD be large enough to account for the size of the packets, twice the round trip time for transmission at the link speed, and at least an additional 100 milliseconds to allow the peer to process the packets before responding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "restart_timer.initial_value >= (packet_transmission_time + 2 * round_trip_time + 100ms)",
+      "actions": [
+        "set initial Restart timer value to cover packet size, twice round-trip time, and at least 100ms peer processing margin"
+      ],
+      "modality": "should",
+      "id": "N-S018-007"
+    },
+    {
+      "statement_id": "N-S018-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "state_machine",
+      "stage": "ppp_fsm",
+      "description": "Max-Terminate MUST be configurable, but SHOULD default to two (2) transmissions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "make Max-Terminate counter configurable"
+      ],
+      "modality": "must",
+      "id": "N-S018-008"
+    },
+    {
+      "statement_id": "N-S018-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "state_machine",
+      "stage": "ppp_fsm",
+      "description": "Max-Terminate MUST be configurable, but SHOULD default to two (2) transmissions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "max_terminate.default = 2",
+      "actions": [
+        "set Max-Terminate default to 2 transmissions"
+      ],
+      "modality": "should",
+      "id": "N-S018-009"
+    },
+    {
+      "statement_id": "N-S018-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "state_machine",
+      "stage": "ppp_fsm",
+      "description": "Max-Configure MUST be configurable, but SHOULD default to ten (10) transmissions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "make Max-Configure counter configurable"
+      ],
+      "modality": "must",
+      "id": "N-S018-010"
+    },
+    {
+      "statement_id": "N-S018-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "state_machine",
+      "stage": "ppp_fsm",
+      "description": "Max-Configure MUST be configurable, but SHOULD default to ten (10) transmissions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "max_configure.default = 10",
+      "actions": [
+        "set Max-Configure default to 10 transmissions"
+      ],
+      "modality": "should",
+      "id": "N-S018-011"
+    },
+    {
+      "statement_id": "N-S018-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "state_machine",
+      "stage": "ppp_fsm",
+      "description": "Max-Failure MUST be configurable, but SHOULD default to five (5) transmissions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "make Max-Failure counter configurable"
+      ],
+      "modality": "must",
+      "id": "N-S018-012"
+    },
+    {
+      "statement_id": "N-S018-13",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "state_machine",
+      "stage": "ppp_fsm",
+      "description": "Max-Failure MUST be configurable, but SHOULD default to five (5) transmissions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "max_failure.default = 5",
+      "actions": [
+        "set Max-Failure default to 5 transmissions"
+      ],
+      "modality": "should",
+      "id": "N-S018-013"
+    }
+  ]
+}

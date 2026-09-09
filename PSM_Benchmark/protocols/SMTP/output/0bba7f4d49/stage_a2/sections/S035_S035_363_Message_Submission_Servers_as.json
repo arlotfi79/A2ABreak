@@ -1,0 +1,137 @@
+{
+  "section_id": "S035",
+  "title": "S035 3.6.3 Message Submission Servers as Relays",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S035 3.6.3 Message Submission Servers as Relays"
+  ],
+  "url_anchor": "#s035-363-message-submission-servers-as-relays",
+  "word_count": 398,
+  "statement_count": 5,
+  "elapsed_seconds": 80.5,
+  "statements": [
+    {
+      "statement_id": "N-S035-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If an SMTP server has accepted the task of relaying the mail and later finds that the destination is incorrect or that the mail cannot be delivered for some other reason, then it MUST construct an \"undeliverable mail\" notification message and send it to the originator of the undeliverable mail (as indicated by the reverse-path).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "SMTP server",
+        "originator"
+      ],
+      "from_state": "RELAY_ACCEPTED",
+      "to_state": null,
+      "trigger": "delivery_failure_detected",
+      "pre_cond": "server.task = relay_accepted & delivery.failed = true",
+      "post_cond": "notification_message.constructed = true & notification_message.sent_to_originator = true",
+      "actions": [
+        "Construct undeliverable mail notification message",
+        "Send notification message to originator as indicated by reverse-path"
+      ],
+      "modality": "must",
+      "id": "N-S035-001"
+    },
+    {
+      "statement_id": "N-S035-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Formats specified for non-delivery reports by other standards (see, for example, RFC 3461 [32] and RFC 3464 [33]) SHOULD be used if possible.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S035-002"
+    },
+    {
+      "statement_id": "N-S035-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Of course, SMTP servers MUST NOT send notification messages about problems transporting notification messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "SMTP servers"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "notification_transport_failure",
+      "pre_cond": "message.type = notification & transport.failed = true",
+      "post_cond": "notification_message.sent = false",
+      "actions": [
+        "Do not send notification message in response to notification transport failure"
+      ],
+      "modality": "must",
+      "id": "N-S035-003"
+    },
+    {
+      "statement_id": "N-S035-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When such a message is transmitted, the reverse-path MUST be set to null (see Section 4.5.5 for additional discussion).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transmit_notification_message",
+      "pre_cond": "message.type = notification",
+      "post_cond": "MAIL_command.reverse_path = null",
+      "actions": [
+        "Set reverse-path to null in MAIL command of notification message"
+      ],
+      "modality": "must",
+      "id": "N-S035-004"
+    },
+    {
+      "statement_id": "N-S035-5",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "As discussed in Section 6.4, a relay SMTP has no need to inspect or act upon the header section or body of the message data and MUST NOT do so except to add its own \"Received:\" header field (Section 4.4) and, optionally, to attempt to detect looping in the mail system (see Section 6.3).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "relay SMTP"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_data_received",
+      "pre_cond": "server.role = relay",
+      "post_cond": "header_section.inspected = false & body.inspected = false & header_section.modified = false & body.modified = false",
+      "actions": [
+        "Do not inspect or act upon header section or body of message data",
+        "Add own Received: header field",
+        "Optionally attempt to detect looping in the mail system"
+      ],
+      "modality": "must",
+      "id": "N-S035-005"
+    }
+  ]
+}

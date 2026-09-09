@@ -1,0 +1,105 @@
+{
+  "section_id": "S062",
+  "title": "S062 10.2.4 Refreshing Bindings",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S062 10.2.4 Refreshing Bindings"
+  ],
+  "url_anchor": "#s062-1024-refreshing-bindings",
+  "word_count": 142,
+  "statement_count": 4,
+  "elapsed_seconds": 30.15,
+  "statements": [
+    {
+      "statement_id": "D-S062-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The 200 (OK) response from the registrar contains a list of Contact fields enumerating all current bindings. The UA compares each contact address to see if it created the contact address. If so, it updates the expiration time interval according to the expires parameter or, if absent, the Expires field value.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S062",
+      "actors": [
+        "UA",
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "200 (OK) received from registrar",
+      "pre_cond": null,
+      "post_cond": "binding.expiration_time = expires_parameter | Expires_field_value",
+      "actions": [
+        "compare each contact address against created contact addresses",
+        "update expiration time interval per expires parameter or Expires field value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The UA then issues a REGISTER request for each of its bindings before the expiration interval has elapsed. It MAY combine several updates into one REGISTER request.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S062",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "expiration interval approaching",
+      "pre_cond": "binding.expiration_interval > 0",
+      "post_cond": null,
+      "actions": [
+        "send REGISTER request for binding before expiration interval elapses"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Registration refreshes SHOULD be sent to the same network address as the original registration, unless redirected.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S062",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REGISTER refresh sent",
+      "pre_cond": "session.redirected = false",
+      "post_cond": "transaction.destination = original_registration.network_address",
+      "actions": [
+        "send REGISTER refresh to same network address as original registration"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S062-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A UA SHOULD use the same Call-ID for all registrations during a single boot cycle.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S062",
+      "object_name": "REGISTER request",
+      "field_name": "Call-ID",
+      "field_type": "header field",
+      "required": true,
+      "allowed_values": [
+        "same value as original registration Call-ID within boot cycle"
+      ],
+      "guard_semantics": "session.boot_cycle = active"
+    }
+  ]
+}

@@ -1,0 +1,298 @@
+{
+  "section_id": "S095",
+  "title": "S095 11.4.1 Ack Vector Consistency",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S095 11.4.1 Ack Vector Consistency"
+  ],
+  "url_anchor": "#s095-1141-ack-vector-consistency",
+  "word_count": 468,
+  "statement_count": 13,
+  "elapsed_seconds": 65.43,
+  "statements": [
+    {
+      "statement_id": "D-S095-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "Ack Vector State 0: the packet was received and is not ECN-marked (received non-marked).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "state_name": "AckVector_State_0",
+      "enum_name": "AckVectorPacketState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S095-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "Ack Vector State 1: the packet was received and is ECN-marked (received ECN marked).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "state_name": "AckVector_State_1",
+      "enum_name": "AckVectorPacketState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S095-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "Ack Vector State 3: the packet was not received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "state_name": "AckVector_State_3",
+      "enum_name": "AckVectorPacketState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S095-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "The HC-Receiver received packet 24 between sending its acks, so the first ack said 24 was not received (State 3) and the second said it was received or ECN marked (State 0 or 1).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Receiver"
+      ],
+      "from_state": "AckVector_State_3",
+      "to_state": "AckVector_State_0",
+      "trigger": "packet_received_after_first_ack",
+      "pre_cond": "message.ack_vector_state = AckVector_State_3",
+      "post_cond": "message.ack_vector_state = AckVector_State_0",
+      "actions": [
+        "update Ack Vector entry to State 0"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S095-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "The HC-Receiver received packet 24 between sending its acks, so the first ack said 24 was not received (State 3) and the second said it was received or ECN marked (State 0 or 1).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Receiver"
+      ],
+      "from_state": "AckVector_State_3",
+      "to_state": "AckVector_State_1",
+      "trigger": "packet_received_ecn_marked_after_first_ack",
+      "pre_cond": "message.ack_vector_state = AckVector_State_3",
+      "post_cond": "message.ack_vector_state = AckVector_State_1",
+      "actions": [
+        "update Ack Vector entry to State 1"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S095-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "The HC-Receiver received packet 24 between sending its acks, and the network reordered the acks. In this case, the packet will appear to transition from State 0 or 1 to State 3.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Receiver",
+        "HC-Sender"
+      ],
+      "from_state": "AckVector_State_0",
+      "to_state": "AckVector_State_3",
+      "trigger": "network_reordering_of_acks",
+      "pre_cond": "message.ack_vector_state = AckVector_State_0",
+      "post_cond": "message.ack_vector_state = AckVector_State_3",
+      "actions": [
+        "update Ack Vector entry to State 3 due to reordering"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S095-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "The HC-Receiver received packet 24 between sending its acks, and the network reordered the acks. In this case, the packet will appear to transition from State 0 or 1 to State 3.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Receiver",
+        "HC-Sender"
+      ],
+      "from_state": "AckVector_State_1",
+      "to_state": "AckVector_State_3",
+      "trigger": "network_reordering_of_acks",
+      "pre_cond": "message.ack_vector_state = AckVector_State_1",
+      "post_cond": "message.ack_vector_state = AckVector_State_3",
+      "actions": [
+        "update Ack Vector entry to State 3 due to reordering"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S095-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "The network duplicated packet 24, and one of the duplicates was ECN marked. This might show up as a transition between States 0 and 1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Receiver"
+      ],
+      "from_state": "AckVector_State_0",
+      "to_state": "AckVector_State_1",
+      "trigger": "ecn_marked_duplicate_received",
+      "pre_cond": "message.ack_vector_state = AckVector_State_0",
+      "post_cond": "message.ack_vector_state = AckVector_State_1",
+      "actions": [
+        "update Ack Vector entry to State 1 due to ECN-marked duplicate"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S095-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "HC-Sender combining table: old state 3, received state 0 yields new state 0. Allows the HC-Sender to undo its reaction to presumed congestion when a lost packet unexpectedly shows up (the transition from State 3 to State 0).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Sender"
+      ],
+      "from_state": "AckVector_State_3",
+      "to_state": "AckVector_State_0",
+      "trigger": "received_ack_vector_state_0_for_old_state_3_packet",
+      "pre_cond": "message.ack_vector_old_state = AckVector_State_3 & message.ack_vector_received_state = AckVector_State_0",
+      "post_cond": "message.ack_vector_state = AckVector_State_0",
+      "actions": [
+        "combine Ack Vector states to new state 0"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S095-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "HC-Sender combining table: old state 3, received state 1 yields new state 1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Sender"
+      ],
+      "from_state": "AckVector_State_3",
+      "to_state": "AckVector_State_1",
+      "trigger": "received_ack_vector_state_1_for_old_state_3_packet",
+      "pre_cond": "message.ack_vector_old_state = AckVector_State_3 & message.ack_vector_received_state = AckVector_State_1",
+      "post_cond": "message.ack_vector_state = AckVector_State_1",
+      "actions": [
+        "combine Ack Vector states to new state 1"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S095-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "HC-Sender combining table: old state 1, received state 3 yields new state 1 (State 1 is sticky against State 3).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Sender"
+      ],
+      "from_state": "AckVector_State_1",
+      "to_state": "AckVector_State_1",
+      "trigger": "received_ack_vector_state_3_for_old_state_1_packet",
+      "pre_cond": "message.ack_vector_old_state = AckVector_State_1 & message.ack_vector_received_state = AckVector_State_3",
+      "post_cond": "message.ack_vector_state = AckVector_State_1",
+      "actions": [
+        "retain Ack Vector state as 1"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S095-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "HC-Sender combining table: old state 0, received state 3 yields new state 0 (State 0 is sticky against State 3 at sender).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Sender"
+      ],
+      "from_state": "AckVector_State_0",
+      "to_state": "AckVector_State_0",
+      "trigger": "received_ack_vector_state_3_for_old_state_0_packet",
+      "pre_cond": "message.ack_vector_old_state = AckVector_State_0 & message.ack_vector_received_state = AckVector_State_3",
+      "post_cond": "message.ack_vector_state = AckVector_State_0",
+      "actions": [
+        "retain Ack Vector state as 0"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S095-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "HC-Receiver stored-state table: stored state 1, received packet state 0 yields new stored state 0 or 1. The receiver is allowed to switch its stored state to 0.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S095",
+      "actors": [
+        "HC-Receiver"
+      ],
+      "from_state": "AckVector_State_1",
+      "to_state": "AckVector_State_0",
+      "trigger": "received_packet_state_0_for_stored_state_1",
+      "pre_cond": "message.ack_vector_stored_state = AckVector_State_1 & message.ack_vector_received_state = AckVector_State_0",
+      "post_cond": "message.ack_vector_state = AckVector_State_0",
+      "actions": [
+        "update stored Ack Vector state to 0"
+      ],
+      "modality": "may"
+    }
+  ]
+}

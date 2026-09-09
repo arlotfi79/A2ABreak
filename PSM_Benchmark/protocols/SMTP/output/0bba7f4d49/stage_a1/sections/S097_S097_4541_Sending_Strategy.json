@@ -1,0 +1,202 @@
+{
+  "section_id": "S097",
+  "title": "S097 4.5.4.1 Sending Strategy",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S097 4.5.4.1 Sending Strategy"
+  ],
+  "url_anchor": "#s097-4541-sending-strategy",
+  "word_count": 599,
+  "statement_count": 9,
+  "elapsed_seconds": 57.59,
+  "statements": [
+    {
+      "statement_id": "D-S097-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "mail that cannot be transmitted immediately MUST be queued and periodically retried by the sender",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S097",
+      "state_name": "queued",
+      "enum_name": "MessageDeliveryState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "message.transmission_succeeded = false & message.give_up = false"
+    },
+    {
+      "statement_id": "D-S097-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "Retries continue until the message is transmitted",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S097",
+      "state_name": "transmitted",
+      "enum_name": "MessageDeliveryState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "message.transmission_succeeded = true"
+    },
+    {
+      "statement_id": "D-S097-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "Retries continue until the message is transmitted or the sender gives up; the give-up time generally needs to be at least 4-5 days.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S097",
+      "state_name": "give-up",
+      "enum_name": "MessageDeliveryState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "message.give_up = true"
+    },
+    {
+      "statement_id": "D-S097-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "mail that cannot be transmitted immediately MUST be queued and periodically retried by the sender. A mail queue entry will include not only the message itself but also the envelope information.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "queued",
+      "trigger": "immediate_transmission_fails",
+      "pre_cond": "message.transmission_succeeded = false",
+      "post_cond": "message.state = queued",
+      "actions": [
+        "enqueue_message_with_envelope"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S097-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "The sender MUST delay retrying a particular destination after one attempt has failed. In general, the retry interval SHOULD be at least 30 minutes.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": "queued",
+      "to_state": "queued",
+      "trigger": "retry_interval_elapsed",
+      "pre_cond": "message.state = queued & timer.retry_interval >= 30min",
+      "post_cond": "message.retry_attempted = true",
+      "actions": [
+        "attempt_delivery"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S097-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "Retries continue until the message is transmitted",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S097",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "queued",
+      "to_state": "transmitted",
+      "trigger": "delivery_attempt_succeeds",
+      "pre_cond": "message.state = queued",
+      "post_cond": "message.transmission_succeeded = true",
+      "actions": [
+        "remove_from_queue"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S097-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "Retries continue until the message is transmitted or the sender gives up; the give-up time generally needs to be at least 4-5 days.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": "queued",
+      "to_state": "give-up",
+      "trigger": "give_up_time_reached",
+      "pre_cond": "message.state = queued & timer.elapsed >= 4days",
+      "post_cond": "message.give_up = true",
+      "actions": [
+        "remove_from_queue",
+        "notify_sender_of_non_delivery"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S097-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "5yz responses to the MAIL command MUST NOT be cached.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S097",
+      "object_name": "MAIL command response",
+      "field_name": "cached_5yz_response",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": false,
+      "guard_semantics": "5yz response to MAIL must never be cached for use in future transactions"
+    },
+    {
+      "statement_id": "D-S097-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "When a mail message is to be delivered to multiple recipients, and the SMTP server to which a copy of the message is to be sent is the same for multiple recipients, then only one copy of the message SHOULD be transmitted. That is, the SMTP client SHOULD use the command sequence: MAIL, RCPT, RCPT, ..., RCPT, DATA instead of the sequence: MAIL, RCPT, DATA, ..., MAIL, RCPT, DATA.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "multiple_recipients_same_server",
+      "pre_cond": "transaction.recipient_count > 1 & transaction.server = same_server_for_all_recipients",
+      "post_cond": "transaction.rcpt_commands_issued = all_recipients_before_DATA",
+      "actions": [
+        "send_MAIL",
+        "send_RCPT_for_each_recipient",
+        "send_DATA"
+      ],
+      "modality": "should"
+    }
+  ]
+}

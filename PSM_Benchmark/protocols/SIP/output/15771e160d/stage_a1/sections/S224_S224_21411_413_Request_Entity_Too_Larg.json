@@ -1,0 +1,80 @@
+{
+  "section_id": "S224",
+  "title": "S224 21.4.11 413 Request Entity Too Large",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S224 21.4.11 413 Request Entity Too Large"
+  ],
+  "url_anchor": "#s224-21411-413-request-entity-too-large",
+  "word_count": 72,
+  "statement_count": 3,
+  "elapsed_seconds": 16.46,
+  "statements": [
+    {
+      "statement_id": "D-S224-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "sip_fsm",
+      "description": "The server MAY close the connection to prevent the client from continuing the request.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S224",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "closed",
+      "trigger": "413 Request Entity Too Large sent",
+      "pre_cond": "request.entity_body_size > server.max_processable_size",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "send 413 response",
+        "close connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S224-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If the condition is temporary, the server SHOULD include a Retry-After header field to indicate that it is temporary and after what time the client MAY try again.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S224",
+      "object_name": "413 response",
+      "field_name": "Retry-After",
+      "field_type": "header field",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "condition is temporary"
+    },
+    {
+      "statement_id": "D-S224-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The server is refusing to process a request because the request entity-body is larger than the server is willing or able to process.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S224",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request entity-body too large",
+      "pre_cond": "request.entity_body_size > server.max_processable_size",
+      "post_cond": null,
+      "actions": [
+        "send 413 Request Entity Too Large"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

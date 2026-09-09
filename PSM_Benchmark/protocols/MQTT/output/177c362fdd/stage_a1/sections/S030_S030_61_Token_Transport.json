@@ -1,0 +1,251 @@
+{
+  "section_id": "S030",
+  "title": "S030 6.1 Token Transport",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S030 6.1 Token Transport"
+  ],
+  "url_anchor": "#s030-61-token-transport",
+  "word_count": 645,
+  "statement_count": 11,
+  "elapsed_seconds": 40.39,
+  "statements": [
+    {
+      "statement_id": "D-S030-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If there is no Session associated with the Client Identifier, the Broker MUST create a new Session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "state_name": "new Session",
+      "enum_name": "SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.associated = false | session.clean_flag = 1"
+    },
+    {
+      "statement_id": "D-S030-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If the Clean flag is set to 0, the Broker MUST resume communications with the Client based on the state from the current Session (as identified by the Client Identifier).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "state_name": "existing Session continued",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.clean_flag = 0 & session.associated = true"
+    },
+    {
+      "statement_id": "D-S030-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "The Client SHOULD set the Clean flag to 1 to always start a new Session.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "new Session",
+      "trigger": "CONNECT received with Clean flag = 1",
+      "pre_cond": "connect.clean_flag = 1",
+      "post_cond": "session.state = new Session",
+      "actions": [
+        "create new Session"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S030-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If the Clean flag is set to 0, the Broker MUST resume communications with the Client based on the state from the current Session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "existing Session continued",
+      "trigger": "CONNECT received with Clean flag = 0 and existing session",
+      "pre_cond": "connect.clean_flag = 0 & session.associated = true",
+      "post_cond": "session.state = existing Session continued",
+      "actions": [
+        "resume Session state",
+        "send CONNACK with Session Present = 1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If there is no Session associated with the Client Identifier, the Broker MUST create a new Session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "new Session",
+      "trigger": "CONNECT received with Clean flag = 0 and no existing session",
+      "pre_cond": "connect.clean_flag = 0 & session.associated = false",
+      "post_cond": "session.state = new Session",
+      "actions": [
+        "create new Session",
+        "send CONNACK with Session Present = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST set the Session Present flag in the CONNACK packet accordingly, i.e., 0 to indicate a new Session to the Client and 1 to indicate that the existing Session is continued.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": "new Session",
+      "to_state": null,
+      "trigger": "new Session created",
+      "pre_cond": "session.state = new Session",
+      "post_cond": "connack.session_present = 0",
+      "actions": [
+        "send CONNACK with Session Present = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST set the Session Present flag in the CONNACK packet accordingly, i.e., 1 to indicate that the existing Session is continued.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": "existing Session continued",
+      "to_state": null,
+      "trigger": "existing Session resumed",
+      "pre_cond": "session.state = existing Session continued",
+      "post_cond": "connack.session_present = 1",
+      "actions": [
+        "send CONNACK with Session Present = 1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Client provided the token via the 'authz-info' topic and will not update the token in the CONNECT packet, it MUST authenticate over TLS. The subsequent TLS handshake would fail without a valid token.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S030",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token published to authz-info topic without CONNECT token update",
+      "pre_cond": "token.transport = authz-info & connect.token_updated = false",
+      "post_cond": "connection.auth_method = TLS",
+      "actions": [
+        "authenticate over TLS"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST still perform PoP validation on the provided Client token.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT received",
+      "pre_cond": null,
+      "post_cond": "token.pop_validated = true",
+      "actions": [
+        "perform PoP validation on Client token"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-010",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "User Name and Password flags MUST be set to 1 to ensure that the Payload of the CONNECT packet includes both the User Name and Password fields.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "object_name": "CONNECT",
+      "field_name": "User Name Flag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        1
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S030-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "User Name and Password flags MUST be set to 1 to ensure that the Payload of the CONNECT packet includes both the User Name and Password fields.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "object_name": "CONNECT",
+      "field_name": "Password Flag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        1
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

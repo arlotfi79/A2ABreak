@@ -1,0 +1,140 @@
+{
+  "section_id": "12.5",
+  "title": "12.5. Streaming Support",
+  "depth": 3,
+  "parent_path": [
+    "12. Custom Binding Guidelines",
+    "12.5. Streaming Support"
+  ],
+  "url_anchor": "#125-streaming-support",
+  "word_count": 63,
+  "statement_count": 6,
+  "elapsed_seconds": 69.5,
+  "statements": [
+    {
+      "statement_id": "D-12-5-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "If streaming is not supported, the binding MUST clearly document this limitation in the Agent Card.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "12.5",
+      "object_name": "AgentCard",
+      "field_name": "streaming_support",
+      "field_type": "documentation",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-12-5-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "streaming",
+      "stage": "interruption",
+      "description": "Reconnection: Define behavior for connection interruption and resumption",
+      "is_inferred": true,
+      "confidence": 0.45,
+      "source_section": "12.5",
+      "state_name": "STREAM_CONNECTION_INTERRUPTED",
+      "enum_name": "StreamState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "stream.open = false"
+    },
+    {
+      "statement_id": "D-12-5-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "streaming",
+      "stage": "termination",
+      "description": "Stream Termination: Specify how stream completion is signaled",
+      "is_inferred": true,
+      "confidence": 0.5,
+      "source_section": "12.5",
+      "state_name": "STREAM_TERMINATED",
+      "enum_name": "StreamState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "stream.open = false"
+    },
+    {
+      "statement_id": "D-12-5-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "interruption",
+      "description": "Reconnection: Define behavior for connection interruption and resumption",
+      "is_inferred": true,
+      "confidence": 0.4,
+      "source_section": "12.5",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "STREAM_CONNECTION_INTERRUPTED",
+      "trigger": "connection_interrupted",
+      "pre_cond": "stream.open = true",
+      "post_cond": "stream.open = false",
+      "actions": [
+        "connection interruption detected",
+        "stream suspended pending reconnection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-12-5-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "interruption",
+      "description": "Reconnection: Define behavior for connection interruption and resumption",
+      "is_inferred": true,
+      "confidence": 0.4,
+      "source_section": "12.5",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "STREAM_CONNECTION_INTERRUPTED",
+      "to_state": null,
+      "trigger": "connection_resumed",
+      "pre_cond": "stream.open = false",
+      "post_cond": "stream.open = true",
+      "actions": [
+        "stream connection re-established",
+        "streaming operations resumed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-12-5-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "termination",
+      "description": "Stream Termination: Specify how stream completion is signaled",
+      "is_inferred": true,
+      "confidence": 0.4,
+      "source_section": "12.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "STREAM_TERMINATED",
+      "trigger": "stream_completion_signaled",
+      "pre_cond": "stream.open = true",
+      "post_cond": "stream.open = false",
+      "actions": [
+        "stream completion signal sent by server",
+        "stream closed"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

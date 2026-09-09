@@ -1,0 +1,214 @@
+{
+  "section_id": "S088",
+  "title": "S088 13.2.2.4 2xx Responses",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S088 13.2.2.4 2xx Responses"
+  ],
+  "url_anchor": "#s088-13224-2xx-responses",
+  "word_count": 492,
+  "statement_count": 9,
+  "elapsed_seconds": 69.97,
+  "statements": [
+    {
+      "statement_id": "D-S088-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the dialog identifier in the 2xx response matches the dialog identifier of an existing dialog, the dialog MUST be transitioned to the \"confirmed\" state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S088",
+      "state_name": "confirmed",
+      "enum_name": "DialogState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S088-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "All the early dialogs that have not transitioned to established dialogs are terminated at 64*T1 seconds after the reception of the first 2xx response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S088",
+      "state_name": "early",
+      "enum_name": "DialogState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "dialog.state = early"
+    },
+    {
+      "statement_id": "D-S088-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the dialog identifier in the 2xx response matches the dialog identifier of an existing dialog, the dialog MUST be transitioned to the \"confirmed\" state, and the route set for the dialog MUST be recomputed based on the 2xx response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S088",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "early",
+      "to_state": "confirmed",
+      "trigger": "2xx_response_received",
+      "pre_cond": "dialog.id = response.dialog_id",
+      "post_cond": "dialog.state = confirmed & dialog.route_set = recomputed",
+      "actions": [
+        "recompute_route_set",
+        "generate_ACK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S088-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Otherwise, a new dialog in the \"confirmed\" state MUST be constructed using the procedures of Section 12.1.2.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S088",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "confirmed",
+      "trigger": "2xx_response_received",
+      "pre_cond": "dialog.id != response.dialog_id",
+      "post_cond": "new_dialog.state = confirmed",
+      "actions": [
+        "construct_new_dialog",
+        "generate_ACK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S088-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The UAC core considers the INVITE transaction completed 64*T1 seconds after the reception of the first 2xx response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S088",
+      "actors": [
+        "UAC core"
+      ],
+      "from_state": null,
+      "to_state": "completed",
+      "trigger": "timer_64T1_expires",
+      "pre_cond": "first_2xx_received = true",
+      "post_cond": "transaction.state = completed",
+      "actions": [
+        "mark_INVITE_transaction_completed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S088-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "At this point all the early dialogs that have not transitioned to established dialogs are terminated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S088",
+      "actors": [
+        "UAC core"
+      ],
+      "from_state": "early",
+      "to_state": "terminated",
+      "trigger": "timer_64T1_expires",
+      "pre_cond": "dialog.state = early & transaction.state = completed",
+      "post_cond": "dialog.state = terminated",
+      "actions": [
+        "terminate_early_dialog"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S088-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The UAC core MUST generate an ACK request for each 2xx received from the transaction layer. The ACK MUST be passed to the client transport every time a retransmission of the 2xx final response that triggered the ACK arrives.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S088",
+      "actors": [
+        "UAC core"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "2xx_received_from_transaction_layer",
+      "pre_cond": null,
+      "post_cond": "ack_sent = true",
+      "actions": [
+        "generate_ACK",
+        "pass_ACK_directly_to_transport"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S088-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the offer in the 2xx response is not acceptable, the UAC core MUST generate a valid answer in the ACK and then send a BYE immediately.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S088",
+      "actors": [
+        "UAC core"
+      ],
+      "from_state": "confirmed",
+      "to_state": "terminated",
+      "trigger": "2xx_offer_not_acceptable",
+      "pre_cond": "response.offer_acceptable = false",
+      "post_cond": "dialog.state = terminated",
+      "actions": [
+        "generate_ACK_with_answer",
+        "send_BYE_immediately"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S088-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If, after acknowledging any 2xx response to an INVITE, the UAC does not want to continue with that dialog, then the UAC MUST terminate the dialog by sending a BYE request as described in Section 15.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S088",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "confirmed",
+      "to_state": "terminated",
+      "trigger": "uac_decides_to_not_continue",
+      "pre_cond": "dialog.state = confirmed & ack_sent = true",
+      "post_cond": "dialog.state = terminated",
+      "actions": [
+        "send_BYE_request"
+      ],
+      "modality": "must"
+    }
+  ]
+}

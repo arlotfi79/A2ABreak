@@ -1,0 +1,844 @@
+{
+  "stage": "dhcp_fsm",
+  "states": [
+    {
+      "state_name": "INIT",
+      "semantic_type": "initial",
+      "actor": "endpoint",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "client.state = INIT",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S012-001",
+        "D-S013-001",
+        "D-S029-002",
+        "D-S030-001",
+        "D-S033-001",
+        "D-S034-004"
+      ]
+    },
+    {
+      "state_name": "INIT_REBOOT",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = INIT_REBOOT",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S024-002",
+        "D-S028-001",
+        "D-S029-001",
+        "D-S030-004",
+        "D-S031-001"
+      ]
+    },
+    {
+      "state_name": "REBOOTING",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = REBOOTING",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-003"
+      ]
+    },
+    {
+      "state_name": "SELECTING",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = SELECTING",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S024-001",
+        "D-S028-002",
+        "D-S029-004",
+        "D-S030-003"
+      ]
+    },
+    {
+      "state_name": "REQUESTING",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = REQUESTING",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-005"
+      ]
+    },
+    {
+      "state_name": "BOUND",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = BOUND",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S008-001",
+        "D-S013-002",
+        "D-S016-001",
+        "D-S029-006",
+        "D-S030-002",
+        "D-S031-002",
+        "D-S034-003"
+      ]
+    },
+    {
+      "state_name": "RENEWING",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = RENEWING",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S024-003",
+        "D-S028-003",
+        "D-S029-007",
+        "D-S030-005",
+        "D-S034-001"
+      ]
+    },
+    {
+      "state_name": "REBINDING",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = REBINDING",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S024-004",
+        "D-S028-004",
+        "D-S029-008",
+        "D-S030-006",
+        "D-S034-002"
+      ]
+    },
+    {
+      "state_name": "GracefulShutdown",
+      "semantic_type": "closing",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null,
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S012-008"
+      ]
+    },
+    {
+      "state_name": "INITIALIZED",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null,
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-S032-001"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "INIT",
+      "to_state": "SELECTING",
+      "trigger": "send DHCPDISCOVER",
+      "guard": "client.state = INIT",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "broadcast DHCPDISCOVER"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S012-010",
+        "D-S029-012"
+      ]
+    },
+    {
+      "from_state": "INIT",
+      "to_state": "INIT",
+      "trigger": "receive DHCPACK",
+      "guard": "client.state = INIT",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "discard DHCPACK silently"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S030-008"
+      ]
+    },
+    {
+      "from_state": "INIT",
+      "to_state": "BOUND",
+      "trigger": "receive DHCPACK_prev_addr",
+      "guard": "client.state = INIT & DHCPACK.yiaddr = client.previous_network_address",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "actions": [
+        "resume network processing"
+      ],
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-S034-010"
+      ]
+    },
+    {
+      "from_state": "INIT_REBOOT",
+      "to_state": "REBOOTING",
+      "trigger": "send DHCPREQUEST",
+      "guard": "client.state = INIT_REBOOT",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DHCPREQUEST"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-009"
+      ]
+    },
+    {
+      "from_state": "INIT_REBOOT",
+      "to_state": "INIT_REBOOT",
+      "trigger": "cond known_address",
+      "guard": "client.state = INIT_REBOOT & client.network_address != null",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "insert known address in DHCPREQUEST",
+        "broadcast DHCPREQUEST"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S031-003"
+      ]
+    },
+    {
+      "from_state": "INIT_REBOOT",
+      "to_state": "BOUND",
+      "trigger": "receive DHCPACK",
+      "guard": "client.state = INIT_REBOOT & message.xid = client.xid",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "record lease expiration time"
+      ],
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-S031-004"
+      ]
+    },
+    {
+      "from_state": "REBOOTING",
+      "to_state": "INIT",
+      "trigger": "receive DHCPNAK",
+      "guard": "client.state = REBOOTING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "restart"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-010"
+      ]
+    },
+    {
+      "from_state": "REBOOTING",
+      "to_state": "BOUND",
+      "trigger": "receive DHCPACK",
+      "guard": "client.state = REBOOTING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "record lease",
+        "set timer T1",
+        "set timer T2"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-011"
+      ]
+    },
+    {
+      "from_state": "SELECTING",
+      "to_state": "SELECTING",
+      "trigger": "receive DHCPOFFER",
+      "guard": "client.state = SELECTING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "collect replies"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-013"
+      ]
+    },
+    {
+      "from_state": "SELECTING",
+      "to_state": "SELECTING",
+      "trigger": "receive DHCPOFFER_bad_xid",
+      "guard": "client.state = SELECTING & DHCPOFFER.xid != DHCPDISCOVER.xid",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "discard DHCPOFFER silently"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S030-007"
+      ]
+    },
+    {
+      "from_state": "SELECTING",
+      "to_state": "REQUESTING",
+      "trigger": "select_offer",
+      "guard": "client.state = SELECTING & client.collected_offers != empty",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "select server from offers",
+        "send DHCPREQUEST"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-014",
+        "D-S021-005"
+      ]
+    },
+    {
+      "from_state": "SELECTING",
+      "to_state": "INIT",
+      "trigger": "timeout no_DHCPOFFER",
+      "guard": "client.state = SELECTING & received_DHCPOFFER = false",
+      "actors": [
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "retransmit DHCPDISCOVER"
+      ],
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_ids": [
+        "D-S012-018"
+      ]
+    },
+    {
+      "from_state": "SELECTING",
+      "to_state": "INIT",
+      "trigger": "receive DHCPACK_unacceptable",
+      "guard": "client.state = SELECTING & client.dhcpack_acceptable = false",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DHCPDECLINE"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-017"
+      ]
+    },
+    {
+      "from_state": "REQUESTING",
+      "to_state": "REQUESTING",
+      "trigger": "receive DHCPOFFER",
+      "guard": "client.state = REQUESTING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "discard"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-015"
+      ]
+    },
+    {
+      "from_state": "REQUESTING",
+      "to_state": "REQUESTING",
+      "trigger": "timeout no_response",
+      "guard": "client.state = REQUESTING & received_DHCPACK = false & received_DHCPNAK = false",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "retransmit DHCPREQUEST"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S012-019"
+      ]
+    },
+    {
+      "from_state": "REQUESTING",
+      "to_state": "INIT",
+      "trigger": "receive DHCPNAK",
+      "guard": "client.state = REQUESTING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "discard offer",
+        "restart configuration"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-016",
+        "D-S012-017"
+      ]
+    },
+    {
+      "from_state": "REQUESTING",
+      "to_state": "INIT",
+      "trigger": "timeout retransmit_exhausted",
+      "guard": "client.state = REQUESTING & retransmission_complete = true",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "actions": [
+        "restart initialization",
+        "notify user of failure"
+      ],
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_ids": [
+        "D-S012-020"
+      ]
+    },
+    {
+      "from_state": "REQUESTING",
+      "to_state": "BOUND",
+      "trigger": "receive DHCPACK",
+      "guard": "client.state = REQUESTING & client.dhcpack_acceptable = true",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "record lease",
+        "set timer T1",
+        "set timer T2"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-018",
+        "D-S012-015"
+      ]
+    },
+    {
+      "from_state": "BOUND",
+      "to_state": "BOUND",
+      "trigger": "receive unsolicited_msg",
+      "guard": "client.state = BOUND",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "discard"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-019"
+      ]
+    },
+    {
+      "from_state": "BOUND",
+      "to_state": "RENEWING",
+      "trigger": "timeout T1_expires",
+      "guard": "client.state = BOUND & timer.T1 = expired",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DHCPREQUEST to server"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-020",
+        "D-S034-005"
+      ]
+    },
+    {
+      "from_state": "BOUND",
+      "to_state": "RENEWING",
+      "trigger": "cond early_renewal",
+      "guard": "client.state = BOUND & timer.T1 = not_expired",
+      "actors": [
+        "client"
+      ],
+      "modality": "may",
+      "actions": [
+        "send DHCPREQUEST to server"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S034-011",
+        "N-S024-019"
+      ]
+    },
+    {
+      "from_state": "BOUND",
+      "to_state": "GracefulShutdown",
+      "trigger": "cond release_desired",
+      "guard": "client.state = BOUND",
+      "actors": [
+        "client"
+      ],
+      "modality": "may",
+      "actions": [
+        "send DHCPRELEASE"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S012-021"
+      ]
+    },
+    {
+      "from_state": "BOUND",
+      "to_state": "INIT",
+      "trigger": "cond address_in_use",
+      "guard": "client.state = BOUND & client.address_in_use = true",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DHCPDECLINE",
+        "restart configuration"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S012-015"
+      ]
+    },
+    {
+      "from_state": "RENEWING",
+      "to_state": "BOUND",
+      "trigger": "receive DHCPACK",
+      "guard": "client.state = RENEWING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "record lease",
+        "set timer T1",
+        "set timer T2"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-021",
+        "D-S034-006"
+      ]
+    },
+    {
+      "from_state": "RENEWING",
+      "to_state": "REBINDING",
+      "trigger": "timeout T2_expires",
+      "guard": "client.state = RENEWING & timer.T2 = expired",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "broadcast DHCPREQUEST"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-022",
+        "D-S034-007"
+      ]
+    },
+    {
+      "from_state": "RENEWING",
+      "to_state": "RENEWING",
+      "trigger": "timeout no_response",
+      "guard": "client.state = RENEWING & DHCPACK.received = false",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "actions": [
+        "retransmit DHCPREQUEST"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S034-008"
+      ]
+    },
+    {
+      "from_state": "REBINDING",
+      "to_state": "INIT",
+      "trigger": "receive DHCPNAK",
+      "guard": "client.state = REBINDING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "halt network"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-023"
+      ]
+    },
+    {
+      "from_state": "REBINDING",
+      "to_state": "BOUND",
+      "trigger": "receive DHCPACK",
+      "guard": "client.state = REBINDING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "record lease",
+        "set timer T1",
+        "set timer T2"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-024"
+      ]
+    },
+    {
+      "from_state": "REBINDING",
+      "to_state": "INIT",
+      "trigger": "timeout lease_expired",
+      "guard": "client.state = REBINDING & lease.expired = true",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "halt network",
+        "stop network processing"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S029-025",
+        "N-S034-009"
+      ]
+    },
+    {
+      "from_state": "REBINDING",
+      "to_state": "REBINDING",
+      "trigger": "timeout retransmit",
+      "guard": "client.state = REBINDING & response.received = false",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "actions": [
+        "retransmit DHCPREQUEST"
+      ],
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_ids": [
+        "D-S034-010",
+        "N-S034-008"
+      ]
+    }
+  ],
+  "inter_stage": {
+    "entry_from_previous": [],
+    "exit_to_next": []
+  },
+  "discarded_states": [
+    {
+      "state_name": null,
+      "reason": "No state name provided",
+      "source_id": "D-S010-004"
+    },
+    {
+      "state_name": "Begins initialization",
+      "reason": "Alias for INIT per identical initial semantics in S012",
+      "source_id": "D-S012-002"
+    },
+    {
+      "state_name": "Collects replies",
+      "reason": "Alias for SELECTING per equivalent transition from INIT with DHCPDISCOVER",
+      "source_id": "D-S012-004"
+    },
+    {
+      "state_name": "Selects configuration",
+      "reason": "Alias for SELECTING sub-phase per offer selection context",
+      "source_id": "D-S012-005"
+    },
+    {
+      "state_name": "Determines configuration",
+      "reason": "Server-side processing step, not client FSM state",
+      "source_id": "D-S012-003"
+    },
+    {
+      "state_name": "Commits configuration",
+      "reason": "Server-side processing step, not client FSM state",
+      "source_id": "D-S012-006"
+    },
+    {
+      "state_name": "Initialization complete",
+      "reason": "Alias for BOUND per equivalent DHCPACK receipt transition",
+      "source_id": "D-S012-007"
+    },
+    {
+      "state_name": "Discards lease",
+      "reason": "Server-side action state, not client FSM state",
+      "source_id": "D-S012-009"
+    },
+    {
+      "state_name": "not allocated",
+      "reason": "Server address pool state, not protocol FSM state",
+      "source_id": "D-S026-001"
+    }
+  ],
+  "unresolved": [
+    {
+      "source_id": "D-S012-011",
+      "description": "null to DeterminesConfig on receive_DHCPDISCOVER: server-side state discarded, from_state null"
+    },
+    {
+      "source_id": "D-S012-014",
+      "description": "DeterminesConfig to CommitsConfig on receive_DHCPREQUEST_selected: both server-side states discarded"
+    },
+    {
+      "source_id": "D-S012-022",
+      "description": "BOUND to DiscardsLease on receive_DHCPRELEASE: DiscardsLease discarded as server-side state"
+    },
+    {
+      "source_id": "D-S012-024",
+      "description": "DeterminesConfig to null on receive_DHCPREQUEST_not_selected: from_state discarded, to_state null"
+    },
+    {
+      "source_id": "N-S012-011",
+      "description": "DeterminesConfig to null on DHCPREQUEST unsatisfiable: from_state discarded as server-side state"
+    },
+    {
+      "source_id": "D-S024-006",
+      "description": "SELECTING to null on no_acceptable_DHCPOFFER: to_state missing"
+    },
+    {
+      "source_id": "N-S013-010",
+      "description": "null to BOUND on retransmission_exhausted with unexpired lease: from_state missing"
+    },
+    {
+      "source_id": "N-S026-001",
+      "description": "null to not_allocated on DHCPRELEASE_received: to_state discarded as server address state"
+    },
+    {
+      "source_id": "D-S032-003",
+      "description": "null to INITIALIZED on DHCPACK after DHCPINFORM: from_state not specified for DHCPINFORM flow"
+    },
+    {
+      "source_id": "D-S030-009",
+      "description": "SELECTING to BOUND on receive_DHCPACK: pre_cond requires dhcprequest_sent, suggesting from_state should be REQUESTING"
+    },
+    {
+      "source_id": "N-S030-012",
+      "description": "SELECTING to BOUND on address_verified: ARP check context suggests from_state should be post-REQUESTING"
+    }
+  ],
+  "gaps": [
+    "No transition leads to INIT_REBOOT from INIT; INIT_REBOOT is an alternate entry point for clients with a saved lease, not reachable from the single initial state",
+    "No transitions exit from INITIALIZED; DHCPINFORM flow post-configuration behavior is unmodeled",
+    "No transitions exit from GracefulShutdown; expected as protocol-terminal state after DHCPRELEASE",
+    "No explicit RENEWING to INIT on receive DHCPNAK stated in input",
+    "REBOOTING retransmission self-transition not explicitly modeled in input"
+  ]
+}

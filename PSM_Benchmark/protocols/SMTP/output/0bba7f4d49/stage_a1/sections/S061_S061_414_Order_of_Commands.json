@@ -1,0 +1,374 @@
+{
+  "section_id": "S061",
+  "title": "S061 4.1.4 Order of Commands",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S061 4.1.4 Order of Commands"
+  ],
+  "url_anchor": "#s061-414-order-of-commands",
+  "word_count": 644,
+  "statement_count": 16,
+  "elapsed_seconds": 208.7,
+  "statements": [
+    {
+      "statement_id": "D-S061-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "A session that will contain mail transactions MUST first be initialized by the use of the EHLO command.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S061",
+      "state_name": "session not initialized",
+      "enum_name": "SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.initialized = false"
+    },
+    {
+      "statement_id": "D-S061-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "A session initialized by the EHLO command with no open mail transaction. There may be zero or more transactions in a session.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S061",
+      "state_name": "session initialized",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.initialized = true & transaction.open = false"
+    },
+    {
+      "statement_id": "D-S061-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "MAIL (or SEND, SOML, or SAML) MUST NOT be sent if a mail transaction is already open.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S061",
+      "state_name": "mail transaction open",
+      "enum_name": "TransactionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.open = true"
+    },
+    {
+      "statement_id": "D-S061-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "A session that will contain mail transactions MUST first be initialized by the use of the EHLO command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "session not initialized",
+      "to_state": "session initialized",
+      "trigger": "EHLO accepted",
+      "pre_cond": "session.initialized = false",
+      "post_cond": "session.initialized = true & transaction.open = false",
+      "actions": [
+        "accept EHLO",
+        "initialize session"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S061-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "An EHLO command MAY be issued by a client later in the session. If it is issued after the session begins and the EHLO command is acceptable to the SMTP server, the SMTP server MUST clear all buffers and reset the state exactly as if a RSET command had been issued.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "session initialized",
+      "to_state": "session initialized",
+      "trigger": "EHLO accepted",
+      "pre_cond": "session.initialized = true & transaction.open = false",
+      "post_cond": "session.buffers_cleared = true & transaction.open = false",
+      "actions": [
+        "clear all buffers",
+        "reset state as if RSET issued"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S061-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "An EHLO command MAY be issued by a client later in the session. If it is issued after the session begins and the EHLO command is acceptable to the SMTP server, the SMTP server MUST clear all buffers and reset the state exactly as if a RSET command had been issued. A mail transaction may be aborted by the RSET, a new EHLO, or the QUIT command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "mail transaction open",
+      "to_state": "session initialized",
+      "trigger": "EHLO accepted",
+      "pre_cond": "transaction.open = true",
+      "post_cond": "session.buffers_cleared = true & transaction.open = false",
+      "actions": [
+        "abort mail transaction",
+        "clear all buffers",
+        "reset state as if RSET issued"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S061-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "If the EHLO command is not acceptable to the SMTP server, 501, 500, 502, or 550 failure replies MUST be returned as appropriate. The SMTP server MUST stay in the same state after transmitting these replies that it was in before the EHLO was received.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "EHLO rejected",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "return 501 or 500 or 502 or 550 failure reply",
+        "stay in same state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S061-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "The MAIL command begins a mail transaction.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "session initialized",
+      "to_state": "mail transaction open",
+      "trigger": "MAIL",
+      "pre_cond": "transaction.open = false",
+      "post_cond": "transaction.open = true",
+      "actions": [
+        "begin mail transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S061-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "A mail transaction may be aborted by the RSET, a new EHLO, or the QUIT command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "mail transaction open",
+      "to_state": "session initialized",
+      "trigger": "RSET",
+      "pre_cond": "transaction.open = true",
+      "post_cond": "transaction.open = false",
+      "actions": [
+        "abort mail transaction"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S061-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "MAIL MUST NOT be sent if a mail transaction is already open, i.e., it should be sent only if ... the previous one successfully concluded with a successful DATA command.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "mail transaction open",
+      "to_state": "session initialized",
+      "trigger": "DATA success",
+      "pre_cond": "transaction.open = true",
+      "post_cond": "transaction.open = false",
+      "actions": [
+        "conclude mail transaction successfully"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S061-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "If the transaction beginning command argument is not acceptable, a 501 failure reply MUST be returned and the SMTP server MUST stay in the same state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": "session initialized",
+      "to_state": "session initialized",
+      "trigger": "MAIL with unacceptable argument",
+      "pre_cond": "transaction.open = false & command.argument_acceptable = false",
+      "post_cond": "transaction.open = false",
+      "actions": [
+        "return 501 failure reply",
+        "stay in same state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S061-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "If the commands in a transaction are out of order to the degree that they cannot be processed by the server, a 503 failure reply MUST be returned and the SMTP server MUST stay in the same state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S061",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "out-of-order command",
+      "pre_cond": "command.order_valid = false",
+      "post_cond": null,
+      "actions": [
+        "return 503 failure reply",
+        "stay in same state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S061-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "The last command in a session MUST be the QUIT command. The QUIT command SHOULD be used by the client SMTP to request connection closure, even when no session opening command was sent and accepted.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "connection closed",
+      "trigger": "QUIT",
+      "pre_cond": null,
+      "post_cond": "session.closed = true",
+      "actions": [
+        "request connection closure"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S061-014",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "MAIL (or SEND, SOML, or SAML) MUST NOT be sent if a mail transaction is already open, i.e., it should be sent only if no mail transaction had been started in the session, or if the previous one successfully concluded with a successful DATA command, or if the previous one was aborted.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S061",
+      "object_name": "mail transaction",
+      "field_name": "open",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "false"
+      ],
+      "guard_semantics": "MAIL MUST NOT be issued when transaction.open = true"
+    },
+    {
+      "statement_id": "D-S061-015",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "Once started, a mail transaction consists of a transaction beginning command, one or more RCPT commands, and a DATA command, in that order.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S061",
+      "object_name": "mail transaction",
+      "field_name": "command_sequence",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "MAIL then one_or_more_RCPT then DATA"
+      ],
+      "guard_semantics": "transaction.command_sequence must follow order: MAIL, RCPT+, DATA"
+    },
+    {
+      "statement_id": "D-S061-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "The NOOP, HELP, EXPN, VRFY, and RSET commands can be used at any time during a session, or without previously initializing a session. SMTP servers SHOULD process these normally (that is, not return a 503 code) even if no EHLO command has yet been received.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S061",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "NOOP or HELP or EXPN or VRFY or RSET",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "process command normally",
+        "do not return 503"
+      ],
+      "modality": "should"
+    }
+  ]
+}

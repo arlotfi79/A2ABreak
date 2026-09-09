@@ -1,0 +1,255 @@
+{
+ "states": [
+  "ConnectionOpened",
+  "Connection Established",
+  "SessionRejected",
+  "Greeted",
+  "Mail Transaction Started",
+  "Data Entry",
+  "Session Terminated",
+  "Message Accepted",
+  "Queued",
+  "Transmitted",
+  "GiveUp",
+  "Error",
+  "Undeliverable"
+ ],
+ "initial_state": "ConnectionOpened",
+ "final_states": [
+  "Error",
+  "GiveUp",
+  "Session Terminated",
+  "Transmitted",
+  "Undeliverable"
+ ],
+ "transitions": [
+  {
+   "from": "ConnectionOpened",
+   "event": "send 220 greeting",
+   "action": "send 220 service ready",
+   "to": "Connection Established"
+  },
+  {
+   "from": "ConnectionOpened",
+   "event": "send 554 rejection",
+   "action": "send 554 rejection response",
+   "to": "SessionRejected"
+  },
+  {
+   "from": "Connection Established",
+   "event": "receive EHLO or HELO after 220 greeting",
+   "action": "send HELO",
+   "to": "Greeted"
+  },
+  {
+   "from": "Connection Established",
+   "event": "receive HELO accepted",
+   "action": "clear all state tables and buffers",
+   "to": "Greeted"
+  },
+  {
+   "from": "Connection Established",
+   "event": "receive EHLO rejected",
+   "action": "return failure reply",
+   "to": "Connection Established"
+  },
+  {
+   "from": "Connection Established",
+   "event": "receive HELO rejected",
+   "action": "send error reply",
+   "to": "Connection Established"
+  },
+  {
+   "from": "Greeted",
+   "event": "receive EHLO mid session",
+   "action": "clear buffers and reset state",
+   "to": "Greeted"
+  },
+  {
+   "from": "Greeted",
+   "event": "receive MAIL FROM",
+   "action": "send MAIL FROM",
+   "to": "Mail Transaction Started"
+  },
+  {
+   "from": "Greeted",
+   "event": "receive MAIL rejected",
+   "action": "send error reply",
+   "to": "Greeted"
+  },
+  {
+   "from": "Mail Transaction Started",
+   "event": "receive RCPT accepted",
+   "action": "store forward-path",
+   "to": "Mail Transaction Started"
+  },
+  {
+   "from": "Mail Transaction Started",
+   "event": "receive RCPT rejected",
+   "action": "send rejection response",
+   "to": "Mail Transaction Started"
+  },
+  {
+   "from": "Mail Transaction Started",
+   "event": "receive DATA",
+   "action": "send DATA 354",
+   "to": "Data Entry"
+  },
+  {
+   "from": "Mail Transaction Started",
+   "event": "receive DATA rejected",
+   "action": "do not send message data",
+   "to": "Mail Transaction Started"
+  },
+  {
+   "from": "Data Entry",
+   "event": "receive data end accepted",
+   "action": "process stored mail transaction",
+   "to": "Greeted"
+  },
+  {
+   "from": "Data Entry",
+   "event": "receive data end rejected",
+   "action": "send error reply",
+   "to": "Greeted"
+  },
+  {
+   "from": "Data Entry",
+   "event": "cond message ended with <CRLF>.<CRLF>",
+   "action": "send message body",
+   "to": "Message Accepted"
+  },
+  {
+   "from": "Mail Transaction Started",
+   "event": "receive RSET",
+   "action": "send RSET",
+   "to": "Greeted"
+  },
+  {
+   "from": "Mail Transaction Started",
+   "event": "receive EHLO accepted",
+   "action": "abort transaction and clear buffers",
+   "to": "Greeted"
+  },
+  {
+   "from": "SessionRejected",
+   "event": "receive QUIT",
+   "action": "close connection",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "SessionRejected",
+   "event": "receive non QUIT command",
+   "action": "send 503 bad sequence",
+   "to": "SessionRejected"
+  },
+  {
+   "from": "Greeted",
+   "event": "receive QUIT",
+   "action": "send QUIT",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "Mail Transaction Started",
+   "event": "receive QUIT",
+   "action": "send QUIT",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "Connection Established",
+   "event": "receive QUIT",
+   "action": "send QUIT",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "Greeted",
+   "event": "receive RSET",
+   "action": "send RSET",
+   "to": "Greeted"
+  },
+  {
+   "from": "Greeted",
+   "event": "receive NOOP",
+   "action": "send 250 OK reply",
+   "to": "Greeted"
+  },
+  {
+   "from": "Mail Transaction Started",
+   "event": "receive NOOP",
+   "action": "send 250 OK reply",
+   "to": "Mail Transaction Started"
+  },
+  {
+   "from": "Greeted",
+   "event": "receive RCPT out of order",
+   "action": "send 503 bad sequence",
+   "to": "Greeted"
+  },
+  {
+   "from": "Message Accepted",
+   "event": "cond delivery fails",
+   "action": "enqueue message with envelope",
+   "to": "Queued"
+  },
+  {
+   "from": "Queued",
+   "event": "timeout retry interval",
+   "action": "attempt delivery",
+   "to": "Queued"
+  },
+  {
+   "from": "Queued",
+   "event": "cond delivery succeeds",
+   "action": "remove from queue",
+   "to": "Transmitted"
+  },
+  {
+   "from": "Queued",
+   "event": "timeout give up time",
+   "action": "notify sender of failure",
+   "to": "GiveUp"
+  },
+  {
+   "from": "Connection Established",
+   "event": "send 421 shutdown",
+   "action": "send 421 and close connection",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "Greeted",
+   "event": "send 421 shutdown",
+   "action": "send 421 and close connection",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "Mail Transaction Started",
+   "event": "send 421 shutdown",
+   "action": "send 421 and close connection",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "Data Entry",
+   "event": "send 421 shutdown",
+   "action": "send 421 and close connection",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "Connection Established",
+   "event": "timeout waiting for command",
+   "action": "close connection",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "Greeted",
+   "event": "timeout waiting for command",
+   "action": "close connection",
+   "to": "Session Terminated"
+  },
+  {
+   "from": "Data Entry",
+   "event": "timeout data transfer",
+   "action": "close connection",
+   "to": "Session Terminated"
+  }
+ ]
+}

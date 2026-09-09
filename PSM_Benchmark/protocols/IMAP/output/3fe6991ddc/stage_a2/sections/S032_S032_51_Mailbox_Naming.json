@@ -1,0 +1,162 @@
+{
+  "section_id": "S032",
+  "title": "S032 5.1 Mailbox Naming",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S032 5.1 Mailbox Naming"
+  ],
+  "url_anchor": "#s032-51-mailbox-naming",
+  "word_count": 385,
+  "statement_count": 6,
+  "elapsed_seconds": 67.69,
+  "statements": [
+    {
+      "statement_id": "N-S032-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Client implementations MAY attempt to create Net-Unicode mailbox names and MUST interpret any 8-bit mailbox names returned by LIST as [NET-UNICODE].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "attempt_create_net_unicode_mailbox_name"
+      ],
+      "modality": "may",
+      "id": "N-S032-001"
+    },
+    {
+      "statement_id": "N-S032-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Client implementations MAY attempt to create Net-Unicode mailbox names and MUST interpret any 8-bit mailbox names returned by LIST as [NET-UNICODE].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST_response_received",
+      "pre_cond": "LIST_response.mailbox_name.encoding = 8bit",
+      "post_cond": "mailbox_name.interpretation = NET_UNICODE",
+      "actions": [
+        "interpret_8bit_mailbox_name_as_NET_UNICODE"
+      ],
+      "modality": "must",
+      "id": "N-S032-002"
+    },
+    {
+      "statement_id": "N-S032-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Server implementations MUST prohibit the creation of 8-bit mailbox names that do not comply with Net-Unicode.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE_command_received",
+      "pre_cond": "CREATE.mailbox_name.encoding = 8bit & CREATE.mailbox_name.net_unicode_compliant = false",
+      "post_cond": "mailbox.created = false",
+      "actions": [
+        "reject_CREATE",
+        "return_error_response"
+      ],
+      "modality": "must",
+      "id": "N-S032-003"
+    },
+    {
+      "statement_id": "N-S032-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "However, servers MAY accept a denormalized UTF-8 mailbox name and convert it to Unicode Normalization Form C (NFC) (as per Net-Unicode requirements) prior to mailbox creation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE_command_received",
+      "pre_cond": "CREATE.mailbox_name.utf8_normalized = false",
+      "post_cond": "CREATE.mailbox_name.encoding = NFC",
+      "actions": [
+        "accept_denormalized_utf8_mailbox_name",
+        "convert_mailbox_name_to_NFC_prior_to_creation"
+      ],
+      "modality": "may",
+      "id": "N-S032-004"
+    },
+    {
+      "statement_id": "N-S032-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Servers that choose to accept such denormalized UTF-8 mailbox names MUST accept them in all IMAP commands that have a mailbox name parameter.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_with_mailbox_name_parameter_received",
+      "pre_cond": "server.accepts_denormalized_utf8_mailbox_names = true & command.mailbox_name.utf8_normalized = false",
+      "post_cond": "command.mailbox_name.accepted = true",
+      "actions": [
+        "accept_denormalized_utf8_mailbox_name_in_command"
+      ],
+      "modality": "must",
+      "id": "N-S032-005"
+    },
+    {
+      "statement_id": "N-S032-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Servers MAY refuse to create mailbox names containing Unicode CTL characters.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE_command_received",
+      "pre_cond": "CREATE.mailbox_name.contains_unicode_CTL = true",
+      "post_cond": "mailbox.created = false",
+      "actions": [
+        "reject_CREATE",
+        "return_error_response"
+      ],
+      "modality": "may",
+      "id": "N-S032-006"
+    }
+  ]
+}

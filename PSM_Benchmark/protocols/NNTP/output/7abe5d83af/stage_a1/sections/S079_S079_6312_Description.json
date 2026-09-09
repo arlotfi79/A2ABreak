@@ -1,0 +1,153 @@
+{
+  "section_id": "S079",
+  "title": "S079 6.3.1.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S079 6.3.1.2 Description"
+  ],
+  "url_anchor": "#s079-6312-description",
+  "word_count": 337,
+  "statement_count": 6,
+  "elapsed_seconds": 25.32,
+  "statements": [
+    {
+      "statement_id": "D-S079-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If posting is allowed, a 340 response MUST be returned to indicate that the article to be posted should be sent.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S079",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "COMMAND",
+      "to_state": "POSTING",
+      "trigger": "POST_command_received",
+      "pre_cond": "server.posting_allowed = true",
+      "post_cond": "server.response = 340",
+      "actions": [
+        "send 340 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S079-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If posting is prohibited for some installation-dependent reason, a 440 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S079",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "COMMAND",
+      "to_state": "COMMAND",
+      "trigger": "POST_command_received",
+      "pre_cond": "server.posting_allowed = false",
+      "post_cond": "server.response = 440",
+      "actions": [
+        "send 440 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S079-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Following the presentation of the termination sequence by the client, the server MUST return a response indicating success or failure of the article transfer \u2014 240 indicating success.",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S079",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "POSTING",
+      "to_state": "COMMAND",
+      "trigger": "article_termination_sequence_received",
+      "pre_cond": "server.article_transfer_success = true",
+      "post_cond": "server.response = 240",
+      "actions": [
+        "send 240 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S079-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Following the presentation of the termination sequence by the client, the server MUST return a response indicating success or failure of the article transfer \u2014 441 indicating failure.",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S079",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "POSTING",
+      "to_state": "COMMAND",
+      "trigger": "article_termination_sequence_received",
+      "pre_cond": "server.article_transfer_success = false",
+      "post_cond": "server.response = 441",
+      "actions": [
+        "send 441 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S079-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "If posting is permitted, the article MUST be sent by the client to the server as a multi-line data block. A 340 response indicates that the article to be posted should be sent.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S079",
+      "state_name": "POSTING",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "server.response = 340 & session.article_received = false"
+    },
+    {
+      "statement_id": "D-S079-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "If the session is interrupted before the response is received, in any subsequent session, the client SHOULD either check whether the article was successfully posted before resending or ensure that the server will allocate the same message-id to the new attempt.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S079",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "POSTING",
+      "to_state": null,
+      "trigger": "session_interrupted",
+      "pre_cond": "session.response_received = false",
+      "post_cond": null,
+      "actions": [
+        "check article posting status",
+        "resend article or ensure same message-id allocation"
+      ],
+      "modality": "should"
+    }
+  ]
+}

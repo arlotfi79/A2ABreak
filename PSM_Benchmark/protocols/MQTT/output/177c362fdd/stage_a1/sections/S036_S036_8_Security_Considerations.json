@@ -1,0 +1,121 @@
+{
+  "section_id": "S036",
+  "title": "S036 8. Security Considerations",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S036 8. Security Considerations"
+  ],
+  "url_anchor": "#s036-8-security-considerations",
+  "word_count": 370,
+  "statement_count": 5,
+  "elapsed_seconds": 24.74,
+  "statements": [
+    {
+      "statement_id": "D-S036-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "After the Broker validates an access token and accepts a connection from a client, it caches the token to authorize a Client's publish and subscribe requests in an ongoing Session.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S036",
+      "state_name": "ongoing Session",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.token_cached = true & session.connection_accepted = true"
+    },
+    {
+      "statement_id": "D-S036-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "After the Broker validates an access token and accepts a connection from a client, it caches the token to authorize a Client's publish and subscribe requests in an ongoing Session.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S036",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "ongoing Session",
+      "trigger": "access token validated and connection accepted",
+      "pre_cond": "connection.token_valid = true",
+      "post_cond": "session.token_cached = true",
+      "actions": [
+        "cache access token",
+        "authorize publish and subscribe requests"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "For MQTT v5.0, when a Client connects with a long Session Expiry Interval, the Broker may need to maintain the Client's MQTT Session State after it disconnects for an extended period.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S036",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "ongoing Session",
+      "to_state": "Session State maintained after disconnect",
+      "trigger": "Client disconnects with long Session Expiry Interval",
+      "pre_cond": "session.expiry_interval = long",
+      "post_cond": "session.state_stored = true",
+      "actions": [
+        "maintain MQTT Session State"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S036-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "For MQTT v3.1.1, the Session State may need to be stored indefinitely, as it does not have a Session Expiry Interval feature.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S036",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "ongoing Session",
+      "to_state": "Session State maintained after disconnect",
+      "trigger": "Client disconnects (MQTT v3.1.1)",
+      "pre_cond": "session.version = v3.1.1",
+      "post_cond": "session.state_stored = true & session.expiry = indefinite",
+      "actions": [
+        "store Session State indefinitely"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S036-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If the Broker caches the token introspection responses, then the Broker SHOULD use a reasonable cache timeout to introspect tokens regularly.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S036",
+      "object_name": "Broker token introspection cache",
+      "field_name": "cache_timeout",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "session.token_introspection_cached = true"
+    }
+  ]
+}

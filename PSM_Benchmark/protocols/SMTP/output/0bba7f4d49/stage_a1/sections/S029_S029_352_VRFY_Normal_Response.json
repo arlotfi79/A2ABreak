@@ -1,0 +1,105 @@
+{
+  "section_id": "S029",
+  "title": "S029 3.5.2 VRFY Normal Response",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S029 3.5.2 VRFY Normal Response"
+  ],
+  "url_anchor": "#s029-352-vrfy-normal-response",
+  "word_count": 246,
+  "statement_count": 4,
+  "elapsed_seconds": 35.3,
+  "statements": [
+    {
+      "statement_id": "D-S029-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When normal (2yz or 551) responses are returned from a VRFY or EXPN request, the reply MUST include the <Mailbox> name using a \"<local-part@domain>\" construction.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S029",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY or EXPN command received with normal response",
+      "pre_cond": null,
+      "post_cond": "reply.includes_mailbox = true & reply.code IN {2yz, 551}",
+      "actions": [
+        "send 2yz or 551 reply with <local-part@domain> mailbox"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S029-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Since they were both optional in RFC 821, but VRFY was made mandatory in RFC 1123, if EXPN is supported, it MUST be listed as a service extension in an EHLO response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S029",
+      "object_name": "EHLO response",
+      "field_name": "EXPN service extension",
+      "field_type": "service extension declaration",
+      "required": true,
+      "allowed_values": [
+        "EXPN"
+      ],
+      "guard_semantics": "server.expn_supported = true"
+    },
+    {
+      "statement_id": "D-S029-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "For security reasons, implementations MAY provide local installations a way to disable either or both of these commands (VRFY, EXPN) through configuration options or the equivalent.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S029",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY or EXPN command received while command is disabled",
+      "pre_cond": "server.vrfy_enabled = false | server.expn_enabled = false",
+      "post_cond": null,
+      "actions": [
+        "refuse or reject VRFY or EXPN command"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S029-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "VRFY MAY be listed as a convenience but, since support for it is required, SMTP clients are not required to check for its presence on the extension list before using it.",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S029",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client issues VRFY command",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "client may send VRFY without checking EHLO extension list"
+      ],
+      "modality": "may"
+    }
+  ]
+}

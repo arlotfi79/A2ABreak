@@ -1,0 +1,113 @@
+{
+  "section_id": "S066",
+  "title": "S066 6.3.9.6 CHILDINFO Extended Data Item",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S066 6.3.9.6 CHILDINFO Extended Data Item"
+  ],
+  "url_anchor": "#s066-6396-childinfo-extended-data-item",
+  "word_count": 431,
+  "statement_count": 4,
+  "elapsed_seconds": 34.73,
+  "statements": [
+    {
+      "statement_id": "N-S066-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The CHILDINFO extended data item MUST NOT be returned unless the client has specified the RECURSIVEMATCH selection option.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S066",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST_response_generation",
+      "pre_cond": "client.selection_option != RECURSIVEMATCH",
+      "post_cond": "response.CHILDINFO = absent",
+      "actions": [
+        "omit CHILDINFO extended data item from LIST response"
+      ],
+      "modality": "must",
+      "id": "N-S066-001"
+    },
+    {
+      "statement_id": "N-S066-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "As the CHILDINFO extended data item is not allowed if the RECURSIVEMATCH selection option is not specified, such servers SHOULD use the \"\\NonExistent \\HasChildren\" attribute pair to signal to the client that there is a descendant mailbox that matches the selection criteria.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S066",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST_response_generation",
+      "pre_cond": "client.selection_option != RECURSIVEMATCH & mailbox.exists = false & mailbox.has_matching_descendant = true",
+      "post_cond": "response.attributes = (\\NonExistent & \\HasChildren)",
+      "actions": [
+        "include \\NonExistent \\HasChildren attribute pair in LIST response to signal matching descendant mailbox"
+      ],
+      "modality": "should",
+      "id": "N-S066-002"
+    },
+    {
+      "statement_id": "N-S066-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Servers SHOULD only return a non-matching mailbox name along with CHILDINFO if at least one matching child is not also being returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST_response_generation",
+      "pre_cond": "mailbox.meets_selection_criteria = false & mailbox.has_matching_child = true",
+      "post_cond": "response.includes_CHILDINFO = true & response.includes_matching_child = false",
+      "actions": [
+        "include CHILDINFO in LIST response for non-matching mailbox only when no matching child is separately being returned"
+      ],
+      "modality": "should",
+      "id": "N-S066-003"
+    },
+    {
+      "statement_id": "N-S066-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "That is, servers SHOULD suppress redundant CHILDINFO responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST_response_generation",
+      "pre_cond": "response.CHILDINFO_redundant = true",
+      "post_cond": "response.CHILDINFO = absent",
+      "actions": [
+        "suppress CHILDINFO from LIST response when it is redundant with separately returned matching children"
+      ],
+      "modality": "should",
+      "id": "N-S066-004"
+    }
+  ]
+}

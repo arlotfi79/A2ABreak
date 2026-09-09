@@ -1,0 +1,182 @@
+{
+  "section_id": "S181",
+  "title": "S181 18.33 Pipelined-Requests",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S181 18.33 Pipelined-Requests"
+  ],
+  "url_anchor": "#s181-1833-pipelined-requests",
+  "word_count": 435,
+  "statement_count": 8,
+  "elapsed_seconds": 55.17,
+  "statements": [
+    {
+      "statement_id": "D-S181-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "No mapping exists between a Pipelined-Requests identifier (for the current persistent connection) and an RTSP session ID.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S181",
+      "state_name": "No Binding",
+      "enum_name": "PipelinedRequestsBindingState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "binding.exists = false"
+    },
+    {
+      "statement_id": "D-S181-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A binding exists between a Pipelined-Requests identifier for the current persistent connection and an RTSP session ID.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S181",
+      "state_name": "Binding Exists",
+      "enum_name": "PipelinedRequestsBindingState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "binding.exists = true"
+    },
+    {
+      "statement_id": "D-S181-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If there does not exist a mapping and no Session header is included in the request, the responding agent MUST create a binding upon the successful completion of a session creating request, i.e., SETUP.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S181",
+      "actors": [
+        "server"
+      ],
+      "from_state": "No Binding",
+      "to_state": "Binding Exists",
+      "trigger": "SETUP with Pipelined-Requests header completes successfully",
+      "pre_cond": "binding.exists = false & request.Session_header = null",
+      "post_cond": "binding.exists = true",
+      "actions": [
+        "create binding between Pipelined-Requests identifier and RTSP session ID"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S181-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A binding MUST NOT be created if the request failed to create an RTSP session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S181",
+      "actors": [
+        "server"
+      ],
+      "from_state": "No Binding",
+      "to_state": "No Binding",
+      "trigger": "SETUP with Pipelined-Requests header fails to create session",
+      "pre_cond": "binding.exists = false",
+      "post_cond": "binding.exists = false",
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S181-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server MUST delete the Pipelined-Requests identifier and its binding to a session upon the termination of that session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S181",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Binding Exists",
+      "to_state": "No Binding",
+      "trigger": "session terminated",
+      "pre_cond": "binding.exists = true",
+      "post_cond": "binding.exists = false",
+      "actions": [
+        "delete Pipelined-Requests identifier",
+        "delete binding to session"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S181-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Upon receiving a request with the Pipelined-Requests header, the responding agent MUST look up if there exists a binding. If the binding exists, then the received request is processed the same way as if it contained the Session header with the found session ID.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S181",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Binding Exists",
+      "to_state": null,
+      "trigger": "request received with Pipelined-Requests header",
+      "pre_cond": "binding.exists = true",
+      "post_cond": null,
+      "actions": [
+        "look up binding for Pipelined-Requests identifier",
+        "process request as if Session header with found session ID is present"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S181-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In case the request contains both a Session header and the Pipelined-Requests header, the Pipelined-Requests header MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S181",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request received with both Session header and Pipelined-Requests header",
+      "pre_cond": "request.Session_header != null & request.Pipelined_Requests_header != null",
+      "post_cond": null,
+      "actions": [
+        "ignore Pipelined-Requests header",
+        "process request using Session header only"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S181-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "When responding to any request that contained the Pipelined-Requests header, the server MUST also include the Session header when a binding to a session context exists.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S181",
+      "object_name": "response",
+      "field_name": "Session",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "request.Pipelined_Requests_header != null & binding.exists = true"
+    }
+  ]
+}

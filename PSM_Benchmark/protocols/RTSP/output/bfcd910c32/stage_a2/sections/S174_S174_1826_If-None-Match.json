@@ -1,0 +1,188 @@
+{
+  "section_id": "S174",
+  "title": "S174 18.26 If-None-Match",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S174 18.26 If-None-Match"
+  ],
+  "url_anchor": "#s174-1826-if-none-match",
+  "word_count": 360,
+  "statement_count": 7,
+  "elapsed_seconds": 45.46,
+  "statements": [
+    {
+      "statement_id": "N-S174-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If any of the message body tags match the message body tag of the message body that would have been returned in the response to a similar DESCRIBE request (without the If-None-Match header) on that resource, or if \"*\" is given and any current entity exists for that resource, then the server MUST NOT perform the requested method, unless required to do so because the resource's modification date fails to match that supplied in an If-Modified-Since header field in the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S174",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DESCRIBE_request_received & (if_none_match_tag_matches_current_entity | if_none_match = \"*\" & current_entity_exists) & !if_modified_since_mismatch",
+      "pre_cond": "request.header.If-None-Match.tag_matches_current_entity = true | (request.header.If-None-Match = \"*\" & resource.current_entity_exists = true)",
+      "post_cond": "server.method_executed = false",
+      "actions": [
+        "suppress execution of requested method"
+      ],
+      "modality": "must",
+      "id": "N-S174-001"
+    },
+    {
+      "statement_id": "N-S174-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Instead, if the request method was DESCRIBE, the server SHOULD respond with a 304 (Not Modified) response, including the cache-related header fields (particularly MTag) of one of the message bodies that matched.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S174",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DESCRIBE_request_received & if_none_match_tag_matches",
+      "pre_cond": "request.method = DESCRIBE & request.header.If-None-Match.tag_matches_current_entity = true",
+      "post_cond": "response.status_code = 304",
+      "actions": [
+        "send 304 Not Modified response",
+        "include cache-related header fields (MTag) of matched message body"
+      ],
+      "modality": "should",
+      "id": "N-S174-002"
+    },
+    {
+      "statement_id": "N-S174-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "For all other request methods, the server MUST respond with a status of 412 (Precondition Failed).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S174",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "non_DESCRIBE_request_received & if_none_match_tag_matches",
+      "pre_cond": "request.method != DESCRIBE & request.header.If-None-Match.tag_matches_current_entity = true",
+      "post_cond": "response.status_code = 412",
+      "actions": [
+        "send 412 Precondition Failed response"
+      ],
+      "modality": "must",
+      "id": "N-S174-003"
+    },
+    {
+      "statement_id": "N-S174-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If none of the message body tags match, then the server MAY perform the requested method as if the If-None-Match header field did not exist, but MUST also ignore any If-Modified-Since header field(s) in the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S174",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received & if_none_match_no_tags_match",
+      "pre_cond": "request.header.If-None-Match.tag_matches_current_entity = false",
+      "post_cond": "server.method_executed = true & request.header.If-Modified-Since.ignored = true",
+      "actions": [
+        "process requested method ignoring If-None-Match",
+        "ignore all If-Modified-Since header fields in request"
+      ],
+      "modality": "may",
+      "id": "N-S174-004"
+    },
+    {
+      "statement_id": "N-S174-5",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "That is, if no message body tags match, then the server MUST NOT return a 304 (Not Modified) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S174",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received & if_none_match_no_tags_match",
+      "pre_cond": "request.header.If-None-Match.tag_matches_current_entity = false",
+      "post_cond": "response.status_code != 304",
+      "actions": [
+        "prohibit 304 Not Modified response"
+      ],
+      "modality": "must",
+      "id": "N-S174-005"
+    },
+    {
+      "statement_id": "N-S174-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the request would, without the If-None-Match header field, result in anything other than a 2xx or 304 status, then the If-None-Match header MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S174",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received & baseline_response_not_2xx_or_304",
+      "pre_cond": "request.baseline_status_code != 2xx & request.baseline_status_code != 304",
+      "post_cond": "request.header.If-None-Match.ignored = true",
+      "actions": [
+        "ignore If-None-Match header field"
+      ],
+      "modality": "must",
+      "id": "N-S174-006"
+    },
+    {
+      "statement_id": "N-S174-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The result of a request having both an If-None-Match header field and an If-Match header field is unspecified and MUST be considered an illegal request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S174",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received & if_none_match_present & if_match_present",
+      "pre_cond": "request.header.If-None-Match.present = true & request.header.If-Match.present = true",
+      "post_cond": "request.status = illegal",
+      "actions": [
+        "treat request as illegal"
+      ],
+      "modality": "must",
+      "id": "N-S174-007"
+    }
+  ]
+}

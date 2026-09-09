@@ -1,0 +1,56 @@
+{
+  "section_id": "S052",
+  "title": "S052 7.5 Validity and Synchronization",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S052 7.5 Validity and Synchronization"
+  ],
+  "url_anchor": "#s052-75-validity-and-synchronization",
+  "word_count": 131,
+  "statement_count": 2,
+  "elapsed_seconds": 20.21,
+  "statements": [
+    {
+      "statement_id": "D-S052-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "Packets whose Sequence and/or Acknowledgement Numbers are out of range are called sequence-invalid and are not processed normally.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S052",
+      "object_name": "DCCP packet",
+      "field_name": "Sequence Number / Acknowledgement Number",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": "in-range",
+      "guard_semantics": "packet.sequence_number = in_range & packet.ack_number = in_range \u2192 process_normally; else \u2192 sequence_invalid"
+    },
+    {
+      "statement_id": "D-S052-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "A handshake of DCCP-Sync and DCCP-SyncAck packets recovers from large bursts of loss where the other endpoint would label a Sequence Number as invalid.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S052",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "sequence-invalid packet received due to large burst of loss",
+      "pre_cond": "packet.sequence_number = out_of_range",
+      "post_cond": "sequence_numbers = synchronized",
+      "actions": [
+        "send DCCP-Sync",
+        "receive DCCP-SyncAck"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

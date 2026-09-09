@@ -1,0 +1,407 @@
+{
+  "stage": "termination",
+  "states": [
+    {
+      "state_name": "TASK_STATE_COMPLETED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "task.status.state = TASK_STATE_COMPLETED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-4-1-004",
+        "D-6-1-001",
+        "D-6-2-002",
+        "D-6-5-001",
+        "D-6-6-002",
+        "D-6-8-001",
+        "D-11-4-001"
+      ]
+    },
+    {
+      "state_name": "TASK_STATE_FAILED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null,
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-4-1-005"
+      ]
+    },
+    {
+      "state_name": "TASK_STATE_CANCELED",
+      "semantic_type": "terminal",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null,
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-4-1-006"
+      ]
+    },
+    {
+      "state_name": "TASK_STATE_REJECTED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null,
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-4-1-008"
+      ]
+    },
+    {
+      "state_name": "STREAM_CLOSED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "stream.state = STREAM_CLOSED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-5-002"
+      ]
+    },
+    {
+      "state_name": "TASK_STATE_WORKING",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "task.state = TASK_STATE_WORKING",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-6-2-011"
+      ]
+    },
+    {
+      "state_name": "submitted",
+      "semantic_type": "active",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null,
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-6-6-012"
+      ]
+    },
+    {
+      "state_name": "STREAM_OPEN",
+      "semantic_type": "active",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "stream.open = true",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-1-038",
+        "D-3-1-040"
+      ]
+    },
+    {
+      "state_name": "STREAM_ACTIVE",
+      "semantic_type": "active",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "stream.state = STREAM_ACTIVE",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-5-007"
+      ]
+    },
+    {
+      "state_name": "TASK_STATE_TERMINAL",
+      "semantic_type": "terminal",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-3-3-010"
+      ]
+    },
+    {
+      "state_name": "STREAM_STATE_OPEN",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "stream.open = true",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-11-7-008"
+      ]
+    },
+    {
+      "state_name": "STREAM_STATE_CLOSED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "stream.open = false",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-11-7-008"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "STREAM_OPEN",
+      "to_state": "STREAM_CLOSED",
+      "trigger": "task_reached_terminal_state",
+      "guard": "stream.open = true & !task.state.is_terminal",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-1-038",
+        "D-3-1-040"
+      ]
+    },
+    {
+      "from_state": "STREAM_ACTIVE",
+      "to_state": "STREAM_CLOSED",
+      "trigger": "stream_close",
+      "guard": "stream.state = STREAM_ACTIVE",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-5-007"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_COMPLETED",
+      "trigger": "statusUpdate",
+      "guard": "task.state = TASK_STATE_WORKING & stream.open = true",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-6-2-011"
+      ]
+    },
+    {
+      "from_state": "submitted",
+      "to_state": "TASK_STATE_COMPLETED",
+      "trigger": "task_processing_complete",
+      "guard": "task.pushNotificationConfig.url != null & task.status.state != TASK_STATE_COMPLETED",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-6-6-012"
+      ]
+    },
+    {
+      "from_state": "STREAM_STATE_OPEN",
+      "to_state": "STREAM_STATE_CLOSED",
+      "trigger": "task_reached_terminal_or_interrupted_state",
+      "guard": "stream.open = true & (task.state = terminal | task.state = interrupted)",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-11-7-008"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_TERMINAL",
+      "to_state": "TASK_STATE_TERMINAL",
+      "trigger": "cancel_task",
+      "guard": "task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-3-3-010"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_CANCELED",
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "cancel_task_after_purge",
+      "guard": "task.canceled = true & task.purged = true",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_ids": [
+        "N-3-3-002"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_FAILED",
+      "trigger": "task_processing_failed",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-4-1-005"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "cancel_task",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-4-1-006"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_REJECTED",
+      "trigger": "agent_rejects_task",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-4-1-008"
+      ]
+    },
+    {
+      "from_state": "submitted",
+      "to_state": "TASK_STATE_REJECTED",
+      "trigger": "agent_rejects_task",
+      "guard": null,
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-4-1-008"
+      ]
+    },
+    {
+      "from_state": "submitted",
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "cancel_task",
+      "guard": "task.status.state = submitted",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_ids": [
+        "D-4-1-006"
+      ]
+    }
+  ],
+  "inter_stage": {
+    "entry_from_previous": [
+      "TASK_STATE_WORKING",
+      "submitted",
+      "STREAM_OPEN",
+      "STREAM_ACTIVE",
+      "STREAM_STATE_OPEN"
+    ],
+    "exit_to_next": []
+  },
+  "discarded_states": [
+    {
+      "state_name": null,
+      "reason": "null state_name, no identifiable protocol state (D-1-4-003, source section 1.4)"
+    },
+    {
+      "state_name": null,
+      "reason": "null state_name, stream termination invariant (stream.open = false) already covered by STREAM_CLOSED and STREAM_STATE_CLOSED (D-11-7-002, source section 11.7)"
+    },
+    {
+      "state_name": "LEGACY_NAME_REMOVAL_ELIGIBLE",
+      "reason": "deprecation lifecycle state from Appendix A, not a protocol session state (D-Appendix A- Migratio-003)"
+    }
+  ],
+  "unresolved": [
+    {
+      "source_id": "N-3-3-020",
+      "issue": "both from_state and to_state are null; describes general error response formatting behavior (server must include error.details), not a specific state transition between identifiable states",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-1-4-006",
+      "issue": "PROTO_NAME_DEPRECATED to PROTO_NAME_REMOVED is a protocol naming deprecation lifecycle transition, not a protocol session state transition; discarded as noise",
+      "reason_type": "semantic_mismatch",
+      "confidence": 0.2
+    },
+    {
+      "source_id": "D-Appendix A- Migratio-007",
+      "issue": "LEGACY_NAME_DEPRECATED to LEGACY_NAME_REMOVAL_ELIGIBLE is a migration/deprecation lifecycle transition from Appendix A, not a protocol session state transition; discarded as noise",
+      "reason_type": "semantic_mismatch",
+      "confidence": 0.2
+    }
+  ],
+  "gaps": [
+    {
+      "state_name": "TASK_STATE_TERMINAL",
+      "issue": "no incoming transition — abstract meta-state representing union of concrete terminal states (COMPLETED, FAILED, CANCELED). Entered implicitly when any concrete terminal state is reached. Searched spec section 3.3.2; no explicit transition to this meta-state found.",
+      "type": "unreachable_state"
+    }
+  ]
+}

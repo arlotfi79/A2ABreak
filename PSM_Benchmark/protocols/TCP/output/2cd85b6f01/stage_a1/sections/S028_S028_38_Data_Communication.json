@@ -1,0 +1,143 @@
+{
+  "section_id": "S028",
+  "title": "S028 3.8 Data Communication",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S028 3.8 Data Communication"
+  ],
+  "url_anchor": "#s028-38-data-communication",
+  "word_count": 261,
+  "statement_count": 6,
+  "elapsed_seconds": 26.2,
+  "statements": [
+    {
+      "statement_id": "D-S028-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Once the connection is established, data is communicated by the exchange of segments.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "state_name": "ESTABLISHED",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = ESTABLISHED"
+    },
+    {
+      "statement_id": "D-S028-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "Note that, once in the ESTABLISHED state, all segments must carry current acknowledgment information.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "object_name": "segment",
+      "field_name": "acknowledgment",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "protocol.state = ESTABLISHED"
+    },
+    {
+      "statement_id": "D-S028-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "When the sender creates a segment and transmits it, the sender advances SND.NXT.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S028",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "ESTABLISHED",
+      "trigger": "segment transmitted",
+      "pre_cond": "protocol.state = ESTABLISHED",
+      "post_cond": "SND.NXT = SND.NXT + segment.length",
+      "actions": [
+        "advance SND.NXT by segment data and flag length"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S028-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "When the receiver accepts a segment, it advances RCV.NXT and sends an acknowledgment.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S028",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "ESTABLISHED",
+      "trigger": "segment accepted",
+      "pre_cond": "protocol.state = ESTABLISHED",
+      "post_cond": "RCV.NXT = RCV.NXT + segment.length",
+      "actions": [
+        "advance RCV.NXT by segment data and flag length",
+        "send acknowledgment"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S028-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "When the data sender receives an acknowledgment, it advances SND.UNA.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S028",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "ESTABLISHED",
+      "trigger": "acknowledgment received",
+      "pre_cond": "protocol.state = ESTABLISHED",
+      "post_cond": "SND.UNA = ACK.value",
+      "actions": [
+        "advance SND.UNA to acknowledged sequence number"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S028-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "The CLOSE user call implies a push function (see Section 3.9.1), as does the FIN control flag in an incoming segment.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S028",
+      "actors": [
+        "user",
+        "endpoint"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": null,
+      "trigger": "CLOSE call | FIN received",
+      "pre_cond": "protocol.state = ESTABLISHED",
+      "post_cond": null,
+      "actions": [
+        "push buffered data"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

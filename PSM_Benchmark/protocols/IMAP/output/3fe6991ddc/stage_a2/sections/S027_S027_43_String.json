@@ -1,0 +1,183 @@
+{
+  "section_id": "S027",
+  "title": "S027 4.3 String",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S027 4.3 String"
+  ],
+  "url_anchor": "#s027-43-string",
+  "word_count": 448,
+  "statement_count": 7,
+  "elapsed_seconds": 126.16,
+  "statements": [
+    {
+      "statement_id": "N-S027-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "In the case of synchronizing literals transmitted from client to server, the client MUST wait to receive a command continuation request (described later in this document) before sending the octet data (and the remainder of the command).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "synchronizing_literal_prefix_sent_to_server",
+      "pre_cond": "client.literal_type = synchronizing & message.direction = client_to_server",
+      "post_cond": "client.waiting_for_continuation_request = true",
+      "actions": [
+        "suspend octet data transmission",
+        "await command continuation request before sending octet data and remainder of command"
+      ],
+      "modality": "must",
+      "id": "N-S027-001"
+    },
+    {
+      "statement_id": "N-S027-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The non-synchronizing literal is an alternative form of synchronizing literal and may be used from client to server anywhere a synchronizing literal is permitted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "synchronizing_literal.permitted = true & message.direction = client_to_server",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S027-002"
+    },
+    {
+      "statement_id": "N-S027-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The non-synchronizing literal form MUST NOT be sent from server to client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "message.literal_type = non_synchronizing & message.direction = server_to_client",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S027-003"
+    },
+    {
+      "statement_id": "N-S027-4",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The server does not generate a command continuation request in response to a non-synchronizing literal, and clients are not required to wait before sending the octets of a non-synchronizing literal.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "non_synchronizing_literal_prefix_sent_to_server",
+      "pre_cond": "client.literal_type = non_synchronizing & message.direction = client_to_server",
+      "post_cond": "client.waiting_for_continuation_request = false",
+      "actions": [
+        "may send octet data immediately without awaiting command continuation request"
+      ],
+      "modality": "other",
+      "id": "N-S027-004"
+    },
+    {
+      "statement_id": "N-S027-5",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "Unless otherwise specified in an IMAP extension, non-synchronizing literals MUST NOT be larger than 4096 octets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "imap_extension.non_synchronizing_limit_override = false & message.literal_type = non_synchronizing",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S027-005"
+    },
+    {
+      "statement_id": "N-S027-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Any literal larger than 4096 bytes MUST be sent as a synchronizing literal.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "literal.size > 4096",
+      "post_cond": "literal.type = synchronizing",
+      "actions": [
+        "send literal as synchronizing literal"
+      ],
+      "modality": "must",
+      "id": "N-S027-006"
+    },
+    {
+      "statement_id": "N-S027-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Even if the octet count is 0, a client transmitting a synchronizing literal MUST wait to receive a command continuation request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "synchronizing_literal_prefix_sent_to_server",
+      "pre_cond": "client.literal_type = synchronizing & message.direction = client_to_server",
+      "post_cond": "client.waiting_for_continuation_request = true",
+      "actions": [
+        "wait for command continuation request before sending octet data"
+      ],
+      "modality": "must",
+      "id": "N-S027-007"
+    }
+  ]
+}

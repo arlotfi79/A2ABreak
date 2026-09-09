@@ -1,0 +1,117 @@
+{
+  "section_id": "S020",
+  "title": "S020 3.6 Closing a Connection",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S020 3.6 Closing a Connection"
+  ],
+  "url_anchor": "#s020-36-closing-a-connection",
+  "word_count": 673,
+  "statement_count": 4,
+  "elapsed_seconds": 97.35,
+  "statements": [
+    {
+      "statement_id": "N-S020-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "tcp_fsm",
+      "description": "The user who CLOSEs may continue to RECEIVE until the TCP receiver is told that the remote peer has CLOSED also.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "actors": [
+        "user",
+        "TCP receiver",
+        "remote peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "user issues CLOSE",
+      "pre_cond": "user.closed_for_sending = true",
+      "post_cond": null,
+      "actions": [
+        "allow user to continue issuing RECEIVE until remote peer CLOSE is indicated"
+      ],
+      "modality": "may",
+      "id": "N-S020-001"
+    },
+    {
+      "statement_id": "N-S020-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "tcp_fsm",
+      "description": "Users must keep reading connections they close for sending until the TCP implementation indicates there is no more data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "actors": [
+        "user",
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "user closes connection for sending",
+      "pre_cond": "user.closed_for_sending = true",
+      "post_cond": null,
+      "actions": [
+        "continue issuing RECEIVE until TCP implementation signals no more data available"
+      ],
+      "modality": "must",
+      "id": "N-S020-002"
+    },
+    {
+      "statement_id": "N-S020-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "A TCP connection may terminate in two ways: (1) the normal TCP close sequence using a FIN handshake (Figure 12), and (2) an \"abort\" in which one or more RST segments are sent and the connection state is immediately discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "actors": [
+        "TCP connection"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "FIN handshake completion or RST sent",
+      "pre_cond": null,
+      "post_cond": "connection.state = CLOSED",
+      "actions": [
+        "normal close: complete FIN handshake sequence",
+        "abort: send one or more RST segments and immediately discard connection state"
+      ],
+      "modality": "may",
+      "id": "N-S020-003"
+    },
+    {
+      "statement_id": "N-S020-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the local TCP connection is closed by the remote side due to a FIN or RST received from the remote side, then the local application MUST be informed whether it closed normally or was aborted (MUST-12).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "actors": [
+        "local TCP connection",
+        "remote side",
+        "local application"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "FIN or RST received from remote",
+      "pre_cond": "FIN_received | RST_received",
+      "post_cond": "local_application.informed_of_closure_type = true",
+      "actions": [
+        "inform local application whether connection was closed normally (FIN) or aborted (RST)"
+      ],
+      "modality": "must",
+      "id": "N-S020-004"
+    }
+  ]
+}

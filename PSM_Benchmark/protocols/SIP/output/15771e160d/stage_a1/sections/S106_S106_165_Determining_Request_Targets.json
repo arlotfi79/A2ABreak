@@ -1,0 +1,183 @@
+{
+  "section_id": "S106",
+  "title": "S106 16.5 Determining Request Targets",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S106 16.5 Determining Request Targets"
+  ],
+  "url_anchor": "#s106-165-determining-request-targets",
+  "word_count": 809,
+  "statement_count": 8,
+  "elapsed_seconds": 67.2,
+  "statements": [
+    {
+      "statement_id": "D-S106-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Next, the proxy calculates the target(s) of the request. The set of targets will either be predetermined by the contents of the request or will be obtained from an abstract location service.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S106",
+      "state_name": "Determining Request Targets",
+      "enum_name": "ProxyProcessingState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S106-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the Request-URI of the request contains an maddr parameter, the Request-URI MUST be placed into the target set as the only target URI, and the proxy MUST proceed to Section 16.6.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S106",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "Determining Request Targets",
+      "to_state": "Request Forwarding",
+      "trigger": "Request-URI contains maddr parameter",
+      "pre_cond": "request.Request-URI.maddr != null",
+      "post_cond": "target_set = {request.Request-URI}",
+      "actions": [
+        "place Request-URI into target set as only target URI",
+        "proceed to Request Forwarding"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S106-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the domain of the Request-URI indicates a domain this element is not responsible for, the Request-URI MUST be placed into the target set as the only target, and the element MUST proceed to the task of Request Forwarding (Section 16.6).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S106",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "Determining Request Targets",
+      "to_state": "Request Forwarding",
+      "trigger": "Request-URI domain not responsible for",
+      "pre_cond": "proxy.responsible_for(request.Request-URI.domain) = false",
+      "post_cond": "target_set = {request.Request-URI}",
+      "actions": [
+        "place Request-URI into target set as only target",
+        "proceed to Request Forwarding"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S106-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the Request-URI does not provide sufficient information for the proxy to determine the target set, it SHOULD return a 485 (Ambiguous) response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S106",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "Determining Request Targets",
+      "to_state": null,
+      "trigger": "Request-URI insufficient to determine target set",
+      "pre_cond": "proxy.can_determine_target_set(request.Request-URI) = false",
+      "post_cond": null,
+      "actions": [
+        "send 485 (Ambiguous) response"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S106-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the Request-URI indicates a resource at this proxy that does not exist, the proxy MUST return a 404 (Not Found) response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S106",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "Determining Request Targets",
+      "to_state": null,
+      "trigger": "Request-URI resource does not exist at proxy",
+      "pre_cond": "proxy.responsible_for(request.Request-URI.domain) = true & proxy.resource_exists(request.Request-URI) = false",
+      "post_cond": null,
+      "actions": [
+        "send 404 (Not Found) response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S106-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the target set remains empty after applying all of the above, the proxy MUST return an error response, which SHOULD be the 480 (Temporarily Unavailable) response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S106",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "Determining Request Targets",
+      "to_state": null,
+      "trigger": "target set empty after all determination steps",
+      "pre_cond": "target_set = empty",
+      "post_cond": null,
+      "actions": [
+        "send 480 (Temporarily Unavailable) response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S106-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Targets can only be placed in the target set once. If a target URI is already present in the set (based on the definition of equality for the URI type), it MUST NOT be added again.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S106",
+      "object_name": "target_set",
+      "field_name": "target URI",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "target_set.contains(uri) = false"
+    },
+    {
+      "statement_id": "D-S106-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A proxy MUST NOT add additional targets to the target set if the Request-URI of the original request does not indicate a resource this proxy is responsible for.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S106",
+      "object_name": "target_set",
+      "field_name": "additional targets",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "proxy.responsible_for(request.Request-URI.domain) = true"
+    }
+  ]
+}

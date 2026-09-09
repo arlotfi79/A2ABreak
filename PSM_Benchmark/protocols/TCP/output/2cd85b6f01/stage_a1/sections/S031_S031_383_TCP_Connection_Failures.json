@@ -1,0 +1,125 @@
+{
+  "section_id": "S031",
+  "title": "S031 3.8.3 TCP Connection Failures",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S031 3.8.3 TCP Connection Failures"
+  ],
+  "url_anchor": "#s031-383-tcp-connection-failures",
+  "word_count": 362,
+  "statement_count": 5,
+  "elapsed_seconds": 32.19,
+  "statements": [
+    {
+      "statement_id": "D-S031-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "When the number of transmissions of the same segment reaches a threshold R2 greater than R1, close the connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S031",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "retransmission_count >= R2",
+      "pre_cond": "connection.retransmission_count >= connection.R2",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "close_connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An attempt to open a TCP connection could fail with excessive retransmissions of the SYN segment; SYN retransmissions MUST be handled in the general way just described for data retransmissions, including notification of the application layer.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S031",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "CLOSED",
+      "trigger": "SYN_retransmission_count >= R2",
+      "pre_cond": "protocol.state = SYN-SENT & connection.SYN_retransmission_count >= connection.R2",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "close_connection",
+        "notify_application_layer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An attempt to open a TCP connection could fail with excessive retransmissions of the SYN segment or by receipt of a RST segment or an ICMP Port Unreachable.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S031",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "CLOSED",
+      "trigger": "RST_received",
+      "pre_cond": "protocol.state = SYN-SENT",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "close_connection"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S031-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An attempt to open a TCP connection could fail with excessive retransmissions of the SYN segment or by receipt of a RST segment or an ICMP Port Unreachable.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S031",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "CLOSED",
+      "trigger": "ICMP_Port_Unreachable_received",
+      "pre_cond": "protocol.state = SYN-SENT",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "close_connection"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S031-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "R2 for a SYN segment MUST be set large enough to provide retransmission of the segment for at least 3 minutes (MUST-23).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S031",
+      "object_name": "SYN retransmission threshold",
+      "field_name": "R2",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": ">= 180 seconds",
+      "guard_semantics": "Minimum value of R2 for SYN segments; controls when connection open attempt is aborted"
+    }
+  ]
+}

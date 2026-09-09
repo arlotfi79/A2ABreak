@@ -1,0 +1,143 @@
+{
+  "section_id": "S043",
+  "title": "S043 8.2.2.3 Require",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S043 8.2.2.3 Require"
+  ],
+  "url_anchor": "#s043-8223-require",
+  "word_count": 271,
+  "statement_count": 5,
+  "elapsed_seconds": 66.0,
+  "statements": [
+    {
+      "statement_id": "N-S043-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a UAS does not understand an option-tag listed in a Require header field, it MUST respond by generating a response with status code 420 (Bad Extension).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S043",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request_with_unsupported_Require_option_tag",
+      "pre_cond": "request.Require.present = true & uas.understands(request.Require.option_tag) = false",
+      "post_cond": "response.status_code = 420",
+      "actions": [
+        "Generate response with status code 420 (Bad Extension)"
+      ],
+      "modality": "must",
+      "id": "N-S043-001"
+    },
+    {
+      "statement_id": "N-S043-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The UAS MUST add an Unsupported header field, and list in it those options it does not understand amongst those in the Require header field of the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S043",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "generate_420_response",
+      "pre_cond": "response.status_code = 420",
+      "post_cond": "response.Unsupported.present = true & response.Unsupported.lists_unrecognised_Require_options = true",
+      "actions": [
+        "Add Unsupported header field to 420 response",
+        "List in Unsupported header all option-tags from Require not understood by UAS"
+      ],
+      "modality": "must",
+      "id": "N-S043-002"
+    },
+    {
+      "statement_id": "N-S043-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Note that Require and Proxy-Require MUST NOT be used in a SIP CANCEL request, or in an ACK request sent for a non-2xx response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S043",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "message.method = CANCEL | (message.method = ACK & message.correlated_response_code != 2xx)",
+      "post_cond": "message.Require.present = false & message.Proxy-Require.present = false",
+      "actions": [
+        "Omit Require header field from CANCEL request",
+        "Omit Proxy-Require header field from CANCEL request",
+        "Omit Require header field from ACK for non-2xx response",
+        "Omit Proxy-Require header field from ACK for non-2xx response"
+      ],
+      "modality": "must",
+      "id": "N-S043-003"
+    },
+    {
+      "statement_id": "N-S043-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "These header fields MUST be ignored if they are present in these requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S043",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_CANCEL_or_ACK_non2xx_containing_Require_or_ProxyRequire",
+      "pre_cond": "(message.method = CANCEL | (message.method = ACK & message.correlated_response_code != 2xx)) & (message.Require.present = true | message.Proxy-Require.present = true)",
+      "post_cond": "uas.processes_Require = false & uas.processes_Proxy-Require = false",
+      "actions": [
+        "Ignore Require header field when present in CANCEL request",
+        "Ignore Proxy-Require header field when present in CANCEL request",
+        "Ignore Require header field when present in ACK for non-2xx response",
+        "Ignore Proxy-Require header field when present in ACK for non-2xx response"
+      ],
+      "modality": "must",
+      "id": "N-S043-004"
+    },
+    {
+      "statement_id": "N-S043-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "An ACK request for a 2xx response MUST contain only those Require and Proxy-Require values that were present in the initial request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S043",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_ACK_for_2xx_response",
+      "pre_cond": "message.method = ACK & message.correlated_response_code = 2xx",
+      "post_cond": "message.Require.values = initial_request.Require.values & message.Proxy-Require.values = initial_request.Proxy-Require.values",
+      "actions": [
+        "Include in ACK Require values only those present in the initial request",
+        "Include in ACK Proxy-Require values only those present in the initial request"
+      ],
+      "modality": "must",
+      "id": "N-S043-005"
+    }
+  ]
+}

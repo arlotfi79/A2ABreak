@@ -1,0 +1,154 @@
+{
+  "section_id": "S043",
+  "title": "S043 3.9.1.2 Send",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S043 3.9.1.2 Send"
+  ],
+  "url_anchor": "#s043-3912-send",
+  "word_count": 868,
+  "statement_count": 6,
+  "elapsed_seconds": 54.46,
+  "statements": [
+    {
+      "statement_id": "D-S043-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the connection has not been opened, the SEND is considered an error.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S043",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEND",
+      "pre_cond": "connection.opened = false",
+      "post_cond": null,
+      "actions": [
+        "return error"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S043-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Some implementations may allow users to SEND first; in which case, an automatic OPEN would be done. For example, this might be one way for application data to be included in SYN segments.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S043",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEND",
+      "pre_cond": "connection.opened = false",
+      "post_cond": null,
+      "actions": [
+        "automatic OPEN",
+        "include data in SYN segment"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S043-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "a LISTENing connection has become specific due to a remote segment arriving for the local socket",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S043",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "remote segment arriving for local socket",
+      "pre_cond": "connection.state = LISTEN & connection.remote_socket = unspecified",
+      "post_cond": "connection.remote_socket = specified",
+      "actions": [
+        "bind remote socket to connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S043-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "if a SEND is attempted before the remote socket becomes specified, an error will be returned",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S043",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEND",
+      "pre_cond": "connection.remote_socket = unspecified",
+      "post_cond": null,
+      "actions": [
+        "return error"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S043-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If a timeout is specified, the current user timeout for this connection is changed to the new one.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S043",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEND with timeout parameter",
+      "pre_cond": "connection.timeout_specified = true",
+      "post_cond": "connection.user_timeout = new_timeout",
+      "actions": [
+        "update user timeout"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S043-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If we are wrong, the connection will close anyway due to the timeout.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S043",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "timeout",
+      "pre_cond": null,
+      "post_cond": "connection.state = CLOSED",
+      "actions": [
+        "close connection"
+      ],
+      "modality": "other"
+    }
+  ]
+}

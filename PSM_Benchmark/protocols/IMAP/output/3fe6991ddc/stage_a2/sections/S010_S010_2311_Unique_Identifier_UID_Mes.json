@@ -1,0 +1,310 @@
+{
+  "section_id": "S010",
+  "title": "S010 2.3.1.1 Unique Identifier (UID) Message Attribute",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S010 2.3.1.1 Unique Identifier (UID) Message Attribute"
+  ],
+  "url_anchor": "#s010-2311-unique-identifier-uid-message-attribute",
+  "word_count": 720,
+  "statement_count": 13,
+  "elapsed_seconds": 332.22,
+  "statements": [
+    {
+      "statement_id": "N-S010-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "A UID is an unsigned non-zero 32-bit value assigned to each message, which when used with the unique identifier validity value (see below) forms a 64-bit value that MUST NOT refer to any other message in the mailbox or any subsequent mailbox with the same name forever.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S010-001"
+    },
+    {
+      "statement_id": "N-S010-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "The unique identifier of a message MUST NOT change during the session and SHOULD NOT change between sessions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "session.active = true",
+      "post_cond": "message.uid = message.uid.initial",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S010-002"
+    },
+    {
+      "statement_id": "N-S010-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "The unique identifier of a message MUST NOT change during the session and SHOULD NOT change between sessions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "previous_session.exists = true",
+      "post_cond": "message.uid = message.uid.previous_session",
+      "actions": [],
+      "modality": "should",
+      "id": "N-S010-003"
+    },
+    {
+      "statement_id": "N-S010-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Any change of unique identifiers between sessions MUST be detectable using the UIDVALIDITY mechanism discussed below.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_start",
+      "pre_cond": "uid.changed_between_sessions = true",
+      "post_cond": "uidvalidity.changed = true",
+      "actions": [
+        "expose UID change via UIDVALIDITY"
+      ],
+      "modality": "must",
+      "id": "N-S010-004"
+    },
+    {
+      "statement_id": "N-S010-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Unless the unique identifier validity also changes (see below), the next unique identifier value MUST have the following two characteristics.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "uidvalidity.changed = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S010-005"
+    },
+    {
+      "statement_id": "N-S010-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "First, the next unique identifier value MUST NOT change unless new messages are added to the mailbox; and second, the next unique identifier value MUST change whenever new messages are added to the mailbox, even if those new messages are subsequently expunged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "new_message.added = false & uidvalidity.changed = false",
+      "post_cond": "uidnext.unchanged = true",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S010-006"
+    },
+    {
+      "statement_id": "N-S010-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "First, the next unique identifier value MUST NOT change unless new messages are added to the mailbox; and second, the next unique identifier value MUST change whenever new messages are added to the mailbox, even if those new messages are subsequently expunged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_added",
+      "pre_cond": "uidvalidity.changed = false",
+      "post_cond": "uidnext.changed = true",
+      "actions": [
+        "increment UIDNEXT"
+      ],
+      "modality": "must",
+      "id": "N-S010-007"
+    },
+    {
+      "statement_id": "N-S010-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If unique identifiers from an earlier session fail to persist in this session, the unique identifier validity value MUST be greater than the one used in the earlier session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_start",
+      "pre_cond": "uid.persisted = false & previous_session.exists = true",
+      "post_cond": "uidvalidity > previous_session.uidvalidity",
+      "actions": [
+        "assign UIDVALIDITY greater than previous session value"
+      ],
+      "modality": "must",
+      "id": "N-S010-008"
+    },
+    {
+      "statement_id": "N-S010-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "imap",
+      "stage": "imap_fsm",
+      "description": "Ideally, unique identifiers SHOULD persist at all times.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S010-009"
+    },
+    {
+      "statement_id": "N-S010-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "Unique identifiers MUST be strictly ascending in the mailbox at all times.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S010-010"
+    },
+    {
+      "statement_id": "N-S010-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the physical message store is reordered by a non-IMAP agent, the unique identifiers in the mailbox MUST be regenerated, since the former unique identifiers are no longer strictly ascending as a result of the reordering.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mailbox_reordered_by_non_imap_agent",
+      "pre_cond": "uid.strictly_ascending = false",
+      "post_cond": "uid.regenerated = true",
+      "actions": [
+        "regenerate unique identifiers to restore strictly ascending order"
+      ],
+      "modality": "must",
+      "id": "N-S010-011"
+    },
+    {
+      "statement_id": "N-S010-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "In particular, the internal date, RFC822.SIZE, envelope, body structure, and message texts (all BODY[...] fetch data items) MUST never change.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S010-012"
+    },
+    {
+      "statement_id": "N-S010-13",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "When a message is expunged, its UID MUST NOT be reused under the same UIDVALIDITY value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_expunged",
+      "pre_cond": "uidvalidity.unchanged = true",
+      "post_cond": "!uid.reused",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S010-013"
+    }
+  ]
+}

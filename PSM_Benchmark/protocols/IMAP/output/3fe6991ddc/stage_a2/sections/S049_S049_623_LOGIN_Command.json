@@ -1,0 +1,153 @@
+{
+  "section_id": "S049",
+  "title": "S049 6.2.3 LOGIN Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S049 6.2.3 LOGIN Command"
+  ],
+  "url_anchor": "#s049-623-login-command",
+  "word_count": 281,
+  "statement_count": 6,
+  "elapsed_seconds": 66.83,
+  "statements": [
+    {
+      "statement_id": "N-S049-1",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The LOGIN command SHOULD NOT be used except as a last resort (after attempting and failing to authenticate using the AUTHENTICATE command one or more times), and it is recommended that client implementations have a means to disable any automatic use of the LOGIN command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "send LOGIN command",
+      "pre_cond": "AUTHENTICATE.attempted = false | AUTHENTICATE.last_result != FAILED",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S049-001"
+    },
+    {
+      "statement_id": "N-S049-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server MAY include a CAPABILITY response code in the tagged OK response to a successful LOGIN command in order to send capabilities automatically.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "LOGIN command succeeds",
+      "pre_cond": null,
+      "post_cond": "response.tagged_ok.includes_capability_code = true",
+      "actions": [
+        "include CAPABILITY response code in tagged OK response"
+      ],
+      "modality": "may",
+      "id": "N-S049-002"
+    },
+    {
+      "statement_id": "N-S049-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "clients MUST NOT use LOGIN on unsecure networks.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "send LOGIN command",
+      "pre_cond": "network.is_secure = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S049-003"
+    },
+    {
+      "statement_id": "N-S049-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Unless the client is accessing IMAP service on an Implicit TLS port [RFC8314], the STARTTLS command has been negotiated, or some other mechanism that protects the session from password snooping has been provided, a server implementation MUST implement a configuration in which it advertises the LOGINDISABLED capability and does NOT permit the LOGIN command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "session.implicit_TLS = false & session.STARTTLS_negotiated = false & session.other_snooping_protection = false",
+      "post_cond": "server.advertises_LOGINDISABLED = true & server.permits_LOGIN = false",
+      "actions": [
+        "advertise LOGINDISABLED capability",
+        "reject LOGIN command"
+      ],
+      "modality": "must",
+      "id": "N-S049-004"
+    },
+    {
+      "statement_id": "N-S049-5",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Server sites SHOULD NOT use any configuration that permits the LOGIN command without such a protection mechanism against password snooping.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "session.snooping_protection_mechanism = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S049-005"
+    },
+    {
+      "statement_id": "N-S049-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "A client implementation MUST NOT send a LOGIN command if the LOGINDISABLED capability is advertised.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "send LOGIN command",
+      "pre_cond": "server.capabilities.includes(LOGINDISABLED) = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S049-006"
+    }
+  ]
+}

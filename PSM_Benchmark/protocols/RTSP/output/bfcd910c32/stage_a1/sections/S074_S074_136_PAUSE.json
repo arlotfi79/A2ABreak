@@ -1,0 +1,150 @@
+{
+  "section_id": "S074",
+  "title": "S074 13.6 PAUSE",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S074 13.6 PAUSE"
+  ],
+  "url_anchor": "#s074-136-pause",
+  "word_count": 469,
+  "statement_count": 6,
+  "elapsed_seconds": 37.13,
+  "statements": [
+    {
+      "statement_id": "D-S074-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If a client issues a PAUSE request and the server acknowledges and enters the Ready state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "state_name": "Ready",
+      "enum_name": "ServerSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = Ready"
+    },
+    {
+      "statement_id": "D-S074-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The PAUSE request causes the stream delivery to immediately be interrupted (halted)... the server acknowledges and enters the Ready state",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S074",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Ready",
+      "trigger": "PAUSE request received",
+      "pre_cond": null,
+      "post_cond": "session.pause_point = current_presentation_position & session.state = Ready",
+      "actions": [
+        "interrupt stream delivery immediately",
+        "set pause point to current position in presentation",
+        "send 200 OK with Range header indicating remaining unplayed range",
+        "enter Ready state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S074-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If a client issues a PAUSE request and the server acknowledges and enters the Ready state, the proper server response, if the player issues another PAUSE, is still 200 OK. The 200 OK response MUST include the Range header with the current pause point.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "PAUSE request received",
+      "pre_cond": "session.state = Ready",
+      "post_cond": "session.state = Ready",
+      "actions": [
+        "send 200 OK",
+        "include Range header with current pause point"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S074-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "servers MAY close the session and free resources after being paused for the duration specified with the timeout parameter of the Session header in the SETUP message",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S074",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": null,
+      "trigger": "pause timeout expired",
+      "pre_cond": "session.state = Ready & session.pause_duration >= session.timeout_parameter",
+      "post_cond": "session.closed = true",
+      "actions": [
+        "close session",
+        "free server resources"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S074-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A subsequent PLAY request without a Range header resumes from the pause point and plays until media end.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S074",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": null,
+      "trigger": "PLAY request received",
+      "pre_cond": "session.state = Ready & session.pause_point != null",
+      "post_cond": "session.delivery_active = true",
+      "actions": [
+        "resume stream delivery from pause point",
+        "maintain synchronization of tracks"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S074-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The pause point after any PAUSE request MUST be returned to the client by adding a Range header with what remains unplayed of the PLAY request's range.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "object_name": "PAUSE response",
+      "field_name": "Range",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "must be present in every PAUSE 200 OK response to indicate the current pause point"
+    }
+  ]
+}

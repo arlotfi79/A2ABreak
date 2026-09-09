@@ -1,0 +1,278 @@
+{
+  "section_id": "S256",
+  "title": "S256 22.1 Framework",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S256 22.1 Framework"
+  ],
+  "url_anchor": "#s256-221-framework",
+  "word_count": 743,
+  "statement_count": 12,
+  "elapsed_seconds": 95.28,
+  "statements": [
+    {
+      "statement_id": "D-S256-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "In SIP, a UAS uses the 401 (Unauthorized) response to challenge the identity of a UAC.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S256",
+      "actors": [
+        "UAS",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS receives unauthenticated request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 401 Unauthorized"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S256-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "registrars and redirect servers MAY make use of 401 (Unauthorized) responses for authentication, but proxies MUST NOT, and instead MAY use the 407 (Proxy Authentication Required) response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S256",
+      "actors": [
+        "proxy",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "proxy receives unauthenticated request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 407 Proxy Authentication Required"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S256-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "any credentials in the INVITE that were accepted by a server MUST be accepted by that server for the ACK.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S256",
+      "actors": [
+        "server",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server receives ACK",
+      "pre_cond": "server.accepted_credentials_for_invite = true",
+      "post_cond": null,
+      "actions": [
+        "accept ACK credentials"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S256-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Servers MUST NOT attempt to challenge an ACK.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S256",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server receives ACK",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S256-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "servers MUST NOT attempt to challenge CANCEL requests since these requests cannot be resubmitted.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S256",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server receives CANCEL",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S256-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "a CANCEL request SHOULD be accepted by a server if it comes from the same hop that sent the request being canceled (provided that some sort of transport or network layer security association is in place).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S256",
+      "actors": [
+        "server",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server receives CANCEL",
+      "pre_cond": "cancel.source_hop = request.source_hop & security_association.active = true",
+      "post_cond": null,
+      "actions": [
+        "accept CANCEL"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S256-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When a UAC receives a challenge, it SHOULD render to the user the contents of the 'realm' parameter in the challenge if the UAC device does not already know of a credential for the realm in question.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S256",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAC receives 401 Unauthorized or 407 Proxy Authentication Required",
+      "pre_cond": "UAC.credential_for_realm = null",
+      "post_cond": null,
+      "actions": [
+        "render realm to user"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S256-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "a server may repeat its challenge, or it may respond with a 403 Forbidden [when credentials are not accepted].",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S256",
+      "actors": [
+        "server",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server receives request with invalid or unacceptable credentials",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 401 Unauthorized | send 403 Forbidden"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S256-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "A UAC MUST NOT re-attempt requests with the credentials that have just been rejected (though the request may be retried if the nonce was stale).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S256",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAC credentials rejected by server",
+      "pre_cond": "nonce.stale = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S256-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "the request may be retried if the nonce was stale.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S256",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "stale nonce indicated in challenge response",
+      "pre_cond": "nonce.stale = true",
+      "post_cond": null,
+      "actions": [
+        "retry request with fresh credentials"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S256-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "UACs creating an ACK message will duplicate all of the Authorization and Proxy-Authorization header field values that appeared in the INVITE to which the ACK corresponds.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S256",
+      "object_name": "ACK",
+      "field_name": "Authorization",
+      "field_type": "header field",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S256-012",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "UACs creating an ACK message will duplicate all of the Authorization and Proxy-Authorization header field values that appeared in the INVITE to which the ACK corresponds.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S256",
+      "object_name": "ACK",
+      "field_name": "Proxy-Authorization",
+      "field_type": "header field",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

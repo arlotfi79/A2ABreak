@@ -1,0 +1,106 @@
+{
+  "section_id": "S053",
+  "title": "S053 11. Capability Handling",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S053 11. Capability Handling"
+  ],
+  "url_anchor": "#s053-11-capability-handling",
+  "word_count": 719,
+  "statement_count": 4,
+  "elapsed_seconds": 23.69,
+  "statements": [
+    {
+      "statement_id": "D-S053-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The OPTIONS response MUST contain a Public header that declares all methods supported for the indicated resource.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPTIONS request received",
+      "pre_cond": null,
+      "post_cond": "response.Public = all_supported_methods_for_resource",
+      "actions": [
+        "send OPTIONS response with Public header listing all supported methods"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "If the receiver of the request does not support the method, it will respond with an error code indicating the method is either not implemented (501) or does not apply for the resource (405).",
+      "is_inferred": false,
+      "confidence": 0.72,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request received with unsupported method",
+      "pre_cond": "endpoint.supports_method = false",
+      "post_cond": null,
+      "actions": [
+        "send 501 response OR send 405 response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S053-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "The endpoint receiving a request containing a Require MUST negatively acknowledge any feature that it does not understand and not perform the request. The response in cases where features are not supported is 551 (Option Not Supported). Also, the features that are not supported are given in the Unsupported header in the response.",
+      "is_inferred": false,
+      "confidence": 0.82,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request received with Require header containing unsupported feature",
+      "pre_cond": "request.Require != null & endpoint.supports_feature(request.Require) = false",
+      "post_cond": "request_not_performed = true",
+      "actions": [
+        "send 551 response",
+        "include Unsupported header listing unsupported features",
+        "do not perform the requested operation"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "Proxies are required to add this header (Proxy-Supported) whenever the Supported header is present.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S053",
+      "object_name": "proxy request/response",
+      "field_name": "Proxy-Supported",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "message.Supported != null"
+    }
+  ]
+}

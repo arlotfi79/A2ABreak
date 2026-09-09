@@ -1,0 +1,89 @@
+{
+  "section_id": "S015",
+  "title": "S015 2.2.4.2 Authentication Using the AUTH Property",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S015 2.2.4.2 Authentication Using the AUTH Property"
+  ],
+  "url_anchor": "#s015-2242-authentication-using-the-auth-property",
+  "word_count": 136,
+  "statement_count": 3,
+  "elapsed_seconds": 45.23,
+  "statements": [
+    {
+      "statement_id": "N-S015-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST set the Authentication Method as a property of a CONNECT packet by using the property identifier 21 (0x15).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Client initiates connection with AUTH property",
+      "pre_cond": "client.auth_method = ace",
+      "post_cond": "CONNECT.property[0x15].present = true",
+      "actions": [
+        "Include Authentication Method property (identifier 0x15) in CONNECT packet"
+      ],
+      "modality": "must",
+      "id": "N-S015-001"
+    },
+    {
+      "statement_id": "N-S015-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "This is followed by a UTF-8-encoded string containing the name of the Authentication Method, which MUST be set to \"ace\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "CONNECT.property[0x15].value = 'ace'",
+      "actions": [
+        "Set Authentication Method string value to 'ace' in CONNECT packet"
+      ],
+      "modality": "must",
+      "id": "N-S015-002"
+    },
+    {
+      "statement_id": "N-S015-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Based on the Authentication Data, the Broker MUST support both options below:\n   *  proof of possession using a challenge from the TLS session\n   *  proof of possession via a Broker-generated challenge/response",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "Authenticating",
+      "to_state": null,
+      "trigger": "CONNECT received with Authentication Data",
+      "pre_cond": "CONNECT.property[0x15].value = 'ace' & CONNECT.property[0x16].present = true",
+      "post_cond": "server.supports_tls_challenge_pop = true & server.supports_broker_challenge_pop = true",
+      "actions": [
+        "Accept proof-of-possession via TLS session challenge",
+        "Accept proof-of-possession via Broker-generated challenge/response"
+      ],
+      "modality": "must",
+      "id": "N-S015-003"
+    }
+  ]
+}

@@ -1,0 +1,824 @@
+{
+  "protocol": "SMTP",
+  "model": "a2a-pipeline",
+  "fingerprint": {
+    "evaluator_sha256": "c302bb6e01e8e95f5fa4f1147efd289e0cba243ca3a707eeb9ae731a6a83b668",
+    "ground_truth_sha256": "eb5e65f062a1be3b18c88fd13be1fbd151aa1093269c0b460dd340bb206893a4",
+    "exported_fsm_sha256": "fe906f05bb2737ae4168b4c264b10f23300cebd963d4ef58ebf4edaeead4ff8c",
+    "minilm": {
+      "found": true,
+      "snapshots": [
+        "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+      ]
+    },
+    "packages": {
+      "python": "3.13.2",
+      "numpy": "2.4.2",
+      "torch": "2.12.0",
+      "sentence-transformers": "5.5.1",
+      "pandas": "3.0.3",
+      "scikit-learn": "1.8.0",
+      "litellm": "1.83.14"
+    }
+  },
+  "official": {
+    "states": {
+      "Protocol": "SMTP",
+      "Model": "a2a-pipeline",
+      "Total Extracted": 13,
+      "Total GT": 7,
+      "Matched": 5,
+      "Precision": 0.385,
+      "Recall": 0.714,
+      "F1-Score": 0.5
+    },
+    "transitions": {
+      "Protocol": "SMTP",
+      "Model": "a2a-pipeline",
+      "TotalExtracted": 38,
+      "TotalGT": 22,
+      "Matched": 1,
+      "UnmatchedGT": 21,
+      "UnmatchedExtracted": 37,
+      "Precision": 0.026,
+      "Recall": 0.045,
+      "F1-Score": 0.033
+    },
+    "call": {
+      "match_all_states": {
+        "threshold": 0.5
+      },
+      "batch_evaluate_transitions_combined": {
+        "if_partial": false,
+        "state_threshold": 0.5,
+        "trans_threshold": 0.5
+      }
+    }
+  },
+  "diagnostics": {
+    "state_matches": [
+      {
+        "gt": "Connection Established",
+        "extracted": "ConnectionOpened",
+        "score": 0.7081800103187561
+      },
+      {
+        "gt": "Greeted",
+        "extracted": "Greeting",
+        "score": 0.641658365726471
+      },
+      {
+        "gt": "Mail Transaction Started",
+        "extracted": "MailTransaction",
+        "score": 0.6090959310531616
+      },
+      {
+        "gt": "Recipient Specified",
+        "extracted": null,
+        "score": 0.45489150285720825
+      },
+      {
+        "gt": "Data Entry",
+        "extracted": "DataTransfer",
+        "score": 0.5213329792022705
+      },
+      {
+        "gt": "Message Accepted",
+        "extracted": null,
+        "score": 0.4066418707370758
+      },
+      {
+        "gt": "Session Terminated",
+        "extracted": "SessionRejected",
+        "score": 0.61114901304245
+      }
+    ],
+    "unmatched_gt_states": [
+      "Recipient Specified",
+      "Message Accepted"
+    ],
+    "unselected_extracted_states": [
+      "MailAccepted",
+      "Queued",
+      "Transmitted",
+      "GiveUp",
+      "Error",
+      "Undeliverable"
+    ],
+    "matched_transitions": [
+      {
+        "extracted": {
+          "from": "ConnectionOpened",
+          "event": "send 220 greeting",
+          "action": "send 220 service ready",
+          "to": "Greeting"
+        },
+        "gt": {
+          "from": "Connection Established",
+          "event": "receive EHLO or HELO after 220 greeting",
+          "action": "send HELO",
+          "to": "Greeted"
+        }
+      }
+    ],
+    "unmatched_gt_transitions": [
+      {
+        "from": "Greeted",
+        "event": "receive MAIL FROM",
+        "action": "send MAIL FROM",
+        "to": "Mail Transaction Started"
+      },
+      {
+        "from": "Mail Transaction Started",
+        "event": "receive RCPT TO",
+        "action": "send RCPT TO",
+        "to": "Recipient Specified"
+      },
+      {
+        "from": "Recipient Specified",
+        "event": "receive DATA",
+        "action": "send DATA 354",
+        "to": "Data Entry"
+      },
+      {
+        "from": "Data Entry",
+        "event": "cond message ended with <CRLF>.<CRLF>",
+        "action": "send message body",
+        "to": "Message Accepted"
+      },
+      {
+        "from": "Message Accepted",
+        "event": "receive QUIT",
+        "action": "send QUIT",
+        "to": "Session Terminated"
+      },
+      {
+        "from": "Greeted",
+        "event": "receive RSET",
+        "action": "send RSET",
+        "to": "Greeted"
+      },
+      {
+        "from": "Mail Transaction Started",
+        "event": "receive RSET",
+        "action": "send RSET",
+        "to": "Greeted"
+      },
+      {
+        "from": "Recipient Specified",
+        "event": "receive RSET",
+        "action": "send RSET",
+        "to": "Greeted"
+      },
+      {
+        "from": "Data Entry",
+        "event": "receive RSET before message is complete",
+        "action": "send RSET",
+        "to": "Greeted"
+      },
+      {
+        "from": "Message Accepted",
+        "event": "receive RSET",
+        "action": "send RSET",
+        "to": "Greeted"
+      },
+      {
+        "from": "Greeted",
+        "event": "receive VRFY",
+        "action": "send VRFY",
+        "to": "Greeted"
+      },
+      {
+        "from": "Greeted",
+        "event": "receive EXPN",
+        "action": "send EXPN; reply 250",
+        "to": "Greeted"
+      },
+      {
+        "from": "Mail Transaction Started",
+        "event": "receive VRFY or EXPN",
+        "action": "send VRFY; send EXPN",
+        "to": "Mail Transaction Started"
+      },
+      {
+        "from": "Recipient Specified",
+        "event": "receive VRFY or EXPN",
+        "action": "send VRFY; send EXPN",
+        "to": "Recipient Specified"
+      },
+      {
+        "from": "Data Entry",
+        "event": "receive VRFY or EXPN",
+        "action": "send VRFY; send EXPN",
+        "to": "Data Entry"
+      },
+      {
+        "from": "Message Accepted",
+        "event": "receive VRFY or EXPN",
+        "action": "send VRFY; send EXPN",
+        "to": "Message Accepted"
+      },
+      {
+        "from": "Connection Established",
+        "event": "receive QUIT",
+        "action": "send QUIT",
+        "to": "Session Terminated"
+      },
+      {
+        "from": "Greeted",
+        "event": "receive QUIT",
+        "action": "send QUIT",
+        "to": "Session Terminated"
+      },
+      {
+        "from": "Mail Transaction Started",
+        "event": "receive QUIT",
+        "action": "send QUIT",
+        "to": "Session Terminated"
+      },
+      {
+        "from": "Recipient Specified",
+        "event": "receive QUIT",
+        "action": "send QUIT",
+        "to": "Session Terminated"
+      },
+      {
+        "from": "Data Entry",
+        "event": "receive QUIT before finishing data",
+        "action": "send QUIT",
+        "to": "Session Terminated"
+      }
+    ],
+    "unmatched_extracted_transitions": [
+      {
+        "from": "ConnectionOpened",
+        "event": "send 554 rejection",
+        "action": "send 554 rejection response",
+        "to": "SessionRejected"
+      },
+      {
+        "from": "Greeting",
+        "event": "receive EHLO accepted",
+        "action": "clear all state tables and buffers",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "Greeting",
+        "event": "receive HELO accepted",
+        "action": "clear all state tables and buffers",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "Greeting",
+        "event": "receive EHLO rejected",
+        "action": "return failure reply",
+        "to": "Greeting"
+      },
+      {
+        "from": "Greeting",
+        "event": "receive HELO rejected",
+        "action": "send error reply",
+        "to": "Greeting"
+      },
+      {
+        "from": "SessionInitialized",
+        "event": "receive EHLO mid session",
+        "action": "clear buffers and reset state",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "SessionInitialized",
+        "event": "receive MAIL accepted",
+        "action": "clear buffers and insert reverse-path",
+        "to": "MailTransaction"
+      },
+      {
+        "from": "SessionInitialized",
+        "event": "receive MAIL rejected",
+        "action": "send error reply",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "MailTransaction",
+        "event": "receive RCPT accepted",
+        "action": "store forward-path",
+        "to": "MailTransaction"
+      },
+      {
+        "from": "MailTransaction",
+        "event": "receive RCPT rejected",
+        "action": "send rejection response",
+        "to": "MailTransaction"
+      },
+      {
+        "from": "MailTransaction",
+        "event": "receive DATA accepted",
+        "action": "send 354 intermediate reply",
+        "to": "DataTransfer"
+      },
+      {
+        "from": "MailTransaction",
+        "event": "receive DATA rejected",
+        "action": "do not send message data",
+        "to": "MailTransaction"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "receive data end accepted",
+        "action": "process stored mail transaction",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "receive data end rejected",
+        "action": "send error reply",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "send 250 data accepted",
+        "action": "accept delivery responsibility",
+        "to": "MailAccepted"
+      },
+      {
+        "from": "MailTransaction",
+        "event": "receive RSET",
+        "action": "abort transaction and clear buffers",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "MailTransaction",
+        "event": "receive EHLO accepted",
+        "action": "abort transaction and clear buffers",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "SessionRejected",
+        "event": "receive QUIT",
+        "action": "close connection",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "SessionRejected",
+        "event": "receive non QUIT command",
+        "action": "send 503 bad sequence",
+        "to": "SessionRejected"
+      },
+      {
+        "from": "SessionInitialized",
+        "event": "receive QUIT",
+        "action": "send 221 and close connection",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "MailTransaction",
+        "event": "receive QUIT",
+        "action": "abort current transaction",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "Greeting",
+        "event": "receive QUIT",
+        "action": "send 221 and close connection",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "SessionInitialized",
+        "event": "receive RSET",
+        "action": "send 250 OK reply",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "SessionInitialized",
+        "event": "receive NOOP",
+        "action": "send 250 OK reply",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "MailTransaction",
+        "event": "receive NOOP",
+        "action": "send 250 OK reply",
+        "to": "MailTransaction"
+      },
+      {
+        "from": "SessionInitialized",
+        "event": "receive RCPT out of order",
+        "action": "send 503 bad sequence",
+        "to": "SessionInitialized"
+      },
+      {
+        "from": "MailAccepted",
+        "event": "cond delivery fails",
+        "action": "enqueue message with envelope",
+        "to": "Queued"
+      },
+      {
+        "from": "Queued",
+        "event": "timeout retry interval",
+        "action": "attempt delivery",
+        "to": "Queued"
+      },
+      {
+        "from": "Queued",
+        "event": "cond delivery succeeds",
+        "action": "remove from queue",
+        "to": "Transmitted"
+      },
+      {
+        "from": "Queued",
+        "event": "timeout give up time",
+        "action": "notify sender of failure",
+        "to": "GiveUp"
+      },
+      {
+        "from": "Greeting",
+        "event": "send 421 shutdown",
+        "action": "send 421 and close connection",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "SessionInitialized",
+        "event": "send 421 shutdown",
+        "action": "send 421 and close connection",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "MailTransaction",
+        "event": "send 421 shutdown",
+        "action": "send 421 and close connection",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "send 421 shutdown",
+        "action": "send 421 and close connection",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "Greeting",
+        "event": "timeout waiting for command",
+        "action": "close connection",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "SessionInitialized",
+        "event": "timeout waiting for command",
+        "action": "close connection",
+        "to": "ConnectionClosed"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "timeout data transfer",
+        "action": "close connection",
+        "to": "ConnectionClosed"
+      }
+    ],
+    "precision": 0.385,
+    "recall": 0.714,
+    "f1_score": 0.5
+  },
+  "supplementary": {
+    "note": "Supplementary only — the official numbers above come from the benchmark's own entry points. The official state matcher is many-to-one and the official transition matcher is greedy and order-sensitive; these one-to-one numbers bound that effect.",
+    "one_to_one": {
+      "states": {
+        "threshold": 0.5,
+        "matched": 5,
+        "total_gt": 7,
+        "total_extracted": 13,
+        "precision": 0.3846,
+        "recall": 0.7143,
+        "f1": 0.5,
+        "pairs": [
+          {
+            "gt": "Connection Established",
+            "extracted": "ConnectionOpened",
+            "score": 0.7082
+          },
+          {
+            "gt": "Greeted",
+            "extracted": "Greeting",
+            "score": 0.6417
+          },
+          {
+            "gt": "Mail Transaction Started",
+            "extracted": "MailTransaction",
+            "score": 0.6091
+          },
+          {
+            "gt": "Data Entry",
+            "extracted": "DataTransfer",
+            "score": 0.5213
+          },
+          {
+            "gt": "Session Terminated",
+            "extracted": "SessionRejected",
+            "score": 0.6111
+          }
+        ]
+      },
+      "transitions": {
+        "threshold": 0.5,
+        "matched": 1,
+        "total_gt": 22,
+        "total_extracted": 38,
+        "precision": 0.0263,
+        "recall": 0.0455,
+        "f1": 0.0333,
+        "pairs": [
+          {
+            "extracted": {
+              "from": "ConnectionOpened",
+              "event": "send 220 greeting",
+              "action": "send 220 service ready",
+              "to": "Greeting"
+            },
+            "gt": {
+              "from": "Connection Established",
+              "event": "receive EHLO or HELO after 220 greeting",
+              "action": "send HELO",
+              "to": "Greeted"
+            },
+            "label_score": 0.545
+          }
+        ]
+      }
+    },
+    "threshold_sensitivity": {
+      "0.4": {
+        "states_official_style": {
+          "matched": 7,
+          "precision": 0.538,
+          "recall": 1.0,
+          "f1": 0.7
+        },
+        "states_one_to_one": {
+          "threshold": 0.4,
+          "matched": 7,
+          "total_gt": 7,
+          "total_extracted": 13,
+          "precision": 0.5385,
+          "recall": 1.0,
+          "f1": 0.7,
+          "pairs": [
+            {
+              "gt": "Connection Established",
+              "extracted": "ConnectionOpened",
+              "score": 0.7082
+            },
+            {
+              "gt": "Greeted",
+              "extracted": "Greeting",
+              "score": 0.6417
+            },
+            {
+              "gt": "Mail Transaction Started",
+              "extracted": "MailTransaction",
+              "score": 0.6091
+            },
+            {
+              "gt": "Recipient Specified",
+              "extracted": "MailAccepted",
+              "score": 0.4176
+            },
+            {
+              "gt": "Data Entry",
+              "extracted": "DataTransfer",
+              "score": 0.5213
+            },
+            {
+              "gt": "Message Accepted",
+              "extracted": "Error",
+              "score": 0.4066
+            },
+            {
+              "gt": "Session Terminated",
+              "extracted": "SessionRejected",
+              "score": 0.6111
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.4,
+          "matched": 6,
+          "total_gt": 22,
+          "total_extracted": 38,
+          "precision": 0.1579,
+          "recall": 0.2727,
+          "f1": 0.2,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "ConnectionOpened",
+                "event": "send 220 greeting",
+                "action": "send 220 service ready",
+                "to": "Greeting"
+              },
+              "gt": {
+                "from": "Connection Established",
+                "event": "receive EHLO or HELO after 220 greeting",
+                "action": "send HELO",
+                "to": "Greeted"
+              },
+              "label_score": 0.545
+            },
+            {
+              "extracted": {
+                "from": "Greeting",
+                "event": "receive EHLO rejected",
+                "action": "return failure reply",
+                "to": "Greeting"
+              },
+              "gt": {
+                "from": "Greeted",
+                "event": "receive EXPN",
+                "action": "send EXPN; reply 250",
+                "to": "Greeted"
+              },
+              "label_score": 0.4527
+            },
+            {
+              "extracted": {
+                "from": "MailTransaction",
+                "event": "receive RCPT rejected",
+                "action": "send rejection response",
+                "to": "MailTransaction"
+              },
+              "gt": {
+                "from": "Mail Transaction Started",
+                "event": "receive RCPT TO",
+                "action": "send RCPT TO",
+                "to": "Recipient Specified"
+              },
+              "label_score": 0.6802
+            },
+            {
+              "extracted": {
+                "from": "MailTransaction",
+                "event": "receive DATA accepted",
+                "action": "send 354 intermediate reply",
+                "to": "DataTransfer"
+              },
+              "gt": {
+                "from": "Recipient Specified",
+                "event": "receive DATA",
+                "action": "send DATA 354",
+                "to": "Data Entry"
+              },
+              "label_score": 0.6961
+            },
+            {
+              "extracted": {
+                "from": "DataTransfer",
+                "event": "receive data end rejected",
+                "action": "send error reply",
+                "to": "SessionInitialized"
+              },
+              "gt": {
+                "from": "Data Entry",
+                "event": "receive QUIT before finishing data",
+                "action": "send QUIT",
+                "to": "Session Terminated"
+              },
+              "label_score": 0.4683
+            },
+            {
+              "extracted": {
+                "from": "MailTransaction",
+                "event": "receive NOOP",
+                "action": "send 250 OK reply",
+                "to": "MailTransaction"
+              },
+              "gt": {
+                "from": "Mail Transaction Started",
+                "event": "receive VRFY or EXPN",
+                "action": "send VRFY; send EXPN",
+                "to": "Mail Transaction Started"
+              },
+              "label_score": 0.4239
+            }
+          ]
+        }
+      },
+      "0.5": {
+        "states_official_style": {
+          "matched": 5,
+          "precision": 0.385,
+          "recall": 0.714,
+          "f1": 0.5
+        },
+        "states_one_to_one": {
+          "threshold": 0.5,
+          "matched": 5,
+          "total_gt": 7,
+          "total_extracted": 13,
+          "precision": 0.3846,
+          "recall": 0.7143,
+          "f1": 0.5,
+          "pairs": [
+            {
+              "gt": "Connection Established",
+              "extracted": "ConnectionOpened",
+              "score": 0.7082
+            },
+            {
+              "gt": "Greeted",
+              "extracted": "Greeting",
+              "score": 0.6417
+            },
+            {
+              "gt": "Mail Transaction Started",
+              "extracted": "MailTransaction",
+              "score": 0.6091
+            },
+            {
+              "gt": "Data Entry",
+              "extracted": "DataTransfer",
+              "score": 0.5213
+            },
+            {
+              "gt": "Session Terminated",
+              "extracted": "SessionRejected",
+              "score": 0.6111
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.5,
+          "matched": 1,
+          "total_gt": 22,
+          "total_extracted": 38,
+          "precision": 0.0263,
+          "recall": 0.0455,
+          "f1": 0.0333,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "ConnectionOpened",
+                "event": "send 220 greeting",
+                "action": "send 220 service ready",
+                "to": "Greeting"
+              },
+              "gt": {
+                "from": "Connection Established",
+                "event": "receive EHLO or HELO after 220 greeting",
+                "action": "send HELO",
+                "to": "Greeted"
+              },
+              "label_score": 0.545
+            }
+          ]
+        }
+      },
+      "0.6": {
+        "states_official_style": {
+          "matched": 4,
+          "precision": 0.308,
+          "recall": 0.571,
+          "f1": 0.4
+        },
+        "states_one_to_one": {
+          "threshold": 0.6,
+          "matched": 4,
+          "total_gt": 7,
+          "total_extracted": 13,
+          "precision": 0.3077,
+          "recall": 0.5714,
+          "f1": 0.4,
+          "pairs": [
+            {
+              "gt": "Connection Established",
+              "extracted": "ConnectionOpened",
+              "score": 0.7082
+            },
+            {
+              "gt": "Greeted",
+              "extracted": "Greeting",
+              "score": 0.6417
+            },
+            {
+              "gt": "Mail Transaction Started",
+              "extracted": "MailTransaction",
+              "score": 0.6091
+            },
+            {
+              "gt": "Session Terminated",
+              "extracted": "SessionRejected",
+              "score": 0.6111
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.6,
+          "matched": 0,
+          "total_gt": 22,
+          "total_extracted": 38,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "pairs": []
+        }
+      }
+    }
+  }
+}

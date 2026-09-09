@@ -1,0 +1,174 @@
+{
+  "section_id": "S047",
+  "title": "S047 6.2.1 STARTTLS Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S047 6.2.1 STARTTLS Command"
+  ],
+  "url_anchor": "#s047-621-starttls-command",
+  "word_count": 390,
+  "statement_count": 7,
+  "elapsed_seconds": 40.54,
+  "statements": [
+    {
+      "statement_id": "D-S047-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "After successful TLS negotiation, the server remains in the non-authenticated state, even if client credentials are supplied during the TLS negotiation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "state_name": "not authenticated",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.tls_negotiation_complete = true & protocol.authenticated = false"
+    },
+    {
+      "statement_id": "D-S047-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "A TLS negotiation begins immediately after the CRLF at the end of the tagged OK response from the server. After successful TLS negotiation, the server remains in the non-authenticated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "not authenticated",
+      "to_state": "not authenticated",
+      "trigger": "STARTTLS_OK",
+      "pre_cond": "connection.port_type = cleartext & connection.tls_active = false",
+      "post_cond": "connection.tls_active = true & server.state = not_authenticated",
+      "actions": [
+        "send tagged OK",
+        "begin TLS negotiation",
+        "discard client cached capabilities"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MUST always respond with a tagged BAD response when the STARTTLS command is received on an Implicit TLS port.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "not authenticated",
+      "to_state": "not authenticated",
+      "trigger": "STARTTLS_received_on_implicit_TLS_port",
+      "pre_cond": "connection.port_type = implicit_TLS",
+      "post_cond": "server.last_response = BAD",
+      "actions": [
+        "send tagged BAD"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "BAD - STARTTLS received after a successful TLS negotiation or arguments invalid.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "not authenticated",
+      "to_state": "not authenticated",
+      "trigger": "STARTTLS_received_after_TLS_active",
+      "pre_cond": "connection.tls_active = true",
+      "post_cond": "server.last_response = BAD",
+      "actions": [
+        "send tagged BAD"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Once a client issues a STARTTLS command, it MUST NOT issue further commands until a server response is seen and the TLS negotiation is complete.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "object_name": "client",
+      "field_name": "pending_starttls",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "guard_semantics": "While pending_starttls = true, client MUST NOT issue further commands"
+    },
+    {
+      "statement_id": "D-S047-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Once TLS has been started, the client MUST discard cached information about server capabilities and SHOULD reissue the CAPABILITY command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "client"
+      ],
+      "from_state": "not authenticated",
+      "to_state": "not authenticated",
+      "trigger": "TLS_negotiation_complete",
+      "pre_cond": "connection.tls_active = true",
+      "post_cond": "client.cached_capabilities = null",
+      "actions": [
+        "discard cached server capabilities",
+        "reissue CAPABILITY command"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S047-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MAY advertise different capabilities and, in particular, SHOULD NOT advertise the STARTTLS capability, after a successful STARTTLS command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S047",
+      "actors": [
+        "server"
+      ],
+      "from_state": "not authenticated",
+      "to_state": "not authenticated",
+      "trigger": "STARTTLS_negotiation_successful",
+      "pre_cond": "connection.tls_active = true",
+      "post_cond": "server.advertised_capabilities excludes STARTTLS",
+      "actions": [
+        "update advertised capabilities",
+        "remove STARTTLS from capability list"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "section_id": "S047",
+  "title": "S047 6.2.1 STARTTLS Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S047 6.2.1 STARTTLS Command"
+  ],
+  "url_anchor": "#s047-621-starttls-command",
+  "word_count": 390,
+  "statement_count": 7,
+  "elapsed_seconds": 123.81,
+  "statements": [
+    {
+      "statement_id": "N-S047-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MUST always respond with a tagged BAD response when the STARTTLS command is received on an Implicit TLS port.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "STARTTLS_command_received",
+      "pre_cond": "connection.port_type = implicit_TLS",
+      "post_cond": "server.response_type = tagged_BAD",
+      "actions": [
+        "Send tagged BAD response"
+      ],
+      "modality": "must",
+      "id": "N-S047-001"
+    },
+    {
+      "statement_id": "N-S047-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Once a client issues a STARTTLS command, it MUST NOT issue further commands until a server response is seen and the TLS negotiation is complete.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "STARTTLS_command_issued",
+      "pre_cond": "client.starttls_command_issued = true",
+      "post_cond": "client.further_commands_blocked = true",
+      "actions": [
+        "Block issuance of further commands until server response received",
+        "Block issuance of further commands until TLS negotiation complete"
+      ],
+      "modality": "must",
+      "id": "N-S047-002"
+    },
+    {
+      "statement_id": "N-S047-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In order to avoid this vulnerability, server implementations MUST do one of the following if any data is received in the same TCP buffer after the CRLF that starts the STARTTLS command:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "extra_data_received_in_TCP_buffer_after_STARTTLS_CRLF",
+      "pre_cond": "server.processing_STARTTLS = true & tcp.buffer.extra_data_after_CRLF = present",
+      "post_cond": null,
+      "actions": [
+        "Interpret extra TCP buffer data as beginning of TLS handshake OR discard extra TCP buffer data"
+      ],
+      "modality": "must",
+      "id": "N-S047-003"
+    },
+    {
+      "statement_id": "N-S047-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Once TLS has been started, the client MUST discard cached information about server capabilities and SHOULD reissue the CAPABILITY command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TLS_negotiation_started",
+      "pre_cond": "tls.started = true",
+      "post_cond": "client.capability_cache = empty",
+      "actions": [
+        "Discard all cached server capability information"
+      ],
+      "modality": "must",
+      "id": "N-S047-004"
+    },
+    {
+      "statement_id": "N-S047-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Once TLS has been started, the client MUST discard cached information about server capabilities and SHOULD reissue the CAPABILITY command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TLS_negotiation_started",
+      "pre_cond": "tls.started = true",
+      "post_cond": "client.CAPABILITY_command_reissued = true",
+      "actions": [
+        "Reissue CAPABILITY command to obtain updated server capability list"
+      ],
+      "modality": "should",
+      "id": "N-S047-005"
+    },
+    {
+      "statement_id": "N-S047-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MAY advertise different capabilities and, in particular, SHOULD NOT advertise the STARTTLS capability, after a successful STARTTLS command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "STARTTLS_command_successful",
+      "pre_cond": "starttls.status = successful",
+      "post_cond": null,
+      "actions": [
+        "Advertise updated capability list reflecting post-TLS state"
+      ],
+      "modality": "may",
+      "id": "N-S047-006"
+    },
+    {
+      "statement_id": "N-S047-7",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MAY advertise different capabilities and, in particular, SHOULD NOT advertise the STARTTLS capability, after a successful STARTTLS command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "STARTTLS_command_successful",
+      "pre_cond": "starttls.status = successful",
+      "post_cond": "server.advertised_capabilities.STARTTLS = absent",
+      "actions": [
+        "Remove STARTTLS from advertised capabilities list"
+      ],
+      "modality": "should",
+      "id": "N-S047-007"
+    }
+  ]
+}

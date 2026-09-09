@@ -1,0 +1,774 @@
+{
+  "section_id": "S005",
+  "title": "S005 5. DECLARATIVE SPECIFICATIONS",
+  "depth": 3,
+  "parent_path": [
+    "FTP",
+    "S005 5. DECLARATIVE SPECIFICATIONS"
+  ],
+  "url_anchor": "#s005-5-declarative-specifications",
+  "word_count": 1759,
+  "statement_count": 35,
+  "elapsed_seconds": 726.06,
+  "statements": [
+    {
+      "statement_id": "D-S005-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "The server protocol interpreter shall \"listen\" on Port L.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "state_name": "Listening",
+      "enum_name": "ServerPIState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S005-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "Intermediate state after user-PI initiates the full-duplex control connection, before the server sends its initial reply (220 or 120).",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S005",
+      "state_name": "Control Connection Established",
+      "enum_name": "ServerPIState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.control = established"
+    },
+    {
+      "statement_id": "D-S005-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "Under normal circumstances, a server will send a 220 reply, \"awaiting input\", when the connection is completed. The user should wait for this greeting message before sending any commands.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "state_name": "Awaiting Input",
+      "enum_name": "ServerPIState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.control = established"
+    },
+    {
+      "statement_id": "D-S005-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "If the server is unable to accept input right away, a 120 \"expected delay\" reply should be sent immediately.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "state_name": "Expected Delay",
+      "enum_name": "ServerPIState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.control = established & server.ready = false"
+    },
+    {
+      "statement_id": "D-S005-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "Server A is sent a PASV command telling him to \"listen\" on his data port rather than initiate a connection when he receives a transfer service command. A->C : 227 Entering Passive Mode.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "state_name": "Entering Passive Mode",
+      "enum_name": "DataConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "server.data_mode = passive"
+    },
+    {
+      "statement_id": "D-S005-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "The control connection shall be closed by the server at the user's request after all transfers and replies are completed.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "state_name": "Control Connection Closed",
+      "enum_name": "ServerPIState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "connection.control = closed"
+    },
+    {
+      "statement_id": "D-S005-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "USER command reply 331 - user name okay, need password.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "state_name": "Need Password",
+      "enum_name": "LoginState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.login_step = password_required"
+    },
+    {
+      "statement_id": "D-S005-008",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "USER or PASS command reply 332 - need account for login.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "state_name": "Need Account",
+      "enum_name": "LoginState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.login_step = account_required"
+    },
+    {
+      "statement_id": "D-S005-009",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "USER/PASS/ACCT command reply 230 - user logged in, proceed.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "state_name": "Logged In",
+      "enum_name": "LoginState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.authenticated = true"
+    },
+    {
+      "statement_id": "D-S005-010",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "RNFR command reply 350 - requested file action pending further information (RNTO).",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "state_name": "Rename Pending",
+      "enum_name": "FileActionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.rename_from = set"
+    },
+    {
+      "statement_id": "D-S005-011",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "REST command reply 350 - requested file action pending further information (following transfer command).",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "state_name": "Restart Pending",
+      "enum_name": "FileActionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.restart_marker = set"
+    },
+    {
+      "statement_id": "D-S005-012",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "Data transfer in progress; preliminary replies 125 or 150 indicate data connection open and transfer active.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "state_name": "Data Transfer",
+      "enum_name": "DataConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.data = open & transfer.active = true"
+    },
+    {
+      "statement_id": "D-S005-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The server protocol interpreter shall 'listen' on Port L. The user or user protocol interpreter shall initiate the full-duplex control connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server-PI"
+      ],
+      "from_state": "Listening",
+      "to_state": "Control Connection Established",
+      "trigger": "user-PI initiates full-duplex control connection to Port L",
+      "pre_cond": "server.state = Listening",
+      "post_cond": "connection.control = established",
+      "actions": [
+        "establish full-duplex control connection on Port L"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S005-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "Under normal circumstances, a server will send a 220 reply, 'awaiting input', when the connection is completed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Control Connection Established",
+      "to_state": "Awaiting Input",
+      "trigger": "connection completed, server ready",
+      "pre_cond": "connection.control = established & server.ready = true",
+      "post_cond": "server.state = Awaiting Input",
+      "actions": [
+        "send 220 (awaiting input)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "If the server is unable to accept input right away, a 120 'expected delay' reply should be sent immediately.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Control Connection Established",
+      "to_state": "Expected Delay",
+      "trigger": "connection completed, server not ready",
+      "pre_cond": "connection.control = established & server.ready = false",
+      "post_cond": "server.state = Expected Delay",
+      "actions": [
+        "send 120 (expected delay)"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S005-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "If the server is unable to accept input right away, a 120 'expected delay' reply should be sent immediately and a 220 reply when ready.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Expected Delay",
+      "to_state": "Awaiting Input",
+      "trigger": "server becomes ready after expected delay",
+      "pre_cond": "server.state = Expected Delay & server.ready = true",
+      "post_cond": "server.state = Awaiting Input",
+      "actions": [
+        "send 220"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S005-017",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "Connection Establishment reply sequence: 421 - service not available, closing control connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Control Connection Established",
+      "to_state": "Control Connection Closed",
+      "trigger": "reply 421 at connection establishment",
+      "pre_cond": null,
+      "post_cond": "connection.control = closed",
+      "actions": [
+        "send 421",
+        "close control connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-018",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "USER command reply 230 - user logged in, proceed.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Awaiting Input",
+      "to_state": "Logged In",
+      "trigger": "USER command, reply 230",
+      "pre_cond": null,
+      "post_cond": "session.authenticated = true",
+      "actions": [
+        "send 230"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-019",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "USER command reply 331 - user name okay, need password.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Awaiting Input",
+      "to_state": "Need Password",
+      "trigger": "USER command, reply 331",
+      "pre_cond": null,
+      "post_cond": "session.login_step = password_required",
+      "actions": [
+        "send 331"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-020",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "USER command reply 332 - need account for login.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Awaiting Input",
+      "to_state": "Need Account",
+      "trigger": "USER command, reply 332",
+      "pre_cond": null,
+      "post_cond": "session.login_step = account_required",
+      "actions": [
+        "send 332"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-021",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "PASS command reply 230 - user logged in, proceed.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Need Password",
+      "to_state": "Logged In",
+      "trigger": "PASS command, reply 230",
+      "pre_cond": "session.login_step = password_required",
+      "post_cond": "session.authenticated = true",
+      "actions": [
+        "send 230"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-022",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "PASS command reply 332 - need account for login.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Need Password",
+      "to_state": "Need Account",
+      "trigger": "PASS command, reply 332",
+      "pre_cond": "session.login_step = password_required",
+      "post_cond": "session.login_step = account_required",
+      "actions": [
+        "send 332"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-023",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "PASS command reply 530 - not logged in.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Need Password",
+      "to_state": "Awaiting Input",
+      "trigger": "PASS command, reply 530",
+      "pre_cond": "session.login_step = password_required",
+      "post_cond": "session.authenticated = false",
+      "actions": [
+        "send 530"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-024",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "ACCT command reply 230 - user logged in, proceed.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Need Account",
+      "to_state": "Logged In",
+      "trigger": "ACCT command, reply 230",
+      "pre_cond": "session.login_step = account_required",
+      "post_cond": "session.authenticated = true",
+      "actions": [
+        "send 230"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-025",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "QUIT command reply 221 - service closing control connection. The control connection shall be closed by the server at the user's request after all transfers and replies are completed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Control Connection Closed",
+      "trigger": "QUIT command, reply 221",
+      "pre_cond": "session.transfers_complete = true & session.replies_complete = true",
+      "post_cond": "connection.control = closed",
+      "actions": [
+        "send 221",
+        "close control connection"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S005-026",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "REIN command reply 220 - service ready for new user. Session is reinitialized to default state.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Awaiting Input",
+      "trigger": "REIN command, reply 220",
+      "pre_cond": null,
+      "post_cond": "session.authenticated = false & session.parameters = default",
+      "actions": [
+        "send 220",
+        "reinitialize session to initial state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-027",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "REIN command reply 120 (expected delay), then 220 when ready.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Expected Delay",
+      "trigger": "REIN command, reply 120",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 120 (reinitializing, expected delay)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-028",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "One of the servers is sent a PASV command telling him to 'listen' on his data port rather than initiate a connection when he receives a transfer service command. A->C : 227 Entering Passive Mode.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Logged In",
+      "to_state": "Entering Passive Mode",
+      "trigger": "PASV command, reply 227",
+      "pre_cond": "session.authenticated = true",
+      "post_cond": "server.data_mode = passive",
+      "actions": [
+        "send 227 (Entering Passive Mode)",
+        "server listens on data port"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-029",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The user-DTP must 'listen' on the specified data port; the server shall initiate the data connection from his own default data port (L-1). Transfer service commands with preliminary replies 125 or 150 initiate data transfer.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server",
+        "user-DTP"
+      ],
+      "from_state": "Logged In",
+      "to_state": "Data Transfer",
+      "trigger": "transfer service command, reply 125 or 150",
+      "pre_cond": "session.authenticated = true & user-DTP.state = listening",
+      "post_cond": "connection.data = open & transfer.active = true",
+      "actions": [
+        "send 125 or 150",
+        "server initiates data connection from L-1 to user data port",
+        "begin data transfer"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S005-030",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The server sends a reply (226) after closing the data connection (or if the connection is left open, a 'file transfer completed' reply (250)). The user-PI should wait for one of these replies before issuing a new transfer command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Data Transfer",
+      "to_state": "Logged In",
+      "trigger": "data transfer complete, reply 226 or 250",
+      "pre_cond": "transfer.active = true",
+      "post_cond": "transfer.active = false",
+      "actions": [
+        "send 226 (after closing data connection) or send 250 (file transfer completed, data connection left open)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S005-031",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "If the data connection is to be closed following a data transfer where closing the connection is not required to indicate the end-of-file, the server must do so immediately. Waiting until after a new transfer command is not permitted.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Data Transfer",
+      "to_state": "Logged In",
+      "trigger": "data transfer complete, EOF not signaled by connection close",
+      "pre_cond": "transfer.complete = true & transfer.eof_required_for_close = false",
+      "post_cond": "connection.data = closed",
+      "actions": [
+        "close data connection immediately"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S005-032",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "ABOR command replies 225 or 226 - no transfer in progress or data connection closed after abort.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Data Transfer",
+      "to_state": "Logged In",
+      "trigger": "ABOR command, reply 225 or 226",
+      "pre_cond": null,
+      "post_cond": "transfer.active = false",
+      "actions": [
+        "send 225 or 226",
+        "abort data transfer if in progress"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-033",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "RNFR command reply 350 - requested file action pending further information.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Logged In",
+      "to_state": "Rename Pending",
+      "trigger": "RNFR command, reply 350",
+      "pre_cond": "session.authenticated = true",
+      "post_cond": "session.rename_from = set",
+      "actions": [
+        "send 350"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-034",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "RNTO command reply 250 - requested file action okay, completed.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Rename Pending",
+      "to_state": "Logged In",
+      "trigger": "RNTO command, reply 250",
+      "pre_cond": "session.rename_from = set",
+      "post_cond": "session.rename_from = null & file.renamed = true",
+      "actions": [
+        "send 250",
+        "rename file"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-035",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "REST command reply 350 - requested file action pending further information.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "user-PI",
+        "server"
+      ],
+      "from_state": "Logged In",
+      "to_state": "Restart Pending",
+      "trigger": "REST command, reply 350",
+      "pre_cond": "session.authenticated = true",
+      "post_cond": "session.restart_marker = set",
+      "actions": [
+        "send 350"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

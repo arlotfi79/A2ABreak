@@ -1,0 +1,165 @@
+{
+  "section_id": "S046",
+  "title": "S046 6.2 Client Commands - Not Authenticated State",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S046 6.2 Client Commands - Not Authenticated State"
+  ],
+  "url_anchor": "#s046-62-client-commands---not-authenticated-state",
+  "word_count": 204,
+  "statement_count": 7,
+  "elapsed_seconds": 21.2,
+  "statements": [
+    {
+      "statement_id": "D-S046-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "In the not authenticated state, the AUTHENTICATE or LOGIN command establishes authentication and enters the authenticated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S046",
+      "state_name": "not authenticated",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = not_authenticated"
+    },
+    {
+      "statement_id": "D-S046-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The AUTHENTICATE or LOGIN command establishes authentication and enters the authenticated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S046",
+      "state_name": "authenticated",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = authenticated"
+    },
+    {
+      "statement_id": "D-S046-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The AUTHENTICATE command establishes authentication and enters the authenticated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S046",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "not authenticated",
+      "to_state": "authenticated",
+      "trigger": "AUTHENTICATE command success",
+      "pre_cond": "session.state = not_authenticated",
+      "post_cond": "session.state = authenticated & session.authentication_established = true",
+      "actions": [
+        "establish authentication",
+        "enter authenticated state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S046-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The LOGIN command uses a conventional user name and plaintext password pair and enters the authenticated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S046",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "not authenticated",
+      "to_state": "authenticated",
+      "trigger": "LOGIN command success",
+      "pre_cond": "session.state = not_authenticated",
+      "post_cond": "session.state = authenticated & session.authentication_established = true",
+      "actions": [
+        "establish authentication",
+        "enter authenticated state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S046-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The STARTTLS command is an alternative form of establishing session privacy protection and integrity checking but does not by itself establish authentication or enter the authenticated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S046",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "not authenticated",
+      "to_state": "not authenticated",
+      "trigger": "STARTTLS command success",
+      "pre_cond": "session.state = not_authenticated",
+      "post_cond": "session.state = not_authenticated & session.tls_established = true",
+      "actions": [
+        "establish session privacy protection",
+        "establish integrity checking"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S046-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Once authenticated (including as anonymous), it is not possible to re-enter not authenticated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S046",
+      "object_name": "session",
+      "field_name": "authentication_established",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "Once session.authentication_established = true, session.state = not_authenticated is forbidden"
+    },
+    {
+      "statement_id": "D-S046-007",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "In addition to the universal commands (CAPABILITY, NOOP, and LOGOUT), the following commands are valid in the not authenticated state: STARTTLS, AUTHENTICATE, and LOGIN.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S046",
+      "object_name": "not authenticated state",
+      "field_name": "valid_commands",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "CAPABILITY",
+        "NOOP",
+        "LOGOUT",
+        "STARTTLS",
+        "AUTHENTICATE",
+        "LOGIN"
+      ],
+      "guard_semantics": "session.state = not_authenticated"
+    }
+  ]
+}

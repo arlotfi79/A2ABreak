@@ -1,0 +1,161 @@
+{
+  "section_id": "S073",
+  "title": "S073 8.3 Termination",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S073 8.3 Termination"
+  ],
+  "url_anchor": "#s073-83-termination",
+  "word_count": 498,
+  "statement_count": 6,
+  "elapsed_seconds": 134.28,
+  "statements": [
+    {
+      "statement_id": "1-S073-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The receiver of a valid DCCP-CloseReq packet MUST respond with a DCCP-Close packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "OPEN",
+      "to_state": "CLOSING",
+      "trigger": "receive_DCCP-CloseReq",
+      "pre_cond": "packet.type = DCCP-CloseReq & packet.valid = true",
+      "post_cond": "connection.state = CLOSING",
+      "actions": [
+        "send DCCP-Close packet"
+      ],
+      "modality": "must",
+      "id": "N-S073-001"
+    },
+    {
+      "statement_id": "2-S073-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The receiver of a valid DCCP-Close packet MUST respond with a DCCP-Reset packet with Reset Code 1, \"Closed\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "receive_DCCP-Close",
+      "pre_cond": "packet.type = DCCP-Close & packet.valid = true",
+      "post_cond": "connection.state = CLOSED",
+      "actions": [
+        "send DCCP-Reset with Reset Code 1 (Closed)"
+      ],
+      "modality": "must",
+      "id": "N-S073-002"
+    },
+    {
+      "statement_id": "3-S073-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "For instance, the endpoint that receives a valid DCCP-Reset SHOULD hold TIMEWAIT state for the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CLOSING",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive_DCCP-Reset",
+      "pre_cond": "packet.type = DCCP-Reset & packet.valid = true",
+      "post_cond": "connection.state = TIMEWAIT",
+      "actions": [
+        "hold TIMEWAIT state for connection"
+      ],
+      "modality": "should",
+      "id": "N-S073-003"
+    },
+    {
+      "statement_id": "4-S073-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints in the CLOSEREQ and CLOSING states MUST retransmit DCCP-CloseReq and DCCP-Close packets, respectively, until leaving those states.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "retransmit_timer_expiry",
+      "pre_cond": "connection.state = CLOSEREQ | connection.state = CLOSING",
+      "post_cond": null,
+      "actions": [
+        "retransmit DCCP-CloseReq if connection.state = CLOSEREQ",
+        "retransmit DCCP-Close if connection.state = CLOSING"
+      ],
+      "modality": "must",
+      "id": "N-S073-004"
+    },
+    {
+      "statement_id": "5-S073-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "A server receiving a sequence-valid DCCP-CloseReq packet MUST respond with a DCCP-Sync packet and otherwise ignore the DCCP-CloseReq.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_DCCP-CloseReq",
+      "pre_cond": "endpoint.role = server & packet.type = DCCP-CloseReq & packet.sequence_valid = true",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Sync packet",
+        "ignore DCCP-CloseReq with no state change"
+      ],
+      "modality": "must",
+      "id": "N-S073-005"
+    },
+    {
+      "statement_id": "6-S073-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "DCCP-Data, DCCP-DataAck, and DCCP-Ack packets received in CLOSEREQ or CLOSING states MAY be either processed or ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_DCCP-Data | receive_DCCP-DataAck | receive_DCCP-Ack",
+      "pre_cond": "connection.state = CLOSEREQ | connection.state = CLOSING",
+      "post_cond": null,
+      "actions": [
+        "process or ignore received DCCP-Data, DCCP-DataAck, or DCCP-Ack packet"
+      ],
+      "modality": "may",
+      "id": "N-S073-006"
+    }
+  ]
+}

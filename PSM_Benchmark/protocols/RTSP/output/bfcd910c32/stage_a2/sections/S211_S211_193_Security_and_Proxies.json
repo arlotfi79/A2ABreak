@@ -1,0 +1,138 @@
+{
+  "section_id": "S211",
+  "title": "S211 19.3 Security and Proxies",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S211 19.3 Security and Proxies"
+  ],
+  "url_anchor": "#s211-193-security-and-proxies",
+  "word_count": 661,
+  "statement_count": 5,
+  "elapsed_seconds": 74.78,
+  "statements": [
+    {
+      "statement_id": "1-S211-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "Note that when the client checks the server certificate in TLS, it MUST check the proxy's identity (URI or possibly other known identity) against the proxy's identity as presented in the proxy's Certificate message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S211",
+      "actors": [
+        "client",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TLS_certificate_verification",
+      "pre_cond": "connection.tls_active = true & proxy.in_use = true",
+      "post_cond": "proxy.identity_verified_against_certificate = true",
+      "actions": [
+        "verify proxy identity against proxy certificate presented in proxy Certificate message"
+      ],
+      "modality": "must",
+      "id": "N-S211-001"
+    },
+    {
+      "statement_id": "2-S211-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "A proxy MUST use TLS for the next hop if the RTSP request includes an \"rtsps\" URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S211",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_with_rtsps_uri",
+      "pre_cond": "request.uri.scheme = rtsps",
+      "post_cond": "next_hop.connection.tls = true",
+      "actions": [
+        "establish TLS for next-hop connection"
+      ],
+      "modality": "must",
+      "id": "N-S211-002"
+    },
+    {
+      "statement_id": "3-S211-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "TLS MAY be applied on intermediate links (e.g., between client and proxy or between proxy and proxy) even if the resource and the end server are not required to use it.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S211",
+      "actors": [
+        "client",
+        "proxy",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S211-003"
+    },
+    {
+      "statement_id": "4-S211-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "The chain of proxies used by a client to reach a server and its TLS sessions MUST have commensurate security.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S211",
+      "actors": [
+        "client",
+        "proxy",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S211-004"
+    },
+    {
+      "statement_id": "5-S211-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Therefore, a proxy MUST, when initiating the next-hop TLS connection, use the incoming TLS connections cipher-suite list, only modified by removing any cipher suites that the proxy does not support.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S211",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "next_hop_TLS_connection_initiation",
+      "pre_cond": "proxy.initiating_tls_to_next_hop = true",
+      "post_cond": "next_hop.tls.cipher_suite_list = incoming.tls.cipher_suite_list - proxy.unsupported_cipher_suites",
+      "actions": [
+        "copy incoming TLS connection cipher-suite list",
+        "remove cipher suites not supported by the proxy",
+        "use resulting list when initiating next-hop TLS connection"
+      ],
+      "modality": "must",
+      "id": "N-S211-005"
+    }
+  ]
+}

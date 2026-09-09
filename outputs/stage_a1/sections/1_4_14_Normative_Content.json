@@ -1,0 +1,113 @@
+{
+  "section_id": "1.4",
+  "title": "1.4 Normative Content",
+  "depth": 3,
+  "parent_path": [
+    "1. Introduction",
+    "1.4 Normative Content"
+  ],
+  "url_anchor": "#14-normative-content",
+  "word_count": 237,
+  "statement_count": 5,
+  "elapsed_seconds": 90.63,
+  "statements": [
+    {
+      "statement_id": "D-1-4-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "initiation",
+      "description": "existing published names remain available",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "1.4",
+      "state_name": "PROTO_NAME_AVAILABLE",
+      "enum_name": "DeprecationLifecycle",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-1-4-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "task_execution",
+      "description": "When a proto message or field is renamed, the new name is added while existing published names remain available, but marked deprecated, until the next major release.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "1.4",
+      "state_name": "PROTO_NAME_DEPRECATED",
+      "enum_name": "DeprecationLifecycle",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "proto_name.available = true & proto_name.deprecated = true"
+    },
+    {
+      "statement_id": "D-1-4-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "termination",
+      "description": "A deprecated name SHOULD NOT be removed earlier than the next major version after introduction of its replacement.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "1.4",
+      "state_name": "PROTO_NAME_REMOVED",
+      "enum_name": "DeprecationLifecycle",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "proto_name.available = false"
+    },
+    {
+      "statement_id": "D-1-4-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "task_execution",
+      "description": "When a proto message or field is renamed, the new name is added while existing published names remain available, but marked deprecated, until the next major release.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "1.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": "PROTO_NAME_AVAILABLE",
+      "to_state": "PROTO_NAME_DEPRECATED",
+      "trigger": "proto_name_renamed",
+      "pre_cond": "proto_name.deprecated = false & proto_name.available = true",
+      "post_cond": "proto_name.deprecated = true & proto_name.available = true",
+      "actions": [
+        "New replacement name is added to the protocol definition",
+        "Existing published name is marked as deprecated"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-1-4-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "termination",
+      "description": "A deprecated name SHOULD NOT be removed earlier than the next major version after introduction of its replacement.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "1.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": "PROTO_NAME_DEPRECATED",
+      "to_state": "PROTO_NAME_REMOVED",
+      "trigger": "major_version_released",
+      "pre_cond": "proto_name.deprecated = true & proto_name.replacement_introduced = true",
+      "post_cond": "proto_name.available = false",
+      "actions": [
+        "Deprecated proto name is removed from the protocol definition"
+      ],
+      "modality": "should"
+    }
+  ]
+}

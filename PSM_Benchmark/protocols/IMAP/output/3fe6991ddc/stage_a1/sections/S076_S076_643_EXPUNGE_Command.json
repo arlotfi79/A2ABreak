@@ -1,0 +1,88 @@
+{
+  "section_id": "S076",
+  "title": "S076 6.4.3 EXPUNGE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S076 6.4.3 EXPUNGE Command"
+  ],
+  "url_anchor": "#s076-643-expunge-command",
+  "word_count": 119,
+  "statement_count": 3,
+  "elapsed_seconds": 14.73,
+  "statements": [
+    {
+      "statement_id": "D-S076-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The EXPUNGE command permanently removes all messages that have the \\Deleted flag set from the currently selected mailbox. Before returning an OK to the client, an untagged EXPUNGE response is sent for each message that is removed.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S076",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "SELECTED",
+      "to_state": "SELECTED",
+      "trigger": "EXPUNGE command",
+      "pre_cond": "session.state = SELECTED",
+      "post_cond": "session.state = SELECTED & mailbox.deleted_messages_removed = true",
+      "actions": [
+        "send untagged EXPUNGE response for each removed message",
+        "send tagged OK response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S076-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Result: NO - expunge failure: can't expunge (e.g., permission denied)",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S076",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "SELECTED",
+      "to_state": "SELECTED",
+      "trigger": "EXPUNGE command rejected",
+      "pre_cond": "session.state = SELECTED & server.expunge_permitted = false",
+      "post_cond": "session.state = SELECTED",
+      "actions": [
+        "send tagged NO response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S076-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Result: BAD - command unknown or arguments invalid",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S076",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "SELECTED",
+      "to_state": "SELECTED",
+      "trigger": "EXPUNGE command malformed",
+      "pre_cond": "session.state = SELECTED & command.valid = false",
+      "post_cond": "session.state = SELECTED",
+      "actions": [
+        "send tagged BAD response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

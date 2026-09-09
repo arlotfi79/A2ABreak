@@ -1,0 +1,115 @@
+{
+  "section_id": "S071",
+  "title": "S071 8.1.5 Handshake Completion",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S071 8.1.5 Handshake Completion"
+  ],
+  "url_anchor": "#s071-815-handshake-completion",
+  "word_count": 238,
+  "statement_count": 4,
+  "elapsed_seconds": 29.18,
+  "statements": [
+    {
+      "statement_id": "N-S071-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "Clients in the PARTOPEN state that want to send data MUST do so using DCCP-DataAck packets, not DCCP-Data packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client"
+      ],
+      "from_state": "PARTOPEN",
+      "to_state": null,
+      "trigger": "send_data",
+      "pre_cond": "connection.state = PARTOPEN & client.wants_to_send_data = true",
+      "post_cond": "packet.type = DCCP-DataAck",
+      "actions": [
+        "send DCCP-DataAck packet",
+        "do not send DCCP-Data packet"
+      ],
+      "modality": "must",
+      "id": "N-S071-001"
+    },
+    {
+      "statement_id": "N-S071-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "Furthermore, if the DCCP-Response included an Init Cookie, that Init Cookie MUST be included on every packet sent in PARTOPEN.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "PARTOPEN",
+      "to_state": null,
+      "trigger": "send_packet",
+      "pre_cond": "connection.state = PARTOPEN & DCCP-Response.init_cookie_present = true",
+      "post_cond": "packet.init_cookie_included = true",
+      "actions": [
+        "include Init Cookie in every packet sent from PARTOPEN"
+      ],
+      "modality": "must",
+      "id": "N-S071-002"
+    },
+    {
+      "statement_id": "N-S071-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "The client SHOULD ensure that some packet gets through eventually.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client"
+      ],
+      "from_state": "PARTOPEN",
+      "to_state": null,
+      "trigger": "DCCP-Ack_possibly_dropped",
+      "pre_cond": "connection.state = PARTOPEN",
+      "post_cond": "server.received_client_packet = true",
+      "actions": [
+        "set retransmission timer (~200ms) on each transmitted packet",
+        "retransmit DCCP-Ack if timer fires and still in PARTOPEN",
+        "back off timer on retransmission"
+      ],
+      "modality": "should",
+      "id": "N-S071-003"
+    },
+    {
+      "statement_id": "N-S071-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "If the client remains in PARTOPEN for more than 4MSL (8 minutes), it SHOULD reset the connection with Reset Code 2, \"Aborted\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client"
+      ],
+      "from_state": "PARTOPEN",
+      "to_state": null,
+      "trigger": "PARTOPEN_timer_exceeds_4MSL",
+      "pre_cond": "connection.state = PARTOPEN & timer.elapsed > 4MSL",
+      "post_cond": "connection.reset_sent = true & reset.code = 2",
+      "actions": [
+        "send DCCP-Reset with Reset Code 2 (Aborted)"
+      ],
+      "modality": "should",
+      "id": "N-S071-004"
+    }
+  ]
+}

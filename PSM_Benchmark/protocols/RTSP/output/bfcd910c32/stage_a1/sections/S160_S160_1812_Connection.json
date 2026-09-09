@@ -1,0 +1,117 @@
+{
+  "section_id": "S160",
+  "title": "S160 18.12 Connection",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S160 18.12 Connection"
+  ],
+  "url_anchor": "#s160-1812-connection",
+  "word_count": 228,
+  "statement_count": 5,
+  "elapsed_seconds": 26.33,
+  "statements": [
+    {
+      "statement_id": "D-S160-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "RTSP 2.0 defines the 'close' connection option for the sender to signal that the connection will be closed after completion of the response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S160",
+      "state_name": "closing",
+      "enum_name": "ConnectionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S160-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "Connection SHOULD NOT be considered 'persistent' (Section 10.2) after the current request/response is complete when Connection: close is present.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S160",
+      "state_name": "persistent",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S160-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "RTSP 2.0 defines the 'close' connection option for the sender to signal that the connection will be closed after completion of the response. 'Connection: close' in either the request or the response-header fields indicates that the connection SHOULD NOT be considered 'persistent' after the current request/response is complete.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S160",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "persistent",
+      "to_state": "closing",
+      "trigger": "Connection_close_option_received",
+      "pre_cond": "connection.header.connection_token = close",
+      "post_cond": "connection.persistent = false",
+      "actions": [
+        "mark_connection_not_persistent",
+        "close_connection_after_response_completion"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S160-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "The connection will be closed after completion of the response when the 'close' connection option is signaled.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S160",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "closing",
+      "to_state": "closed",
+      "trigger": "request_response_exchange_complete",
+      "pre_cond": "connection.header.connection_token = close",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "close_connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S160-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "Connection options are signaled by the presence of a connection-token in the Connection header field.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S160",
+      "object_name": "Connection header",
+      "field_name": "connection-token",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "close"
+      ],
+      "guard_semantics": "presence of connection-token signals connection option; absence means option not asserted"
+    }
+  ]
+}

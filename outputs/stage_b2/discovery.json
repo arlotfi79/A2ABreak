@@ -1,0 +1,544 @@
+{
+  "stage": "discovery",
+  "states": [
+    {
+      "state_name": "AGENT_CARD_RECEIVED",
+      "semantic_type": "initial",
+      "actor": "shared",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "agent_card != null",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-8-3-004",
+        "D-6-9-006",
+        "N-8-3-005",
+        "N-14-3-001"
+      ]
+    },
+    {
+      "state_name": "TRANSPORT_SELECTED",
+      "semantic_type": "active",
+      "actor": "client",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.selectedTransport != null",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-8-3-004",
+        "D-8-3-005"
+      ]
+    },
+    {
+      "state_name": "TRANSPORT_CONNECTED",
+      "semantic_type": "active",
+      "actor": "client",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.connectionUrl != null",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-8-3-005"
+      ]
+    },
+    {
+      "state_name": "CLIENT_AUTH_DISCOVERY",
+      "semantic_type": "active",
+      "actor": "client",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "agent_card.securitySchemes != null",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-7-3-001"
+      ]
+    },
+    {
+      "state_name": "CLIENT_CREDENTIAL_ACQUISITION",
+      "semantic_type": "active",
+      "actor": "client",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.required_auth_scheme != null",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-7-3-004"
+      ]
+    },
+    {
+      "state_name": "EXTENDED_CARD_UNSUPPORTED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "agent_card.capabilities.extendedAgentCard = false | !agent_card.capabilities.extendedAgentCard.present",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-13-3-001"
+      ]
+    },
+    {
+      "state_name": "EXTENDED_CARD_NOT_CONFIGURED",
+      "semantic_type": "error",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "agent_card.capabilities.extendedAgentCard = true & agent_card.extended_card_configured = false",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-13-3-014"
+      ]
+    },
+    {
+      "state_name": "AGENT_CARD_CACHE_VALID",
+      "semantic_type": "active",
+      "actor": "client",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "agent_card.cached = true & agent_card.cache_expired = false",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-8-6-007",
+        "N-8-6-005"
+      ]
+    },
+    {
+      "state_name": "AGENT_CARD_CACHE_EXPIRED",
+      "semantic_type": "active",
+      "actor": "client",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "agent_card.cached = true & agent_card.cache_expired = true",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-8-6-006"
+      ]
+    },
+    {
+      "state_name": "BINDING_VERSION_CURRENT",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null,
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-5-8-003"
+      ]
+    },
+    {
+      "state_name": "BINDING_VERSION_NEW",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "binding.uri != previous_uri",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-5-8-003"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "AGENT_CARD_RECEIVED",
+      "to_state": "TRANSPORT_SELECTED",
+      "trigger": "supportedInterfaces_parsed",
+      "guard": "agent_card.supportedInterfaces != null",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-8-3-004"
+      ]
+    },
+    {
+      "from_state": "AGENT_CARD_RECEIVED",
+      "to_state": "TRANSPORT_SELECTED",
+      "trigger": "protocol_selection",
+      "guard": "agent_card.supported_protocols != null",
+      "actors": [
+        "client"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_ids": [
+        "N-5-2-002"
+      ]
+    },
+    {
+      "from_state": "TRANSPORT_SELECTED",
+      "to_state": "TRANSPORT_CONNECTED",
+      "trigger": "transport_url_resolved",
+      "guard": "client.selectedTransport != null",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-8-3-005"
+      ]
+    },
+    {
+      "from_state": "TRANSPORT_CONNECTED",
+      "to_state": "CLIENT_AUTH_DISCOVERY",
+      "trigger": "auth_discovery_initiated",
+      "guard": null,
+      "actors": [],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_ids": [
+        "D-7-3-001",
+        "D-8-3-005"
+      ]
+    },
+    {
+      "from_state": "CLIENT_AUTH_DISCOVERY",
+      "to_state": "CLIENT_CREDENTIAL_ACQUISITION",
+      "trigger": "security_scheme_parsed",
+      "guard": "agent_card.securitySchemes != null",
+      "actors": [
+        "client"
+      ],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-7-3-004"
+      ]
+    },
+    {
+      "from_state": "AGENT_CARD_RECEIVED",
+      "to_state": "EXTENDED_CARD_UNSUPPORTED",
+      "trigger": "get_extended_agent_card_request",
+      "guard": "agent_card.capabilities.extendedAgentCard = false | !agent_card.capabilities.extendedAgentCard",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-13-3-013"
+      ]
+    },
+    {
+      "from_state": "AGENT_CARD_RECEIVED",
+      "to_state": "EXTENDED_CARD_NOT_CONFIGURED",
+      "trigger": "get_extended_agent_card_request",
+      "guard": "agent_card.capabilities.extendedAgentCard = true & agent_card.extended_card_configured = false",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-3-3-028",
+        "N-13-3-014"
+      ]
+    },
+    {
+      "from_state": "AGENT_CARD_RECEIVED",
+      "to_state": "AGENT_CARD_CACHE_VALID",
+      "trigger": "agent_card_fetch",
+      "guard": null,
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-8-6-005",
+        "N-8-6-007"
+      ]
+    },
+    {
+      "from_state": "AGENT_CARD_CACHE_VALID",
+      "to_state": "AGENT_CARD_CACHE_EXPIRED",
+      "trigger": "cache_ttl_expired",
+      "guard": "agent_card.cache_expired = true",
+      "actors": [],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_ids": [
+        "N-8-6-006"
+      ]
+    },
+    {
+      "from_state": "AGENT_CARD_CACHE_EXPIRED",
+      "to_state": "AGENT_CARD_RECEIVED",
+      "trigger": "agent_card_cache_expired",
+      "guard": "agent_card.cached = true & agent_card.cache_expired = true",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-8-6-006"
+      ]
+    },
+    {
+      "from_state": "BINDING_VERSION_CURRENT",
+      "to_state": "BINDING_VERSION_NEW",
+      "trigger": "binding_breaking_change_introduced",
+      "guard": "binding.breaking_change = true",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-5-8-003"
+      ]
+    }
+  ],
+  "inter_stage": {
+    "entry_from_previous": [],
+    "exit_to_next": [
+      {
+        "from_state": "CLIENT_CREDENTIAL_ACQUISITION",
+        "to_stage": "authentication",
+        "reason": "Client has identified required auth scheme from AgentCard securitySchemes and must acquire credentials before authentication can proceed"
+      }
+    ]
+  },
+  "discarded_states": [
+    {
+      "state_name": null,
+      "reason": "D-2-2-011: null state_name — no protocol session state extractable from section 2.2 overview definitions"
+    },
+    {
+      "state_name": null,
+      "reason": "D-8-1-001: null state_name — no protocol session state extractable from section 8.1 agent card overview"
+    }
+  ],
+  "unresolved": [
+    {
+      "source_id": "D-6-9-006",
+      "issue": "from_state cannot be determined; GET_public_agent_card is the initial entry action into discovery phase with no prior state within this phase",
+      "reason_type": "null_from_state",
+      "confidence": 0.5
+    },
+    {
+      "source_id": "N-14-3-001",
+      "issue": "from_state cannot be determined; well_known_uri_request is the entry trigger with no prior state in discovery phase",
+      "reason_type": "null_from_state",
+      "confidence": 0.5
+    },
+    {
+      "source_id": "N-3-3-030",
+      "issue": "capability_check is a client-side validation sub-step within AGENT_CARD_RECEIVED processing; no distinct target state for validated capabilities",
+      "reason_type": "both_null",
+      "confidence": 0.4
+    },
+    {
+      "source_id": "N-5-2-003",
+      "issue": "protocol_selection_failed describes fallback logic requirement (SHOULD); no error or retry state defined for protocol selection failure",
+      "reason_type": "both_null",
+      "confidence": 0.4
+    },
+    {
+      "source_id": "N-8-3-005",
+      "issue": "agent_card_received behavioral constraint overlaps with explicit transitions D-8-3-004 and D-8-3-005; compound post_cond spans two states",
+      "reason_type": "null_from_state",
+      "confidence": 0.5
+    },
+    {
+      "source_id": "N-8-4-002",
+      "issue": "Server-side agent card signing initiation requirement; implementation constraint within card preparation, not a discovery phase state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-003",
+      "issue": "Server-side canonicalization requirement (protobuf section 5.7 semantics); implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-004",
+      "issue": "Server-side canonicalization for optional unset fields; implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-005",
+      "issue": "Server-side canonicalization for optional explicitly-set fields; implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-006",
+      "issue": "Server-side canonicalization for required fields; implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-007",
+      "issue": "Server-side canonicalization for default-value fields; implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-008",
+      "issue": "Server-side RFC 8785 JSON canonicalization requirement; implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-009",
+      "issue": "Server-side signing must exclude signatures field from signed content; implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-010",
+      "issue": "Server-side JWS protected header MUST include alg and kid; implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-011",
+      "issue": "Server-side JWS protected header SHOULD include typ=JOSE; implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-012",
+      "issue": "Server-side optional signing behavior; implementation constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-013",
+      "issue": "Client-side signature verification is a validation sub-step within AGENT_CARD_RECEIVED processing, not a distinct state transition",
+      "reason_type": "both_null",
+      "confidence": 0.4
+    },
+    {
+      "source_id": "N-8-4-014",
+      "issue": "Client SHOULD verify at least one signature; behavioral constraint within AGENT_CARD_RECEIVED processing",
+      "reason_type": "both_null",
+      "confidence": 0.4
+    },
+    {
+      "source_id": "N-8-4-015",
+      "issue": "Public key retrieval SHOULD use HTTPS; sub-step of signature verification, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-4-017",
+      "issue": "Client MUST reject expired/revoked keys during signature verification; behavioral guard constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.4
+    },
+    {
+      "source_id": "N-8-6-002",
+      "issue": "Server SHOULD include Cache-Control max-age header; server-side response behavior, not a client state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-6-003",
+      "issue": "Server SHOULD include ETag header; server-side response behavior, not a client state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-8-6-004",
+      "issue": "Server MAY apply optional caching behavior; server-side, not a client state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "D-8-6-005",
+      "issue": "All fields null; searched section 8.6.2, no resolvable state transition found",
+      "reason_type": "both_null",
+      "confidence": 0.0
+    },
+    {
+      "source_id": "D-13-3-002",
+      "issue": "All fields null; searched section 13.3, no resolvable state transition found",
+      "reason_type": "both_null",
+      "confidence": 0.0
+    },
+    {
+      "source_id": "N-13-3-004",
+      "issue": "Server SHOULD include caching headers in extended card response; server-side behavioral constraint, not a state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-13-3-011",
+      "issue": "Client SHOULD cache extended agent card during authenticated session; behavioral constraint, no distinct extended-card cache state modeled",
+      "reason_type": "both_null",
+      "confidence": 0.4
+    },
+    {
+      "source_id": "N-14-3-006",
+      "issue": "Client SHOULD verify agent card signature on receipt; validation sub-step within AGENT_CARD_RECEIVED, not a distinct state transition",
+      "reason_type": "both_null",
+      "confidence": 0.4
+    },
+    {
+      "source_id": "N-Appendix A- Migratio-001",
+      "issue": "Legacy identifier resolution during migration; administrative lifecycle concern, not a discovery phase state transition",
+      "reason_type": "both_null",
+      "confidence": 0.2
+    },
+    {
+      "source_id": "N-12-002",
+      "issue": "Custom binding MUST comply with section 5 requirements; server implementation constraint, not a discovery state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    },
+    {
+      "source_id": "N-12-7-001",
+      "issue": "Custom binding MUST be declared in agent card supportedInterfaces; server configuration requirement, not a discovery state transition",
+      "reason_type": "both_null",
+      "confidence": 0.3
+    }
+  ],
+  "gaps": [
+    {
+      "state_name": "BINDING_VERSION_CURRENT",
+      "issue": "No incoming transition — unreachable within discovery phase. Represents a server-side binding lifecycle pre-condition. Searched section 5.8; no explicit entry transition defined.",
+      "type": "unreachable_state"
+    },
+    {
+      "state_name": "BINDING_VERSION_NEW",
+      "issue": "Non-terminal state with no outgoing transition. After breaking change introduces new binding URI, no further discovery-phase state is modeled. Searched section 5.8; spec describes URI change but no subsequent discovery re-entry.",
+      "type": "no_outgoing_non_terminal"
+    },
+    {
+      "state_name": "AGENT_CARD_RECEIVED",
+      "issue": "Signature verification (sections 8.4.3, 14.3) is a normative client behavior within this state but is not modeled as a distinct sub-state or transition guard. Multiple behavioral constraints (N-8-4-013, N-8-4-014, N-8-4-017, N-14-3-006) describe verification steps with no FSM representation.",
+      "type": "missing_state_coverage"
+    }
+  ]
+}

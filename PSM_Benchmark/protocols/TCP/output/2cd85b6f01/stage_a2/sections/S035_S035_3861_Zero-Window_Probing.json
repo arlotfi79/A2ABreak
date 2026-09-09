@@ -1,0 +1,185 @@
+{
+  "section_id": "S035",
+  "title": "S035 3.8.6.1 Zero-Window Probing",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S035 3.8.6.1 Zero-Window Probing"
+  ],
+  "url_anchor": "#s035-3861-zero-window-probing",
+  "word_count": 226,
+  "statement_count": 7,
+  "elapsed_seconds": 77.77,
+  "statements": [
+    {
+      "statement_id": "N-S035-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "peer",
+      "stage": "tcp_fsm",
+      "description": "The sending TCP peer must regularly transmit at least one octet of new data (if available), or retransmit to the receiving TCP peer even if the send window is zero, in order to \"probe\" the window.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S035",
+      "actors": [
+        "sending TCP peer",
+        "receiving TCP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_window = 0",
+      "pre_cond": "send_window = 0",
+      "post_cond": null,
+      "actions": [
+        "transmit at least one octet of new data or retransmit to receiving TCP peer"
+      ],
+      "modality": "must",
+      "id": "N-S035-001"
+    },
+    {
+      "statement_id": "N-S035-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "Probing of zero (offered) windows MUST be supported (MUST-36).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "support zero-window probing capability"
+      ],
+      "modality": "must",
+      "id": "N-S035-002"
+    },
+    {
+      "statement_id": "N-S035-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "A TCP implementation MAY keep its offered receive window closed indefinitely (MAY-8).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "receive_window = 0",
+      "actions": [
+        "maintain receive window advertisement at zero indefinitely"
+      ],
+      "modality": "may",
+      "id": "N-S035-003"
+    },
+    {
+      "statement_id": "N-S035-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "As long as the receiving TCP peer continues to send acknowledgments in response to the probe segments, the sending TCP peer MUST allow the connection to stay open (MUST-37).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "sending TCP peer",
+        "receiving TCP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "probe_ack_received",
+      "pre_cond": "peer.sends_ack_in_response_to_probe = true",
+      "post_cond": "connection.open = true",
+      "actions": [
+        "keep connection open"
+      ],
+      "modality": "must",
+      "id": "N-S035-004"
+    },
+    {
+      "statement_id": "N-S035-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "peer",
+      "stage": "tcp_fsm",
+      "description": "When the receiving TCP peer has a zero window and a segment arrives, it must still send an acknowledgment showing its next expected sequence number and current window (zero).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S035",
+      "actors": [
+        "receiving TCP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "segment_received",
+      "pre_cond": "receive_window = 0 & segment_received = true",
+      "post_cond": null,
+      "actions": [
+        "send ACK containing next expected sequence number and window = 0"
+      ],
+      "modality": "must",
+      "id": "N-S035-005"
+    },
+    {
+      "statement_id": "N-S035-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "tcp_fsm",
+      "description": "The transmitting host SHOULD send the first zero-window probe when a zero window has existed for the retransmission timeout period (SHLD-29) (Section 3.8.1), and SHOULD increase exponentially the interval between successive probes (SHLD-30).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "transmitting host"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "zero_window_duration >= retransmission_timeout_period",
+      "pre_cond": "send_window = 0 & zero_window_duration >= retransmission_timeout_period",
+      "post_cond": null,
+      "actions": [
+        "send first zero-window probe segment"
+      ],
+      "modality": "should",
+      "id": "N-S035-006"
+    },
+    {
+      "statement_id": "N-S035-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "tcp_fsm",
+      "description": "The transmitting host SHOULD send the first zero-window probe when a zero window has existed for the retransmission timeout period (SHLD-29) (Section 3.8.1), and SHOULD increase exponentially the interval between successive probes (SHLD-30).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "actors": [
+        "transmitting host"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "zwp_probe_sent & zwp_probe_count > 1",
+      "pre_cond": "send_window = 0 & zwp_probe_count > 1",
+      "post_cond": null,
+      "actions": [
+        "increase interval between successive zero-window probes exponentially"
+      ],
+      "modality": "should",
+      "id": "N-S035-007"
+    }
+  ]
+}

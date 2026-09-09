@@ -1,0 +1,376 @@
+{
+  "inter_stage_transitions": [
+    {
+      "from_stage": "discovery",
+      "from_state": "CLIENT_CREDENTIAL_ACQUISITION",
+      "to_stage": "authentication",
+      "to_state": "TLS_HANDSHAKE_INITIATED",
+      "trigger": "transport_security_initiated",
+      "guard": "client.required_auth_scheme != null",
+      "actors": [
+        "client"
+      ],
+      "actor": "client",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-7-3-004",
+        "N-7-2-001"
+      ]
+    },
+    {
+      "from_stage": "authentication",
+      "from_state": "REQUEST_AUTHORIZED",
+      "to_stage": "initiation",
+      "to_state": "TASK_STATE_NONEXISTENT",
+      "trigger": "initial_message_authorized",
+      "guard": "client.permissions.sufficient = true",
+      "actors": [
+        "client"
+      ],
+      "actor": "client",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "N-7-5-001",
+        "N-13-1-002",
+        "D-3-1-044"
+      ]
+    },
+    {
+      "from_stage": "initiation",
+      "from_state": "TASK_STATE_WORKING",
+      "to_stage": "task_execution",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "task_processing_continues",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "server"
+      ],
+      "actor": "server",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-1-044",
+        "D-4-1-003",
+        "D-6-2-001"
+      ]
+    },
+    {
+      "from_stage": "initiation",
+      "from_state": "TASK_STATE_SUBMITTED",
+      "to_stage": "task_execution",
+      "to_state": "TASK_STATE_SUBMITTED",
+      "trigger": "task_submitted_for_execution",
+      "guard": "task.state = TASK_STATE_SUBMITTED",
+      "actors": [
+        "server"
+      ],
+      "actor": "shared",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-6-6-001",
+        "N-3-4-012",
+        "D-4-1-045"
+      ]
+    },
+    {
+      "from_stage": "initiation",
+      "from_state": "STREAM_STATE_OPEN",
+      "to_stage": "task_execution",
+      "to_state": "STREAM_STATE_OPEN",
+      "trigger": "task_lifecycle_stream_established",
+      "guard": "stream.open = true & stream.mode != MESSAGE_ONLY",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "actor": "shared",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-11-7-007",
+        "D-3-1-037",
+        "D-11-7-001",
+        "D-3-1-039"
+      ]
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": "TASK_STATE_INPUT_REQUIRED",
+      "to_stage": "interruption",
+      "to_state": "TASK_STATE_INPUT_REQUIRED",
+      "trigger": "input_requested",
+      "guard": "task.state = TASK_STATE_INPUT_REQUIRED",
+      "actors": [
+        "server"
+      ],
+      "actor": "server",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-6-3-001",
+        "D-3-4-001",
+        "D-4-1-007"
+      ]
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_stage": "interruption",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_requested",
+      "guard": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "actors": [
+        "server"
+      ],
+      "actor": "server",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "N-7-6-001",
+        "N-3-2-004",
+        "D-7-6-001"
+      ]
+    },
+    {
+      "from_stage": "interruption",
+      "from_state": "TASK_STATE_WORKING",
+      "to_stage": "task_execution",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "interruption_resolved",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "actor": "shared",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-3-4-007",
+        "N-7-6-006",
+        "D-4-1-003"
+      ]
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": "TASK_STATE_COMPLETED",
+      "to_stage": "termination",
+      "to_state": "TASK_STATE_COMPLETED",
+      "trigger": "task_completed",
+      "guard": "task.state = TASK_STATE_COMPLETED",
+      "actors": [
+        "server"
+      ],
+      "actor": "server",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-6-1-002",
+        "D-6-7-010",
+        "D-4-1-004"
+      ]
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": "TASK_STATE_FAILED",
+      "to_stage": "termination",
+      "to_state": "TASK_STATE_FAILED",
+      "trigger": "task_failed",
+      "guard": "task.state = TASK_STATE_FAILED",
+      "actors": [
+        "server"
+      ],
+      "actor": "server",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "N-3-2-004",
+        "D-3-2-014",
+        "D-4-1-005"
+      ]
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": "TASK_STATE_CANCELED",
+      "to_stage": "termination",
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "task_canceled",
+      "guard": "task.state = TASK_STATE_CANCELED",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "actor": "shared",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-3-2-014",
+        "D-11-3-013",
+        "D-4-1-006"
+      ]
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": "TASK_STATE_REJECTED",
+      "to_stage": "termination",
+      "to_state": "TASK_STATE_REJECTED",
+      "trigger": "task_rejected",
+      "guard": "task.state = TASK_STATE_REJECTED",
+      "actors": [
+        "server"
+      ],
+      "actor": "server",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-4-1-045",
+        "D-4-1-008"
+      ]
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": "STREAM_CLOSED",
+      "to_stage": "termination",
+      "to_state": "STREAM_CLOSED",
+      "trigger": "stream_terminated",
+      "guard": "stream.open = false",
+      "actors": [
+        "server"
+      ],
+      "actor": "server",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-3-5-006",
+        "D-3-2-014",
+        "D-3-5-002"
+      ]
+    },
+    {
+      "from_stage": "interruption",
+      "from_state": "TASK_STATE_CANCELED",
+      "to_stage": "termination",
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "task_canceled_during_interruption",
+      "guard": "task.state = TASK_STATE_CANCELED",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "actor": "shared",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-3-1-041",
+        "D-9-4-013",
+        "D-4-1-006"
+      ]
+    },
+    {
+      "from_stage": "interruption",
+      "from_state": "STREAM_STATE_CLOSED",
+      "to_stage": "termination",
+      "to_state": "STREAM_STATE_CLOSED",
+      "trigger": "stream_closed_during_interruption",
+      "guard": "stream.open = false",
+      "actors": [
+        "server"
+      ],
+      "actor": "server",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_ids": [
+        "D-11-7-009",
+        "D-11-7-008"
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "from_stage": "task_execution",
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_stage": "authentication",
+      "issue": "Authentication stage models TASK_STATE_AUTH_REQUIRED as an entry_from_previous with exit via REQUEST_AUTHORIZED back to task_execution for secondary credential flows. However, spec section 7.6 states secondary credentials are obtained out-of-band and provided via subsequent message/send, which flows through the interruption stage (AUTH_REQUIRED → WORKING). No listed boundary supports a task_execution → authentication crossing; the secondary auth loop appears to be modeled redundantly across authentication and interruption stages.",
+      "reason_type": "searched_not_found",
+      "source_ids": [
+        "D-4-1-009",
+        "N-7-6-001",
+        "D-7-6-001"
+      ],
+      "confidence": 0.5
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": null,
+      "to_stage": "termination",
+      "to_state": "submitted",
+      "issue": "Termination stage contains non-terminal state 'submitted' (lowercase, source D-6-6-012) listed in entry_from_previous, but task_execution and initiation use 'TASK_STATE_SUBMITTED' (uppercase). Naming inconsistency prevents confident pairing. No state named 'submitted' exists in task_execution or initiation.",
+      "reason_type": "no_matching_exit",
+      "source_ids": [
+        "D-6-6-012"
+      ],
+      "confidence": 0.5
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": null,
+      "to_stage": "termination",
+      "to_state": "STREAM_OPEN",
+      "issue": "Termination stage contains non-terminal state 'STREAM_OPEN' (source D-3-1-038) listed in entry_from_previous with transition to STREAM_CLOSED. Task_execution uses 'STREAM_STATE_OPEN' (different name). No state named 'STREAM_OPEN' exists in task_execution. Name mismatch prevents resolution.",
+      "reason_type": "no_matching_exit",
+      "source_ids": [
+        "D-3-1-038",
+        "D-3-1-040"
+      ],
+      "confidence": 0.45
+    },
+    {
+      "from_stage": "task_execution",
+      "from_state": "STREAM_STATE_OPEN",
+      "to_stage": "interruption",
+      "to_state": "STREAM_STATE_OPEN",
+      "issue": "Interruption stage contains STREAM_STATE_OPEN with no incoming transitions (flagged as unreachable in B1). Stream may carry over from task_execution when task enters interrupted state, but task_execution already models stream closure on interrupted states via STREAM_ACTIVE → STREAM_CLOSED (guard includes INPUT_REQUIRED, AUTH_REQUIRED). Ambiguous whether a separate inter-stage stream carry-over is required or is redundant with intra-stage stream closure.",
+      "reason_type": "ambiguous_connection",
+      "source_ids": [
+        "D-11-7-009",
+        "N-3-5-006"
+      ],
+      "confidence": 0.55
+    }
+  ],
+  "gaps": [
+    {
+      "state_name": null,
+      "boundary": "task_execution → termination",
+      "issue": "All candidate exit states in task_execution are semantic_type terminal or have outgoing intra-stage transitions. Terminal states (TASK_STATE_COMPLETED, TASK_STATE_FAILED, TASK_STATE_CANCELED, TASK_STATE_REJECTED, STREAM_CLOSED) satisfy the no-outgoing-transitions criterion but violate the non-terminal exit state heuristic. Terminal-to-terminal crossings were defined as best-available resolution.",
+      "type": "missing_exit_state"
+    },
+    {
+      "state_name": "TASK_STATE_WORKING",
+      "boundary": "task_execution → termination",
+      "issue": "Termination stage contains TASK_STATE_WORKING as a non-terminal entry state (listed in entry_from_previous) with transitions to COMPLETED, FAILED, CANCELED, REJECTED. These duplicate transitions already present in task_execution. task_execution.TASK_STATE_WORKING has outgoing intra-stage transitions, preventing it from serving as a strict exit candidate. No clean inter-stage connection resolved.",
+      "type": "ambiguous_connection"
+    },
+    {
+      "state_name": "STREAM_ACTIVE",
+      "boundary": "task_execution → termination",
+      "issue": "Termination stage contains STREAM_ACTIVE as a non-terminal entry state (listed in entry_from_previous) with transition to STREAM_CLOSED. Could map from task_execution.STREAM_ACTIVE but that state has outgoing intra-stage transitions (self-loop and to STREAM_CLOSED). Overlapping modeling prevents clean boundary resolution.",
+      "type": "ambiguous_connection"
+    },
+    {
+      "state_name": "STREAM_STATE_OPEN",
+      "boundary": "task_execution → termination",
+      "issue": "Termination stage contains STREAM_STATE_OPEN as a non-terminal entry state (listed in entry_from_previous) with transition to STREAM_STATE_CLOSED. Could map from task_execution.STREAM_STATE_OPEN but that state has outgoing intra-stage transitions. Additionally, initiation and interruption stages also contain STREAM_STATE_OPEN, creating a three-way ambiguity.",
+      "type": "ambiguous_connection"
+    },
+    {
+      "state_name": null,
+      "boundary": "initiation → termination",
+      "issue": "Initiation stage has terminal states (TASK_STATE_REJECTED, STREAM_CLOSED) representing termination outcomes for tasks rejected or message-only streams closed before reaching task_execution. No boundary is defined between initiation and termination in the stage order, so these terminal states have no inter-stage path to the termination phase.",
+      "type": "missing_exit_state"
+    }
+  ]
+}

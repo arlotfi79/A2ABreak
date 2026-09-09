@@ -1,0 +1,174 @@
+{
+  "section_id": "S112",
+  "title": "S112 16.11 Stateless Proxy",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S112 16.11 Stateless Proxy"
+  ],
+  "url_anchor": "#s112-1611-stateless-proxy",
+  "word_count": 850,
+  "statement_count": 7,
+  "elapsed_seconds": 46.04,
+  "statements": [
+    {
+      "statement_id": "D-S112-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A stateless proxy does not have any notion of a transaction, or of the response context used to describe stateful proxy behavior.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "object_name": "stateless_proxy",
+      "field_name": "transaction",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S112-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When handling a request statelessly, an element MUST NOT generate its own 100 (Trying) or any other provisional response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S112",
+      "actors": [
+        "stateless_proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": "proxy.provisional_response_generated = false",
+      "actions": [
+        "suppress_100_Trying",
+        "suppress_provisional_responses"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S112-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless proxy MUST validate a request as described in Section 16.3 and MUST follow the request processing steps described in Sections 16.4 through 16.5; the request is sent directly to the transport layer instead of through a client transaction.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S112",
+      "actors": [
+        "stateless_proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_from_transport",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": null,
+      "actions": [
+        "validate_request_per_16.3",
+        "process_per_16.4_16.5",
+        "select_single_target",
+        "compute_branch_id_as_deterministic_function",
+        "forward_directly_to_transport_layer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S112-004",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless proxy MUST choose one and only one target from the target set. This choice MUST only rely on fields in the message and time-invariant properties of the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S112",
+      "object_name": "stateless_proxy_target_selection",
+      "field_name": "target",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "exactly_one_target"
+      ],
+      "guard_semantics": "selection_based_on_message_fields_and_time_invariant_server_properties"
+    },
+    {
+      "statement_id": "D-S112-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When a response arrives at a stateless proxy, the proxy MUST inspect the sent-by value in the first (topmost) Via header field value. If that address matches the proxy, the proxy MUST remove that header field value from the response and forward the result to the location indicated in the next Via header field value.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S112",
+      "actors": [
+        "stateless_proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_received",
+      "pre_cond": "proxy.mode = stateless & topmost_via.sent_by = proxy.address",
+      "post_cond": null,
+      "actions": [
+        "inspect_topmost_via_sent_by",
+        "remove_topmost_via_header_field_value",
+        "forward_to_next_via_location"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S112-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the address does not match the proxy, the message MUST be silently discarded.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S112",
+      "actors": [
+        "stateless_proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_received",
+      "pre_cond": "proxy.mode = stateless & topmost_via.sent_by != proxy.address",
+      "post_cond": null,
+      "actions": [
+        "silently_discard_message"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S112-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Stateless proxies MUST NOT perform special processing for CANCEL requests. They are processed by the above rules as any other requests.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S112",
+      "actors": [
+        "stateless_proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CANCEL_received",
+      "pre_cond": "proxy.mode = stateless",
+      "post_cond": null,
+      "actions": [
+        "process_CANCEL_as_ordinary_request",
+        "apply_Route_header_processing"
+      ],
+      "modality": "must"
+    }
+  ]
+}

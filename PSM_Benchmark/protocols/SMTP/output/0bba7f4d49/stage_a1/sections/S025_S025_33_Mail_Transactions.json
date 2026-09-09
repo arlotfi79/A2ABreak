@@ -1,0 +1,257 @@
+{
+  "section_id": "S025",
+  "title": "S025 3.3 Mail Transactions",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S025 3.3 Mail Transactions"
+  ],
+  "url_anchor": "#s025-33-mail-transactions",
+  "word_count": 1097,
+  "statement_count": 11,
+  "elapsed_seconds": 203.12,
+  "statements": [
+    {
+      "statement_id": "D-S025-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "the MAIL command may be sent only when no mail transaction is in progress",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "state_name": "no_mail_transaction_in_progress",
+      "enum_name": "MailTransactionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S025-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "This command tells the SMTP-receiver that a new mail transaction is starting and to reset all its state tables and buffers, including any recipients or mail data.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S025",
+      "state_name": "mail_transaction_in_progress",
+      "enum_name": "MailTransactionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S025-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "If accepted, the SMTP server returns a 354 Intermediate reply and considers all succeeding lines up to but not including the end of mail data indicator to be the message text.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S025",
+      "state_name": "data_transfer",
+      "enum_name": "MailTransactionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S025-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "The transaction starts with a MAIL command that gives the sender identification. This command tells the SMTP-receiver that a new mail transaction is starting and to reset all its state tables and buffers. If accepted, the SMTP server returns a 250 OK reply.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "no_mail_transaction_in_progress",
+      "to_state": "mail_transaction_in_progress",
+      "trigger": "MAIL command received and accepted",
+      "pre_cond": "transaction.state = no_mail_transaction_in_progress",
+      "post_cond": "server.reply = 250",
+      "actions": [
+        "reset all state tables and buffers including recipients and mail data",
+        "return 250 OK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "A series of one or more RCPT commands follows, giving the receiver information. If accepted, the SMTP server returns a 250 OK reply and stores the forward-path. This step of the procedure can be repeated any number of times.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "mail_transaction_in_progress",
+      "to_state": "mail_transaction_in_progress",
+      "trigger": "RCPT command accepted",
+      "pre_cond": "transaction.state = mail_transaction_in_progress",
+      "post_cond": "server.reply = 250 & transaction.forward_path_stored = true",
+      "actions": [
+        "store forward-path",
+        "return 250 OK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "A DATA command initiates transfer of the mail data. If accepted, the SMTP server returns a 354 Intermediate reply and considers all succeeding lines up to but not including the end of mail data indicator to be the message text.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "mail_transaction_in_progress",
+      "to_state": "data_transfer",
+      "trigger": "DATA command accepted",
+      "pre_cond": "transaction.state = mail_transaction_in_progress",
+      "post_cond": "server.reply = 354",
+      "actions": [
+        "return 354 Intermediate reply"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "When the end of text is successfully received and stored, the SMTP-receiver sends a 250 OK reply. The end of mail data indicator also confirms the mail transaction and tells the SMTP server to now process the stored recipients and mail data.",
+      "is_inferred": true,
+      "confidence": 0.95,
+      "source_section": "S025",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "data_transfer",
+      "to_state": "no_mail_transaction_in_progress",
+      "trigger": "end of mail data received and accepted",
+      "pre_cond": "transaction.state = data_transfer",
+      "post_cond": "server.reply = 250 & transaction.confirmed = true",
+      "actions": [
+        "process stored recipients and mail data",
+        "return 250 OK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If a RCPT command appears without a previous MAIL command, the server MUST return a 503 'Bad sequence of commands' response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "no_mail_transaction_in_progress",
+      "to_state": "no_mail_transaction_in_progress",
+      "trigger": "RCPT command received without prior MAIL",
+      "pre_cond": "transaction.state = no_mail_transaction_in_progress",
+      "post_cond": "server.reply = 503",
+      "actions": [
+        "return 503 Bad sequence of commands"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If there was no MAIL, or no RCPT, command, or all such commands were rejected, the server MAY return a 'command out of sequence' (503) or 'no valid recipients' (554) reply in response to the DATA command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S025",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DATA command with no MAIL or no valid RCPT",
+      "pre_cond": "transaction.mail_accepted = false | transaction.valid_rcpt_count = 0",
+      "post_cond": "server.reply = 503 | server.reply = 554",
+      "actions": [
+        "return 503 or 554 reply"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S025-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "If one of those replies (or any other 5yz reply) is received, the client MUST NOT send the message data; more generally, message data MUST NOT be sent unless a 354 reply is received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client"
+      ],
+      "from_state": "mail_transaction_in_progress",
+      "to_state": null,
+      "trigger": "5yz reply received for DATA command",
+      "pre_cond": "server.reply >= 500 & server.reply <= 599",
+      "post_cond": null,
+      "actions": [
+        "MUST NOT send message data"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "Mail transaction commands MUST be used in the order discussed above.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "object_name": "mail transaction",
+      "field_name": "command_sequence_order",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "MAIL",
+        "RCPT",
+        "DATA"
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

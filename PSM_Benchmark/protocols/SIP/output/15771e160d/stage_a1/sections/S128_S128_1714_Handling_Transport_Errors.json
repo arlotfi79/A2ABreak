@@ -1,0 +1,390 @@
+{
+  "section_id": "S128",
+  "title": "S128 17.1.4 Handling Transport Errors",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S128 17.1.4 Handling Transport Errors"
+  ],
+  "url_anchor": "#s128-1714-handling-transport-errors",
+  "word_count": 231,
+  "statement_count": 17,
+  "elapsed_seconds": 55.4,
+  "statements": [
+    {
+      "statement_id": "D-S128-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Figure 6: non-INVITE client transaction shows 'Trying' as the initial state entered upon receiving a Request from TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "state_name": "Trying",
+      "enum_name": "NonINVITEClientTransactionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Trying"
+    },
+    {
+      "statement_id": "D-S128-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Figure 6: non-INVITE client transaction shows 'Proceeding' as an active state entered after receiving a 1xx provisional response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "state_name": "Proceeding",
+      "enum_name": "NonINVITEClientTransactionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Proceeding"
+    },
+    {
+      "statement_id": "D-S128-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Figure 6: non-INVITE client transaction shows 'Completed' as an active state entered after receiving a 200-699 final response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "state_name": "Completed",
+      "enum_name": "NonINVITEClientTransactionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Completed"
+    },
+    {
+      "statement_id": "D-S128-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Figure 6: non-INVITE client transaction shows 'Terminated' as the terminal state reached via Timer F, Timer K, or Transport Error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "state_name": "Terminated",
+      "enum_name": "NonINVITEClientTransactionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "transaction.state = Terminated"
+    },
+    {
+      "statement_id": "D-S128-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Request from TU / send request causes entry into Trying state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": null,
+      "to_state": "Trying",
+      "trigger": "Request from TU",
+      "pre_cond": null,
+      "post_cond": "transaction.state = Trying",
+      "actions": [
+        "send request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Trying state, Timer E fires: send request (retransmit), remain in Trying.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Trying",
+      "to_state": "Trying",
+      "trigger": "Timer E",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Trying",
+      "actions": [
+        "send request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Trying state, Timer F fires: inform TU, transition to Terminated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Terminated",
+      "trigger": "Timer F",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Trying state, Transport Error: inform TU, transition to Terminated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Terminated",
+      "trigger": "Transport Error",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU of transport failure"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S128-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Trying state, 1xx response received: pass response to TU, transition to Proceeding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Proceeding",
+      "trigger": "1xx response received",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "pass response to TU"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Trying state, 200-699 response received: pass response to TU, transition to Completed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Completed",
+      "trigger": "200-699 response received",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "pass response to TU"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Proceeding state, Timer E fires: send request (retransmit), remain in Proceeding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Proceeding",
+      "trigger": "Timer E",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "send request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Proceeding state, Timer F fires: inform TU, transition to Terminated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Terminated",
+      "trigger": "Timer F",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Proceeding state, Transport Error: inform TU, transition to Terminated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Terminated",
+      "trigger": "Transport Error",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU of transport failure"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S128-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Proceeding state, 1xx response received: pass response to TU, remain in Proceeding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Proceeding",
+      "trigger": "1xx response received",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "pass response to TU"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Proceeding state, 200-699 response received: pass response to TU, transition to Completed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Completed",
+      "trigger": "200-699 response received",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "pass response to TU"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In Completed state, Timer K fires: transition to Terminated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": "Terminated",
+      "trigger": "Timer K",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S128-017",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The client transaction SHOULD inform the TU that a transport failure has occurred, and the client transaction SHOULD transition directly to the 'Terminated' state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S128",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "transport layer indicates failure",
+      "pre_cond": null,
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU of transport failure"
+      ],
+      "modality": "should"
+    }
+  ]
+}

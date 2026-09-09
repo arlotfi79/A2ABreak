@@ -1,0 +1,136 @@
+{
+  "section_id": "S065",
+  "title": "S065 3.10.7.3 SYN-SENT STATE",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S065 3.10.7.3 SYN-SENT STATE"
+  ],
+  "url_anchor": "#s065-31073-syn-sent-state",
+  "word_count": 577,
+  "statement_count": 5,
+  "elapsed_seconds": 40.07,
+  "statements": [
+    {
+      "statement_id": "D-S065-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "SYN-SENT state: the state in which a connection attempt has been initiated and a SYN has been sent, awaiting a corresponding SYN or SYN-ACK from the peer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "state_name": "SYN-SENT",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = SYN-SENT"
+    },
+    {
+      "statement_id": "D-S065-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the RST bit is set and the ACK was acceptable, then signal to the user 'error: connection reset', drop the segment, enter CLOSED state, delete TCB, and return.",
+      "is_inferred": false,
+      "confidence": 0.99,
+      "source_section": "S065",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "CLOSED",
+      "trigger": "RST received with acceptable ACK",
+      "pre_cond": "connection.state = SYN-SENT & segment.RST = 1 & ack_acceptable = true",
+      "post_cond": "connection.state = CLOSED & tcb_deleted = true",
+      "actions": [
+        "signal user 'error: connection reset'",
+        "drop segment",
+        "delete TCB"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S065-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If SND.UNA > ISS (our SYN has been ACKed), change the connection state to ESTABLISHED, form an ACK segment <SEQ=SND.NXT><ACK=RCV.NXT><CTL=ACK> and send it.",
+      "is_inferred": false,
+      "confidence": 0.99,
+      "source_section": "S065",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "ESTABLISHED",
+      "trigger": "SYN-ACK received (SYN bit on, ACK acceptable, SND.UNA > ISS)",
+      "pre_cond": "connection.state = SYN-SENT & segment.SYN = 1 & security_compartment_matches = true & SND.UNA > ISS",
+      "post_cond": "connection.state = ESTABLISHED",
+      "actions": [
+        "set RCV.NXT = SEG.SEQ+1",
+        "set IRS = SEG.SEQ",
+        "advance SND.UNA to SEG.ACK",
+        "remove acknowledged segments from retransmission queue",
+        "send ACK <SEQ=SND.NXT><ACK=RCV.NXT><CTL=ACK>"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S065-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Otherwise (SYN bit on but SND.UNA <= ISS, simultaneous open), enter SYN-RECEIVED, form a SYN,ACK segment <SEQ=ISS><ACK=RCV.NXT><CTL=SYN,ACK> and send it.",
+      "is_inferred": false,
+      "confidence": 0.98,
+      "source_section": "S065",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "SYN-RECEIVED",
+      "trigger": "SYN received without our SYN being ACKed (simultaneous open)",
+      "pre_cond": "connection.state = SYN-SENT & segment.SYN = 1 & security_compartment_matches = true & SND.UNA <= ISS",
+      "post_cond": "connection.state = SYN-RECEIVED",
+      "actions": [
+        "set RCV.NXT = SEG.SEQ+1",
+        "set IRS = SEG.SEQ",
+        "send SYN,ACK <SEQ=ISS><ACK=RCV.NXT><CTL=SYN,ACK>",
+        "set SND.WND = SEG.WND",
+        "set SND.WL1 = SEG.SEQ",
+        "set SND.WL2 = SEG.ACK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S065-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the ACK bit is set and SEG.ACK =< ISS or SEG.ACK > SND.NXT, send a reset (unless RST bit is set) <SEQ=SEG.ACK><CTL=RST> and discard the segment. Return. (No state change; segment is rejected.)",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S065",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "SYN-SENT",
+      "trigger": "ACK received with unacceptable ACK number",
+      "pre_cond": "connection.state = SYN-SENT & segment.ACK = 1 & (SEG.ACK <= ISS | SEG.ACK > SND.NXT) & segment.RST = 0",
+      "post_cond": "connection.state = SYN-SENT",
+      "actions": [
+        "send RST <SEQ=SEG.ACK><CTL=RST>",
+        "discard segment"
+      ],
+      "modality": "must"
+    }
+  ]
+}

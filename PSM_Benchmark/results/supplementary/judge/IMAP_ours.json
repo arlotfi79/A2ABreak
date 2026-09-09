@@ -1,0 +1,470 @@
+{
+ "proto": "IMAP",
+ "system": "ours",
+ "gt_states": 5,
+ "gt_transitions": 11,
+ "cand_states": 9,
+ "cand_transitions": 53,
+ "states_matched": 5,
+ "states_P": 0.5556,
+ "states_R": 1.0,
+ "states_F1": 0.7143,
+ "trans_matched": 11,
+ "trans_P": 0.2075,
+ "trans_R": 1.0,
+ "trans_F1": 0.3438,
+ "unmatched_classes": {
+  "real_behavior_not_in_gt": 27,
+  "duplicate_or_alias": 15
+ },
+ "tokens_in": 3844,
+ "tokens_out": 3784,
+ "cost": 0.11382,
+ "seconds": 47.9,
+ "raw": {
+  "state_matches": [
+   {
+    "gt": "Connection_Established_Server_Greeting",
+    "candidate": "ServerGreeting",
+    "confidence": 0.85,
+    "reason": "Both represent the state where the server issues its initial greeting (OK, PREAUTH, or BYE). The candidate splits connection establishment and greeting into two states, but ServerGreeting is the functional equivalent."
+   },
+   {
+    "gt": "Not_Authenticated",
+    "candidate": "NotAuthenticated",
+    "confidence": 1.0,
+    "reason": "Same protocol state: client connected but not yet authenticated."
+   },
+   {
+    "gt": "Authenticated",
+    "candidate": "Authenticated",
+    "confidence": 1.0,
+    "reason": "Same protocol state: client authenticated but no mailbox selected."
+   },
+   {
+    "gt": "Selected",
+    "candidate": "Selected",
+    "confidence": 1.0,
+    "reason": "Same protocol state: a mailbox is selected."
+   },
+   {
+    "gt": "Logout",
+    "candidate": "Logout",
+    "confidence": 0.9,
+    "reason": "Both represent the logout/disconnecting state. The candidate has a further ConnectionClosed state, but Logout is the matching concept."
+   }
+  ],
+  "transition_matches": [
+   {
+    "gt_index": 0,
+    "gt": {
+     "from": "Connection_Established_Server_Greeting",
+     "event": "connect without pre-authentication",
+     "action": "Send OK greeting",
+     "to": "Not_Authenticated"
+    },
+    "candidate_index": 1,
+    "candidate": {
+     "from": "ServerGreeting",
+     "event": "receive OK greeting",
+     "action": "send OK greeting",
+     "to": "NotAuthenticated"
+    },
+    "confidence": 0.9,
+    "reason": "Both transition from the greeting state to NotAuthenticated upon an OK greeting."
+   },
+   {
+    "gt_index": 1,
+    "gt": {
+     "from": "Connection_Established_Server_Greeting",
+     "event": "Connects with pre-authentication",
+     "action": "Send PREAUTH greeting",
+     "to": "Authenticated"
+    },
+    "candidate_index": 2,
+    "candidate": {
+     "from": "ServerGreeting",
+     "event": "receive PREAUTH greeting",
+     "action": "send PREAUTH greeting",
+     "to": "Authenticated"
+    },
+    "confidence": 0.95,
+    "reason": "Both transition from greeting state to Authenticated upon PREAUTH."
+   },
+   {
+    "gt_index": 2,
+    "gt": {
+     "from": "Connection_Established_Server_Greeting",
+     "event": "Connection reject",
+     "action": "Send BYE greeting",
+     "to": "Logout"
+    },
+    "candidate_index": 3,
+    "candidate": {
+     "from": "ServerGreeting",
+     "event": "receive BYE greeting",
+     "action": "send BYE greeting",
+     "to": "Logout"
+    },
+    "confidence": 0.95,
+    "reason": "Both transition from greeting state to Logout upon BYE greeting (connection rejected)."
+   },
+   {
+    "gt_index": 3,
+    "gt": {
+     "from": "Not_Authenticated",
+     "event": "Sends LOGIN or AUTHENTICATE command",
+     "action": "Sends LOGIN or AUTHENTICATE command",
+     "to": "Authenticated"
+    },
+    "candidate_index": 4,
+    "candidate": {
+     "from": "NotAuthenticated",
+     "event": "receive AUTHENTICATE OK",
+     "action": "enter Authenticated state",
+     "to": "Authenticated"
+    },
+    "confidence": 0.8,
+    "reason": "Both represent successful authentication transitioning to Authenticated. Candidate splits LOGIN and AUTHENTICATE into separate transitions; this matches AUTHENTICATE OK."
+   },
+   {
+    "gt_index": 4,
+    "gt": {
+     "from": "Not_Authenticated",
+     "event": "Sends LOGOUT or server shutdown",
+     "action": "Close connection",
+     "to": "Logout"
+    },
+    "candidate_index": 14,
+    "candidate": {
+     "from": "NotAuthenticated",
+     "event": "send LOGOUT command",
+     "action": "send BYE untagged response; send tagged OK response",
+     "to": "Logout"
+    },
+    "confidence": 0.8,
+    "reason": "Both represent logout from NotAuthenticated state. GT combines LOGOUT and server shutdown; this matches the LOGOUT part."
+   },
+   {
+    "gt_index": 5,
+    "gt": {
+     "from": "Authenticated",
+     "event": "Sends SELECT or EXAMINE command",
+     "action": "Sends SELECT or EXAMINE command",
+     "to": "Selected"
+    },
+    "candidate_index": 18,
+    "candidate": {
+     "from": "Authenticated",
+     "event": "receive SELECT OK",
+     "action": "select mailbox for access",
+     "to": "Selected"
+    },
+    "confidence": 0.85,
+    "reason": "Both represent successful SELECT transitioning from Authenticated to Selected."
+   },
+   {
+    "gt_index": 6,
+    "gt": {
+     "from": "Authenticated",
+     "event": "Sends LOGOUT or server shutdown",
+     "action": "Close connection",
+     "to": "Logout"
+    },
+    "candidate_index": 20,
+    "candidate": {
+     "from": "Authenticated",
+     "event": "send LOGOUT command",
+     "action": "send BYE untagged response; send tagged OK response",
+     "to": "Logout"
+    },
+    "confidence": 0.8,
+    "reason": "Both represent logout from Authenticated. GT combines LOGOUT and server shutdown; this matches LOGOUT."
+   },
+   {
+    "gt_index": 7,
+    "gt": {
+     "from": "Authenticated",
+     "event": "Send requests mailbox listing",
+     "action": "List mailbox",
+     "to": "Authenticated"
+    },
+    "candidate_index": 29,
+    "candidate": {
+     "from": "Authenticated",
+     "event": "send LIST command",
+     "action": "send untagged LIST responses",
+     "to": "Authenticated"
+    },
+    "confidence": 0.95,
+    "reason": "Both represent listing mailboxes while remaining in Authenticated state."
+   },
+   {
+    "gt_index": 8,
+    "gt": {
+     "from": "Selected",
+     "event": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+     "action": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+     "to": "Authenticated"
+    },
+    "candidate_index": 33,
+    "candidate": {
+     "from": "Selected",
+     "event": "send CLOSE command",
+     "action": "close selected mailbox; send tagged OK response",
+     "to": "Authenticated"
+    },
+    "confidence": 0.8,
+    "reason": "Both represent returning from Selected to Authenticated via CLOSE. GT combines CLOSE/UNSELECT/fail; this matches CLOSE."
+   },
+   {
+    "gt_index": 9,
+    "gt": {
+     "from": "Selected",
+     "event": "Client manages messages",
+     "action": "Read/write/delete messages",
+     "to": "Selected"
+    },
+    "candidate_index": 44,
+    "candidate": {
+     "from": "Selected",
+     "event": "send FETCH command",
+     "action": "send untagged FETCH responses",
+     "to": "Selected"
+    },
+    "confidence": 0.7,
+    "reason": "FETCH is one form of message management (reading). GT is a general 'manages messages' self-loop."
+   },
+   {
+    "gt_index": 10,
+    "gt": {
+     "from": "Selected",
+     "event": "Sends LOGOUT or server shutdown",
+     "action": "Close connection",
+     "to": "Logout"
+    },
+    "candidate_index": 40,
+    "candidate": {
+     "from": "Selected",
+     "event": "send LOGOUT command",
+     "action": "send BYE untagged response; send tagged OK response",
+     "to": "Logout"
+    },
+    "confidence": 0.8,
+    "reason": "Both represent logout from Selected state. GT combines LOGOUT and server shutdown."
+   }
+  ],
+  "unmatched_candidate_transitions": [
+   {
+    "candidate_index": 0,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Represents the initial TCP connection establishment before the server greeting, which the GT collapses into a single initial state."
+   },
+   {
+    "candidate_index": 5,
+    "class": "duplicate_or_alias",
+    "reason": "LOGIN OK to Authenticated is the LOGIN variant of GT transition 3 (which combines LOGIN and AUTHENTICATE). Already matched AUTHENTICATE OK."
+   },
+   {
+    "candidate_index": 6,
+    "class": "real_behavior_not_in_gt",
+    "reason": "STARTTLS negotiation staying in NotAuthenticated is valid IMAP behavior not captured in the GT."
+   },
+   {
+    "candidate_index": 7,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Failed AUTHENTICATE (BAD) remaining in NotAuthenticated is valid protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 8,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Failed AUTHENTICATE (NO) remaining in NotAuthenticated is valid protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 9,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Auth cancellation remaining in NotAuthenticated is valid protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 10,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Failed LOGIN (NO) remaining in NotAuthenticated is valid protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 11,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Failed LOGIN (BAD) remaining in NotAuthenticated is valid protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 12,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Failed STARTTLS (BAD) remaining in NotAuthenticated is valid protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 13,
+    "class": "real_behavior_not_in_gt",
+    "reason": "LOGIN disabled response remaining in NotAuthenticated is valid protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 15,
+    "class": "duplicate_or_alias",
+    "reason": "Server shutdown from NotAuthenticated is the other half of GT transition 4 (which combines LOGOUT and server shutdown). Already matched LOGOUT."
+   },
+   {
+    "candidate_index": 16,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Connection closed condition from NotAuthenticated is a plausible edge case not explicitly in GT."
+   },
+   {
+    "candidate_index": 17,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Pre-auth timeout autologout from NotAuthenticated is valid IMAP behavior not in GT."
+   },
+   {
+    "candidate_index": 19,
+    "class": "duplicate_or_alias",
+    "reason": "EXAMINE OK to Selected is the EXAMINE variant of GT transition 5 (which combines SELECT and EXAMINE). Already matched SELECT OK."
+   },
+   {
+    "candidate_index": 21,
+    "class": "duplicate_or_alias",
+    "reason": "Server shutdown from Authenticated is the other half of GT transition 6. Already matched LOGOUT."
+   },
+   {
+    "candidate_index": 22,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Connection closed condition from Authenticated is a plausible edge case not explicitly in GT."
+   },
+   {
+    "candidate_index": 23,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Autologout timeout from Authenticated is valid IMAP behavior not in GT."
+   },
+   {
+    "candidate_index": 24,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Failed SELECT (NO) remaining in Authenticated is valid protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 25,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Failed EXAMINE (NO) remaining in Authenticated is valid protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 26,
+    "class": "real_behavior_not_in_gt",
+    "reason": "ENABLE command in Authenticated is valid IMAP behavior not in GT."
+   },
+   {
+    "candidate_index": 27,
+    "class": "real_behavior_not_in_gt",
+    "reason": "DELETE command in Authenticated is valid IMAP behavior not in GT."
+   },
+   {
+    "candidate_index": 28,
+    "class": "real_behavior_not_in_gt",
+    "reason": "SUBSCRIBE command in Authenticated is valid IMAP behavior not in GT."
+   },
+   {
+    "candidate_index": 30,
+    "class": "real_behavior_not_in_gt",
+    "reason": "NAMESPACE command in Authenticated is valid IMAP behavior not in GT."
+   },
+   {
+    "candidate_index": 31,
+    "class": "real_behavior_not_in_gt",
+    "reason": "STATUS command in Authenticated is valid IMAP behavior not in GT."
+   },
+   {
+    "candidate_index": 32,
+    "class": "real_behavior_not_in_gt",
+    "reason": "APPEND command in Authenticated is valid IMAP behavior not in GT."
+   },
+   {
+    "candidate_index": 34,
+    "class": "duplicate_or_alias",
+    "reason": "UNSELECT to Authenticated is the UNSELECT variant of GT transition 8 (which combines CLOSE/UNSELECT/fail). Already matched CLOSE."
+   },
+   {
+    "candidate_index": 35,
+    "class": "duplicate_or_alias",
+    "reason": "SELECT NO from Selected to Authenticated is the SELECT-fails variant of GT transition 8. Already matched CLOSE."
+   },
+   {
+    "candidate_index": 36,
+    "class": "duplicate_or_alias",
+    "reason": "EXAMINE NO from Selected to Authenticated is the EXAMINE-fails variant of GT transition 8. Already matched CLOSE."
+   },
+   {
+    "candidate_index": 37,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Unsolicited CLOSED response deselecting mailbox is valid IMAP behavior (RFC 7162/9051) not in GT."
+   },
+   {
+    "candidate_index": 38,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Re-SELECT while in Selected state (switching mailboxes) is valid IMAP behavior not explicitly in GT."
+   },
+   {
+    "candidate_index": 39,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Re-EXAMINE while in Selected state is valid IMAP behavior not explicitly in GT."
+   },
+   {
+    "candidate_index": 41,
+    "class": "duplicate_or_alias",
+    "reason": "Server shutdown from Selected is the other half of GT transition 10. Already matched LOGOUT."
+   },
+   {
+    "candidate_index": 42,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Connection closed condition from Selected is a plausible edge case not explicitly in GT."
+   },
+   {
+    "candidate_index": 43,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Autologout timeout from Selected is valid IMAP behavior not in GT."
+   },
+   {
+    "candidate_index": 45,
+    "class": "duplicate_or_alias",
+    "reason": "EXPUNGE is another form of message management (delete) covered by GT transition 9's general 'manages messages'."
+   },
+   {
+    "candidate_index": 46,
+    "class": "duplicate_or_alias",
+    "reason": "SEARCH is another form of message management covered by GT transition 9's general 'manages messages'."
+   },
+   {
+    "candidate_index": 47,
+    "class": "duplicate_or_alias",
+    "reason": "COPY is another form of message management covered by GT transition 9's general 'manages messages'."
+   },
+   {
+    "candidate_index": 48,
+    "class": "duplicate_or_alias",
+    "reason": "MOVE is another form of message management covered by GT transition 9's general 'manages messages'."
+   },
+   {
+    "candidate_index": 49,
+    "class": "duplicate_or_alias",
+    "reason": "UID command is another form of message management covered by GT transition 9's general 'manages messages'."
+   },
+   {
+    "candidate_index": 50,
+    "class": "duplicate_or_alias",
+    "reason": "APPEND in Selected is another form of message management covered by GT transition 9."
+   },
+   {
+    "candidate_index": 51,
+    "class": "duplicate_or_alias",
+    "reason": "STATUS in Selected is another form of message management covered by GT transition 9."
+   },
+   {
+    "candidate_index": 52,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Transition from Logout to ConnectionClosed represents the final connection teardown, which GT treats as implicit in the Logout final state."
+   }
+  ]
+ }
+}

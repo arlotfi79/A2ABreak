@@ -1,0 +1,131 @@
+{
+  "section_id": "S120",
+  "title": "S120 Appendix C. Source Routes",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S120 Appendix C. Source Routes"
+  ],
+  "url_anchor": "#s120-appendix-c-source-routes",
+  "word_count": 529,
+  "statement_count": 5,
+  "elapsed_seconds": 28.78,
+  "statements": [
+    {
+      "statement_id": "D-S120-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "A server that is reached by means of a source route (e.g., its domain name appears first in the list in the forward-path) MUST remove its domain name from any forward-paths in which that domain name appears before forwarding the message and MAY remove all other source routing information.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S120",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_reached_via_source_route",
+      "pre_cond": "message.forward_path.first_host = server.domain_name",
+      "post_cond": "message.forward_path does not contain server.domain_name",
+      "actions": [
+        "remove_own_domain_from_forward_path",
+        "optionally_remove_all_source_routing"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S120-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "The reverse-path SHOULD NOT be updated by servers conforming to this specification.",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S120",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_relay",
+      "pre_cond": null,
+      "post_cond": "session.reverse_path = session.reverse_path",
+      "actions": [
+        "preserve_reverse_path_unchanged"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S120-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "SMTP servers MUST NOT derive final message routing information from message header fields.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S120",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "routing_decision",
+      "pre_cond": null,
+      "post_cond": "server.routing_source != message.header_fields",
+      "actions": [
+        "derive_routing_from_envelope_only"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S120-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "clients SHOULD NOT transmit source routes",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S120",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "MAIL_command_construction",
+      "pre_cond": null,
+      "post_cond": "message.forward_path.contains_source_route = false",
+      "actions": [
+        "omit_source_route_from_forward_path"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S120-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "servers MUST be prepared to receive and handle them as discussed in Section 3.3 and Appendix F.2",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S120",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "source_route_received",
+      "pre_cond": "message.forward_path.contains_source_route = true",
+      "post_cond": null,
+      "actions": [
+        "accept_and_handle_source_route"
+      ],
+      "modality": "must"
+    }
+  ]
+}

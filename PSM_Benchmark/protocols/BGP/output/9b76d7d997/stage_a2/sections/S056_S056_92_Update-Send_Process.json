@@ -1,0 +1,187 @@
+{
+  "section_id": "S056",
+  "title": "S056 9.2 Update-Send Process",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S056 9.2 Update-Send Process"
+  ],
+  "url_anchor": "#s056-92-update-send-process",
+  "word_count": 233,
+  "statement_count": 7,
+  "elapsed_seconds": 53.26,
+  "statements": [
+    {
+      "statement_id": "N-S056-1",
+      "normative_level": "SHALL NOT",
+      "category": "BEHAVIORAL",
+      "subject": "peer",
+      "stage": "bgp_fsm",
+      "description": "the receiving BGP speaker SHALL NOT re-distribute the routing information contained in that UPDATE message to other internal peers (unless the speaker acts as a BGP Route Reflector [RFC2796]).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "BGP speaker",
+        "internal peer"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "UPDATE_received_from_internal_peer",
+      "pre_cond": "protocol.state = Established & message.source = internal_peer & speaker.role != Route_Reflector",
+      "post_cond": "routing_info.redistributed_to_internal_peers = false",
+      "actions": [
+        "suppress redistribution of routing information from UPDATE to other internal peers"
+      ],
+      "modality": "shall",
+      "id": "N-S056-001"
+    },
+    {
+      "statement_id": "N-S056-2",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "All newly installed routes and all newly unfeasible routes for which there is no replacement route SHALL be advertised to its peers by means of an UPDATE message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "BGP speaker",
+        "peers"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "Phase3_route_selection_complete",
+      "pre_cond": "protocol.state = Established & (route.newly_installed = true | (route.newly_unfeasible = true & route.replacement_exists = false))",
+      "post_cond": "UPDATE_message.sent = true",
+      "actions": [
+        "advertise newly installed routes to peers via UPDATE message",
+        "advertise newly unfeasible routes with no replacement to peers via UPDATE message"
+      ],
+      "modality": "shall",
+      "id": "N-S056-002"
+    },
+    {
+      "statement_id": "N-S056-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "A BGP speaker SHOULD NOT advertise a given feasible BGP route from its Adj-RIB-Out if it would produce an UPDATE message containing the same BGP route as was previously advertised.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "route_advertisement_check",
+      "pre_cond": "protocol.state = Established & Adj-RIB-Out.route.feasible = true & UPDATE.would_duplicate_previously_advertised_route = true",
+      "post_cond": "route.advertised = false",
+      "actions": [
+        "suppress advertisement of route that would produce a duplicate UPDATE message"
+      ],
+      "modality": "should",
+      "id": "N-S056-003"
+    },
+    {
+      "statement_id": "N-S056-4",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Any routes in the Loc-RIB marked as unfeasible SHALL be removed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "route_marked_unfeasible",
+      "pre_cond": "protocol.state = Established & Loc-RIB.route.feasible = false",
+      "post_cond": "Loc-RIB.route.removed = true",
+      "actions": [
+        "remove unfeasible routes from Loc-RIB"
+      ],
+      "modality": "shall",
+      "id": "N-S056-004"
+    },
+    {
+      "statement_id": "N-S056-5",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Changes to the reachable destinations within its own autonomous system SHALL also be advertised in an UPDATE message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "reachable_destination_change_within_own_AS",
+      "pre_cond": "protocol.state = Established & AS.reachable_destination.changed = true",
+      "post_cond": "UPDATE_message.sent = true",
+      "actions": [
+        "advertise changes to reachable destinations within own AS via UPDATE message"
+      ],
+      "modality": "shall",
+      "id": "N-S056-005"
+    },
+    {
+      "statement_id": "N-S056-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If, due to the limits on the maximum size of an UPDATE message (see Section 4), a single route doesn't fit into the message, the BGP speaker MUST not advertise the route to its peers and MAY choose to log an error locally.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "BGP speaker",
+        "peers"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "route_exceeds_max_UPDATE_message_size",
+      "pre_cond": "protocol.state = Established & route.encoded_size > UPDATE.max_message_size",
+      "post_cond": "route.advertised_to_peers = false",
+      "actions": [
+        "do not advertise the oversized route to peers"
+      ],
+      "modality": "must",
+      "id": "N-S056-006"
+    },
+    {
+      "statement_id": "N-S056-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If, due to the limits on the maximum size of an UPDATE message (see Section 4), a single route doesn't fit into the message, the BGP speaker MUST not advertise the route to its peers and MAY choose to log an error locally.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "route_exceeds_max_UPDATE_message_size",
+      "pre_cond": "protocol.state = Established & route.encoded_size > UPDATE.max_message_size",
+      "post_cond": null,
+      "actions": [
+        "log error locally"
+      ],
+      "modality": "may",
+      "id": "N-S056-007"
+    }
+  ]
+}

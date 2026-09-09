@@ -1,0 +1,180 @@
+{
+  "section_id": "S076",
+  "title": "S076 13.7.1 Client to Server",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S076 13.7.1 Client to Server"
+  ],
+  "url_anchor": "#s076-1371-client-to-server",
+  "word_count": 251,
+  "statement_count": 8,
+  "elapsed_seconds": 106.79,
+  "statements": [
+    {
+      "statement_id": "D-S076-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A TEARDOWN using the aggregated control URI or the media URI in a session under non-aggregated control (single media session) MAY be done in any state (Ready and Play).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "state_name": "Ready",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S076-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A TEARDOWN using the aggregated control URI or the media URI in a session under non-aggregated control (single media session) MAY be done in any state (Ready and Play).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "state_name": "Play",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S076-003",
+      "normative_level": "MUST",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A TEARDOWN using the aggregated control URI or the media URI in a session under non-aggregated control (single media session) MAY be done in any state (Ready and Play). A successful request MUST result in that media delivery being immediately halted and the session state being destroyed. This MUST be indicated through the lack of a Session header in the response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S076",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "TEARDOWN on aggregated control URI or media URI in non-aggregated session",
+      "pre_cond": "session.state = Ready & (session.control = aggregated_uri | session.control = non_aggregated)",
+      "post_cond": "session.destroyed = true",
+      "actions": [
+        "halt media delivery immediately",
+        "destroy session state",
+        "send response without Session header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S076-004",
+      "normative_level": "MUST",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A TEARDOWN using the aggregated control URI or the media URI in a session under non-aggregated control (single media session) MAY be done in any state (Ready and Play). A successful request MUST result in that media delivery being immediately halted and the session state being destroyed. This MUST be indicated through the lack of a Session header in the response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S076",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "TEARDOWN on aggregated control URI or media URI in non-aggregated session",
+      "pre_cond": "session.state = Play & (session.control = aggregated_uri | session.control = non_aggregated)",
+      "post_cond": "session.destroyed = true",
+      "actions": [
+        "halt media delivery immediately",
+        "destroy session state",
+        "send response without Session header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S076-005",
+      "normative_level": "MUST",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A TEARDOWN using a media URI in an aggregated session can only be done in Ready state. Such a request only removes the indicated media stream and associated resources from the session. A session that will exist after the processing of the TEARDOWN request MUST, in the response to that TEARDOWN request, contain a Session header.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S076",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "TEARDOWN on media URI in aggregated session",
+      "pre_cond": "session.state = Ready & session.control = aggregated",
+      "post_cond": "session.media_count = session.media_count - 1",
+      "actions": [
+        "remove indicated media stream",
+        "free associated resources for removed media",
+        "send response with Session header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S076-006",
+      "normative_level": "MUST",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The TEARDOWN request MUST contain a Session header indicating to what session the request applies.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "object_name": "TEARDOWN request",
+      "field_name": "Session",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S076-007",
+      "normative_level": "MUST",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The TEARDOWN request MUST NOT include a Terminate-Reason header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "object_name": "TEARDOWN request",
+      "field_name": "Terminate-Reason",
+      "field_type": "header",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S076-008",
+      "normative_level": "MUST",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A TEARDOWN using a media URI in an aggregated session can only be done in Ready state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "object_name": "TEARDOWN on media URI in aggregated session",
+      "field_name": "session.state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "Ready"
+      ],
+      "guard_semantics": "session.state = Ready & session.control = aggregated"
+    }
+  ]
+}

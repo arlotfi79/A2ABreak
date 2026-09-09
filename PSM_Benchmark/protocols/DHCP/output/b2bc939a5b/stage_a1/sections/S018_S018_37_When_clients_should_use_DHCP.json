@@ -1,0 +1,85 @@
+{
+  "section_id": "S018",
+  "title": "S018 3.7 When clients should use DHCP",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S018 3.7 When clients should use DHCP"
+  ],
+  "url_anchor": "#s018-37-when-clients-should-use-dhcp",
+  "word_count": 122,
+  "statement_count": 3,
+  "elapsed_seconds": 35.79,
+  "statements": [
+    {
+      "statement_id": "D-S018-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "A client SHOULD use DHCP to reacquire or verify its IP address and network parameters whenever the local network parameters may have changed; e.g., at system boot time or after a disconnection from the local network.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S018",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "system_boot | network_disconnection",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "initiate_DHCP_reacquisition_or_verification"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S018-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If a client has knowledge of a previous network address and is unable to contact a local DHCP server, the client may continue to use the previous network address until the lease for that address expires.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S018",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "dhcp_server_unreachable",
+      "pre_cond": "client.previous_network_address != null & client.dhcp_server_reachable = false & client.lease_expired = false",
+      "post_cond": "client.using_previous_address = true",
+      "actions": [
+        "continue_using_previous_network_address"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S018-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the lease expires before the client can contact a DHCP server, the client must immediately discontinue use of the previous network address and may inform local users of the problem.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S018",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "lease_expiration",
+      "pre_cond": "client.lease_expired = true & client.dhcp_server_reachable = false",
+      "post_cond": "client.using_previous_address = false",
+      "actions": [
+        "discontinue_use_of_previous_network_address",
+        "inform_local_users_of_problem"
+      ],
+      "modality": "must"
+    }
+  ]
+}

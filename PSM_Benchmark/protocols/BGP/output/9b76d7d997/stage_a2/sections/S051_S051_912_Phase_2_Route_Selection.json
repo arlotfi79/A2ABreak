@@ -1,0 +1,235 @@
+{
+  "section_id": "S051",
+  "title": "S051 9.1.2 Phase 2: Route Selection",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S051 9.1.2 Phase 2: Route Selection"
+  ],
+  "url_anchor": "#s051-912-phase-2-route-selection",
+  "word_count": 523,
+  "statement_count": 9,
+  "elapsed_seconds": 111.91,
+  "statements": [
+    {
+      "statement_id": "1-S051-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the NEXT_HOP attribute of a BGP route depicts an address that is not resolvable, or if it would become unresolvable if the route was installed in the routing table, the BGP route MUST be excluded from the Phase 2 decision function.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "local BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "route.NEXT_HOP.resolvable = false | route.NEXT_HOP.resolvable_if_installed = false",
+      "post_cond": "route.eligible_for_phase2 = false",
+      "actions": [
+        "exclude BGP route from Phase 2 decision function"
+      ],
+      "modality": "must",
+      "id": "N-S051-001"
+    },
+    {
+      "statement_id": "2-S051-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the AS_PATH attribute of a BGP route contains an AS loop, the BGP route should be excluded from the Phase 2 decision function.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "local BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "route.AS_PATH.contains_local_AS = true",
+      "post_cond": "route.eligible_for_phase2 = false",
+      "actions": [
+        "exclude BGP route from Phase 2 decision function"
+      ],
+      "modality": "should",
+      "id": "N-S051-002"
+    },
+    {
+      "statement_id": "3-S051-3",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "The local speaker SHALL then install that route in the Loc-RIB, replacing any route to the same destination that is currently being held in the Loc-RIB.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "local BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Phase2_route_selected",
+      "pre_cond": null,
+      "post_cond": "Loc-RIB.contains(selected_route) = true & Loc-RIB.previous_route_to_same_destination.replaced = true",
+      "actions": [
+        "install selected route in Loc-RIB",
+        "replace existing route to same destination currently held in Loc-RIB"
+      ],
+      "modality": "shall",
+      "id": "N-S051-003"
+    },
+    {
+      "statement_id": "4-S051-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "When the new BGP route is installed in the Routing Table, care must be taken to ensure that existing routes to the same destination that are now considered invalid are removed from the Routing Table.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S051",
+      "actors": [
+        "local BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_BGP_route_installed_in_routing_table",
+      "pre_cond": "routing_table.contains_invalid_routes_to_same_destination = true",
+      "post_cond": "routing_table.invalid_routes_to_same_destination.removed = true",
+      "actions": [
+        "remove from Routing Table all existing routes to same destination now considered invalid"
+      ],
+      "modality": "must",
+      "id": "N-S051-004"
+    },
+    {
+      "statement_id": "5-S051-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "The local speaker MUST determine the immediate next-hop address from the NEXT_HOP attribute of the selected route (see Section 5.1.3).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "local BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Phase2_route_selected",
+      "pre_cond": null,
+      "post_cond": "selected_route.immediate_next_hop.resolved = true",
+      "actions": [
+        "determine immediate next-hop address from NEXT_HOP attribute of selected route"
+      ],
+      "modality": "must",
+      "id": "N-S051-005"
+    },
+    {
+      "statement_id": "6-S051-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If either the immediate next-hop or the IGP cost to the NEXT_HOP (where the NEXT_HOP is resolved through an IGP route) changes, Phase 2 Route Selection MUST be performed again.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "local BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "immediate_next_hop_changed | IGP_cost_to_NEXT_HOP_changed",
+      "pre_cond": "next_hop.immediate_address.changed = true | next_hop.IGP_cost.changed = true",
+      "post_cond": "phase2_route_selection.reinvoked = true",
+      "actions": [
+        "re-invoke Phase 2 Route Selection"
+      ],
+      "modality": "must",
+      "id": "N-S051-006"
+    },
+    {
+      "statement_id": "7-S051-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Notice that even though BGP routes do not have to be installed in the Routing Table with the immediate next-hop(s), implementations MUST take care that, before any packets are forwarded along a BGP route, its associated NEXT_HOP address is resolved to the immediate (directly connected) next-hop address, and that this address (or multiple addresses) is finally used for actual packet forwarding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "local BGP speaker",
+        "implementations"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "packet.forwarding_along_BGP_route = pending",
+      "post_cond": "route.NEXT_HOP.resolved_to_immediate_connected_next_hop = true & immediate_next_hop.used_for_forwarding = true",
+      "actions": [
+        "resolve NEXT_HOP to immediate (directly connected) next-hop address before forwarding any packet along BGP route",
+        "use resolved immediate next-hop address for actual packet forwarding"
+      ],
+      "modality": "must",
+      "id": "N-S051-007"
+    },
+    {
+      "statement_id": "8-S051-8",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Unresolvable routes SHALL be removed from the Loc-RIB and the routing table.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "local BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "route_becomes_unresolvable",
+      "pre_cond": "route.resolvable = false",
+      "post_cond": "Loc-RIB.contains(route) = false & routing_table.contains(route) = false",
+      "actions": [
+        "remove unresolvable routes from Loc-RIB",
+        "remove unresolvable routes from routing table"
+      ],
+      "modality": "shall",
+      "id": "N-S051-008"
+    },
+    {
+      "statement_id": "9-S051-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "However, corresponding unresolvable routes SHOULD be kept in the Adj-RIBs-In (in case they become resolvable).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "local BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "route.resolvable = false",
+      "post_cond": "Adj-RIBs-In.contains(route) = true",
+      "actions": [
+        "retain unresolvable routes in Adj-RIBs-In"
+      ],
+      "modality": "should",
+      "id": "N-S051-009"
+    }
+  ]
+}

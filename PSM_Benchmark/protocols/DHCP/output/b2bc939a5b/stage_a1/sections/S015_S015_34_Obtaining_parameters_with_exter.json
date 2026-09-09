@@ -1,0 +1,148 @@
+{
+  "section_id": "S015",
+  "title": "S015 3.4 Obtaining parameters with externally configured network address",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S015 3.4 Obtaining parameters with externally configured network address"
+  ],
+  "url_anchor": "#s015-34-obtaining-parameters-with-externally-configured-network-address",
+  "word_count": 135,
+  "statement_count": 6,
+  "elapsed_seconds": 36.23,
+  "statements": [
+    {
+      "statement_id": "D-S015-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If a client has obtained a network address through some other means (e.g., manual configuration), it may use a DHCPINFORM request message to obtain other local configuration parameters.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S015",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DHCPINFORM",
+      "pre_cond": "client.address_source = external",
+      "post_cond": null,
+      "actions": [
+        "send DHCPINFORM"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S015-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "Servers receiving a DHCPINFORM message construct a DHCPACK message with any local configuration parameters appropriate for the client without: allocating a new address, checking for an existing binding, filling in 'yiaddr' or including lease time parameters.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S015",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_DHCPINFORM",
+      "pre_cond": null,
+      "post_cond": "server.dhcpack_constructed = true",
+      "actions": [
+        "construct DHCPACK with local configuration parameters",
+        "omit new address allocation",
+        "omit existing binding check",
+        "omit yiaddr field",
+        "omit lease time parameters"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S015-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The servers SHOULD unicast the DHCPACK reply to the address given in the 'ciaddr' field of the DHCPINFORM message.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S015",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DHCPACK_reply_to_DHCPINFORM",
+      "pre_cond": "server.dhcpack_constructed = true",
+      "post_cond": null,
+      "actions": [
+        "unicast DHCPACK to DHCPINFORM.ciaddr"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S015-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server SHOULD check the network address in a DHCPINFORM message for consistency, but MUST NOT check for an existing lease. The server forms a DHCPACK message containing the configuration parameters for the requesting client and sends the DHCPACK message directly to the client.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S015",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_DHCPINFORM",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "check network address in DHCPINFORM for consistency",
+        "do not check for existing lease",
+        "form DHCPACK with configuration parameters",
+        "send DHCPACK directly to client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S015-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "dhcp_fsm",
+      "description": "Servers receiving a DHCPINFORM message construct a DHCPACK message without filling in 'yiaddr' or including lease time parameters.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "object_name": "DHCPACK",
+      "field_name": "yiaddr",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "DHCPACK is sent in response to DHCPINFORM"
+    },
+    {
+      "statement_id": "D-S015-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "dhcp_fsm",
+      "description": "Servers receiving a DHCPINFORM message construct a DHCPACK message without including lease time parameters.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "object_name": "DHCPACK",
+      "field_name": "lease_time_parameters",
+      "field_type": "parameter",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "DHCPACK is sent in response to DHCPINFORM"
+    }
+  ]
+}

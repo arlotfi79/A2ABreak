@@ -1,0 +1,78 @@
+{
+  "section_id": "S099",
+  "title": "S099 4.5.5 Messages with a Null Reverse-Path",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S099 4.5.5 Messages with a Null Reverse-Path"
+  ],
+  "url_anchor": "#s099-455-messages-with-a-null-reverse-path",
+  "word_count": 228,
+  "statement_count": 3,
+  "elapsed_seconds": 24.67,
+  "statements": [
+    {
+      "statement_id": "D-S099-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "Non-delivery notifications, Delivery Status Notifications (DSNs), and Message Disposition Notifications (MDNs) are required to be sent with a null reverse-path.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S099",
+      "object_name": "MAIL FROM",
+      "field_name": "reverse-path",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "<>"
+      ],
+      "guard_semantics": "message.type = NDN | DSN | MDN"
+    },
+    {
+      "statement_id": "D-S099-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "All other types of messages (i.e., any message which is not required by a Standards-Track RFC to have a null reverse-path) SHOULD be sent with a valid, non-null reverse-path.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S099",
+      "object_name": "MAIL FROM",
+      "field_name": "reverse-path",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "non-null valid address"
+      ],
+      "guard_semantics": "message.type != NDN & message.type != DSN & message.type != MDN"
+    },
+    {
+      "statement_id": "D-S099-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Automated email processors SHOULD NOT reply to messages with a null reverse-path, and they SHOULD NOT add a non-null reverse-path, or change a null reverse-path to a non-null one, to such messages when forwarding.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S099",
+      "actors": [
+        "server",
+        "automated email processor"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "forward or reply to message with null reverse-path",
+      "pre_cond": "message.reverse_path = null",
+      "post_cond": "message.reverse_path = null",
+      "actions": [
+        "preserve null reverse-path on forward",
+        "suppress reply generation"
+      ],
+      "modality": "should"
+    }
+  ]
+}

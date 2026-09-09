@@ -1,0 +1,155 @@
+{
+  "section_id": "S024",
+  "title": "S024 6.1 Message Header Error Handling",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S024 6.1 Message Header Error Handling"
+  ],
+  "url_anchor": "#s024-61-message-header-error-handling",
+  "word_count": 234,
+  "statement_count": 6,
+  "elapsed_seconds": 68.67,
+  "statements": [
+    {
+      "statement_id": "N-S024-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "All errors detected while processing the Message Header MUST be indicated by sending the NOTIFICATION message with the Error Code Message Header Error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_header_error_detected",
+      "pre_cond": null,
+      "post_cond": "NOTIFICATION.sent = true & NOTIFICATION.error_code = Message_Header_Error",
+      "actions": [
+        "send NOTIFICATION with Error Code Message Header Error"
+      ],
+      "modality": "must",
+      "id": "N-S024-001"
+    },
+    {
+      "statement_id": "N-S024-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the Marker field of the message header is not as expected, then a synchronization error has occurred and the Error Subcode MUST be set to Connection Not Synchronized.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Marker_field_invalid",
+      "pre_cond": "message.Marker != all_ones",
+      "post_cond": "NOTIFICATION.error_subcode = Connection_Not_Synchronized",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Connection Not Synchronized"
+      ],
+      "modality": "must",
+      "id": "N-S024-002"
+    },
+    {
+      "statement_id": "N-S024-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "then the Error Subcode MUST be set to Bad Message Length.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "invalid_message_length",
+      "pre_cond": "(message.Length < 19 | message.Length > 4096) | (message.type = OPEN & message.Length < OPEN_min_length) | (message.type = UPDATE & message.Length < UPDATE_min_length) | (message.type = KEEPALIVE & message.Length != 19) | (message.type = NOTIFICATION & message.Length < NOTIFICATION_min_length)",
+      "post_cond": "NOTIFICATION.error_subcode = Bad_Message_Length",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Bad Message Length"
+      ],
+      "modality": "must",
+      "id": "N-S024-003"
+    },
+    {
+      "statement_id": "N-S024-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The Data field MUST contain the erroneous Length field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S024-004"
+    },
+    {
+      "statement_id": "N-S024-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the Type field of the message header is not recognized, then the Error Subcode MUST be set to Bad Message Type.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unrecognized_message_type",
+      "pre_cond": "message.Type = unrecognized",
+      "post_cond": "NOTIFICATION.error_subcode = Bad_Message_Type",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Bad Message Type"
+      ],
+      "modality": "must",
+      "id": "N-S024-005"
+    },
+    {
+      "statement_id": "N-S024-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The Data field MUST contain the erroneous Type field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S024-006"
+    }
+  ]
+}

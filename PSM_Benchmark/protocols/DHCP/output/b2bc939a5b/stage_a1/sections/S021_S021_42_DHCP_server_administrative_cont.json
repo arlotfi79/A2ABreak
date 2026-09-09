@@ -1,0 +1,113 @@
+{
+  "section_id": "S021",
+  "title": "S021 4.2 DHCP server administrative controls",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S021 4.2 DHCP server administrative controls"
+  ],
+  "url_anchor": "#s021-42-dhcp-server-administrative-controls",
+  "word_count": 388,
+  "statement_count": 5,
+  "elapsed_seconds": 31.13,
+  "statements": [
+    {
+      "statement_id": "D-S021-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "DHCP servers are not required to respond to every DHCPDISCOVER and DHCPREQUEST message they receive.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S021",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPDISCOVER_received | DHCPREQUEST_received",
+      "pre_cond": "server.administrative_policy = deny_client",
+      "post_cond": null,
+      "actions": [
+        "silently_discard_message"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S021-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client MAY choose to explicitly provide the identifier through the 'client identifier' option.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "object_name": "DHCP message",
+      "field_name": "client identifier",
+      "field_type": "option",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S021-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client supplies a 'client identifier', the client MUST use the same 'client identifier' in all subsequent messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "object_name": "subsequent DHCP message",
+      "field_name": "client identifier",
+      "field_type": "option",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "client.client_identifier_supplied = true"
+    },
+    {
+      "statement_id": "D-S021-004",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server MUST use that identifier to identify the client. If the client does not provide a 'client identifier' option, the server MUST use the contents of the 'chaddr' field to identify the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "object_name": "client lease record",
+      "field_name": "client identifier | chaddr",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "message.client_identifier_present = true -> use client_identifier; message.client_identifier_present = false -> use chaddr"
+    },
+    {
+      "statement_id": "D-S021-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "DHCP clients are free to use any strategy in selecting a DHCP server among those from which the client receives a DHCPOFFER message.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S021",
+      "actors": [
+        "client"
+      ],
+      "from_state": "SELECTING",
+      "to_state": "REQUESTING",
+      "trigger": "DHCPOFFER_received",
+      "pre_cond": "client.state = SELECTING & client.collected_offers != empty",
+      "post_cond": "client.chosen_server != null",
+      "actions": [
+        "select_server_from_offers",
+        "send_DHCPREQUEST"
+      ],
+      "modality": "may"
+    }
+  ]
+}

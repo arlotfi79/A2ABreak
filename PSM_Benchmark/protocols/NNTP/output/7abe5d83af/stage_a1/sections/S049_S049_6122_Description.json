@@ -1,0 +1,152 @@
+{
+  "section_id": "S049",
+  "title": "S049 6.1.2.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S049 6.1.2.2 Description"
+  ],
+  "url_anchor": "#s049-6122-description",
+  "word_count": 341,
+  "statement_count": 6,
+  "elapsed_seconds": 37.42,
+  "statements": [
+    {
+      "statement_id": "D-S049-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The LISTGROUP command selects a newsgroup in the same manner as the GROUP command; on success a 211 response is returned and the command sets the current article number to the first article in the group, if any.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S049",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Group Selected",
+      "trigger": "LISTGROUP command with valid available group argument",
+      "pre_cond": "server.group_available = true",
+      "post_cond": "session.current_group = requested_group & session.current_article_number = first_article_in_group",
+      "actions": [
+        "send 211 response with group stats",
+        "return multi-line article number list",
+        "set current article number to first article in group"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S049-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the group specified is not available on the server, a 411 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LISTGROUP command with unavailable group argument",
+      "pre_cond": "server.group_available = false",
+      "post_cond": "session.current_group unchanged",
+      "actions": [
+        "send 411 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S049-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If no group is specified and the currently selected newsgroup is invalid, a 412 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "No Group Selected",
+      "to_state": "No Group Selected",
+      "trigger": "LISTGROUP command with no group argument",
+      "pre_cond": "session.current_group = invalid",
+      "post_cond": "session.current_group = invalid",
+      "actions": [
+        "send 412 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S049-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If no group is specified, the currently selected newsgroup is used; on success the command sets the current article number to the first article in the group, if any.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S049",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Group Selected",
+      "to_state": "Group Selected",
+      "trigger": "LISTGROUP command with no group argument and valid current group",
+      "pre_cond": "session.current_group != invalid",
+      "post_cond": "session.current_article_number = first_article_in_group",
+      "actions": [
+        "send 211 response with group stats",
+        "return multi-line article number list",
+        "set current article number to first article in group"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S049-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "The currently selected newsgroup can be valid or invalid; if no group is specified and the currently selected newsgroup is invalid, a 412 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "object_name": "session",
+      "field_name": "current_group",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "valid group",
+        "invalid"
+      ],
+      "guard_semantics": "Determines whether LISTGROUP without argument succeeds (211) or fails (412)"
+    },
+    {
+      "statement_id": "D-S049-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "When successful, the LISTGROUP command sets the current article number to the first article in the group, if any, even if this is not within the range specified by the second argument.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "object_name": "session",
+      "field_name": "current_article_number",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "Set to first article in group on successful LISTGROUP, regardless of range argument"
+    }
+  ]
+}

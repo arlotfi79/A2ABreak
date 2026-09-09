@@ -1,0 +1,115 @@
+{
+  "section_id": "S050",
+  "title": "S050 10.5 Showing Liveness",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S050 10.5 Showing Liveness"
+  ],
+  "url_anchor": "#s050-105-showing-liveness",
+  "word_count": 532,
+  "statement_count": 5,
+  "elapsed_seconds": 35.54,
+  "statements": [
+    {
+      "statement_id": "D-S050-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "established session \u2014 the length of the session timeout MUST NOT be changed in an established session",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S050",
+      "state_name": "established session",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = <established session>"
+    },
+    {
+      "statement_id": "D-S050-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "RTSP requires the client to periodically show its liveness to the server or the server may terminate any session state \u2026 closing the session due to lack of activity",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S050",
+      "actors": [
+        "server"
+      ],
+      "from_state": "established session",
+      "to_state": null,
+      "trigger": "liveness timeout / lack of activity",
+      "pre_cond": "session.timeout_elapsed = true & session.liveness_received = false",
+      "post_cond": "session.state = <closed>",
+      "actions": [
+        "terminate session state"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S050-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The timeout parameter of the Session header MAY be included in a SETUP response and MUST NOT be included in requests. The server uses it to indicate to the client how long the server is prepared to wait between RTSP commands or other signs of life before closing the session due to lack of activity.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S050",
+      "object_name": "Session header",
+      "field_name": "timeout",
+      "field_type": "parameter",
+      "required": false,
+      "allowed_values": [
+        "SETUP response only"
+      ],
+      "guard_semantics": "MAY appear in SETUP response; MUST NOT appear in any request"
+    },
+    {
+      "statement_id": "D-S050-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The length of the session timeout MUST NOT be changed in an established session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S050",
+      "object_name": "session",
+      "field_name": "timeout",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "session.state = <established session> => session.timeout is immutable"
+    },
+    {
+      "statement_id": "D-S050-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "To show liveness between RTSP requests, mechanisms (RTCP, SET_PARAMETER, GET_PARAMETER, OPTIONS) can be used; client SHOULD NOT wait to the last second of the timeout before trying to send a liveness message.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S050",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "established session",
+      "to_state": "established session",
+      "trigger": "liveness keep-alive sent (RTCP / SET_PARAMETER / GET_PARAMETER / OPTIONS)",
+      "pre_cond": "session.state = <established session>",
+      "post_cond": "session.liveness_received = true",
+      "actions": [
+        "reset session inactivity timer"
+      ],
+      "modality": "should"
+    }
+  ]
+}

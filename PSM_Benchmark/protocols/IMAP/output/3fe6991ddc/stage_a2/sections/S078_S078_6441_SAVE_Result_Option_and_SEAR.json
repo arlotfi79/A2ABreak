@@ -1,0 +1,65 @@
+{
+  "section_id": "S078",
+  "title": "S078 6.4.4.1 SAVE Result Option and SEARCH Result Variable",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S078 6.4.4.1 SAVE Result Option and SEARCH Result Variable"
+  ],
+  "url_anchor": "#s078-6441-save-result-option-and-search-result-variable",
+  "word_count": 632,
+  "statement_count": 2,
+  "elapsed_seconds": 30.72,
+  "statements": [
+    {
+      "statement_id": "1-S078-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Any of the following SEARCH commands MUST NOT change the search result variable: a SEARCH command that caused the server to return the BAD tagged response, a SEARCH command with no SAVE result option that caused the server to return NO tagged response, and a successful SEARCH command with no SAVE result option.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S078",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "SELECTED",
+      "to_state": "SELECTED",
+      "trigger": "SEARCH_command_received",
+      "pre_cond": "(command.type = SEARCH & server.response = BAD) | (command.type = SEARCH & command.options.SAVE = absent & server.response = NO) | (command.type = SEARCH & command.options.SAVE = absent & server.response = OK)",
+      "post_cond": "search_result_variable = unchanged",
+      "actions": [
+        "retain current search_result_variable value without modification"
+      ],
+      "modality": "must",
+      "id": "N-S078-001"
+    },
+    {
+      "statement_id": "2-S078-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Implementors are reminded that if the server stores the list as a list of message numbers, it MUST automatically adjust them when notifying the client about expunged messages, as described in Section 7.5.1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S078",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "SELECTED",
+      "to_state": "SELECTED",
+      "trigger": "message_expunged",
+      "pre_cond": "server.search_result_variable.storage_format = message_numbers",
+      "post_cond": "server.search_result_variable.message_numbers = adjusted_for_expunge",
+      "actions": [
+        "automatically adjust all message numbers in search_result_variable to reflect expunged messages before sending expunge notification to client"
+      ],
+      "modality": "must",
+      "id": "N-S078-002"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "section_id": "S105",
+  "title": "S105 16.4 Route Information Preprocessing",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S105 16.4 Route Information Preprocessing"
+  ],
+  "url_anchor": "#s105-164-route-information-preprocessing",
+  "word_count": 324,
+  "statement_count": 3,
+  "elapsed_seconds": 21.45,
+  "statements": [
+    {
+      "statement_id": "D-S105-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the Request-URI of the request contains a value this proxy previously placed into a Record-Route header field, the proxy MUST replace the Request-URI in the request with the last value from the Route header field, and remove that value from the Route header field. The proxy MUST then proceed as if it received this modified request.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S105",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "Route Information Preprocessing",
+      "to_state": "Route Information Preprocessing",
+      "trigger": "Request-URI matches previously placed Record-Route value",
+      "pre_cond": "request.request_uri = proxy.record_route_value",
+      "post_cond": "request.request_uri = request.route_header.last_value & request.route_header.last_value = null",
+      "actions": [
+        "replace Request-URI with last Route header field value",
+        "remove that value from Route header field",
+        "proceed as if modified request was received"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S105-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the Request-URI has a maddr parameter with a value the proxy is responsible for, and the request was received using the port and transport indicated in the Request-URI, the proxy MUST strip the maddr and any non-default port or transport parameter and continue processing as if those values had not been present in the request.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S105",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "Route Information Preprocessing",
+      "to_state": "Route Information Preprocessing",
+      "trigger": "Request-URI maddr matches proxy-responsible address and port/transport match",
+      "pre_cond": "request.request_uri.maddr = proxy.responsible_address & request.received_port = request.request_uri.port & request.received_transport = request.request_uri.transport",
+      "post_cond": "request.request_uri.maddr = null & request.request_uri.non_default_port = null & request.request_uri.non_default_transport = null",
+      "actions": [
+        "strip maddr parameter from Request-URI",
+        "strip any non-default port parameter from Request-URI",
+        "strip any non-default transport parameter from Request-URI",
+        "continue processing"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S105-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the first value in the Route header field indicates this proxy, the proxy MUST remove that value from the request.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S105",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": "Route Information Preprocessing",
+      "to_state": "Route Information Preprocessing",
+      "trigger": "first Route header value identifies this proxy",
+      "pre_cond": "request.route_header.first_value = proxy.address",
+      "post_cond": "request.route_header.first_value = null",
+      "actions": [
+        "remove first Route header field value from request"
+      ],
+      "modality": "must"
+    }
+  ]
+}

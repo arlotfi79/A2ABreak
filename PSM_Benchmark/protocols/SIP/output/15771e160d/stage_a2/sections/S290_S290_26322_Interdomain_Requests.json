@@ -1,0 +1,312 @@
+{
+  "section_id": "S290",
+  "title": "S290 26.3.2.2 Interdomain Requests",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S290 26.3.2.2 Interdomain Requests"
+  ],
+  "url_anchor": "#s290-26322-interdomain-requests",
+  "word_count": 820,
+  "statement_count": 12,
+  "elapsed_seconds": 125.81,
+  "statements": [
+    {
+      "statement_id": "N-S290-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy server that handles inbound requests for an administrative domain MAY also act as a local outbound proxy; for simplicity's sake we'll assume this to be the case for atlanta.com (otherwise the user agent would initiate a new TLS connection to a separate server at this point).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "proxy server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S290-001"
+    },
+    {
+      "statement_id": "N-S290-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Assuming that the client has completed the registration process described in the preceding section, it SHOULD reuse the TLS connection to the local proxy server when it sends an INVITE request to another user.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "client",
+        "local proxy server"
+      ],
+      "from_state": "registered",
+      "to_state": null,
+      "trigger": "send_INVITE",
+      "pre_cond": "client.registration.completed = true & client.tls_connection.to_proxy.exists = true",
+      "post_cond": null,
+      "actions": [
+        "reuse existing TLS connection to local proxy server for INVITE"
+      ],
+      "modality": "should",
+      "id": "N-S290-002"
+    },
+    {
+      "statement_id": "N-S290-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The UA SHOULD reuse cached credentials in the INVITE to avoid prompting the user unnecessarily.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_INVITE",
+      "pre_cond": "client.cached_credentials.exists = true",
+      "post_cond": null,
+      "actions": [
+        "include cached credentials in INVITE request"
+      ],
+      "modality": "should",
+      "id": "N-S290-003"
+    },
+    {
+      "statement_id": "N-S290-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When the local outbound proxy server has validated the credentials presented by the UA in the INVITE, it SHOULD inspect the Request-URI to determine how the message should be routed (see [4]).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "local outbound proxy server",
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE_credentials_validated",
+      "pre_cond": "proxy.UA_credentials.validated = true",
+      "post_cond": null,
+      "actions": [
+        "inspect Request-URI",
+        "determine routing for INVITE message"
+      ],
+      "modality": "should",
+      "id": "N-S290-004"
+    },
+    {
+      "statement_id": "N-S290-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "sip_fsm",
+      "description": "The local outbound proxy server at atlanta.com SHOULD therefore establish a TLS connection with the remote proxy server at biloxi.com.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "atlanta.com proxy server",
+        "biloxi.com proxy server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Request-URI_designates_remote_domain",
+      "pre_cond": "request.Request-URI.domain != local_domain",
+      "post_cond": "tls_connection.to_remote_proxy.established = true",
+      "actions": [
+        "establish TLS connection with remote proxy server at biloxi.com"
+      ],
+      "modality": "should",
+      "id": "N-S290-005"
+    },
+    {
+      "statement_id": "N-S290-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "sip_fsm",
+      "description": "Since both of the participants in this TLS connection are servers that possess site certificates, mutual TLS authentication SHOULD occur.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "atlanta.com proxy server",
+        "biloxi.com proxy server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TLS_handshake_initiated",
+      "pre_cond": "both_peers.have_site_certificates = true",
+      "post_cond": "mutual_tls_authentication.completed = true",
+      "actions": [
+        "perform mutual TLS authentication"
+      ],
+      "modality": "should",
+      "id": "N-S290-006"
+    },
+    {
+      "statement_id": "N-S290-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "sip_fsm",
+      "description": "Each side of the connection SHOULD verify and inspect the certificate of the other, noting the domain name that appears in the certificate for comparison with the header fields of SIP messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "atlanta.com proxy server",
+        "biloxi.com proxy server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TLS_handshake",
+      "pre_cond": null,
+      "post_cond": "peer.certificate.domain_noted = true",
+      "actions": [
+        "verify peer certificate",
+        "inspect peer certificate",
+        "record domain name from certificate for comparison with SIP header fields"
+      ],
+      "modality": "should",
+      "id": "N-S290-007"
+    },
+    {
+      "statement_id": "N-S290-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The atlanta.com proxy server, for example, SHOULD verify at this stage that the certificate received from the remote side corresponds with the biloxi.com domain.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "atlanta.com proxy server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TLS_handshake",
+      "pre_cond": null,
+      "post_cond": "remote_certificate.domain_verified = true",
+      "actions": [
+        "verify that remote certificate domain corresponds with biloxi.com domain"
+      ],
+      "modality": "should",
+      "id": "N-S290-008"
+    },
+    {
+      "statement_id": "N-S290-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy server at biloxi.com SHOULD inspect the certificate of the proxy server at atlanta.com in turn and compare the domain asserted by the certificate with the \"domainname\" portion of the From header field in the INVITE request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "biloxi.com proxy server",
+        "atlanta.com proxy server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE_received_via_TLS",
+      "pre_cond": "tls_connection.established = true",
+      "post_cond": null,
+      "actions": [
+        "inspect atlanta.com proxy TLS certificate",
+        "compare certificate domain with From header field domainname portion of INVITE"
+      ],
+      "modality": "should",
+      "id": "N-S290-009"
+    },
+    {
+      "statement_id": "N-S290-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The biloxi proxy MAY have a strict security policy that requires it to reject requests that do not match the administrative domain from which they have been proxied.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "biloxi proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "request.proxied_from_domain != remote_certificate.domain",
+      "post_cond": null,
+      "actions": [
+        "reject request"
+      ],
+      "modality": "may",
+      "id": "N-S290-010"
+    },
+    {
+      "statement_id": "N-S290-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Once the INVITE has been approved by the biloxi proxy, the proxy server SHOULD identify the existing TLS channel, if any, associated with the user targeted by this request (in this case \"bob@biloxi.com\").",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "biloxi proxy server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE_approved",
+      "pre_cond": "biloxi_proxy.INVITE.approved = true",
+      "post_cond": null,
+      "actions": [
+        "identify existing TLS channel associated with target user"
+      ],
+      "modality": "should",
+      "id": "N-S290-011"
+    },
+    {
+      "statement_id": "N-S290-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Before they forward the request, both proxy servers SHOULD add a Record-Route header field to the request so that all future requests in this dialog will pass through the proxy servers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S290",
+      "actors": [
+        "atlanta.com proxy server",
+        "biloxi.com proxy server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "forward_request",
+      "pre_cond": null,
+      "post_cond": "request.Record-Route.contains_proxy = true",
+      "actions": [
+        "add Record-Route header field referencing proxy to request prior to forwarding"
+      ],
+      "modality": "should",
+      "id": "N-S290-012"
+    }
+  ]
+}

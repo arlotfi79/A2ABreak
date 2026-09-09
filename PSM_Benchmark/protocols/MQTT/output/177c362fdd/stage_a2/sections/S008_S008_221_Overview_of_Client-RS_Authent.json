@@ -1,0 +1,360 @@
+{
+  "section_id": "S008",
+  "title": "S008 2.2.1 Overview of Client-RS Authentication Methods over TLS and MQTT",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S008 2.2.1 Overview of Client-RS Authentication Methods over TLS and MQTT"
+  ],
+  "url_anchor": "#s008-221-overview-of-client-rs-authentication-methods-over-tls-and-mqtt",
+  "word_count": 499,
+  "statement_count": 14,
+  "elapsed_seconds": 177.21,
+  "statements": [
+    {
+      "statement_id": "N-S008-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "mqtt_fsm",
+      "description": "Unless the Client publishes and subscribes to only public topics, the Client and the Broker MUST perform mutual authentication.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_initiation",
+      "pre_cond": "!(client.publishes_only_public_topics & client.subscribes_only_public_topics)",
+      "post_cond": "mutual_authentication_performed = true",
+      "actions": [
+        "perform mutual authentication between Client and Broker"
+      ],
+      "modality": "must",
+      "id": "N-S008-001"
+    },
+    {
+      "statement_id": "N-S008-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST authenticate to the Broker either over MQTT or TLS before performing any other action.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": "authenticated",
+      "trigger": "any_action_attempt",
+      "pre_cond": null,
+      "post_cond": "client.authenticated_to_broker = true",
+      "actions": [
+        "authenticate to Broker via MQTT or TLS",
+        "defer all other actions until authentication is complete"
+      ],
+      "modality": "must",
+      "id": "N-S008-002"
+    },
+    {
+      "statement_id": "N-S008-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The token is transported inside the CONNECT packet and MUST be validated using one of the methods described in Section 2.2.2.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT_received",
+      "pre_cond": "auth.method = TLS:Anon,MQTT:ace",
+      "post_cond": "token.validated = true",
+      "actions": [
+        "validate token contained in CONNECT packet using a defined validation method"
+      ],
+      "modality": "must",
+      "id": "N-S008-003"
+    },
+    {
+      "statement_id": "N-S008-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "For the RPK, the Client MUST have published the token to the \"authz-info\" topic.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TLS:Known(RPK)_auth_initiation",
+      "pre_cond": "auth.method = TLS:Known(RPK)",
+      "post_cond": "token.published_to_authz-info = true",
+      "actions": [
+        "publish token to authz-info topic before initiating RPK-based TLS authentication"
+      ],
+      "modality": "must",
+      "id": "N-S008-004"
+    },
+    {
+      "statement_id": "N-S008-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "For the PSK, the token MAY be published to the \"authz-info\" topic or MAY be, alternatively, provided as a \"PSK identity\" (e.g., an \"identity\" in the \"identities\" field in the Client's \"pre_shared_key\" extension in TLS 1.3).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TLS:Known(PSK)_auth_initiation",
+      "pre_cond": "auth.method = TLS:Known(PSK)",
+      "post_cond": null,
+      "actions": [
+        "optionally publish token to authz-info topic",
+        "or optionally provide token as PSK identity in TLS pre_shared_key extension"
+      ],
+      "modality": "may",
+      "id": "N-S008-005"
+    },
+    {
+      "statement_id": "N-S008-6",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "This option SHOULD NOT be chosen as the token transported in the CONNECT packet and overwrites any permissions passed during the TLS authentication.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "auth_method_selection",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "avoid selecting TLS:Known(RPK/PSK),MQTT:ace authentication combination"
+      ],
+      "modality": "should",
+      "id": "N-S008-006"
+    },
+    {
+      "statement_id": "N-S008-7",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "It is RECOMMENDED that the Client implements TLS:Anon,MQTT:ace as the first choice when working with protected topics.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "auth_method_selection",
+      "pre_cond": "client.working_with_protected_topics = true",
+      "post_cond": null,
+      "actions": [
+        "prefer TLS:Anon,MQTT:ace as primary authentication method for protected topics"
+      ],
+      "modality": "should",
+      "id": "N-S008-007"
+    },
+    {
+      "statement_id": "N-S008-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "However, MQTT v3.1.1 Clients that do not prefer to overload the User Name and Password fields for ACE (as described in Section 6) MAY implement TLS:Known(RPK/PSK),MQTT:none and, consequently, TLS:Anon,MQTT:None to submit their token to \"authz-info\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "auth_method_selection",
+      "pre_cond": "client.version = MQTT_v3.1.1 & client.avoids_ACE_in_username_password = true",
+      "post_cond": null,
+      "actions": [
+        "optionally implement TLS:Known(RPK/PSK),MQTT:none",
+        "optionally implement TLS:Anon,MQTT:None for authz-info token submission"
+      ],
+      "modality": "may",
+      "id": "N-S008-008"
+    },
+    {
+      "statement_id": "N-S008-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST support TLS:Anon,MQTT:ace.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "broker.supports_TLS:Anon,MQTT:ace = true",
+      "actions": [
+        "support TLS:Anon,MQTT:ace as a client authentication method"
+      ],
+      "modality": "must",
+      "id": "N-S008-009"
+    },
+    {
+      "statement_id": "N-S008-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "To support Clients with different capabilities, the Broker MAY provide multiple client authentication options, e.g., support TLS:Known(RPK),MQTT:none and TLS:Anon,MQTT:None, to enable RPK-based client authentication.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "optionally provide multiple client authentication options beyond TLS:Anon,MQTT:ace"
+      ],
+      "modality": "may",
+      "id": "N-S008-010"
+    },
+    {
+      "statement_id": "N-S008-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST authenticate the Broker during the TLS handshake.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": "tls_handshake",
+      "to_state": null,
+      "trigger": "TLS_handshake",
+      "pre_cond": null,
+      "post_cond": "broker.authenticated = true",
+      "actions": [
+        "authenticate Broker during TLS handshake"
+      ],
+      "modality": "must",
+      "id": "N-S008-011"
+    },
+    {
+      "statement_id": "N-S008-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "Otherwise, to authenticate the Broker, the Client MUST validate a public key from an X.509 certificate or an RPK from the Broker against the \"rs_cnf\" parameter in the token response, which contains information about the public key used by the RS to authenticate if the token type is \"pop\" and asymmetric keys are used as defined in [RFC9201].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": "tls_handshake",
+      "to_state": null,
+      "trigger": "broker_authentication",
+      "pre_cond": "auth.tls_method != TLS:Known(RPK/PSK) & token.type = pop & token.key_type = asymmetric",
+      "post_cond": "broker.public_key.validated_against_rs_cnf = true",
+      "actions": [
+        "validate broker X.509 public key or RPK against rs_cnf parameter in token response"
+      ],
+      "modality": "must",
+      "id": "N-S008-012"
+    },
+    {
+      "statement_id": "N-S008-13",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The AS MAY include the thumbprint of the RS's X.509 certificate in the \"rs_cnf\" (thumbprint, as defined in [RFC9360]).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "AS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token_response_generation",
+      "pre_cond": null,
+      "post_cond": "rs_cnf.thumbprint != null",
+      "actions": [
+        "optionally include RS X.509 certificate thumbprint in rs_cnf of token response"
+      ],
+      "modality": "may",
+      "id": "N-S008-013"
+    },
+    {
+      "statement_id": "N-S008-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "In this case, the Client MUST validate the RS certificate against this thumbprint.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "Client"
+      ],
+      "from_state": "tls_handshake",
+      "to_state": null,
+      "trigger": "broker_certificate_validation",
+      "pre_cond": "rs_cnf.thumbprint != null",
+      "post_cond": "rs_certificate.validated_against_thumbprint = true",
+      "actions": [
+        "validate RS X.509 certificate against thumbprint present in rs_cnf"
+      ],
+      "modality": "must",
+      "id": "N-S008-014"
+    }
+  ]
+}

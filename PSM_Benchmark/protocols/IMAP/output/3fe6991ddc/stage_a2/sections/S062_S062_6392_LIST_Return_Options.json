@@ -1,0 +1,138 @@
+{
+  "section_id": "S062",
+  "title": "S062 6.3.9.2 LIST Return Options",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S062 6.3.9.2 LIST Return Options"
+  ],
+  "url_anchor": "#s062-6392-list-return-options",
+  "word_count": 329,
+  "statement_count": 5,
+  "elapsed_seconds": 82.3,
+  "statements": [
+    {
+      "statement_id": "N-S062-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The \"\\Subscribed\" attribute MUST be supported and MUST be accurately computed when the SUBSCRIBED return option is specified.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST_command_with_SUBSCRIBED_return_option",
+      "pre_cond": "LIST.return_option = SUBSCRIBED",
+      "post_cond": "response.Subscribed_attribute.computed = true",
+      "actions": [
+        "compute \\Subscribed attribute accurately",
+        "include \\Subscribed attribute in LIST response"
+      ],
+      "modality": "must",
+      "id": "N-S062-001"
+    },
+    {
+      "statement_id": "N-S062-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Furthermore, all other mailbox attributes MUST be accurately computed (this differs from the behavior of the obsolete LSUB command from [RFC3501]).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST_command_with_SUBSCRIBED_return_option",
+      "pre_cond": "LIST.return_option = SUBSCRIBED",
+      "post_cond": "response.all_mailbox_attributes.accurately_computed = true",
+      "actions": [
+        "accurately compute all mailbox attributes for LIST response"
+      ],
+      "modality": "must",
+      "id": "N-S062-002"
+    },
+    {
+      "statement_id": "N-S062-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "For each selectable mailbox matching the list pattern and selection options, the server MUST return an untagged LIST response followed by an untagged STATUS response containing the information requested in the STATUS return option, except for some cases described below.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST_command_with_STATUS_return_option",
+      "pre_cond": "LIST.return_option = STATUS & mailbox.selectable = true",
+      "post_cond": "LIST_response.sent = true & STATUS_response.sent = true",
+      "actions": [
+        "send untagged LIST response",
+        "send untagged STATUS response with requested data items"
+      ],
+      "modality": "must",
+      "id": "N-S062-003"
+    },
+    {
+      "statement_id": "N-S062-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If an attempted STATUS for a listed mailbox fails because the mailbox can't be selected (e.g., if the \"l\" Access Control List (ACL) right [RFC4314] is granted to the mailbox and the \"r\" right is not granted, or is due to a race condition between LIST and STATUS changing the mailbox to \\NoSelect), the STATUS response MUST NOT be returned, and the LIST response MUST include the \\NoSelect attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "STATUS_lookup_failed_mailbox_not_selectable",
+      "pre_cond": "STATUS.lookup_failed = true & mailbox.selectable = false",
+      "post_cond": "STATUS_response.sent = false & LIST_response.NoSelect_attribute = true",
+      "actions": [
+        "omit STATUS response",
+        "include \\NoSelect attribute in LIST response"
+      ],
+      "modality": "must",
+      "id": "N-S062-004"
+    },
+    {
+      "statement_id": "N-S062-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server runs into unexpected problems while trying to look up the STATUS information, it MAY drop the corresponding STATUS reply.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unexpected_problem_during_STATUS_lookup",
+      "pre_cond": "server.unexpected_problem = true",
+      "post_cond": "STATUS_response.sent = false",
+      "actions": [
+        "drop STATUS reply"
+      ],
+      "modality": "may",
+      "id": "N-S062-005"
+    }
+  ]
+}

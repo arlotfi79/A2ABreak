@@ -1,0 +1,126 @@
+{
+  "section_id": "S048",
+  "title": "S048 9. UPDATE Message Handling",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S048 9. UPDATE Message Handling"
+  ],
+  "url_anchor": "#s048-9-update-message-handling",
+  "word_count": 267,
+  "statement_count": 5,
+  "elapsed_seconds": 17.11,
+  "statements": [
+    {
+      "statement_id": "D-S048-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "An UPDATE message may be received only in the Established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "state_name": "Established",
+      "enum_name": "BGPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Established"
+    },
+    {
+      "statement_id": "D-S048-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "An UPDATE message may be received only in the Established state. Receiving an UPDATE message in any other state is an error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UpdateMsg",
+      "pre_cond": "protocol.state != Established",
+      "post_cond": "protocol.error = true",
+      "actions": [
+        "treat as error per Section 6.3"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S048-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "When an UPDATE message is received [in Established state], each field is checked for validity, as specified in Section 6.3.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "peer"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "UpdateMsg",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": null,
+      "actions": [
+        "validate UPDATE message fields per Section 6.3"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S048-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the UPDATE message contains a non-empty WITHDRAWN ROUTES field, the previously advertised routes SHALL be removed from the Adj-RIB-In. This BGP speaker SHALL run its Decision Process because the previously advertised route is no longer available for use.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "peer"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "UpdateMsg",
+      "pre_cond": "protocol.state = Established & message.withdrawn_routes != empty",
+      "post_cond": "Adj-RIB-In.withdrawn_routes_removed = true",
+      "actions": [
+        "remove withdrawn routes from Adj-RIB-In",
+        "run Decision Process"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S048-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the UPDATE message contains a feasible route, the Adj-RIB-In will be updated with this route; if NLRI is identical, the new route SHALL replace the older route. Otherwise, if no route with identical NLRI exists, the new route SHALL be placed in the Adj-RIB-In. Once updated, the speaker SHALL run its Decision Process.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "peer"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "UpdateMsg",
+      "pre_cond": "protocol.state = Established & message.feasible_route = true",
+      "post_cond": "Adj-RIB-In.updated = true",
+      "actions": [
+        "update Adj-RIB-In with feasible route (replace if NLRI matches, else insert)",
+        "run Decision Process"
+      ],
+      "modality": "shall"
+    }
+  ]
+}

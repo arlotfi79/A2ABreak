@@ -1,0 +1,89 @@
+{
+  "section_id": "S064",
+  "title": "S064 13.4.3 Updating Current PLAY Requests",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S064 13.4.3 Updating Current PLAY Requests"
+  ],
+  "url_anchor": "#s064-1343-updating-current-play-requests",
+  "word_count": 623,
+  "statement_count": 3,
+  "elapsed_seconds": 63.66,
+  "statements": [
+    {
+      "statement_id": "N-S064-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In the case of continuation, the first range specifier has an implicit start point and an explicit stop value (Z), e.g., \"npt=-60\", which indicate that it MUST convert the range specifier being played prior to this PLAY request (X to Y) into (X to Z) and continue as if this was the request originally played.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY_request_received_with_continuation_range",
+      "pre_cond": "session.state = Play & range_specifier.start = implicit & range_specifier.stop = explicit",
+      "post_cond": "active_range = (X to Z)",
+      "actions": [
+        "convert active range specifier from (X to Y) to (X to Z)",
+        "continue playback as if (X to Z) was the originally requested range"
+      ],
+      "modality": "must",
+      "id": "N-S064-001"
+    },
+    {
+      "statement_id": "N-S064-2",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the current delivery point is beyond the stop point, the server SHALL immediately pause delivery.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Ready",
+      "trigger": "current_delivery_point_exceeds_stop_point",
+      "pre_cond": "session.state = Play & current_delivery_point > stop_point",
+      "post_cond": "delivery.state = paused & session.pause_point = requested_stop_point",
+      "actions": [
+        "immediately pause media delivery"
+      ],
+      "modality": "shall",
+      "id": "N-S064-002"
+    },
+    {
+      "statement_id": "N-S064-3",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "As the request has been completed successfully, it shall be responded to with a 200 OK response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S064",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "PLAY_request_completed_successfully",
+      "pre_cond": "session.state = Play & request.result = success",
+      "post_cond": "response.status_code = 200",
+      "actions": [
+        "send 200 OK response to client"
+      ],
+      "modality": "shall",
+      "id": "N-S064-003"
+    }
+  ]
+}

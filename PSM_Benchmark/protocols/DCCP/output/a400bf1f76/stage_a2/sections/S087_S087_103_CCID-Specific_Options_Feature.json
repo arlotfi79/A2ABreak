@@ -1,0 +1,88 @@
+{
+  "section_id": "S087",
+  "title": "S087 10.3 CCID-Specific Options, Features, and Reset Codes",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S087 10.3 CCID-Specific Options, Features, and Reset Codes"
+  ],
+  "url_anchor": "#s087-103-ccid-specific-options-features-and-reset-codes",
+  "word_count": 676,
+  "statement_count": 3,
+  "elapsed_seconds": 62.85,
+  "statements": [
+    {
+      "statement_id": "1-S087-1",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Using CCID-specific options and feature options during a negotiation for the corresponding CCID feature is NOT RECOMMENDED, since it is difficult to predict which CCID will be in force when the option is processed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S087-001"
+    },
+    {
+      "statement_id": "2-S087-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Such a server MUST send Mandatory Change(CCID) options on its DCCP-Response, so CCID-specific options on any other packet won't refer to CCID 2.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "RESPOND",
+      "trigger": "receive_DCCP-Request_with_CCID2_specific_options",
+      "pre_cond": "server.implements_CCID2 = false & packet.type = DCCP-Request & packet.contains_CCID2_specific_options = true",
+      "post_cond": "DCCP-Response.contains_Mandatory_Change_CCID = true",
+      "actions": [
+        "include Mandatory Change(CCID) option(s) in outgoing DCCP-Response"
+      ],
+      "modality": "must",
+      "id": "N-S087-002"
+    },
+    {
+      "statement_id": "3-S087-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server MUST treat such options as non-understood.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "receive_CCID2_specific_options_on_DCCP-Request",
+      "pre_cond": "server.implements_CCID2 = false & packet.type = DCCP-Request & packet.contains_CCID2_specific_options = true",
+      "post_cond": "options.status = non-understood",
+      "actions": [
+        "treat received CCID 2-specific options as non-understood",
+        "reset connection if Mandatory CCID-specific option or feature negotiation request encountered",
+        "send empty Confirm for non-Mandatory Change option for CCID-specific feature",
+        "ignore other CCID-specific options"
+      ],
+      "modality": "must",
+      "id": "N-S087-003"
+    }
+  ]
+}

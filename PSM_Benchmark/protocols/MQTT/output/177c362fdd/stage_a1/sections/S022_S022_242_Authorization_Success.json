@@ -1,0 +1,150 @@
+{
+  "section_id": "S022",
+  "title": "S022 2.4.2 Authorization Success",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S022 2.4.2 Authorization Success"
+  ],
+  "url_anchor": "#s022-242-authorization-success",
+  "word_count": 164,
+  "statement_count": 6,
+  "elapsed_seconds": 34.77,
+  "statements": [
+    {
+      "statement_id": "D-S022-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "On success, the reason code of the CONNACK is 0x00 (Success). Having accepted the connection, the Broker MUST be prepared to store the token during the connection and after disconnection for future use.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S022",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Authorizing",
+      "to_state": "Connected",
+      "trigger": "AuthorizationSuccess",
+      "pre_cond": null,
+      "post_cond": "session.token_stored = true",
+      "actions": [
+        "send CONNACK with reason code 0x00",
+        "store access token"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S022-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Broker starts a new Session, it MUST also set Session Present to 0 in the CONNACK packet to signal a new Session to the Client.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S022",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Authorizing",
+      "to_state": "Connected",
+      "trigger": "AuthorizationSuccess",
+      "pre_cond": "session.is_new = true",
+      "post_cond": "connack.session_present = 0",
+      "actions": [
+        "send CONNACK with reason code 0x00",
+        "set Session Present = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S022-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Otherwise, it MUST set Session Present to 1 in the CONNACK packet.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S022",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Authorizing",
+      "to_state": "Connected",
+      "trigger": "AuthorizationSuccess",
+      "pre_cond": "session.is_new = false",
+      "post_cond": "connack.session_present = 1",
+      "actions": [
+        "send CONNACK with reason code 0x00",
+        "set Session Present = 1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S022-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The reason code of the CONNACK is 0x00 (Success) on authorization success; Session Present must be set to 0 for new session or 1 for existing session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S022",
+      "object_name": "CONNACK",
+      "field_name": "Session Present",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "0",
+        "1"
+      ],
+      "guard_semantics": "0 if session.is_new = true; 1 if session.is_new = false"
+    },
+    {
+      "statement_id": "D-S022-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Having accepted the connection, the Broker MUST be prepared to store the token during the connection and after disconnection for future use. PUBLISH and SUBSCRIBE packets, which are sent after a connection setup, do not contain access tokens.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S022",
+      "state_name": "Connected",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.token_stored = true & connack.reason_code = 0x00"
+    },
+    {
+      "statement_id": "D-S022-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the token is not self-contained and the Broker uses token introspection, it MAY cache the validation result to authorize the subsequent PUBLISH and SUBSCRIBE packets.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S022",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Connected",
+      "to_state": "Connected",
+      "trigger": "TokenIntrospectionResult",
+      "pre_cond": "session.token.self_contained = false & server.uses_introspection = true",
+      "post_cond": "session.introspection_cached = true",
+      "actions": [
+        "cache introspection result"
+      ],
+      "modality": "may"
+    }
+  ]
+}

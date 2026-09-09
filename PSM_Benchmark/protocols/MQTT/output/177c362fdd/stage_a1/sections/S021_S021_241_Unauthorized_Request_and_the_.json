@@ -1,0 +1,82 @@
+{
+  "section_id": "S021",
+  "title": "S021 2.4.1 Unauthorized Request and the Optional Authorization Server",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S021 2.4.1 Unauthorized Request and the Optional Authorization Server"
+  ],
+  "url_anchor": "#s021-241-unauthorized-request-and-the-optional-authorization-server",
+  "word_count": 174,
+  "statement_count": 3,
+  "elapsed_seconds": 32.91,
+  "statements": [
+    {
+      "statement_id": "D-S021-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Authentication can fail for the following reasons: if the Client does not provide a valid token, the Client omits the Authentication Data field and the Broker has no token stored for the Client, the token or Authentication data are malformed, or if the Will Flag is set, the authorization checks for the Will Topic fails. The Broker responds with the CONNACK reason code 0x87 (Not Authorized) or any other applicable reason code.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S021",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authentication_failure",
+      "pre_cond": "client.token_valid = false | (client.authentication_data_present = false & server.stored_token = null) | client.token_malformed = true | (connection.will_flag = true & will_topic.authorized = false)",
+      "post_cond": null,
+      "actions": [
+        "send CONNACK with reason_code=0x87 (Not Authorized)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S021-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MAY also trigger AS discovery and include a User Property (identified as property type 38 (0x26)) in the CONNACK for the AS Request Creation Hints.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S021",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authentication_failure",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "trigger AS discovery",
+        "include User Property 'ace_as_hint' in CONNACK"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S021-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The name of the User Property MUST be set to 'ace_as_hint' when the Broker includes AS Request Creation Hints in the CONNACK.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "object_name": "CONNACK",
+      "field_name": "User Property name",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "ace_as_hint"
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

@@ -1,0 +1,1400 @@
+{
+  "schema_version": "unified_stage_split_v1",
+  "source_schema_version": "semantic_pass_v1",
+  "source_unified_fsm": "/Users/alex/Documents/Programming/A2A/Analysis/outputs/stage_b4/unified_fsm_llm_dedup.json",
+  "stage": "task_execution",
+  "protocol_phase": "task_execution",
+  "protocol_phases": [
+    "task_execution"
+  ],
+  "split_policy": {
+    "states": "local states plus boundary endpoint states needed by included transitions",
+    "transitions": "include transitions assigned to this stage; duplicate cross-stage transitions into every involved stage"
+  },
+  "state_count": 18,
+  "local_state_count": 18,
+  "boundary_state_count": 0,
+  "transition_count": 26,
+  "cross_stage_transition_count": 9,
+  "states": [
+    {
+      "state_name": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+      "semantic_type": "terminal",
+      "actor": "client",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "push_notification.http_response_status >= 200 & push_notification.http_response_status < 300",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-13-2-003"
+      ],
+      "state_id": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution"
+        ]
+      }
+    },
+    {
+      "state_name": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "semantic_type": "active",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "push_notification_config.exists = true",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-3-1-042",
+        "D-3-1-043"
+      ],
+      "state_id": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 6: Incoming transitions redirected from removed PUSH_NOTIFICATION_CONFIG_NONEXISTENT to parent task states (TASK_STATE_SUBMITTED, TASK_STATE_WORKING). Rule 8: Added outgoing transitions to PUSH_NOTIFICATION_DELIVERY_RETRYING and PUSH_NOTIFICATION_RECEIVED to connect push notification delivery sub-lifecycle.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution"
+        ]
+      }
+    },
+    {
+      "state_name": "PUSH_NOTIFICATION_CONFIG_DELETED",
+      "semantic_type": "terminal",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "push_notification_config.exists = false & no_further_notifications_sent = true",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-3-1-042"
+      ],
+      "state_id": "PUSH_NOTIFICATION_CONFIG_DELETED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution"
+        ]
+      }
+    },
+    {
+      "state_name": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "push_notification.delivery_active = false",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-13-2-002"
+      ],
+      "state_id": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution"
+        ]
+      }
+    },
+    {
+      "state_name": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "push_notification.delivery_attempts >= 1",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-13-2-002"
+      ],
+      "state_id": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 8: Added incoming transition from PUSH_NOTIFICATION_CONFIG_ACTIVE. Server sends push notification to client webhook (section 13.2); delivery failure triggers retry state.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution"
+        ]
+      }
+    },
+    {
+      "state_name": "PUSH_NOTIFICATION_RECEIVED",
+      "semantic_type": "active",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null,
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-13-2-003"
+      ],
+      "state_id": "PUSH_NOTIFICATION_RECEIVED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 8: Added incoming transition from PUSH_NOTIFICATION_CONFIG_ACTIVE. Server delivers push notification via HTTP POST to client webhook URL (section 13.2); successful receipt enters this state.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution"
+        ]
+      }
+    },
+    {
+      "state_name": "STREAM_ACTIVE",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "stream.state = STREAM_ACTIVE",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-5-001",
+        "D-3-5-007"
+      ],
+      "state_id": "STREAM_ACTIVE",
+      "protocol_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "merged_from_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "pre_merge_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution",
+          "termination"
+        ]
+      }
+    },
+    {
+      "state_name": "STREAM_CLOSED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "stream.state = STREAM_CLOSED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-11-7-008",
+        "D-11-7-009",
+        "D-3-1-037",
+        "D-3-2-014",
+        "D-3-5-002",
+        "N-3-5-006"
+      ],
+      "state_id": "STREAM_CLOSED",
+      "protocol_phases": [
+        "initiation",
+        "interruption",
+        "task_execution",
+        "termination"
+      ],
+      "merged_from_phases": [
+        "initiation",
+        "interruption",
+        "task_execution",
+        "termination"
+      ],
+      "pre_merge_count": 5,
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "initiation",
+          "interruption",
+          "task_execution",
+          "termination"
+        ]
+      }
+    },
+    {
+      "state_name": "STREAM_STATE_OPEN",
+      "semantic_type": "active",
+      "actor": "shared",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "stream.open = true",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-11-7-001",
+        "D-11-7-007",
+        "D-11-7-008",
+        "D-11-7-009",
+        "D-3-1-037",
+        "D-3-1-038",
+        "D-3-1-039",
+        "D-3-1-040"
+      ],
+      "state_id": "STREAM_STATE_OPEN",
+      "protocol_phases": [
+        "initiation",
+        "interruption",
+        "task_execution",
+        "termination"
+      ],
+      "merged_from_phases": [
+        "initiation",
+        "interruption",
+        "task_execution",
+        "termination"
+      ],
+      "pre_merge_count": 5,
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "initiation",
+          "interruption",
+          "task_execution",
+          "termination"
+        ]
+      }
+    },
+    {
+      "state_name": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "semantic_type": "active",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null,
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-3-1-039"
+      ],
+      "state_id": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 8: Added incoming transitions from TASK_STATE_SUBMITTED, TASK_STATE_WORKING, TASK_STATE_INPUT_REQUIRED, TASK_STATE_AUTH_REQUIRED. Client initiates subscribeToTask (section 3.1.6, 9.4.6) from any non-terminal task state.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution"
+        ]
+      }
+    },
+    {
+      "state_name": "TASK_STATE_AUTH_REQUIRED",
+      "semantic_type": "interrupted",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-4-1-009",
+        "D-7-6-001",
+        "N-3-2-004",
+        "N-7-6-001"
+      ],
+      "state_id": "TASK_STATE_AUTH_REQUIRED",
+      "protocol_phases": [
+        "authentication",
+        "interruption",
+        "task_execution"
+      ],
+      "merged_from_phases": [
+        "authentication",
+        "interruption",
+        "task_execution"
+      ],
+      "pre_merge_count": 3,
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "authentication",
+          "interruption",
+          "task_execution"
+        ]
+      }
+    },
+    {
+      "state_name": "TASK_STATE_CANCELED",
+      "semantic_type": "terminal",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "task.state = TASK_STATE_CANCELED",
+      "is_inferred": true,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-11-3-013",
+        "D-3-1-041",
+        "D-3-2-014",
+        "D-4-1-006",
+        "D-9-4-013",
+        "N-3-2-004"
+      ],
+      "state_id": "TASK_STATE_CANCELED",
+      "protocol_phases": [
+        "interruption",
+        "task_execution",
+        "termination"
+      ],
+      "merged_from_phases": [
+        "interruption",
+        "task_execution",
+        "termination"
+      ],
+      "pre_merge_count": 3,
+      "fix_note": "Rule 5: Added cancel_task self-loop redistributed from removed TASK_STATE_TERMINAL meta-state",
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "interruption",
+          "task_execution",
+          "termination"
+        ]
+      }
+    },
+    {
+      "state_name": "TASK_STATE_COMPLETED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "task.status.state = TASK_STATE_COMPLETED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-11-4-001",
+        "D-4-1-004",
+        "D-6-1-001",
+        "D-6-1-002",
+        "D-6-2-002",
+        "D-6-5-001",
+        "D-6-6-002",
+        "D-6-7-010",
+        "D-6-8-001",
+        "D-6-8-009"
+      ],
+      "state_id": "TASK_STATE_COMPLETED",
+      "protocol_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "merged_from_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "pre_merge_count": 2,
+      "fix_note": "Rule 5: Added cancel_task self-loop redistributed from removed TASK_STATE_TERMINAL meta-state",
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution",
+          "termination"
+        ]
+      }
+    },
+    {
+      "state_name": "TASK_STATE_FAILED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "task.state = TASK_STATE_FAILED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-2-014",
+        "D-4-1-005",
+        "N-3-2-004"
+      ],
+      "state_id": "TASK_STATE_FAILED",
+      "protocol_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "merged_from_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "pre_merge_count": 2,
+      "fix_note": "Rule 5: Added cancel_task self-loop redistributed from removed TASK_STATE_TERMINAL meta-state",
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "task_execution",
+          "termination"
+        ]
+      }
+    },
+    {
+      "state_name": "TASK_STATE_INPUT_REQUIRED",
+      "semantic_type": "interrupted",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "task.state = TASK_STATE_INPUT_REQUIRED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-4-001",
+        "D-4-1-007",
+        "D-6-3-001"
+      ],
+      "state_id": "TASK_STATE_INPUT_REQUIRED",
+      "protocol_phases": [
+        "interruption",
+        "task_execution"
+      ],
+      "merged_from_phases": [
+        "interruption",
+        "task_execution"
+      ],
+      "pre_merge_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "interruption",
+          "task_execution"
+        ]
+      }
+    },
+    {
+      "state_name": "TASK_STATE_REJECTED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "task.status.state = TASK_STATE_REJECTED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-4-1-008",
+        "D-4-1-044",
+        "D-4-1-045"
+      ],
+      "state_id": "TASK_STATE_REJECTED",
+      "protocol_phases": [
+        "initiation",
+        "task_execution",
+        "termination"
+      ],
+      "merged_from_phases": [
+        "initiation",
+        "task_execution",
+        "termination"
+      ],
+      "pre_merge_count": 3,
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "initiation",
+          "task_execution",
+          "termination"
+        ]
+      }
+    },
+    {
+      "state_name": "TASK_STATE_SUBMITTED",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "task.status.state = TASK_STATE_SUBMITTED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-4-1-044",
+        "D-4-1-045",
+        "D-6-6-001",
+        "D-6-6-011",
+        "D-6-6-012",
+        "N-3-4-012"
+      ],
+      "state_id": "TASK_STATE_SUBMITTED",
+      "protocol_phases": [
+        "initiation",
+        "task_execution",
+        "termination"
+      ],
+      "merged_from_phases": [
+        "initiation",
+        "task_execution",
+        "termination"
+      ],
+      "pre_merge_count": 3,
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "initiation",
+          "task_execution",
+          "termination"
+        ]
+      }
+    },
+    {
+      "state_name": "TASK_STATE_WORKING",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "task.state = TASK_STATE_WORKING",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-1-044",
+        "D-3-2-015",
+        "D-3-4-007",
+        "D-4-1-003",
+        "D-6-2-001",
+        "D-6-2-009",
+        "D-6-2-011",
+        "D-6-5-002",
+        "N-7-6-003",
+        "N-7-6-006"
+      ],
+      "state_id": "TASK_STATE_WORKING",
+      "protocol_phases": [
+        "initiation",
+        "interruption",
+        "task_execution",
+        "termination"
+      ],
+      "merged_from_phases": [
+        "initiation",
+        "interruption",
+        "task_execution",
+        "termination"
+      ],
+      "pre_merge_count": 4,
+      "stage_split": {
+        "included_in": "task_execution",
+        "membership": "local",
+        "original_protocol_phases": [
+          "initiation",
+          "interruption",
+          "task_execution",
+          "termination"
+        ]
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "TASK_STATE_SUBMITTED",
+      "to_state": "TASK_STATE_REJECTED",
+      "trigger": "agent_rejects_task",
+      "guard": "task.state = TASK_STATE_SUBMITTED",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-4-1-008",
+        "D-4-1-044",
+        "D-4-1-045"
+      ],
+      "kind": "unified",
+      "from_state_id": "TASK_STATE_SUBMITTED",
+      "to_state_id": "TASK_STATE_REJECTED",
+      "protocol_phases": [
+        "initiation",
+        "task_execution",
+        "termination"
+      ],
+      "merged_count": 3,
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [
+          "initiation",
+          "termination"
+        ],
+        "is_cross_stage": true,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_SUBMITTED",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "agent_begins_processing",
+      "guard": "task.state = TASK_STATE_SUBMITTED",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-4-1-045",
+        "D-6-2-001"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "TASK_STATE_SUBMITTED",
+      "to_state_id": "TASK_STATE_WORKING",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "artifactUpdate",
+      "guard": "task.state = TASK_STATE_WORKING & stream.open = true",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-6-2-010"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "TASK_STATE_WORKING",
+      "to_state_id": "TASK_STATE_WORKING",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_COMPLETED",
+      "trigger": "statusUpdate",
+      "guard": "task.state = TASK_STATE_WORKING & stream.open = true",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-6-1-002",
+        "D-6-2-011",
+        "D-6-7-010",
+        "D-6-8-009"
+      ],
+      "kind": "unified",
+      "from_state_id": "TASK_STATE_WORKING",
+      "to_state_id": "TASK_STATE_COMPLETED",
+      "protocol_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "merged_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [
+          "termination"
+        ],
+        "is_cross_stage": true,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_INPUT_REQUIRED",
+      "trigger": "agent_requests_input",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-4-007",
+        "D-6-3-005"
+      ],
+      "kind": "unified",
+      "from_state_id": "TASK_STATE_WORKING",
+      "to_state_id": "TASK_STATE_INPUT_REQUIRED",
+      "protocol_phases": [
+        "task_execution",
+        "interruption"
+      ],
+      "merged_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [
+          "interruption"
+        ],
+        "is_cross_stage": true,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_REJECTED",
+      "trigger": "agent_rejects_task",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-4-1-008",
+        "D-4-1-045"
+      ],
+      "kind": "unified",
+      "from_state_id": "TASK_STATE_WORKING",
+      "to_state_id": "TASK_STATE_REJECTED",
+      "protocol_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "merged_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [
+          "termination"
+        ],
+        "is_cross_stage": true,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_FAILED",
+      "trigger": "task_processing_failed",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-3-2-014",
+        "D-4-1-005",
+        "N-3-2-004"
+      ],
+      "kind": "unified",
+      "from_state_id": "TASK_STATE_WORKING",
+      "to_state_id": "TASK_STATE_FAILED",
+      "protocol_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "merged_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [
+          "termination"
+        ],
+        "is_cross_stage": true,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "cancel_task",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-11-3-013",
+        "D-3-2-014",
+        "D-4-1-006",
+        "N-3-2-004"
+      ],
+      "kind": "unified",
+      "from_state_id": "TASK_STATE_WORKING",
+      "to_state_id": "TASK_STATE_CANCELED",
+      "protocol_phases": [
+        "task_execution",
+        "termination"
+      ],
+      "merged_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [
+          "termination"
+        ],
+        "is_cross_stage": true,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_required",
+      "guard": "!(authorization.negotiated_out_of_band = true | authorization.negotiated_via_extension = true)",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-7-6-002",
+        "N-3-2-004",
+        "N-7-6-001",
+        "N-7-6-002",
+        "N-7-6-003"
+      ],
+      "kind": "unified",
+      "from_state_id": "TASK_STATE_WORKING",
+      "to_state_id": "TASK_STATE_AUTH_REQUIRED",
+      "protocol_phases": [
+        "task_execution",
+        "interruption"
+      ],
+      "merged_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [
+          "interruption"
+        ],
+        "is_cross_stage": true,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_INPUT_REQUIRED",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "message_received",
+      "guard": "task.state = TASK_STATE_INPUT_REQUIRED & message.taskId = task.taskId & message.contextId = task.contextId",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "can",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-4-001",
+        "D-3-4-007",
+        "D-3-4-008",
+        "D-6-3-006"
+      ],
+      "kind": "unified",
+      "from_state_id": "TASK_STATE_INPUT_REQUIRED",
+      "to_state_id": "TASK_STATE_WORKING",
+      "protocol_phases": [
+        "task_execution",
+        "interruption"
+      ],
+      "merged_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [
+          "interruption"
+        ],
+        "is_cross_stage": true,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "credential_received",
+      "guard": "task.state = TASK_STATE_AUTH_REQUIRED & credential_received_out_of_band = true",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "N-7-6-001",
+        "N-7-6-006"
+      ],
+      "kind": "unified",
+      "from_state_id": "TASK_STATE_AUTH_REQUIRED",
+      "to_state_id": "TASK_STATE_WORKING",
+      "protocol_phases": [
+        "task_execution",
+        "interruption"
+      ],
+      "merged_count": 2,
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [
+          "interruption"
+        ],
+        "is_cross_stage": true,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "to_state": "STREAM_STATE_OPEN",
+      "trigger": "subscribe_to_task_requested",
+      "guard": "!task.state.is_terminal",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-1-039"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "to_state_id": "STREAM_STATE_OPEN",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "STREAM_STATE_OPEN",
+      "to_state": "STREAM_ACTIVE",
+      "trigger": "stream_open",
+      "guard": null,
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-3-5-006"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "STREAM_STATE_OPEN",
+      "to_state_id": "STREAM_ACTIVE",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "STREAM_ACTIVE",
+      "to_state": "STREAM_ACTIVE",
+      "trigger": "task_event_generated",
+      "guard": "stream.state = STREAM_ACTIVE",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-5-005"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "STREAM_ACTIVE",
+      "to_state_id": "STREAM_ACTIVE",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "STREAM_ACTIVE",
+      "to_state": "STREAM_CLOSED",
+      "trigger": "task_reaches_terminal_or_interrupted_state",
+      "guard": "task.state IN (TASK_STATE_COMPLETED, TASK_STATE_FAILED, TASK_STATE_CANCELED, TASK_STATE_REJECTED, TASK_STATE_INPUT_REQUIRED, TASK_STATE_AUTH_REQUIRED)",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-3-5-006",
+        "D-3-2-014"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "STREAM_ACTIVE",
+      "to_state_id": "STREAM_CLOSED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "to_state": "PUSH_NOTIFICATION_CONFIG_DELETED",
+      "trigger": "delete_push_notification_config_requested",
+      "guard": "push_notification_config.exists = true AND agent.supports_push_notifications = true",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-1-042"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "to_state_id": "PUSH_NOTIFICATION_CONFIG_DELETED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+      "to_state": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+      "trigger": "consecutive_delivery_failures_threshold_reached",
+      "guard": "push_notification.consecutive_failures >= push_notification.configured_failure_limit",
+      "actors": [
+        "agent"
+      ],
+      "modality": "may",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-13-2-002"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+      "to_state_id": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "PUSH_NOTIFICATION_RECEIVED",
+      "to_state": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+      "trigger": "webhook_request_received",
+      "guard": "webhook_request received with authentication credentials present",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-13-2-003"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "PUSH_NOTIFICATION_RECEIVED",
+      "to_state_id": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_SUBMITTED",
+      "to_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "trigger": "create_push_notification_config_requested",
+      "guard": "agent.capabilities.pushNotifications = true & task.exists = true",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-1-043"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "TASK_STATE_SUBMITTED",
+      "to_state_id": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 6: Transition redirected from removed PUSH_NOTIFICATION_CONFIG_NONEXISTENT. Parent state is TASK_STATE_SUBMITTED because a task must exist before push notification config can be created.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "trigger": "create_push_notification_config_requested",
+      "guard": "agent.capabilities.pushNotifications = true & task.exists = true",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-1-043"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "TASK_STATE_WORKING",
+      "to_state_id": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 6: Transition redirected from removed PUSH_NOTIFICATION_CONFIG_NONEXISTENT. Parent state is TASK_STATE_WORKING because a task must exist before push notification config can be created.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_SUBMITTED",
+      "to_state": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "trigger": "subscribe_to_task",
+      "guard": "task.exists = true & !task.state.is_terminal",
+      "actors": [
+        "client"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-3-1-039"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "TASK_STATE_SUBMITTED",
+      "to_state_id": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 8: Added missing incoming transition. Client initiates subscribeToTask (section 3.1.6) from any non-terminal task state.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "trigger": "subscribe_to_task",
+      "guard": "task.exists = true & !task.state.is_terminal",
+      "actors": [
+        "client"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-3-1-039"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "TASK_STATE_WORKING",
+      "to_state_id": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 8: Added missing incoming transition. Client initiates subscribeToTask (section 3.1.6) from any non-terminal task state.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_INPUT_REQUIRED",
+      "to_state": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "trigger": "subscribe_to_task",
+      "guard": "task.exists = true & !task.state.is_terminal",
+      "actors": [
+        "client"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-3-1-039"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "TASK_STATE_INPUT_REQUIRED",
+      "to_state_id": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 8: Added missing incoming transition. Client initiates subscribeToTask (section 3.1.6) from interrupted task states.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "trigger": "subscribe_to_task",
+      "guard": "task.exists = true & !task.state.is_terminal",
+      "actors": [
+        "client"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-3-1-039",
+        "N-7-6-009"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "TASK_STATE_AUTH_REQUIRED",
+      "to_state_id": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 8: Added missing incoming transition. Section 7.6.2 explicitly mentions client may subscribe when task is in AUTH_REQUIRED state without active stream.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "to_state": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+      "trigger": "push_notification_delivery_failed",
+      "guard": "push_notification_config.exists = true & push_notification.delivery_attempt_failed = true",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-13-2-002"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "to_state_id": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 8: Added missing incoming transition. Server sends push notification via HTTP POST to configured webhook URL (section 13.2); delivery failure triggers retry sub-lifecycle.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    },
+    {
+      "from_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "to_state": "PUSH_NOTIFICATION_RECEIVED",
+      "trigger": "push_notification_delivered",
+      "guard": "push_notification_config.exists = true & push_notification.delivery_successful = true",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-13-2-003"
+      ],
+      "kind": "intra_stage",
+      "from_state_id": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "to_state_id": "PUSH_NOTIFICATION_RECEIVED",
+      "protocol_phases": [
+        "task_execution"
+      ],
+      "fix_note": "Rule 8: Added missing incoming transition. Server delivers push notification via HTTP POST to client webhook URL (section 13.2); successful delivery enters PUSH_NOTIFICATION_RECEIVED.",
+      "stage_split": {
+        "included_in": "task_execution",
+        "also_in": [],
+        "is_cross_stage": false,
+        "policy": "duplicated into every involved stage split"
+      }
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "section_id": "S094",
+  "title": "S094 13.3.1.4 The INVITE is Accepted",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S094 13.3.1.4 The INVITE is Accepted"
+  ],
+  "url_anchor": "#s094-13314-the-invite-is-accepted",
+  "word_count": 312,
+  "statement_count": 7,
+  "elapsed_seconds": 34.2,
+  "statements": [
+    {
+      "statement_id": "D-S094-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The UAS core generates a 2xx response. This response establishes a dialog.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S094",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": "Dialog Established",
+      "trigger": "INVITE accepted",
+      "pre_cond": null,
+      "post_cond": "dialog.state = Established",
+      "actions": [
+        "generate 2xx response",
+        "establish dialog per Section 12.1.1"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S094-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The INVITE server transaction will be destroyed as soon as it receives this final response and passes it to the transport.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S094",
+      "actors": [
+        "INVITE server transaction"
+      ],
+      "from_state": null,
+      "to_state": "Destroyed",
+      "trigger": "2xx final response passed to transport",
+      "pre_cond": null,
+      "post_cond": "transaction.state = Destroyed",
+      "actions": [
+        "pass 2xx to transport",
+        "destroy INVITE server transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S094-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Response retransmissions cease when an ACK request for the response is received.",
+      "is_inferred": false,
+      "confidence": 0.98,
+      "source_section": "S094",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "Retransmitting 2xx",
+      "to_state": "ACK Received",
+      "trigger": "ACK received",
+      "pre_cond": "transaction.retransmitting_2xx = true",
+      "post_cond": "transaction.retransmitting_2xx = false",
+      "actions": [
+        "cease 2xx retransmissions"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S094-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the server retransmits the 2xx response for 64*T1 seconds without receiving an ACK, the dialog is confirmed, but the session SHOULD be terminated. This is accomplished with a BYE.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S094",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "Retransmitting 2xx",
+      "to_state": "Terminated",
+      "trigger": "64*T1 timeout without ACK",
+      "pre_cond": "timer.elapsed >= 64*T1 & transaction.ack_received = false",
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "send BYE"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S094-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The dialog is confirmed (after 64*T1 seconds of retransmitting 2xx without receiving ACK).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S094",
+      "state_name": "Confirmed",
+      "enum_name": "DialogState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "dialog.state = Confirmed"
+    },
+    {
+      "statement_id": "D-S094-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The UAS periodically retransmits the 2xx response directly to the transport until the ACK arrives, with interval starting at T1 and doubling until T2.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S094",
+      "state_name": "Retransmitting 2xx",
+      "enum_name": "InviteServerTransactionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.retransmitting_2xx = true"
+    },
+    {
+      "statement_id": "D-S094-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the response has been constructed, it is passed to the INVITE server transaction. The 2xx response is passed to the transport with an interval that starts at T1 seconds and doubles for each retransmission until it reaches T2 seconds.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S094",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "Dialog Established",
+      "to_state": "Retransmitting 2xx",
+      "trigger": "2xx response constructed and passed to transport",
+      "pre_cond": "transaction.state = Destroyed",
+      "post_cond": "transaction.retransmit_interval = T1 & transaction.retransmit_max = T2",
+      "actions": [
+        "pass 2xx directly to transport",
+        "start retransmission timer at T1",
+        "double interval on each retransmission up to T2"
+      ],
+      "modality": "must"
+    }
+  ]
+}

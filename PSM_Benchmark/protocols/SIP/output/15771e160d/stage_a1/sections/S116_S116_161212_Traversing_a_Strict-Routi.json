@@ -1,0 +1,115 @@
+{
+  "section_id": "S116",
+  "title": "S116 16.12.1.2 Traversing a Strict-Routing Proxy",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S116 16.12.1.2 Traversing a Strict-Routing Proxy"
+  ],
+  "url_anchor": "#s116-161212-traversing-a-strict-routing-proxy",
+  "word_count": 293,
+  "statement_count": 4,
+  "elapsed_seconds": 35.72,
+  "statements": [
+    {
+      "statement_id": "D-S116-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "P4 notices that it is the element in the first Route header field value so it removes it. It then prepares to send the request based on the now first Route header field value, but notices this URI does not contain the lr parameter, so before sending, it reformats the request placing the original Request-URI at the end of the Route list and putting the strict-router address in the Request-URI.",
+      "is_inferred": false,
+      "confidence": 0.5,
+      "source_section": "S116",
+      "actors": [
+        "P4"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "BYE_received_proxy_is_first_route_value_and_next_route_lacks_lr",
+      "pre_cond": "transaction.route_header[0] = self & transaction.route_header[1].lr_param = false",
+      "post_cond": "transaction.request_uri = route_header[1] & transaction.route_set = route_header[2..n] + [original_request_uri]",
+      "actions": [
+        "remove_self_from_route_header",
+        "move_original_request_uri_to_end_of_route",
+        "set_request_uri_to_next_strict_route_value",
+        "forward_request_to_strict_router"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S116-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "P3 is a strict router, so it forwards the following to P2: it places the first Route header value into the Request-URI and appends the old Request-URI to the end of the Route list.",
+      "is_inferred": false,
+      "confidence": 0.5,
+      "source_section": "S116",
+      "actors": [
+        "P3"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "BYE_received_by_strict_router",
+      "pre_cond": "transaction.proxy.routing_mode = strict",
+      "post_cond": "transaction.request_uri = route_header[0] & transaction.route_set = route_header[1..n]",
+      "actions": [
+        "set_request_uri_to_first_route_value",
+        "remove_first_route_header",
+        "forward_request_to_next_hop"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S116-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "P2 sees the request-URI is a value it placed into a Record-Route header field, so before further processing, it rewrites the request restoring the original Request-URI and removes its own value from the Route list.",
+      "is_inferred": false,
+      "confidence": 0.5,
+      "source_section": "S116",
+      "actors": [
+        "P2"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "BYE_received_request_uri_matches_own_record_route",
+      "pre_cond": "transaction.request_uri = self.record_route_value",
+      "post_cond": "transaction.request_uri = route_header[last] & transaction.route_set = route_header[0..n-1]",
+      "actions": [
+        "rewrite_request_uri_from_last_route_value",
+        "remove_last_route_header",
+        "forward_request_based_on_route_header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S116-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "P1 notices itself in the topmost Route header field value, so it removes it. Since P1 is not responsible for u1.example.com and there is no Route header field, P1 will forward the request to u1.example.com based on the Request-URI.",
+      "is_inferred": false,
+      "confidence": 0.5,
+      "source_section": "S116",
+      "actors": [
+        "P1"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "BYE_received_proxy_is_topmost_route_value_no_remaining_routes",
+      "pre_cond": "transaction.route_header[0] = self & transaction.route_header.count = 1 & transaction.proxy.responsible_for_domain(request_uri.host) = false",
+      "post_cond": "transaction.route_set = [] & transaction.next_hop = request_uri",
+      "actions": [
+        "remove_self_from_topmost_route_header",
+        "forward_request_based_on_request_uri"
+      ],
+      "modality": "must"
+    }
+  ]
+}

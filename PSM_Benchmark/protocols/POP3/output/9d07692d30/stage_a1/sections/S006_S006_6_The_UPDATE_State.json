@@ -1,0 +1,130 @@
+{
+  "section_id": "S006",
+  "title": "S006 6. The UPDATE State",
+  "depth": 3,
+  "parent_path": [
+    "POP3",
+    "S006 6. The UPDATE State"
+  ],
+  "url_anchor": "#s006-6-the-update-state",
+  "word_count": 201,
+  "statement_count": 5,
+  "elapsed_seconds": 46.76,
+  "statements": [
+    {
+      "statement_id": "D-S006-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the client issues the QUIT command from the TRANSACTION state, the POP3 session enters the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "state_name": "UPDATE",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = UPDATE"
+    },
+    {
+      "statement_id": "D-S006-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the client issues the QUIT command from the TRANSACTION state, the POP3 session enters the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "UPDATE",
+      "trigger": "QUIT",
+      "pre_cond": "protocol.state = TRANSACTION",
+      "post_cond": "protocol.state = UPDATE",
+      "actions": [
+        "enter UPDATE state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "If the client issues the QUIT command from the AUTHORIZATION state, the POP3 session terminates but does NOT enter the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "QUIT",
+      "pre_cond": "protocol.state = AUTHORIZATION",
+      "post_cond": "session.terminated = true & protocol.state != UPDATE",
+      "actions": [
+        "terminate session"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "If a session terminates for some reason other than a client-issued QUIT command, the POP3 session does NOT enter the UPDATE state and MUST not remove any messages from the maildrop.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "abnormal termination",
+      "pre_cond": "session.client_quit_issued = false",
+      "post_cond": "protocol.state != UPDATE & maildrop.messages_removed = false",
+      "actions": [
+        "terminate session without entering UPDATE state",
+        "retain all messages in maildrop"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S006-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "The POP3 server removes all messages marked as deleted from the maildrop and replies as to the status of this operation. Whether the removal was successful or not, the server then releases any exclusive-access lock on the maildrop and closes the TCP connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "server"
+      ],
+      "from_state": "UPDATE",
+      "to_state": null,
+      "trigger": "QUIT command processed",
+      "pre_cond": "protocol.state = UPDATE",
+      "post_cond": "session.terminated = true & maildrop.exclusive_lock = false & tcp.connection = closed",
+      "actions": [
+        "remove all messages marked as deleted from maildrop",
+        "send +OK or -ERR response",
+        "release exclusive-access lock on maildrop",
+        "close TCP connection"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

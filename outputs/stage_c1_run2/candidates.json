@@ -1,0 +1,246 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "C-001",
+      "title": "Absence of protocol-level task-to-identity binding enables cross-client task manipulation",
+      "attack_scenario": "Two independently authenticated clients (Client A and Client B) interact with the same A2A server. Client A creates a task. Client B, possessing valid credentials for the same server (e.g., a different authorized agent), learns or guesses Client A's task ID. Client B then uses standard protocol operations — GetTask to read Client A's task state and artifacts, CancelTask to terminate Client A's task, SubscribeToTask to receive Client A's real-time streaming updates, or CreateTaskPushNotificationConfig to redirect Client A's task notifications to Client B's own webhook. The protocol defines all task operations keyed solely by task ID. The Task data structure contains no owner or creator identity field. No session-to-task binding, task-scoped access token, or ownership proof mechanism exists at the protocol level. Authorization is vaguely delegated to implementations ('implementation-specific and MAY consider') with no interoperable protocol mechanism. The spec says 'Implementations MUST implement appropriate authorization scoping' for ListTasks, but 'appropriate' is undefined and no protocol-level mechanism (ownership field, binding token) is provided for any task operation. Different servers will invent incompatible authorization schemes, and clients have no protocol-level way to understand or interact with authorization controls. Even under full compliance with all normative requirements, the protocol provides no mechanism for the server to determine task ownership — that determination is entirely outside the protocol.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "REQUEST_AUTHORIZED",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Client A authenticates and is authorized. The server confirms Client A's identity at the HTTP transport layer."
+        },
+        {
+          "step": 2,
+          "stage": "initiation",
+          "state": "TASK_STATE_NONEXISTENT",
+          "transition": "task_creation",
+          "actor": "server",
+          "note": "Client A sends a message that causes the server to create a task. Task is assigned an ID. The protocol records no ownership binding between Client A's identity and the task ID."
+        },
+        {
+          "step": 3,
+          "stage": "task_execution",
+          "state": "TASK_STATE_SUBMITTED",
+          "transition": "agent_begins_processing",
+          "actor": "server",
+          "note": "Task transitions to WORKING as the agent processes it. Task state, artifacts, and context accumulate."
+        },
+        {
+          "step": 4,
+          "stage": "authentication",
+          "state": "REQUEST_AUTHORIZED",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Client B independently authenticates to the same server with its own valid credentials. Client B is a separate authorized principal."
+        },
+        {
+          "step": 5,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "task_canceled",
+          "actor": "client",
+          "note": "Client B calls CancelTask with Client A's task ID. The operation takes only a task ID parameter. The protocol defines no mechanism for the server to verify that Client B is the task's creator. Under the protocol as specified, this operation succeeds because there is no ownership check mechanism defined."
+        },
+        {
+          "step": 6,
+          "stage": "termination",
+          "state": "TASK_STATE_CANCELED",
+          "transition": "task_canceled",
+          "actor": "shared",
+          "note": "Client A's task is terminated by Client B's action. Client A's work is lost. The protocol provided no mechanism to prevent this."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "authentication",
+          "state_name": "REQUEST_AUTHORIZED",
+          "actor": "server",
+          "relevance": "Both Client A and Client B reach this state independently. The protocol establishes their authenticated identities but provides no mechanism to bind subsequent task operations to these identities."
+        },
+        {
+          "stage": "initiation",
+          "state_name": "TASK_STATE_NONEXISTENT",
+          "actor": "client",
+          "relevance": "Initial state before task creation. The protocol defines no identity-binding mechanism during task creation."
+        },
+        {
+          "stage": "task_execution",
+          "state_name": "TASK_STATE_WORKING",
+          "actor": "server",
+          "relevance": "Active task state where task data accumulates. Vulnerable to unauthorized access via GetTask, unauthorized cancellation via CancelTask, unauthorized streaming via SubscribeToTask, and unauthorized push notification redirection via CreateTaskPushNotificationConfig — all keyed solely by task ID."
+        },
+        {
+          "stage": "task_execution",
+          "state_name": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+          "actor": "client",
+          "relevance": "Client B can create a push notification config for Client A's task, redirecting task status updates to Client B's webhook. No protocol mechanism prevents this."
+        },
+        {
+          "stage": "task_execution",
+          "state_name": "TASK_STATE_CANCELED",
+          "actor": "shared",
+          "relevance": "Terminal state reached when Client B cancels Client A's task. The unauthorized state transition is irreversible."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "authentication",
+          "from_state": "authenticated",
+          "to_stage": "authentication",
+          "to_state": "REQUEST_AUTHORIZED",
+          "trigger": "A2A_protocol_operations_request",
+          "relevance": "Authorizes Client B for general protocol operations but provides no task-specific authorization mechanism. The guard 'caller.authenticated = true' checks identity but the protocol defines no way to bind this identity to task ownership."
+        },
+        {
+          "from_stage": "task_execution",
+          "from_state": "TASK_STATE_WORKING",
+          "to_stage": "task_execution",
+          "to_state": "TASK_STATE_CANCELED",
+          "trigger": "task_canceled",
+          "relevance": "This transition can be triggered by any authenticated client providing the task ID. The guard 'task.state = TASK_STATE_WORKING' checks only task state, not caller identity or task ownership."
+        },
+        {
+          "from_stage": "task_execution",
+          "from_state": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+          "to_stage": "task_execution",
+          "to_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+          "trigger": "create_push_notification_config_requested",
+          "relevance": "Any authenticated client can create a push notification config for any task they know the ID of, redirecting status updates to their own webhook URL."
+        },
+        {
+          "from_stage": "task_execution",
+          "from_state": "TASK_STATE_CANCELED",
+          "to_stage": "termination",
+          "to_state": "TASK_STATE_CANCELED",
+          "trigger": "task_canceled",
+          "relevance": "The unauthorized cancellation propagates to the termination phase, making it irreversible."
+        }
+      ],
+      "missing_primitive": "A protocol-level task-to-identity binding mechanism. The protocol needs either: (1) an owner/creator identity field in the Task data structure that is set during task creation and checked during subsequent operations, (2) task-scoped access tokens returned on task creation that must be presented for subsequent operations, or (3) a protocol-defined session-to-task binding that scopes task visibility to the authenticated identity that created the task. Currently, the Task object has no ownership field, no access token mechanism exists, and authorization is delegated to implementations with the vague requirement to 'implement appropriate authorization scoping' without any defined mechanism.",
+      "why_compliance_does_not_prevent": "The spec says 'Authorization logic is implementation-specific and MAY consider' various factors (Section 7.5) and 'Implementations MUST implement appropriate authorization scoping' (for ListTasks). Under full compliance, the server MUST implement authorization scoping — but the protocol defines no mechanism for it. The Task data structure has no owner field. No task-scoped token is defined. No session-binding mechanism exists. The MUST requirement is vague delegation: it says 'do authorization' without defining how. A fully compliant server that follows every MUST, SHOULD, and MAY still has no protocol-defined mechanism to determine which client owns which task. Any authorization scheme the server implements is entirely outside the protocol and non-interoperable. The 'SHOULD NOT distinguish between does not exist and not authorized' guidance (Section 3.3) acknowledges the need for access control but again provides no mechanism. Servers MUST return 'not found' for inaccessible resources, but what makes a resource inaccessible to a client is completely undefined at the protocol level.",
+      "spec_sections_searched": [
+        "3.1",
+        "3.3",
+        "3.4",
+        "4.1",
+        "7.5",
+        "9.4",
+        "13.1"
+      ],
+      "preliminary_confidence": "HIGH"
+    },
+    {
+      "candidate_id": "C-002",
+      "title": "Push notification webhook URL ownership verification absent from normative spec enables server-side request targeting",
+      "attack_scenario": "An authenticated client creates a task with a PushNotificationConfig whose url field points to a public HTTPS endpoint that the client does not own or control — for example, a competitor's API endpoint, a public webhook service, or another A2A agent's endpoint. The server validates the URL per the normative spec's SHOULD-level SSRF prevention (rejecting private IP ranges), which the URL passes because it's a legitimate public HTTPS URL. The server then delivers push notifications (HTTP POST requests containing task status updates as StreamResponse payloads) to this unowned URL whenever the task reaches a significant state change. The normative specification contains no mandatory ownership verification mechanism (such as challenge-response) for webhook URLs. The only normative SSRF mitigation is SHOULD-level rejection of private IP ranges. The topics/guidance page mentions ownership verification as 'SHOULD ideally' — a non-standard, non-normative qualifier. This enables two attack vectors: (1) DDoS amplification — the attacker creates many tasks with push configs pointing to the same target, causing the server to send numerous HTTP POST requests to the target; (2) Information leakage — task status details (state changes, potentially sensitive status messages) are delivered to an unintended third-party endpoint.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "REQUEST_AUTHORIZED",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Attacker authenticates to the A2A server with valid credentials. The attacker is a legitimate, authorized client."
+        },
+        {
+          "step": 2,
+          "stage": "initiation",
+          "state": "TASK_STATE_NONEXISTENT",
+          "transition": "message_send",
+          "actor": "client",
+          "note": "Attacker sends a message with pushNotificationConfig.url pointing to a public third-party endpoint (e.g., https://victim.com/api/webhook). The URL passes SSRF validation (it's not a private IP). No protocol-level ownership verification exists."
+        },
+        {
+          "step": 3,
+          "stage": "initiation",
+          "state": "TASK_STATE_SUBMITTED",
+          "transition": "task_creation",
+          "actor": "server",
+          "note": "Server creates the task and registers the push notification configuration."
+        },
+        {
+          "step": 4,
+          "stage": "task_execution",
+          "state": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+          "transition": "create_push_notification_config_requested",
+          "actor": "server",
+          "note": "Push notification config transitions to ACTIVE. Server validated URL (not a private IP) but performed no ownership verification because the normative spec defines no such mechanism."
+        },
+        {
+          "step": 5,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "message_send",
+          "actor": "server",
+          "note": "Task processes and reaches a state change that triggers push notification delivery."
+        },
+        {
+          "step": 6,
+          "stage": "task_execution",
+          "state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+          "transition": "webhook_request_received",
+          "actor": "server",
+          "note": "Server sends HTTP POST with StreamResponse payload to the third-party URL. If PushNotificationConfig.authentication was provided, server authenticates to the target endpoint. If authentication was omitted (it's optional), the POST is sent unauthenticated. The third-party endpoint receives unwanted traffic containing task state information."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "task_execution",
+          "state_name": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+          "actor": "client",
+          "relevance": "Starting state for push notification config. No protocol guard exists to verify URL ownership before transitioning to ACTIVE."
+        },
+        {
+          "stage": "task_execution",
+          "state_name": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+          "actor": "shared",
+          "relevance": "Config is active with an unverified URL. Server will deliver HTTP POST requests to this URL on task state changes. The invariant 'push_notification_config.exists = true' holds, but no invariant for URL ownership exists."
+        },
+        {
+          "stage": "task_execution",
+          "state_name": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+          "actor": "server",
+          "relevance": "If the target rejects the request, the server retries with exponential backoff, amplifying the attack against the target."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "task_execution",
+          "from_state": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+          "to_stage": "task_execution",
+          "to_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+          "trigger": "create_push_notification_config_requested",
+          "relevance": "This transition activates push notification delivery to the client-provided URL. The guard 'agent supports push notifications capability' checks only capability support, not URL ownership. No ownership verification guard exists in the protocol."
+        },
+        {
+          "from_stage": "task_execution",
+          "from_state": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+          "to_stage": "task_execution",
+          "to_state": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+          "trigger": "consecutive_delivery_failures_threshold_reached",
+          "relevance": "Retry mechanism means the server sends multiple requests to the target before giving up, amplifying the impact on the unowned endpoint."
+        }
+      ],
+      "missing_primitive": "A mandatory protocol-level webhook URL ownership verification mechanism. The protocol should define a challenge-response handshake: before activating push notification delivery, the server sends a verification request (e.g., HTTP GET with a unique validation token) to the proposed webhook URL, and the URL must echo back the token to prove the client controls it. This is a standard pattern in webhook-based systems (used by Stripe, GitHub, Slack, etc.) but is entirely absent from the A2A normative specification. The SHOULD-level SSRF mitigation (rejecting private IPs) addresses only internal network targeting, not unauthorized targeting of public endpoints.",
+      "why_compliance_does_not_prevent": "The normative spec says 'Agents SHOULD validate webhook URLs to prevent SSRF attacks: Reject private IP ranges' — under full compliance, the server rejects private IPs. But a public HTTPS URL passes this validation. The ownership verification guidance ('SHOULD ideally perform a verification step') appears only in the non-normative topics page using 'SHOULD ideally' — a non-standard qualifier that is not an RFC 2119 keyword and is not in the normative spec. Under full compliance with all normative MUST, SHOULD, and MAY requirements, the server validates the URL against private IPs, confirms it's HTTPS, but has no protocol-defined mechanism to verify that the client owns or controls the URL. The PushNotificationConfig.authentication field (which specifies how the server authenticates TO the webhook) is optional — if omitted, the server sends unauthenticated POST requests to arbitrary public URLs. A fully compliant server following every normative requirement still sends HTTP POST requests to any valid public HTTPS URL provided by any authenticated client.",
+      "spec_sections_searched": [
+        "3.1",
+        "4.3",
+        "13.2",
+        "streaming-and-async topics"
+      ],
+      "preliminary_confidence": "MEDIUM"
+    }
+  ],
+  "structural_observations": [
+    "Agent card signing is explicitly optional (MAY) per the normative spec ('Agent Cards MAY be signed using JSON Web Signatures'). Client verification is SHOULD-level ('Clients SHOULD verify signatures when present'). When signing is not used — which is fully compliant — the only integrity guarantee for agent card content comes from TLS transport security. This means agent card authenticity is dependent solely on the trust relationship with the serving domain, with no content-level integrity protection. While this is an intentional design choice (MAY), it means agent card content used for security-critical decisions (service endpoint URL, securitySchemes) has no protocol-level tamper protection beyond TLS.",
+    "The protocol defines multi-agent authorization delegation via TASK_STATE_AUTH_REQUIRED bubbling ('An A2A client that is also an A2A agent SHOULD bubble up the TASK_STATE_AUTH_REQUIRED state to its own client') but provides no mechanism for provenance tracking of delegated credentials through multi-agent chains. In a chain A→B→C, when C requests auth and B delegates to A, the credential that eventually reaches C has no protocol-level provenance — C cannot verify through what path or how many intermediaries the credential traveled. This is partially mitigated by the spec's explicit delegation of credential acquisition to out-of-band processes.",
+    "The protocol defines no requirements for task ID format, entropy, or namespace isolation. Task IDs are client-provided opaque strings with no minimum entropy requirement. In the absence of protocol-level task-to-identity binding (C-001), the unguessability of task IDs becomes the de facto access control — yet the protocol imposes no constraints on task ID generation. Sequential, predictable, or low-entropy task IDs would significantly amplify the C-001 vulnerability.",
+    "The protocol explicitly states 'A2A protocol payloads, such as JSON-RPC messages, don't carry user or client identity information directly. Identity is established at the transport/HTTP layer.' This design means there is no in-band identity context that could be used for protocol-level authorization decisions across the task lifecycle. Combined with the absence of task-to-identity binding, this creates a fundamental gap where authentication (transport layer) and authorization (task layer) operate in disconnected layers with no protocol-defined bridge.",
+    "The A2A project roadmap explicitly lists 'Formalize inclusion of authorization schemes and optional credentials directly within the AgentCard' as a planned improvement, indicating the protocol designers are aware of the authorization mechanism gap but have not yet addressed it in the specification."
+  ]
+}

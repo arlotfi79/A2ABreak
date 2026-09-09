@@ -1,0 +1,148 @@
+{
+  "section_id": "S057",
+  "title": "S057 4.1.1.10 QUIT (QUIT)",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S057 4.1.1.10 QUIT (QUIT)"
+  ],
+  "url_anchor": "#s057-41110-quit-quit",
+  "word_count": 154,
+  "statement_count": 6,
+  "elapsed_seconds": 43.75,
+  "statements": [
+    {
+      "statement_id": "D-S057-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "This command specifies that the receiver MUST send a '221 OK' reply, and then close the transmission channel.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "transmission channel closed",
+      "trigger": "QUIT received",
+      "pre_cond": null,
+      "post_cond": "session.channel = closed",
+      "actions": [
+        "send 221 OK reply",
+        "close transmission channel"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S057-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "The sender MUST NOT intentionally close the transmission channel until it sends a QUIT command, and it SHOULD wait until it receives the reply (even if there was an error response to a previous command).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S057",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "transmission channel closed",
+      "trigger": "QUIT sent and 221 reply received",
+      "pre_cond": "client.quit_sent = true",
+      "post_cond": "session.channel = closed",
+      "actions": [
+        "wait for 221 reply",
+        "close transmission channel"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S057-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the connection is closed prematurely due to violations of the above or system or network failure, the server MUST cancel any pending transaction, but not undo any previously completed transaction, and generally MUST act as if the command or transaction in progress had received a temporary error (i.e., a 4yz response).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "transmission channel closed",
+      "trigger": "connection closed prematurely",
+      "pre_cond": "session.quit_received = false",
+      "post_cond": "transaction.pending = cancelled",
+      "actions": [
+        "cancel pending transaction",
+        "preserve completed transactions",
+        "treat in-progress command or transaction as 4yz temporary error"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S057-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "The QUIT command may be issued at any time. Any current uncompleted mail transaction will be aborted.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S057",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "transmission channel closed",
+      "trigger": "QUIT issued",
+      "pre_cond": "transaction.state = in_progress",
+      "post_cond": "transaction.state = aborted",
+      "actions": [
+        "abort current uncompleted mail transaction"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S057-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "The receiver MUST send a '221 OK' reply, and then close the transmission channel. (Terminal state reached after QUIT is processed.)",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S057",
+      "state_name": "transmission channel closed",
+      "enum_name": "SessionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "session.channel = closed"
+    },
+    {
+      "statement_id": "D-S057-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "The receiver MUST NOT intentionally close the transmission channel until it receives and replies to a QUIT command (even if there was an error).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S057",
+      "object_name": "session",
+      "field_name": "quit_received",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "true"
+      ],
+      "guard_semantics": "server may not close transmission channel unless session.quit_received = true"
+    }
+  ]
+}

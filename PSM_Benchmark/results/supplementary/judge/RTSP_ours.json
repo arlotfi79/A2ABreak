@@ -1,0 +1,630 @@
+{
+ "proto": "RTSP",
+ "system": "ours",
+ "gt_states": 3,
+ "gt_transitions": 33,
+ "cand_states": 4,
+ "cand_transitions": 30,
+ "states_matched": 3,
+ "states_P": 0.75,
+ "states_R": 1.0,
+ "states_F1": 0.8571,
+ "trans_matched": 24,
+ "trans_P": 0.8,
+ "trans_R": 0.7273,
+ "trans_F1": 0.7619,
+ "unmatched_classes": {
+  "wrong_or_unsupported": 2,
+  "duplicate_or_alias": 2,
+  "real_behavior_not_in_gt": 2
+ },
+ "tokens_in": 3726,
+ "tokens_out": 3776,
+ "cost": 0.11302999999999999,
+ "seconds": 281.2,
+ "raw": {
+  "state_matches": [
+   {
+    "gt": "Init",
+    "candidate": "Init",
+    "confidence": 1.0,
+    "reason": "Both represent the initial state before session setup"
+   },
+   {
+    "gt": "Ready",
+    "candidate": "Ready",
+    "confidence": 1.0,
+    "reason": "Both represent the state after SETUP, before PLAY"
+   },
+   {
+    "gt": "Play",
+    "candidate": "Play",
+    "confidence": 1.0,
+    "reason": "Both represent active media playback state"
+   }
+  ],
+  "transition_matches": [
+   {
+    "gt_index": 0,
+    "gt": {
+     "from": "Init",
+     "event": "cond default",
+     "action": "send SETUP; reply NRM=1, RP=0.0",
+     "to": "Ready"
+    },
+    "candidate_index": 0,
+    "candidate": {
+     "from": "Init",
+     "event": "receive SETUP success",
+     "action": "generate session identifier; set transport parameters",
+     "to": "Ready"
+    },
+    "confidence": 0.9,
+    "reason": "Both represent successful SETUP transitioning Init->Ready"
+   },
+   {
+    "gt_index": 1,
+    "gt": {
+     "from": "Init",
+     "event": "cond Needs Redirect",
+     "action": "send SETUP; reply 3rr Redirect",
+     "to": "Init"
+    },
+    "candidate_index": 1,
+    "candidate": {
+     "from": "Init",
+     "event": "receive SETUP redirect",
+     "action": "send 3rr redirect response",
+     "to": "Init"
+    },
+    "confidence": 0.95,
+    "reason": "Both represent SETUP requiring redirect, staying in Init"
+   },
+   {
+    "gt_index": 2,
+    "gt": {
+     "from": "Init",
+     "event": "cond No Session hdr",
+     "action": "send S -> C: REDIRECT; reply Terminate all SES",
+     "to": "Init"
+    },
+    "candidate_index": 2,
+    "candidate": {
+     "from": "Init",
+     "event": "receive REDIRECT",
+     "action": "terminate all sessions",
+     "to": "Init"
+    },
+    "confidence": 0.85,
+    "reason": "Both represent REDIRECT terminating all sessions in Init"
+   },
+   {
+    "gt_index": 4,
+    "gt": {
+     "from": "Ready",
+     "event": "cond URI Setup prior",
+     "action": "send SETUP; reply Change transport param",
+     "to": "Ready"
+    },
+    "candidate_index": 3,
+    "candidate": {
+     "from": "Ready",
+     "event": "receive SETUP",
+     "action": "update transport parameters",
+     "to": "Ready"
+    },
+    "confidence": 0.8,
+    "reason": "Both represent SETUP changing transport parameters in Ready"
+   },
+   {
+    "gt_index": 7,
+    "gt": {
+     "from": "Ready",
+     "event": "cond md URI,NRM>1",
+     "action": "send TEARDOWN; reply Session hdr, NRM -= 1",
+     "to": "Ready"
+    },
+    "candidate_index": 4,
+    "candidate": {
+     "from": "Ready",
+     "event": "receive TEARDOWN media",
+     "action": "remove media stream; free associated resources",
+     "to": "Ready"
+    },
+    "confidence": 0.8,
+    "reason": "Both represent TEARDOWN of a media URI when NRM>1, staying in Ready"
+   },
+   {
+    "gt_index": 12,
+    "gt": {
+     "from": "Ready",
+     "event": "cond Prs URI",
+     "action": "send PAUSE; reply Return PP",
+     "to": "Ready"
+    },
+    "candidate_index": 5,
+    "candidate": {
+     "from": "Ready",
+     "event": "receive PAUSE",
+     "action": "send 200 OK response",
+     "to": "Ready"
+    },
+    "confidence": 0.85,
+    "reason": "Both represent PAUSE in Ready state"
+   },
+   {
+    "gt_index": 13,
+    "gt": {
+     "from": "Ready",
+     "event": "cond Terminate-Reason",
+     "action": "send SC:REDIRECT; reply Set RedP",
+     "to": "Ready"
+    },
+    "candidate_index": 6,
+    "candidate": {
+     "from": "Ready",
+     "event": "receive REDIRECT timed",
+     "action": "set redirect deadline",
+     "to": "Ready"
+    },
+    "confidence": 0.9,
+    "reason": "Both represent timed REDIRECT setting a redirect point in Ready"
+   },
+   {
+    "gt_index": 9,
+    "gt": {
+     "from": "Ready",
+     "event": "cond Prs URI, Range",
+     "action": "send PLAY; reply According to range",
+     "to": "Play"
+    },
+    "candidate_index": 7,
+    "candidate": {
+     "from": "Ready",
+     "event": "receive PLAY",
+     "action": "begin media delivery",
+     "to": "Play"
+    },
+    "confidence": 0.75,
+    "reason": "Both represent PLAY transitioning Ready->Play"
+   },
+   {
+    "gt_index": 5,
+    "gt": {
+     "from": "Ready",
+     "event": "cond Prs URI",
+     "action": "send TEARDOWN; reply No session hdr, NRM = 0",
+     "to": "Init"
+    },
+    "candidate_index": 8,
+    "candidate": {
+     "from": "Ready",
+     "event": "receive TEARDOWN session",
+     "action": "destroy session state",
+     "to": "Init"
+    },
+    "confidence": 0.85,
+    "reason": "Both represent session-level TEARDOWN from Ready to Init"
+   },
+   {
+    "gt_index": 14,
+    "gt": {
+     "from": "Ready",
+     "event": "cond No Terminate-Reason time parameter",
+     "action": "send SC:REDIRECT; reply Session is removed",
+     "to": "Init"
+    },
+    "candidate_index": 9,
+    "candidate": {
+     "from": "Ready",
+     "event": "receive REDIRECT immediate",
+     "action": "remove session",
+     "to": "Init"
+    },
+    "confidence": 0.9,
+    "reason": "Both represent immediate REDIRECT removing session"
+   },
+   {
+    "gt_index": 15,
+    "gt": {
+     "from": "Ready",
+     "event": "cond default",
+     "action": "timeout",
+     "to": "Init"
+    },
+    "candidate_index": 10,
+    "candidate": {
+     "from": "Ready",
+     "event": "timeout session",
+     "action": "remove session",
+     "to": "Init"
+    },
+    "confidence": 0.95,
+    "reason": "Both represent session timeout in Ready going to Init"
+   },
+   {
+    "gt_index": 16,
+    "gt": {
+     "from": "Ready",
+     "event": "cond default",
+     "action": "cond RedP reached; reply TEARDOWN of session",
+     "to": "Init"
+    },
+    "candidate_index": 11,
+    "candidate": {
+     "from": "Ready",
+     "event": "cond redirect deadline",
+     "action": "teardown session",
+     "to": "Init"
+    },
+    "confidence": 0.95,
+    "reason": "Both represent redirect point reached causing teardown"
+   },
+   {
+    "gt_index": 21,
+    "gt": {
+     "from": "Play",
+     "event": "cond Prs URI, Range",
+     "action": "send PLAY; reply According to range",
+     "to": "Play"
+    },
+    "candidate_index": 13,
+    "candidate": {
+     "from": "Play",
+     "event": "receive PLAY",
+     "action": "replace current play action",
+     "to": "Play"
+    },
+    "confidence": 0.7,
+    "reason": "Both represent PLAY in Play state staying in Play"
+   },
+   {
+    "gt_index": 19,
+    "gt": {
+     "from": "Play",
+     "event": "cond default",
+     "action": "set Set RP = End of range",
+     "to": "Play"
+    },
+    "candidate_index": 14,
+    "candidate": {
+     "from": "Play",
+     "event": "cond end of range",
+     "action": "stop media delivery",
+     "to": "Play"
+    },
+    "confidence": 0.75,
+    "reason": "Both represent end-of-range condition in Play state"
+   },
+   {
+    "gt_index": 18,
+    "gt": {
+     "from": "Play",
+     "event": "cond All media",
+     "action": "set Set RP = End of media",
+     "to": "Play"
+    },
+    "candidate_index": 15,
+    "candidate": {
+     "from": "Play",
+     "event": "cond end of media",
+     "action": "set resume point to end",
+     "to": "Play"
+    },
+    "confidence": 0.9,
+    "reason": "Both represent end-of-media setting resume point"
+   },
+   {
+    "gt_index": 22,
+    "gt": {
+     "from": "Play",
+     "event": "cond default",
+     "action": "send SC:PLAY_NOTIFY; reply 200",
+     "to": "Play"
+    },
+    "candidate_index": 16,
+    "candidate": {
+     "from": "Play",
+     "event": "receive PLAY NOTIFY",
+     "action": "send 200 response",
+     "to": "Play"
+    },
+    "confidence": 0.85,
+    "reason": "Both represent PLAY_NOTIFY with 200 response in Play"
+   },
+   {
+    "gt_index": 25,
+    "gt": {
+     "from": "Play",
+     "event": "cond md URI, IFI",
+     "action": "send SETUP; reply Change transport param.",
+     "to": "Play"
+    },
+    "candidate_index": 17,
+    "candidate": {
+     "from": "Play",
+     "event": "receive SETUP",
+     "action": "change transport parameters",
+     "to": "Play"
+    },
+    "confidence": 0.85,
+    "reason": "Both represent SETUP changing transport params in Play"
+   },
+   {
+    "gt_index": 29,
+    "gt": {
+     "from": "Play",
+     "event": "cond Terminate Reason with Time parameter",
+     "action": "send SC:REDIRECT; reply Set RedP",
+     "to": "Play"
+    },
+    "candidate_index": 18,
+    "candidate": {
+     "from": "Play",
+     "event": "receive REDIRECT timed",
+     "action": "set redirect deadline",
+     "to": "Play"
+    },
+    "confidence": 0.9,
+    "reason": "Both represent timed REDIRECT in Play state"
+   },
+   {
+    "gt_index": 17,
+    "gt": {
+     "from": "Play",
+     "event": "cond Prs URI",
+     "action": "send PAUSE; reply Set RP to present point",
+     "to": "Ready"
+    },
+    "candidate_index": 22,
+    "candidate": {
+     "from": "Play",
+     "event": "receive PAUSE",
+     "action": "halt media delivery",
+     "to": "Ready"
+    },
+    "confidence": 0.9,
+    "reason": "Both represent PAUSE transitioning Play->Ready"
+   },
+   {
+    "gt_index": 26,
+    "gt": {
+     "from": "Play",
+     "event": "cond Prs URI",
+     "action": "send TEARDOWN; reply No session hdr",
+     "to": "Init"
+    },
+    "candidate_index": 24,
+    "candidate": {
+     "from": "Play",
+     "event": "receive TEARDOWN session",
+     "action": "destroy session state",
+     "to": "Init"
+    },
+    "confidence": 0.85,
+    "reason": "Both represent session TEARDOWN from Play to Init"
+   },
+   {
+    "gt_index": 30,
+    "gt": {
+     "from": "Play",
+     "event": "cond default",
+     "action": "send SC:REDIRECT; reply Session is removed",
+     "to": "Init"
+    },
+    "candidate_index": 25,
+    "candidate": {
+     "from": "Play",
+     "event": "receive REDIRECT immediate",
+     "action": "remove session",
+     "to": "Init"
+    },
+    "confidence": 0.9,
+    "reason": "Both represent immediate REDIRECT removing session from Play"
+   },
+   {
+    "gt_index": 32,
+    "gt": {
+     "from": "Play",
+     "event": "cond default",
+     "action": "timeout; reply Stop Media playout",
+     "to": "Init"
+    },
+    "candidate_index": 26,
+    "candidate": {
+     "from": "Play",
+     "event": "timeout session",
+     "action": "stop media playout",
+     "to": "Init"
+    },
+    "confidence": 0.95,
+    "reason": "Both represent session timeout stopping media in Play"
+   },
+   {
+    "gt_index": 31,
+    "gt": {
+     "from": "Play",
+     "event": "cond default",
+     "action": "cond RedP reached; reply TEARDOWN of session",
+     "to": "Init"
+    },
+    "candidate_index": 27,
+    "candidate": {
+     "from": "Play",
+     "event": "cond redirect deadline",
+     "action": "teardown session",
+     "to": "Init"
+    },
+    "confidence": 0.95,
+    "reason": "Both represent redirect deadline reached causing teardown from Play"
+   },
+   {
+    "gt_index": 27,
+    "gt": {
+     "from": "Play",
+     "event": "cond md URI,NRM=1",
+     "action": "send TEARDOWN; reply No Session hdr, NRM=0",
+     "to": "Init"
+    },
+    "candidate_index": 28,
+    "candidate": {
+     "from": "Play",
+     "event": "receive TEARDOWN affected",
+     "action": "terminate media session",
+     "to": "Init"
+    },
+    "confidence": 0.7,
+    "reason": "Both represent TEARDOWN of last media URI from Play to Init"
+   },
+   {
+    "gt_index": 3,
+    "gt": {
+     "from": "Ready",
+     "event": "cond New URI",
+     "action": "send SETUP; reply NRM +=1",
+     "to": "Ready"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate transition specifically matches adding a new URI with NRM increment (candidate index 3 was matched to gt_index 4)"
+   },
+   {
+    "gt_index": 6,
+    "gt": {
+     "from": "Ready",
+     "event": "cond md URI,NRM=1",
+     "action": "send TEARDOWN; reply No Session hdr, NRM = 0",
+     "to": "Init"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "Candidate index 8 already matched to gt_index 5; no separate match for last-media TEARDOWN from Ready"
+   },
+   {
+    "gt_index": 8,
+    "gt": {
+     "from": "Ready",
+     "event": "cond Prs URI, No range",
+     "action": "send PLAY; reply Play from RP",
+     "to": "Play"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "Candidate index 7 already matched to gt_index 9; no separate PLAY without range"
+   },
+   {
+    "gt_index": 10,
+    "gt": {
+     "from": "Ready",
+     "event": "cond md URI, NRM=1, Range",
+     "action": "send PLAY; reply According to range",
+     "to": "Play"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No separate candidate for aggregate PLAY with range from Ready"
+   },
+   {
+    "gt_index": 11,
+    "gt": {
+     "from": "Ready",
+     "event": "cond md URI, NRM=1",
+     "action": "send PLAY; reply Play from RP",
+     "to": "Play"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No separate candidate for aggregate PLAY without range from Ready"
+   },
+   {
+    "gt_index": 20,
+    "gt": {
+     "from": "Play",
+     "event": "cond Prs URI, No range",
+     "action": "send PLAY; reply Play from present point",
+     "to": "Play"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "Candidate index 13 already matched to gt_index 21"
+   },
+   {
+    "gt_index": 23,
+    "gt": {
+     "from": "Play",
+     "event": "cond New URI",
+     "action": "send SETUP; reply 455",
+     "to": "Play"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate for SETUP with new URI returning 455 error in Play"
+   },
+   {
+    "gt_index": 24,
+    "gt": {
+     "from": "Play",
+     "event": "cond md URI",
+     "action": "send SETUP; reply 455",
+     "to": "Play"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate for SETUP with media URI returning 455 in Play"
+   },
+   {
+    "gt_index": 28,
+    "gt": {
+     "from": "Play",
+     "event": "cond md URI",
+     "action": "send TEARDOWN; reply 455",
+     "to": "Play"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate for TEARDOWN returning 455 staying in Play"
+   }
+  ],
+  "unmatched_candidate_transitions": [
+   {
+    "candidate_index": 12,
+    "class": "wrong_or_unsupported",
+    "reason": "Transition from Ready to Terminated via server TEARDOWN; Terminated state does not exist in ground truth"
+   },
+   {
+    "candidate_index": 19,
+    "class": "duplicate_or_alias",
+    "reason": "PLAY_NOTIFY end-of-stream is a specific sub-case of the PLAY_NOTIFY already matched at candidate index 16"
+   },
+   {
+    "candidate_index": 20,
+    "class": "duplicate_or_alias",
+    "reason": "PLAY_NOTIFY update is another sub-case of PLAY_NOTIFY already matched at candidate index 16"
+   },
+   {
+    "candidate_index": 21,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Scale change condition in Play state is plausible protocol behavior not explicitly in ground truth"
+   },
+   {
+    "candidate_index": 23,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Delivery exceeding stop point causing pause to Ready is plausible behavior related to end-of-range but modeled differently than GT"
+   },
+   {
+    "candidate_index": 29,
+    "class": "wrong_or_unsupported",
+    "reason": "Transition from Play to Terminated via aggregate TEARDOWN; Terminated state does not exist in ground truth"
+   }
+  ]
+ }
+}

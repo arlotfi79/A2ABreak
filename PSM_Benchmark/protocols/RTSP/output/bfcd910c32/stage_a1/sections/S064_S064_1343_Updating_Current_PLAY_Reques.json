@@ -1,0 +1,133 @@
+{
+  "section_id": "S064",
+  "title": "S064 13.4.3 Updating Current PLAY Requests",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S064 13.4.3 Updating Current PLAY Requests"
+  ],
+  "url_anchor": "#s064-1343-updating-current-play-requests",
+  "word_count": 623,
+  "statement_count": 5,
+  "elapsed_seconds": 50.07,
+  "statements": [
+    {
+      "statement_id": "D-S064-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Clients can issue PLAY requests while the stream is in Play state and thus updating their request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "state_name": "Play",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = Play"
+    },
+    {
+      "statement_id": "D-S064-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A total replacement is signaled by having the first range specification have an explicit start value, in which case the server stops playout at the current playout point and then starts delivering media according to the Range header. This is equivalent to having the client first send a PAUSE and then a new PLAY request that isn't based on the pause point.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S064",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY request with explicit range start value",
+      "pre_cond": "session.state = Play & range.start = explicit",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "stop playout at current playout point",
+        "start delivering media per Range header"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S064-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "In the case of continuation, the first range specifier has an implicit start point and an explicit stop value (Z), which indicate that it MUST convert the range specifier being played prior to this PLAY request (X to Y) into (X to Z) and continue as if this was the request originally played.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S064",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY request with implicit range start and explicit stop value",
+      "pre_cond": "session.state = Play & range.start = implicit & range.stop = explicit",
+      "post_cond": "session.state = Play & range_specifier = (X to Z)",
+      "actions": [
+        "convert range specifier from (X to Y) to (X to Z)",
+        "continue playback from current point"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S064-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the current delivery point is beyond the stop point, the server SHALL immediately pause delivery. As the request has been completed successfully, it shall be responded to with a 200 OK response. A PLAY_NOTIFY with end-of-stream is also sent to indicate the actual stop point. The pause point is set to the requested stop point.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S064",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "current delivery point beyond stop point",
+      "pre_cond": "session.state = Play & delivery_point > stop_point",
+      "post_cond": "session.pause_point = stop_point",
+      "actions": [
+        "immediately pause delivery",
+        "send 200 OK response",
+        "send PLAY_NOTIFY with end-of-stream",
+        "set pause point to requested stop point"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S064-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A common use of a PLAY request while in Play state is changing the scale of the media, i.e., entering or leaving fast forward or fast rewind. The client can issue an updating PLAY request that is either a continuation or a complete replacement.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S064",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY request with Scale header while in Play state",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Play & session.scale = requested_scale",
+      "actions": [
+        "update playback scale",
+        "send 200 OK with actual playback point and new scale"
+      ],
+      "modality": "can"
+    }
+  ]
+}

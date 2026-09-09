@@ -1,0 +1,236 @@
+{
+  "section_id": "S140",
+  "title": "S140 18.2.2 Sending Responses",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S140 18.2.2 Sending Responses"
+  ],
+  "url_anchor": "#s140-1822-sending-responses",
+  "word_count": 330,
+  "statement_count": 9,
+  "elapsed_seconds": 114.25,
+  "statements": [
+    {
+      "statement_id": "N-S140-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "It MUST follow the following process:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S140",
+      "actors": [
+        "server transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "determine response destination by following top Via header field based routing process"
+      ],
+      "modality": "must",
+      "id": "N-S140-001"
+    },
+    {
+      "statement_id": "N-S140-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the \"sent-protocol\" is a reliable transport protocol such as TCP or SCTP, or TLS over those, the response MUST be sent using the existing connection to the source of the original request that created the transaction, if that connection is still open.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S140",
+      "actors": [
+        "server transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response",
+      "pre_cond": "via.sent_protocol.reliable = true & existing_connection.open = true",
+      "post_cond": "response.sent_via = existing_connection",
+      "actions": [
+        "send response over existing transport connection to original request source"
+      ],
+      "modality": "must",
+      "id": "N-S140-002"
+    },
+    {
+      "statement_id": "N-S140-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If that connection is no longer open, the server SHOULD open a connection to the IP address in the \"received\" parameter, if present, using the port in the \"sent-by\" value, or the default port for that transport, if no port is specified.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S140",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "existing_connection_closed",
+      "pre_cond": "via.sent_protocol.reliable = true & existing_connection.open = false & via.received_param.present = true",
+      "post_cond": "new_connection.open = true",
+      "actions": [
+        "open new connection to IP address in via.received parameter",
+        "use port from via.sent_by or transport default port if none specified"
+      ],
+      "modality": "should",
+      "id": "N-S140-003"
+    },
+    {
+      "statement_id": "N-S140-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If that connection attempt fails, the server SHOULD use the procedures in [4] for servers in order to determine the IP address and port to open the connection and send the response to.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S140",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_attempt_failed",
+      "pre_cond": "connection_attempt.failed = true",
+      "post_cond": null,
+      "actions": [
+        "apply RFC3263 server procedures to determine destination IP address and port",
+        "open connection and send response to determined destination"
+      ],
+      "modality": "should",
+      "id": "N-S140-004"
+    },
+    {
+      "statement_id": "N-S140-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Otherwise, if the Via header field value contains a \"maddr\" parameter, the response MUST be forwarded to the address listed there, using the port indicated in \"sent-by\", or port 5060 if none is present.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S140",
+      "actors": [
+        "server transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response",
+      "pre_cond": "via.sent_protocol.reliable = false & via.maddr_param.present = true",
+      "post_cond": "response.forwarded_to = via.maddr",
+      "actions": [
+        "forward response to address in via.maddr parameter",
+        "use port from via.sent_by or port 5060 if none present"
+      ],
+      "modality": "must",
+      "id": "N-S140-005"
+    },
+    {
+      "statement_id": "N-S140-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the address is a multicast address, the response SHOULD be sent using the TTL indicated in the \"ttl\" parameter, or with a TTL of 1 if that parameter is not present.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S140",
+      "actors": [
+        "server transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response",
+      "pre_cond": "via.maddr_param.present = true & via.maddr.multicast = true",
+      "post_cond": null,
+      "actions": [
+        "send response with TTL from via.ttl parameter or TTL=1 if via.ttl absent"
+      ],
+      "modality": "should",
+      "id": "N-S140-006"
+    },
+    {
+      "statement_id": "N-S140-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Otherwise (for unreliable unicast transports), if the top Via has a \"received\" parameter, the response MUST be sent to the address in the \"received\" parameter, using the port indicated in the \"sent-by\" value, or using port 5060 if none is specified explicitly.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S140",
+      "actors": [
+        "server transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response",
+      "pre_cond": "via.sent_protocol.reliable = false & via.maddr_param.present = false & via.received_param.present = true",
+      "post_cond": "response.sent_to = via.received",
+      "actions": [
+        "send response to address in via.received parameter",
+        "use port from via.sent_by or port 5060 if none specified"
+      ],
+      "modality": "must",
+      "id": "N-S140-007"
+    },
+    {
+      "statement_id": "N-S140-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If this fails, for example, elicits an ICMP \"port unreachable\" response, the procedures of Section 5 of [4] SHOULD be used to determine where to send the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S140",
+      "actors": [
+        "server transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_to_received_failed",
+      "pre_cond": "send_to_received.failed = true",
+      "post_cond": null,
+      "actions": [
+        "apply RFC3263 Section 5 procedures to determine alternate response destination"
+      ],
+      "modality": "should",
+      "id": "N-S140-008"
+    },
+    {
+      "statement_id": "N-S140-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Otherwise, if it is not receiver-tagged, the response MUST be sent to the address indicated by the \"sent-by\" value, using the procedures in Section 5 of [4].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S140",
+      "actors": [
+        "server transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response",
+      "pre_cond": "via.sent_protocol.reliable = false & via.maddr_param.present = false & via.received_param.present = false & via.receiver_tagged = false",
+      "post_cond": "response.sent_to = via.sent_by",
+      "actions": [
+        "send response to address in via.sent_by value",
+        "apply RFC3263 Section 5 procedures for address resolution"
+      ],
+      "modality": "must",
+      "id": "N-S140-009"
+    }
+  ]
+}

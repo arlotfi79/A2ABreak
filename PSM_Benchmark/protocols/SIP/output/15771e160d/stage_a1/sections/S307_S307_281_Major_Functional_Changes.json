@@ -1,0 +1,283 @@
+{
+  "section_id": "S307",
+  "title": "S307 28.1 Major Functional Changes",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S307 28.1 Major Functional Changes"
+  ],
+  "url_anchor": "#s307-281-major-functional-changes",
+  "word_count": 1508,
+  "statement_count": 12,
+  "elapsed_seconds": 112.82,
+  "statements": [
+    {
+      "statement_id": "D-S307-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When a UAC wishes to terminate a call before it has been answered, it sends CANCEL.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S307",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAC wishes to terminate call before answered",
+      "pre_cond": "call.answered = false",
+      "post_cond": null,
+      "actions": [
+        "send CANCEL"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S307-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the original INVITE still returns a 2xx, the UAC then sends BYE.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S307",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "2xx received for INVITE after CANCEL sent",
+      "pre_cond": "cancel.sent = true & invite.response = 2xx",
+      "post_cond": null,
+      "actions": [
+        "send BYE"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S307-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "BYE can only be sent on an existing call leg (now called a dialog in this RFC).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S307",
+      "object_name": "BYE request",
+      "field_name": "dialog",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "BYE may only be sent within an established dialog"
+    },
+    {
+      "statement_id": "D-S307-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When a user sends an INVITE and then a CANCEL, the INVITE transaction still terminates normally.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S307",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CANCEL sent for in-progress INVITE transaction",
+      "pre_cond": null,
+      "post_cond": "invite_transaction.terminated = true",
+      "actions": [
+        "INVITE transaction terminates normally (independently of CANCEL transaction)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S307-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A UAS needs to respond to the original INVITE request with a 487 response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S307",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CANCEL received for in-progress INVITE",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 487 response to original INVITE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S307-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "RFC 2543 allowed the UAS not to send a response to INVITE when a BYE was received. That is disallowed here. The original INVITE needs a response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S307",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "BYE received during active INVITE transaction",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send response to original INVITE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S307-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A UA cannot send a BYE for a call until it has received an ACK for the initial INVITE.",
+      "is_inferred": false,
+      "confidence": 0.98,
+      "source_section": "S307",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UA wishes to send BYE",
+      "pre_cond": "session.initial_ack_received = true",
+      "post_cond": null,
+      "actions": [
+        "send BYE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S307-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A UA or proxy cannot send CANCEL for a transaction until it gets a provisional response for the request.",
+      "is_inferred": false,
+      "confidence": 0.98,
+      "source_section": "S307",
+      "actors": [
+        "UA",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UA or proxy wishes to send CANCEL",
+      "pre_cond": "transaction.provisional_response_received = true",
+      "post_cond": null,
+      "actions": [
+        "send CANCEL"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S307-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "It is allowed for non-INVITE requests [to initiate a new transaction to a peer while another is in progress], disallowed for INVITE.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S307",
+      "object_name": "INVITE transaction",
+      "field_name": "concurrent_invite_transaction",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "A UA cannot initiate a new INVITE transaction while another INVITE transaction is in progress; non-INVITE concurrent transactions are allowed"
+    },
+    {
+      "statement_id": "D-S307-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Proxies no longer forward a 6xx immediately on receiving it. Instead, they CANCEL pending branches immediately. In all cases except this race condition, the result will be the same - the 6xx is forwarded upstream.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S307",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "6xx response received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "CANCEL all pending branches immediately",
+        "forward 6xx upstream"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S307-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "In RFC 2543, a proxy was not required to forward provisional responses from 101 to 199 upstream. This was changed to MUST.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S307",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "provisional response (101-199) received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "forward provisional response upstream"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S307-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "receipt of a 503 should trigger an attempt to contact the next element in the result of a DNS SRV lookup.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S307",
+      "actors": [
+        "UAC",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "503 response received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "attempt contact with next element from DNS SRV lookup result"
+      ],
+      "modality": "should"
+    }
+  ]
+}

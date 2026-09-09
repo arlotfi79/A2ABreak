@@ -1,0 +1,528 @@
+{
+  "section_id": "S080",
+  "title": "S080 13.10 REDIRECT",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S080 13.10 REDIRECT"
+  ],
+  "url_anchor": "#s080-1310-redirect",
+  "word_count": 929,
+  "statement_count": 21,
+  "elapsed_seconds": 393.38,
+  "statements": [
+    {
+      "statement_id": "N-S080-1",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The REDIRECT request SHALL contain a Terminate-Reason header (Section 18.52) to inform the client of the reason for the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "shall",
+      "id": "N-S080-001"
+    },
+    {
+      "statement_id": "N-S080-2",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Any intervening proxies SHOULD NOT disconnect the control channel while there are other remaining end-to-end sessions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_with_Session_header_received",
+      "pre_cond": "session.end_to_end_remaining > 0",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S080-002"
+    },
+    {
+      "statement_id": "N-S080-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The REQUIRED Location header MUST contain a complete absolute URI pointing to the resource to which the client SHOULD reconnect.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_with_Session_header_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "client reconnects to absolute URI in Location header"
+      ],
+      "modality": "must",
+      "id": "N-S080-003"
+    },
+    {
+      "statement_id": "N-S080-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "Specifically, the Location MUST NOT contain just the host and port.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S080-004"
+    },
+    {
+      "statement_id": "N-S080-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A client may receive a REDIRECT request with a Session header, if and only if, an end-to-end session has been established.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "established",
+      "to_state": null,
+      "trigger": "REDIRECT_with_Session_header_received",
+      "pre_cond": "session.state = established",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S080-005"
+    },
+    {
+      "statement_id": "N-S080-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A REDIRECT request without a Session header indicates that all sessions and pending requests being managed via the connection MUST be redirected.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_without_Session_header_received",
+      "pre_cond": null,
+      "post_cond": "session.all_connection_sessions.redirected = true & connection.pending_requests.redirected = true",
+      "actions": [
+        "redirect all sessions managed via connection",
+        "redirect all pending requests managed via connection"
+      ],
+      "modality": "must",
+      "id": "N-S080-006"
+    },
+    {
+      "statement_id": "N-S080-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The Location header, if included in such a request, SHOULD contain an absolute URI with only the host address and the OPTIONAL port number of the server to which the RTSP agent SHOULD reconnect.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server",
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_without_Session_header_received",
+      "pre_cond": "REDIRECT.Location_header = present",
+      "post_cond": null,
+      "actions": [
+        "RTSP agent reconnects to server at host address in Location URI"
+      ],
+      "modality": "should",
+      "id": "N-S080-007"
+    },
+    {
+      "statement_id": "N-S080-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Any intervening proxies SHOULD do all of the following in the order listed: 1. respond to the REDIRECT request 2. disconnect the control channel from the requesting server 3. connect to the server at the given host address 4. pass the REDIRECT request to each applicable client (typically those clients with an active session or an unanswered request)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "proxy",
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_without_Session_header_received",
+      "pre_cond": null,
+      "post_cond": "proxy.connected_to_new_server = true",
+      "actions": [
+        "respond to REDIRECT request",
+        "disconnect control channel from requesting server",
+        "connect to server at given host address",
+        "pass REDIRECT request to each applicable client"
+      ],
+      "modality": "should",
+      "id": "N-S080-008"
+    },
+    {
+      "statement_id": "N-S080-9",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "these responses MUST NOT be passed on to either the original server or the redirected server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_response_received_from_client",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S080-009"
+    },
+    {
+      "statement_id": "N-S080-10",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server that needs to terminate a session or all its sessions and lacks an alternative server to redirect to, SHALL instead use TEARDOWN requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_termination_needed",
+      "pre_cond": "server.alternative_server = null",
+      "post_cond": null,
+      "actions": [
+        "send TEARDOWN requests to sessions"
+      ],
+      "modality": "shall",
+      "id": "N-S080-010"
+    },
+    {
+      "statement_id": "N-S080-11",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "When no Terminate-Reason \"time\" parameter is included in a REDIRECT request, the client SHALL perform the redirection immediately and return a response to the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_received_without_time_param",
+      "pre_cond": "REDIRECT.Terminate_Reason.time_param = null",
+      "post_cond": null,
+      "actions": [
+        "perform redirection immediately",
+        "return response to server"
+      ],
+      "modality": "shall",
+      "id": "N-S080-011"
+    },
+    {
+      "statement_id": "N-S080-12",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server shall consider the session to be terminated and can free any associated state after it receives the successful (2xx) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "terminated",
+      "trigger": "2xx_response_received",
+      "pre_cond": null,
+      "post_cond": "session.state = terminated",
+      "actions": [
+        "consider session terminated",
+        "free associated session state"
+      ],
+      "modality": "shall",
+      "id": "N-S080-012"
+    },
+    {
+      "statement_id": "N-S080-13",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "The server MAY close the signaling connection upon receiving the response, and the client SHOULD close the signaling connection after sending the 2xx response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "closed",
+      "trigger": "REDIRECT_2xx_response_exchanged",
+      "pre_cond": null,
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "server: optionally close signaling connection upon receiving 2xx response",
+        "client: close signaling connection after sending 2xx response"
+      ],
+      "modality": "should",
+      "id": "N-S080-013"
+    },
+    {
+      "statement_id": "N-S080-14",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "In this case, the client SHOULD close the connection when it has received and responded to REDIRECT requests for all the sessions managed by the signaling connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "closed",
+      "trigger": "all_session_REDIRECTs_responded",
+      "pre_cond": "client.pending_redirect_sessions_on_connection = 0",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "close signaling connection"
+      ],
+      "modality": "should",
+      "id": "N-S080-014"
+    },
+    {
+      "statement_id": "N-S080-15",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "rtsp_fsm",
+      "description": "The Terminate-Reason header \"time\" parameter MAY be used to indicate the wallclock time by which the redirection MUST have taken place.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_with_time_param_sent",
+      "pre_cond": "REDIRECT.Terminate_Reason.time_param != null",
+      "post_cond": null,
+      "actions": [
+        "set redirect deadline timer to Terminate-Reason time parameter value"
+      ],
+      "modality": "may",
+      "id": "N-S080-015"
+    },
+    {
+      "statement_id": "N-S080-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "To allow a client to determine that redirect time without being time synchronized with the server, the server MUST include a Date header in the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_with_time_param_sent",
+      "pre_cond": "REDIRECT.Terminate_Reason.time_param != null",
+      "post_cond": null,
+      "actions": [
+        "include Date header in REDIRECT request"
+      ],
+      "modality": "must",
+      "id": "N-S080-016"
+    },
+    {
+      "statement_id": "N-S080-17",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MAY simply cease to provide service when the deadline time has been reached, or it can issue a TEARDOWN requests to the remaining sessions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "redirect_deadline_reached",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "cease to provide service",
+        "issue TEARDOWN requests to remaining sessions"
+      ],
+      "modality": "may",
+      "id": "N-S080-017"
+    },
+    {
+      "statement_id": "N-S080-18",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the REDIRECT request times out following the rules in Section 10.4, the server MAY terminate the session or transport connection that would be redirected by the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "terminated",
+      "trigger": "REDIRECT_request_timeout",
+      "pre_cond": "REDIRECT.timed_out = true",
+      "post_cond": null,
+      "actions": [
+        "terminate session or transport connection"
+      ],
+      "modality": "may",
+      "id": "N-S080-018"
+    },
+    {
+      "statement_id": "N-S080-19",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If the URI given in the Location header is a valid resource URI, a client SHOULD issue a DESCRIBE request for the URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_processed",
+      "pre_cond": "Location.URI = valid_resource_URI",
+      "post_cond": null,
+      "actions": [
+        "issue DESCRIBE request for Location URI"
+      ],
+      "modality": "should",
+      "id": "N-S080-019"
+    },
+    {
+      "statement_id": "N-S080-20",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "This is the reason why a new DESCRIBE request SHOULD be issued.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_processed",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "issue new DESCRIBE request"
+      ],
+      "modality": "should",
+      "id": "N-S080-020"
+    },
+    {
+      "statement_id": "N-S080-21",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "the usage of conditional SETUP using MTag identifiers is RECOMMENDED as a means to verify the assumption.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S080",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_session_setup_after_redirect",
+      "pre_cond": "Location.contains_host_only = true",
+      "post_cond": null,
+      "actions": [
+        "use conditional SETUP with MTag identifiers to verify media configuration"
+      ],
+      "modality": "should",
+      "id": "N-S080-021"
+    }
+  ]
+}

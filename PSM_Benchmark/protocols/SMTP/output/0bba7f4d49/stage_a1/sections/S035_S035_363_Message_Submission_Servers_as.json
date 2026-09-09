@@ -1,0 +1,106 @@
+{
+  "section_id": "S035",
+  "title": "S035 3.6.3 Message Submission Servers as Relays",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S035 3.6.3 Message Submission Servers as Relays"
+  ],
+  "url_anchor": "#s035-363-message-submission-servers-as-relays",
+  "word_count": 398,
+  "statement_count": 4,
+  "elapsed_seconds": 35.22,
+  "statements": [
+    {
+      "statement_id": "D-S035-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If an SMTP server has accepted the task of relaying the mail and later finds that the destination is incorrect or that the mail cannot be delivered for some other reason, then it MUST construct an 'undeliverable mail' notification message and send it to the originator of the undeliverable mail (as indicated by the reverse-path).",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S035",
+      "actors": [
+        "server"
+      ],
+      "from_state": "relay accepted",
+      "to_state": "undeliverable notification pending",
+      "trigger": "delivery cannot be accomplished",
+      "pre_cond": "server.relay_accepted = true & server.delivery_possible = false",
+      "post_cond": "server.ndr_sent = true",
+      "actions": [
+        "construct undeliverable mail notification message",
+        "send notification to originator at reverse-path"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S035-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "When such a message is transmitted, the reverse-path MUST be set to null. A MAIL command with a null reverse-path appears as follows: MAIL FROM:<>",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "object_name": "notification message MAIL command",
+      "field_name": "reverse-path",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "<>"
+      ],
+      "guard_semantics": "transaction.message_type = notification"
+    },
+    {
+      "statement_id": "D-S035-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "SMTP servers MUST NOT send notification messages about problems transporting notification messages. One way to prevent loops in error reporting is to specify a null reverse-path in the MAIL command of a notification message.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S035",
+      "actors": [
+        "server"
+      ],
+      "from_state": "undeliverable notification pending",
+      "to_state": null,
+      "trigger": "notification delivery failure detected",
+      "pre_cond": "transaction.message_type = notification",
+      "post_cond": null,
+      "actions": [
+        "suppress further notification message generation"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S035-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "A relay SMTP has no need to inspect or act upon the header section or body of the message data and MUST NOT do so except to add its own 'Received:' header field and, optionally, to attempt to detect looping in the mail system.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S035",
+      "actors": [
+        "server"
+      ],
+      "from_state": "relay accepted",
+      "to_state": null,
+      "trigger": "forwarding relayed message",
+      "pre_cond": "server.role = relay",
+      "post_cond": "message.received_header_added = true",
+      "actions": [
+        "add Received header field",
+        "do not inspect message header section or body",
+        "do not modify message header fields or text"
+      ],
+      "modality": "must"
+    }
+  ]
+}

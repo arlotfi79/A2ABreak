@@ -1,0 +1,306 @@
+{
+  "section_id": "S289",
+  "title": "S289 26.3.2.1 Registration",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S289 26.3.2.1 Registration"
+  ],
+  "url_anchor": "#s289-26321-registration",
+  "word_count": 471,
+  "statement_count": 12,
+  "elapsed_seconds": 118.21,
+  "statements": [
+    {
+      "statement_id": "N-S289-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When a UA comes online and registers with its local administrative domain, it SHOULD establish a TLS connection with its registrar (Section 10 describes how the UA reaches its registrar).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "UA",
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": "TLS_connected",
+      "trigger": "UA_registration_initiated",
+      "pre_cond": "ua.online = true & ua.registering = true",
+      "post_cond": "tls_connection.established = true",
+      "actions": [
+        "establish TLS connection with registrar"
+      ],
+      "modality": "should",
+      "id": "N-S289-001"
+    },
+    {
+      "statement_id": "N-S289-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The registrar SHOULD offer a certificate to the UA, and the site identified by the certificate MUST correspond with the domain in which the UA intends to register; for example, if the UA intends to register the address-of-record 'alice@atlanta.com', the site certificate must identify a host within the atlanta.com domain (such as sip.atlanta.com).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "registrar",
+        "UA"
+      ],
+      "from_state": "TLS_connected",
+      "to_state": null,
+      "trigger": "TLS_connection_established",
+      "pre_cond": "tls_connection.established = true",
+      "post_cond": "registrar.certificate.offered = true",
+      "actions": [
+        "offer TLS certificate to UA"
+      ],
+      "modality": "should",
+      "id": "N-S289-002"
+    },
+    {
+      "statement_id": "N-S289-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The registrar SHOULD offer a certificate to the UA, and the site identified by the certificate MUST correspond with the domain in which the UA intends to register; for example, if the UA intends to register the address-of-record 'alice@atlanta.com', the site certificate must identify a host within the atlanta.com domain (such as sip.atlanta.com).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "registrar",
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "certificate.site_domain = ua.intended_registration_domain",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S289-003"
+    },
+    {
+      "statement_id": "N-S289-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When it receives the TLS Certificate message, the UA SHOULD verify the certificate and inspect the site identified by the certificate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "UA"
+      ],
+      "from_state": "TLS_connected",
+      "to_state": null,
+      "trigger": "TLS_Certificate_message_received",
+      "pre_cond": "tls_connection.established = true",
+      "post_cond": "certificate.verified = true",
+      "actions": [
+        "verify certificate",
+        "inspect site identified by certificate"
+      ],
+      "modality": "should",
+      "id": "N-S289-004"
+    },
+    {
+      "statement_id": "N-S289-5",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the certificate is invalid, revoked, or if it does not identify the appropriate party, the UA MUST NOT send the REGISTER message and otherwise proceed with the registration.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "UA"
+      ],
+      "from_state": "TLS_connected",
+      "to_state": null,
+      "trigger": "certificate_validation_failed",
+      "pre_cond": "certificate.invalid = true | certificate.revoked = true | certificate.wrong_party = true",
+      "post_cond": "register.sent = false & registration.aborted = true",
+      "actions": [
+        "abort REGISTER transmission",
+        "abort registration process"
+      ],
+      "modality": "must",
+      "id": "N-S289-005"
+    },
+    {
+      "statement_id": "N-S289-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The UA then creates a REGISTER request that SHOULD be addressed to a Request-URI corresponding to the site certificate received from the registrar.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "UA",
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "certificate_validated",
+      "pre_cond": "certificate.valid = true",
+      "post_cond": "register.request_uri = site_certificate.domain",
+      "actions": [
+        "set REGISTER Request-URI to domain identified by site certificate"
+      ],
+      "modality": "should",
+      "id": "N-S289-006"
+    },
+    {
+      "statement_id": "N-S289-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When the UA sends the REGISTER request over the existing TLS connection, the registrar SHOULD challenge the request with a 401 (Proxy Authentication Required) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "registrar",
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REGISTER_received_over_TLS",
+      "pre_cond": "tls_connection.established = true & register.received = true",
+      "post_cond": "challenge.sent = true",
+      "actions": [
+        "send 401 Proxy Authentication Required response"
+      ],
+      "modality": "should",
+      "id": "N-S289-007"
+    },
+    {
+      "statement_id": "N-S289-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The \"realm\" parameter within the Proxy-Authenticate header field of the response SHOULD correspond to the domain previously given by the site certificate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "response.proxy_authenticate.realm = site_certificate.domain",
+      "actions": [],
+      "modality": "should",
+      "id": "N-S289-008"
+    },
+    {
+      "statement_id": "N-S289-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When the UAC receives the challenge, it SHOULD either prompt the user for credentials or take an appropriate credential from a keyring corresponding to the \"realm\" parameter in the challenge.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "401_challenge_received",
+      "pre_cond": "challenge.received = true",
+      "post_cond": "credentials.obtained = true",
+      "actions": [
+        "prompt user for credentials or retrieve credential from keyring matching challenge realm"
+      ],
+      "modality": "should",
+      "id": "N-S289-009"
+    },
+    {
+      "statement_id": "N-S289-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The username of this credential SHOULD correspond with the \"userinfo\" portion of the URI in the To header field of the REGISTER request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "credential.username = register.to_uri.userinfo",
+      "actions": [],
+      "modality": "should",
+      "id": "N-S289-010"
+    },
+    {
+      "statement_id": "N-S289-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Once the Digest credentials have been inserted into an appropriate Proxy-Authorization header field, the REGISTER should be resubmitted to the registrar.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S289",
+      "actors": [
+        "UAC",
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Digest_credentials_inserted_in_Proxy_Authorization",
+      "pre_cond": "proxy_authorization.credentials_inserted = true",
+      "post_cond": "register.resubmitted = true",
+      "actions": [
+        "resubmit REGISTER request with Proxy-Authorization header containing Digest credentials"
+      ],
+      "modality": "should",
+      "id": "N-S289-011"
+    },
+    {
+      "statement_id": "N-S289-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Once the registration has been accepted by the registrar, the UA SHOULD leave this TLS connection open provided that the registrar also acts as the proxy server to which requests are sent for users in this administrative domain.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S289",
+      "actors": [
+        "UA",
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": "TLS_connection_retained",
+      "trigger": "registration_accepted",
+      "pre_cond": "registration.accepted = true & registrar.acts_as_proxy = true",
+      "post_cond": "tls_connection.open = true",
+      "actions": [
+        "retain existing TLS connection open for subsequent inbound request delivery"
+      ],
+      "modality": "should",
+      "id": "N-S289-012"
+    }
+  ]
+}

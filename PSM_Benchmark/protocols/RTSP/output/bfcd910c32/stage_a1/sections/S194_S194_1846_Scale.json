@@ -1,0 +1,97 @@
+{
+  "section_id": "S194",
+  "title": "S194 18.46 Scale",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S194 18.46 Scale"
+  ],
+  "url_anchor": "#s194-1846-scale",
+  "word_count": 389,
+  "statement_count": 4,
+  "elapsed_seconds": 28.47,
+  "statements": [
+    {
+      "statement_id": "D-S194-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "When indicating a negative scale for a reverse playback, the Range header MUST indicate a decreasing range as described in Section 18.40.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S194",
+      "object_name": "PLAY request with negative Scale",
+      "field_name": "Range",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": "decreasing range",
+      "guard_semantics": "Scale < 0"
+    },
+    {
+      "statement_id": "D-S194-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server supporting scale operations for PLAY MUST indicate this with the use of the 'play.scale' feature tag.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S194",
+      "object_name": "server capability advertisement",
+      "field_name": "play.scale",
+      "field_type": "feature tag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "server supports Scale during PLAY"
+    },
+    {
+      "statement_id": "D-S194-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A non-supported scale value in a request does not generate an error; it only forces the server to choose the closest value. The response MUST always contain the actual scale value chosen by the server.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S194",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY request with Scale value",
+      "pre_cond": "protocol.state = Play",
+      "post_cond": "response.Scale = server_chosen_scale",
+      "actions": [
+        "server selects closest supported scale value",
+        "server includes actual Scale value in response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S194-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the server does not implement the possibility to scale, it will not return a Scale header.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S194",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY response when scale not supported",
+      "pre_cond": "server.supports_scale = false",
+      "post_cond": "response.Scale = null",
+      "actions": [
+        "server omits Scale header from response"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

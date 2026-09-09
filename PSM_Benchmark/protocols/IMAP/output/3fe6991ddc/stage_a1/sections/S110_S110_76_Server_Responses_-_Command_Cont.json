@@ -1,0 +1,84 @@
+{
+  "section_id": "S110",
+  "title": "S110 7.6 Server Responses - Command Continuation Request",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S110 7.6 Server Responses - Command Continuation Request"
+  ],
+  "url_anchor": "#s110-76-server-responses---command-continuation-request",
+  "word_count": 202,
+  "statement_count": 3,
+  "elapsed_seconds": 35.01,
+  "statements": [
+    {
+      "statement_id": "D-S110-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "This form of response indicates that the server is ready to accept the continuation of a command from the client. This response is used in the AUTHENTICATE command to transmit server data to the client and request additional client data. This response is also used if an argument to any command is a synchronizing literal.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S110",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_continuation_request",
+      "pre_cond": "command.has_synchronizing_literal = true | command.name = AUTHENTICATE",
+      "post_cond": "server.awaiting_client_continuation = true",
+      "actions": [
+        "server sends '+' response",
+        "server transmits optional continuation text"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S110-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The client is not permitted to send the octets of the synchronizing literal unless the server indicates that it is expected.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S110",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_sends_continuation_request",
+      "pre_cond": "server.awaiting_client_continuation = true",
+      "post_cond": "client.sent_literal_octets = true",
+      "actions": [
+        "client sends synchronizing literal octets",
+        "client sends remainder of command including CRLF"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S110-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "The command continuation request response is indicated by a '+' token instead of a tag.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S110",
+      "object_name": "command_continuation_request",
+      "field_name": "response_token",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "+"
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

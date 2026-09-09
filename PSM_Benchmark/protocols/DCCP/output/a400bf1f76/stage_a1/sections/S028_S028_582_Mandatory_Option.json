@@ -1,0 +1,78 @@
+{
+  "section_id": "S028",
+  "title": "S028 5.8.2 Mandatory Option",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S028 5.8.2 Mandatory Option"
+  ],
+  "url_anchor": "#s028-582-mandatory-option",
+  "word_count": 243,
+  "statement_count": 3,
+  "elapsed_seconds": 19.17,
+  "statements": [
+    {
+      "statement_id": "D-S028-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "If the endpoint does not understand or process O, however, then it MUST reset the connection using Reset Code 6, \"Mandatory Failure\".",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S028",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "Mandatory option received and following option O not understood or not processed",
+      "pre_cond": "mandatory_option.received = true & option_O.understood = false",
+      "post_cond": "connection.reset = true & reset_code = 6",
+      "actions": [
+        "send Reset with Reset Code 6 (Mandatory Failure)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S028-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "The connection is in error and should be reset with Reset Code 5, \"Option Error\", if option O is absent (Mandatory was the last byte of the option list), or if option O equals Mandatory.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S028",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "Mandatory option received and O is absent or O equals Mandatory",
+      "pre_cond": "mandatory_option.received = true & (option_O.present = false | option_O.type = Mandatory)",
+      "post_cond": "connection.reset = true & reset_code = 5",
+      "actions": [
+        "send Reset with Reset Code 5 (Option Error)"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S028-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "Mandatory options MUST NOT be sent on DCCP-Data packets, and any Mandatory options received on DCCP-Data packets MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "object_name": "DCCP-Data packet",
+      "field_name": "Mandatory option",
+      "field_type": "option",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "Mandatory option is prohibited on DCCP-Data packets; if received, must be ignored"
+    }
+  ]
+}

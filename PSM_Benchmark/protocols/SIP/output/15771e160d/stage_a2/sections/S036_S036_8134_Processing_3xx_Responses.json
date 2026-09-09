@@ -1,0 +1,380 @@
+{
+  "section_id": "S036",
+  "title": "S036 8.1.3.4 Processing 3xx Responses",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S036 8.1.3.4 Processing 3xx Responses"
+  ],
+  "url_anchor": "#s036-8134-processing-3xx-responses",
+  "word_count": 765,
+  "statement_count": 15,
+  "elapsed_seconds": 165.28,
+  "statements": [
+    {
+      "statement_id": "N-S036-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Upon receipt of a redirection response (for example, a 301 response status code), clients SHOULD use the URI(s) in the Contact header field to formulate one or more new requests based on the redirected request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_3xx_response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "formulate new requests using URIs from Contact header field"
+      ],
+      "modality": "should",
+      "id": "N-S036-001"
+    },
+    {
+      "statement_id": "N-S036-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "As with proxy recursion, a client processing 3xx class responses MUST NOT add any given URI to the target set more than once.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "3xx_response_processing",
+      "pre_cond": "uri.already_in_target_set = true",
+      "post_cond": null,
+      "actions": [
+        "reject duplicate URI addition to target set"
+      ],
+      "modality": "must",
+      "id": "N-S036-002"
+    },
+    {
+      "statement_id": "N-S036-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the original request had a SIPS URI in the Request-URI, the client MAY choose to recurse to a non-SIPS URI, but SHOULD inform the user of the redirection to an insecure URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_3xx_response",
+      "pre_cond": "original_request.request_uri.scheme = SIPS",
+      "post_cond": null,
+      "actions": [
+        "recurse to non-SIPS URI"
+      ],
+      "modality": "may",
+      "id": "N-S036-003"
+    },
+    {
+      "statement_id": "N-S036-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the original request had a SIPS URI in the Request-URI, the client MAY choose to recurse to a non-SIPS URI, but SHOULD inform the user of the redirection to an insecure URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "redirect_to_non_sips_uri",
+      "pre_cond": "original_request.request_uri.scheme = SIPS & redirect_target.scheme != SIPS",
+      "post_cond": null,
+      "actions": [
+        "inform user of redirection to insecure URI"
+      ],
+      "modality": "should",
+      "id": "N-S036-004"
+    },
+    {
+      "statement_id": "N-S036-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "As the target set grows, the client MAY generate new requests to the URIs in any order.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "target_set_populated",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "generate new requests to URIs in target set in any order"
+      ],
+      "modality": "may",
+      "id": "N-S036-005"
+    },
+    {
+      "statement_id": "N-S036-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Requests to the URIs MAY be generated serially or in parallel.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S036-006"
+    },
+    {
+      "statement_id": "N-S036-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Failures SHOULD be detected through failure response codes (codes greater than 399); for network errors the client transaction will report any transport layer failures to the transaction user.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "client",
+        "client transaction",
+        "transaction user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_received",
+      "pre_cond": "response.code > 399",
+      "post_cond": "contact_address.status = failed",
+      "actions": [
+        "detect failure via response code greater than 399"
+      ],
+      "modality": "should",
+      "id": "N-S036-007"
+    },
+    {
+      "statement_id": "N-S036-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When a failure for a particular contact address is received, the client SHOULD try the next contact address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "contact_address_failure",
+      "pre_cond": "target_set.has_next_address = true",
+      "post_cond": null,
+      "actions": [
+        "try next contact address",
+        "create new client transaction to deliver new request"
+      ],
+      "modality": "should",
+      "id": "N-S036-008"
+    },
+    {
+      "statement_id": "N-S036-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "a UAC MUST copy the entire URI from the target set into the Request-URI, except for the \"method-param\" and \"header\" URI parameters (see Section 19.1.1 for a definition of these parameters).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_request_creation_from_3xx",
+      "pre_cond": null,
+      "post_cond": "new_request.request_uri = contact_uri.excluding(method_param, header_param)",
+      "actions": [
+        "copy entire URI from target set into Request-URI",
+        "exclude method-param and header URI parameters from copy"
+      ],
+      "modality": "must",
+      "id": "N-S036-009"
+    },
+    {
+      "statement_id": "N-S036-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "As a general rule, if the header field can accept a comma-separated list of values, then the new header field value MAY be appended to any existing values in the original redirected request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_request_construction_from_3xx",
+      "pre_cond": "header_field.accepts_list_values = true",
+      "post_cond": null,
+      "actions": [
+        "append new header field value to existing values in original redirected request"
+      ],
+      "modality": "may",
+      "id": "N-S036-010"
+    },
+    {
+      "statement_id": "N-S036-11",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If the header field does not accept multiple values, the value in the original redirected request MAY be overwritten by the header field value communicated in the contact address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_request_construction_from_3xx",
+      "pre_cond": "header_field.accepts_multiple_values = false",
+      "post_cond": null,
+      "actions": [
+        "overwrite header field value with value communicated in contact address"
+      ],
+      "modality": "may",
+      "id": "N-S036-011"
+    },
+    {
+      "statement_id": "N-S036-12",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "It is RECOMMENDED that the UAC reuse the same To, From, and Call-ID used in the original redirected request, but the UAC MAY also choose to update the Call-ID header field value for new requests, for example.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_request_construction_from_3xx",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "reuse To header from original redirected request",
+        "reuse From header from original redirected request",
+        "reuse Call-ID from original redirected request"
+      ],
+      "modality": "should",
+      "id": "N-S036-012"
+    },
+    {
+      "statement_id": "N-S036-13",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "It is RECOMMENDED that the UAC reuse the same To, From, and Call-ID used in the original redirected request, but the UAC MAY also choose to update the Call-ID header field value for new requests, for example.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_request_construction_from_3xx",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "update Call-ID header field value for new request"
+      ],
+      "modality": "may",
+      "id": "N-S036-013"
+    },
+    {
+      "statement_id": "N-S036-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Finally, once the new request has been constructed, it is sent using a new client transaction, and therefore MUST have a new branch ID in the top Via field as discussed in Section 8.1.1.7.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "UAC",
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_request_sent_via_new_client_transaction",
+      "pre_cond": null,
+      "post_cond": "new_transaction.top_via.branch_id = new_unique_value",
+      "actions": [
+        "assign new branch ID to top Via field of new request"
+      ],
+      "modality": "must",
+      "id": "N-S036-014"
+    },
+    {
+      "statement_id": "N-S036-15",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "In all other respects, requests sent upon receipt of a redirect response SHOULD re-use the header fields and bodies of the original request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "redirect_response_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "re-use header fields and bodies from original request in new request"
+      ],
+      "modality": "should",
+      "id": "N-S036-015"
+    }
+  ]
+}

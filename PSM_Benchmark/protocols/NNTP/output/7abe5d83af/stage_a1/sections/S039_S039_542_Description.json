@@ -1,0 +1,105 @@
+{
+  "section_id": "S039",
+  "title": "S039 5.4.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S039 5.4.2 Description"
+  ],
+  "url_anchor": "#s039-542-description",
+  "word_count": 104,
+  "statement_count": 4,
+  "elapsed_seconds": 26.34,
+  "statements": [
+    {
+      "statement_id": "D-S039-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "The client uses the QUIT command to terminate the session. The server MUST acknowledge the QUIT command and then close the connection to the client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S039",
+      "state_name": "DISCONNECTED",
+      "enum_name": "SessionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S039-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "The client uses the QUIT command to terminate the session. The server MUST acknowledge the QUIT command and then close the connection to the client. Server responds 205.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S039",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "DISCONNECTED",
+      "trigger": "QUIT_command_received",
+      "pre_cond": "command.arguments = null",
+      "post_cond": "session.terminated = true & connection.closed = true",
+      "actions": [
+        "send_response_205",
+        "close_connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S039-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "The server MUST NOT generate any response code to the QUIT command other than 205 or, if any arguments are provided, 501.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S039",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "QUIT_command_with_arguments_received",
+      "pre_cond": "command.arguments != null",
+      "post_cond": "session.terminated = false",
+      "actions": [
+        "send_response_501"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S039-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "If a client simply disconnects (or if the connection times out or some other fault occurs), the server MUST gracefully cease its attempts to service the client, disconnecting from its end if necessary.",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S039",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "DISCONNECTED",
+      "trigger": "client_disconnect_or_timeout_or_fault",
+      "pre_cond": null,
+      "post_cond": "session.terminated = true",
+      "actions": [
+        "cease_servicing_client",
+        "close_connection"
+      ],
+      "modality": "must"
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "section_id": "S055",
+  "title": "S055 6.3.4 CREATE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S055 6.3.4 CREATE Command"
+  ],
+  "url_anchor": "#s055-634-create-command",
+  "word_count": 507,
+  "statement_count": 6,
+  "elapsed_seconds": 42.08,
+  "statements": [
+    {
+      "statement_id": "D-S055-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: OK - create completed",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S055",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE command succeeds",
+      "pre_cond": null,
+      "post_cond": "mailbox.created = true",
+      "actions": [
+        "send tagged OK response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S055-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: NO - create failure: can't create mailbox with that name. Any error in creation will return a tagged NO response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S055",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE command fails",
+      "pre_cond": null,
+      "post_cond": "mailbox.created = false",
+      "actions": [
+        "send tagged NO response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S055-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: BAD - command unknown or arguments invalid",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S055",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE command malformed",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send tagged BAD response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S055-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If a client attempts to create a UTF-8 mailbox name that is not a valid Net-Unicode name, the server MUST reject the creation or convert the name to Net-Unicode prior to creating the mailbox.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S055",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE with invalid Net-Unicode mailbox name",
+      "pre_cond": "mailbox.name.valid_net_unicode = false",
+      "post_cond": null,
+      "actions": [
+        "reject creation with tagged NO",
+        "convert name to Net-Unicode and proceed"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S055-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server decides to convert (normalize) the name, it SHOULD return an untagged LIST with an OLDNAME extended data item.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S055",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server normalizes mailbox name during CREATE",
+      "pre_cond": "server.normalize_name = true",
+      "post_cond": null,
+      "actions": [
+        "send untagged LIST with OLDNAME extended data item"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S055-006",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: OK - create completed / NO - create failure / BAD - command unknown or arguments invalid",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S055",
+      "object_name": "CREATE command result",
+      "field_name": "tagged response",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "OK",
+        "NO",
+        "BAD"
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

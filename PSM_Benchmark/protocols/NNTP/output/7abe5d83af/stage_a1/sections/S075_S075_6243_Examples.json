@@ -1,0 +1,205 @@
+{
+  "section_id": "S075",
+  "title": "S075 6.2.4.3 Examples",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S075 6.2.4.3 Examples"
+  ],
+  "url_anchor": "#s075-6243-examples",
+  "word_count": 336,
+  "statement_count": 8,
+  "elapsed_seconds": 40.55,
+  "statements": [
+    {
+      "statement_id": "D-S075-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of STAT on an article by number when no newsgroup was selected first: [Assumes currently selected newsgroup is invalid.] [C] STAT 300256 [S] 412 No newsgroup selected",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S075",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "No Newsgroup Selected",
+      "to_state": "No Newsgroup Selected",
+      "trigger": "STAT <article-number>",
+      "pre_cond": "session.selected_newsgroup = invalid",
+      "post_cond": null,
+      "actions": [
+        "send 412 No newsgroup selected"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S075-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of STAT on an article when the currently selected newsgroup is empty: [C] STAT [S] 420 No current article selected",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S075",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Newsgroup Selected",
+      "to_state": "Newsgroup Selected",
+      "trigger": "STAT (no argument)",
+      "pre_cond": "session.selected_newsgroup.article_count = 0 | session.current_article_pointer = invalid",
+      "post_cond": null,
+      "actions": [
+        "send 420 No current article selected"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S075-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of STAT on an article not on the server by message-id: [C] STAT <i.am.not.there@example.com> [S] 430 No Such Article Found",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S075",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "STAT <message-id>",
+      "pre_cond": "server.article_exists(message-id) = false",
+      "post_cond": null,
+      "actions": [
+        "send 430 No Such Article Found"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S075-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of STAT on an article not in the server by number: [C] STAT 300256 [S] 423 No article with that number",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S075",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Newsgroup Selected",
+      "to_state": "Newsgroup Selected",
+      "trigger": "STAT <article-number>",
+      "pre_cond": "session.selected_newsgroup.contains_article(article-number) = false",
+      "post_cond": null,
+      "actions": [
+        "send 423 No article with that number"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S075-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of STAT on an existing article (explicitly not using an article number): [C] STAT [S] 223 3000234 <45223423@example.com>",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S075",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Newsgroup Selected",
+      "to_state": "Newsgroup Selected",
+      "trigger": "STAT (no argument)",
+      "pre_cond": "session.current_article_pointer != invalid",
+      "post_cond": null,
+      "actions": [
+        "send 223 <article-number> <message-id>"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S075-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The last one shows that the current article number is still not changed by the use of STAT with a message-id even if it returns an article number.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S075",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Newsgroup Selected",
+      "to_state": "Newsgroup Selected",
+      "trigger": "STAT <message-id>",
+      "pre_cond": "server.article_exists(message-id) = true",
+      "post_cond": "session.current_article_pointer = session.current_article_pointer.pre",
+      "actions": [
+        "send 223 <article-number-or-zero> <message-id>"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S075-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The fourth STAT command shows that zero must be specified if the article isn't in the currently selected newsgroup.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S075",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "STAT <message-id>",
+      "pre_cond": "server.article_exists(message-id) = true & session.selected_newsgroup.contains_article(message-id) = false",
+      "post_cond": "response.article_number = 0",
+      "actions": [
+        "send 223 0 <message-id>"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S075-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The fifth shows that the number, if provided, must be that relating to the currently selected newsgroup.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S075",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "STAT <message-id>",
+      "pre_cond": "server.article_exists(message-id) = true & session.selected_newsgroup.contains_article(message-id) = true",
+      "post_cond": "response.article_number = session.selected_newsgroup.article_number(message-id)",
+      "actions": [
+        "send 223 <newsgroup-article-number> <message-id>"
+      ],
+      "modality": "must"
+    }
+  ]
+}

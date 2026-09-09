@@ -1,0 +1,162 @@
+{
+  "section_id": "S028",
+  "title": "S028 3.1.2 Control connection Receiver (may be PAC or PNS)",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S028 3.1.2 Control connection Receiver (may be PAC or PNS)"
+  ],
+  "url_anchor": "#s028-312-control-connection-receiver-may-be-pac-or-pns",
+  "word_count": 303,
+  "statement_count": 6,
+  "elapsed_seconds": 107.66,
+  "statements": [
+    {
+      "statement_id": "N-S028-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "pptp_fsm",
+      "description": "If the version is earlier than the receiver's version and the earlier version can be supported by the receiver, the receiver SHOULD send a Start-Control-Connection-Reply.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "idle",
+      "to_state": "established",
+      "trigger": "Start-Control-Connection-Request received with earlier but supported version",
+      "pre_cond": "receiver.state = idle & received.version < receiver.version & receiver.supports(received.version) = true",
+      "post_cond": "Start-Control-Connection-Reply.sent = true",
+      "actions": [
+        "send Start-Control-Connection-Reply"
+      ],
+      "modality": "should",
+      "id": "N-S028-001"
+    },
+    {
+      "statement_id": "N-S028-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "pptp_fsm",
+      "description": "If the version is earlier than the receiver's version and the version cannot be supported, the receiver SHOULD send a Start-Connection-Reply message, close the TCP connection and remain in the idle state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "idle",
+      "to_state": "idle",
+      "trigger": "Start-Control-Connection-Request received with unsupported earlier version",
+      "pre_cond": "receiver.state = idle & received.version < receiver.version & receiver.supports(received.version) = false",
+      "post_cond": "receiver.state = idle & TCP_connection.state = closed",
+      "actions": [
+        "send Start-Connection-Reply message",
+        "close TCP connection"
+      ],
+      "modality": "should",
+      "id": "N-S028-002"
+    },
+    {
+      "statement_id": "N-S028-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "pptp_fsm",
+      "description": "If the receiver's version is the same as earlier than the peer's, the receiver SHOULD send a Start-Control-Connection-Reply with the receiver's version and enter the established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "idle",
+      "to_state": "established",
+      "trigger": "Start-Control-Connection-Request received with matching version",
+      "pre_cond": "receiver.state = idle & received.version = receiver.version",
+      "post_cond": "receiver.state = established & Start-Control-Connection-Reply.sent = true",
+      "actions": [
+        "send Start-Control-Connection-Reply with receiver's version"
+      ],
+      "modality": "should",
+      "id": "N-S028-003"
+    },
+    {
+      "statement_id": "N-S028-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "pptp_fsm",
+      "description": "In the event of a local termination, the originator MUST send a Stop-Control-Connection-Request and enter the wait_stop_reply state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "established",
+      "to_state": "wait_stop_reply",
+      "trigger": "local termination condition",
+      "pre_cond": "originator.state = established & local_termination = true",
+      "post_cond": "originator.state = wait_stop_reply & Stop-Control-Connection-Request.sent = true",
+      "actions": [
+        "send Stop-Control-Connection-Request"
+      ],
+      "modality": "must",
+      "id": "N-S028-004"
+    },
+    {
+      "statement_id": "N-S028-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "pptp_fsm",
+      "description": "If the originator receives a Stop-Control-Connection-Request it SHOULD send a Stop-Control-Connection-Reply and close the TCP connection, making sure that the final TCP information has been \"pushed\" properly.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "Stop-Control-Connection-Request received",
+      "pre_cond": "originator.state = established",
+      "post_cond": "Stop-Control-Connection-Reply.sent = true & TCP_connection.state = closed",
+      "actions": [
+        "send Stop-Control-Connection-Reply",
+        "close TCP connection",
+        "ensure final TCP data is pushed"
+      ],
+      "modality": "should",
+      "id": "N-S028-005"
+    },
+    {
+      "statement_id": "N-S028-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If a Stop-Control-Connection-Reply is received, the TCP connection SHOULD be closed and the control connection becomes idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "wait_stop_reply",
+      "to_state": "idle",
+      "trigger": "Stop-Control-Connection-Reply received",
+      "pre_cond": "connection.state = wait_stop_reply",
+      "post_cond": "TCP_connection.state = closed & connection.state = idle",
+      "actions": [
+        "close TCP connection"
+      ],
+      "modality": "should",
+      "id": "N-S028-006"
+    }
+  ]
+}

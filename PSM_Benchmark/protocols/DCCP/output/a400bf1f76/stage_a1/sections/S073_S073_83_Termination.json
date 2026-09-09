@@ -1,0 +1,502 @@
+{
+  "section_id": "S073",
+  "title": "S073 8.3 Termination",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S073 8.3 Termination"
+  ],
+  "url_anchor": "#s073-83-termination",
+  "word_count": 498,
+  "statement_count": 23,
+  "elapsed_seconds": 312.16,
+  "statements": [
+    {
+      "statement_id": "D-S073-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "The server moves from the OPEN state, possibly through the CLOSEREQ state, to CLOSED; the client moves from OPEN through CLOSING to TIMEWAIT.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "state_name": "OPEN",
+      "enum_name": "DCCP_CONNECTION_STATE",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OPEN"
+    },
+    {
+      "statement_id": "D-S073-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server moves from the OPEN state, possibly through the CLOSEREQ state, to CLOSED. Only the server can send a DCCP-CloseReq packet or enter the CLOSEREQ state. Endpoints in the CLOSEREQ state MUST retransmit DCCP-CloseReq packets until leaving that state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "state_name": "CLOSEREQ",
+      "enum_name": "DCCP_CONNECTION_STATE",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = CLOSEREQ & endpoint.role = server"
+    },
+    {
+      "statement_id": "D-S073-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "The client moves from OPEN through CLOSING to TIMEWAIT. Endpoints in the CLOSING state MUST retransmit DCCP-Close packets until leaving that state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "state_name": "CLOSING",
+      "enum_name": "DCCP_CONNECTION_STATE",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = CLOSING"
+    },
+    {
+      "statement_id": "D-S073-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "TIMEWAIT state, where an endpoint quietly preserves a socket for 2MSL (4 minutes) after its connection has closed, ensures that no connection duplicating the current connection's source and destination addresses and ports can start up while old packets might remain in the network.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "state_name": "TIMEWAIT",
+      "enum_name": "DCCP_CONNECTION_STATE",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TIMEWAIT"
+    },
+    {
+      "statement_id": "D-S073-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "DCCP implementations generally transition to the CLOSED state after sending a DCCP-Reset packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "state_name": "CLOSED",
+      "enum_name": "DCCP_CONNECTION_STATE",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = CLOSED"
+    },
+    {
+      "statement_id": "D-S073-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Scenario 1, step 1: Server moves from OPEN to CLOSEREQ and sends DCCP-CloseReq when it decides to close the connection without holding TIMEWAIT state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S073",
+      "actors": [
+        "server"
+      ],
+      "from_state": "OPEN",
+      "to_state": "CLOSEREQ",
+      "trigger": "server_decides_close",
+      "pre_cond": "protocol.state = OPEN & endpoint.role = server",
+      "post_cond": "protocol.state = CLOSEREQ",
+      "actions": [
+        "send DCCP-CloseReq"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S073-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "Scenario 1, step 2: Client moves from OPEN to CLOSING upon receiving DCCP-CloseReq, and sends DCCP-Close.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S073",
+      "actors": [
+        "client"
+      ],
+      "from_state": "OPEN",
+      "to_state": "CLOSING",
+      "trigger": "receive_DCCP-CloseReq",
+      "pre_cond": "protocol.state = OPEN & endpoint.role = client",
+      "post_cond": "protocol.state = CLOSING",
+      "actions": [
+        "send DCCP-Close"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S073-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Scenario 1, step 3: Server moves from CLOSEREQ to CLOSED upon receiving DCCP-Close, and sends DCCP-Reset.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S073",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CLOSEREQ",
+      "to_state": "CLOSED",
+      "trigger": "receive_DCCP-Close",
+      "pre_cond": "protocol.state = CLOSEREQ & endpoint.role = server",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "send DCCP-Reset with Reset Code 1 Closed"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S073-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "Scenarios 1 and 2: Client moves from CLOSING to TIMEWAIT upon receiving DCCP-Reset.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S073",
+      "actors": [
+        "client"
+      ],
+      "from_state": "CLOSING",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive_DCCP-Reset",
+      "pre_cond": "protocol.state = CLOSING & endpoint.role = client",
+      "post_cond": "protocol.state = TIMEWAIT",
+      "actions": [
+        "hold TIMEWAIT state for connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S073-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "Scenarios 1 and 2: Client moves from TIMEWAIT to CLOSED after 2MSL wait time (4 minutes).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TIMEWAIT",
+      "to_state": "CLOSED",
+      "trigger": "2MSL_timer_expires",
+      "pre_cond": "protocol.state = TIMEWAIT & endpoint.role = client",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S073-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "Scenario 2, step 1: Client moves from OPEN to CLOSING and sends DCCP-Close when it decides to close the connection.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S073",
+      "actors": [
+        "client"
+      ],
+      "from_state": "OPEN",
+      "to_state": "CLOSING",
+      "trigger": "client_decides_close",
+      "pre_cond": "protocol.state = OPEN & endpoint.role = client",
+      "post_cond": "protocol.state = CLOSING",
+      "actions": [
+        "send DCCP-Close"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S073-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Scenario 2, step 2: Server moves from OPEN to CLOSED upon receiving DCCP-Close, and sends DCCP-Reset.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S073",
+      "actors": [
+        "server"
+      ],
+      "from_state": "OPEN",
+      "to_state": "CLOSED",
+      "trigger": "receive_DCCP-Close",
+      "pre_cond": "protocol.state = OPEN & endpoint.role = server",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "send DCCP-Reset with Reset Code 1 Closed"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S073-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Scenario 3, step 1: Server moves from OPEN to CLOSING and sends DCCP-Close when it decides to hold TIMEWAIT state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S073",
+      "actors": [
+        "server"
+      ],
+      "from_state": "OPEN",
+      "to_state": "CLOSING",
+      "trigger": "server_decides_close_hold_timewait",
+      "pre_cond": "protocol.state = OPEN & endpoint.role = server",
+      "post_cond": "protocol.state = CLOSING",
+      "actions": [
+        "send DCCP-Close"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S073-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "Scenario 3, step 2: Client moves from OPEN to CLOSED upon receiving DCCP-Close, and sends DCCP-Reset.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S073",
+      "actors": [
+        "client"
+      ],
+      "from_state": "OPEN",
+      "to_state": "CLOSED",
+      "trigger": "receive_DCCP-Close",
+      "pre_cond": "protocol.state = OPEN & endpoint.role = client",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "send DCCP-Reset with Reset Code 1 Closed"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S073-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Scenario 3, step 3: Server moves from CLOSING to TIMEWAIT upon receiving DCCP-Reset.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S073",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CLOSING",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive_DCCP-Reset",
+      "pre_cond": "protocol.state = CLOSING & endpoint.role = server",
+      "post_cond": "protocol.state = TIMEWAIT",
+      "actions": [
+        "hold TIMEWAIT state for connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S073-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Scenario 3, step 4: Server moves from TIMEWAIT to CLOSED after 2MSL wait time (4 minutes).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TIMEWAIT",
+      "to_state": "CLOSED",
+      "trigger": "2MSL_timer_expires",
+      "pre_cond": "protocol.state = TIMEWAIT & endpoint.role = server",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S073-017",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The receiver of a valid DCCP-CloseReq packet MUST respond with a DCCP-Close packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "CLOSING",
+      "trigger": "receive_valid_DCCP-CloseReq",
+      "pre_cond": null,
+      "post_cond": "protocol.state = CLOSING",
+      "actions": [
+        "send DCCP-Close"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S073-018",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The receiver of a valid DCCP-Close packet MUST respond with a DCCP-Reset packet with Reset Code 1, \"Closed\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "receive_valid_DCCP-Close",
+      "pre_cond": null,
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "send DCCP-Reset with Reset Code 1 Closed"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S073-019",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The receiver of a valid DCCP-Reset packet will hold TIMEWAIT state for the connection. The endpoint that receives a valid DCCP-Reset SHOULD hold TIMEWAIT state for the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TIMEWAIT",
+      "trigger": "receive_valid_DCCP-Reset",
+      "pre_cond": null,
+      "post_cond": "protocol.state = TIMEWAIT",
+      "actions": [
+        "hold TIMEWAIT state for connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S073-020",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "DCCP implementations generally transition to the CLOSED state after sending a DCCP-Reset packet.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S073",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "send_DCCP-Reset",
+      "pre_cond": null,
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S073-021",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "A server receiving a sequence-valid DCCP-CloseReq packet MUST respond with a DCCP-Sync packet and otherwise ignore the DCCP-CloseReq.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_sequence_valid_DCCP-CloseReq",
+      "pre_cond": "endpoint.role = server",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Sync",
+        "ignore DCCP-CloseReq"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S073-022",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Only the server can send a DCCP-CloseReq packet or enter the CLOSEREQ state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "object_name": "CLOSEREQ",
+      "field_name": "endpoint.role",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "server"
+      ],
+      "guard_semantics": "endpoint.role = server"
+    },
+    {
+      "statement_id": "D-S073-023",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints in the CLOSEREQ and CLOSING states MUST retransmit DCCP-CloseReq and DCCP-Close packets, respectively, until leaving those states. The retransmission timer should initially be set to go off in two round-trip times and should back off to not less than once every 64 seconds if no relevant response is received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S073",
+      "object_name": "retransmission",
+      "field_name": "retransmission_timer",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "protocol.state = CLOSEREQ | protocol.state = CLOSING"
+    }
+  ]
+}

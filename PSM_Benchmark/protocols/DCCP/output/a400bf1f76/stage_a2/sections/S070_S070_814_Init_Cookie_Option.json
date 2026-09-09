@@ -1,0 +1,207 @@
+{
+  "section_id": "S070",
+  "title": "S070 8.1.4 Init Cookie Option",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S070 8.1.4 Init Cookie Option"
+  ],
+  "url_anchor": "#s070-814-init-cookie-option",
+  "word_count": 425,
+  "statement_count": 8,
+  "elapsed_seconds": 102.95,
+  "statements": [
+    {
+      "statement_id": "N-S070-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The Init Cookie option MUST NOT be sent on DCCP-Request or DCCP-Data packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "do not include Init Cookie option in DCCP-Request packets",
+        "do not include Init Cookie option in DCCP-Data packets"
+      ],
+      "modality": "must",
+      "id": "N-S070-001"
+    },
+    {
+      "statement_id": "N-S070-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Any Init Cookie options received on DCCP-Request or DCCP-Data packets, or after the connection has been established (when the connection's state is >= OPEN), MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_Init_Cookie_option",
+      "pre_cond": "received.packet_type = DCCP-Request | received.packet_type = DCCP-Data | connection.state >= OPEN",
+      "post_cond": null,
+      "actions": [
+        "ignore Init Cookie option"
+      ],
+      "modality": "must",
+      "id": "N-S070-002"
+    },
+    {
+      "statement_id": "N-S070-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server MAY include Init Cookie options in its DCCP-Response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "actors": [
+        "server"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "send_DCCP-Response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "include Init Cookie options in DCCP-Response"
+      ],
+      "modality": "may",
+      "id": "N-S070-003"
+    },
+    {
+      "statement_id": "N-S070-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "If so, then the client MUST echo the same Init Cookie options, in the same order, in each succeeding DCCP packet until one of those packets is acknowledged (showing that the three-way handshake has completed) or the connection is reset.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "actors": [
+        "client"
+      ],
+      "from_state": "PARTOPEN",
+      "to_state": null,
+      "trigger": "receive_DCCP-Response_with_Init_Cookie_options",
+      "pre_cond": "received.packet_type = DCCP-Response & received.Init_Cookie_options != null",
+      "post_cond": null,
+      "actions": [
+        "echo Init Cookie options in the same order in each succeeding DCCP packet",
+        "continue echoing until a packet carrying the cookie is acknowledged or connection is reset"
+      ],
+      "modality": "must",
+      "id": "N-S070-004"
+    },
+    {
+      "statement_id": "N-S070-5",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "As a result, the client MUST NOT use DCCP-Data packets until the three-way handshake completes or the connection is reset.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "actors": [
+        "client"
+      ],
+      "from_state": "PARTOPEN",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "connection.handshake_completed = false & connection.state != CLOSED",
+      "post_cond": null,
+      "actions": [
+        "do not send DCCP-Data packets"
+      ],
+      "modality": "must",
+      "id": "N-S070-005"
+    },
+    {
+      "statement_id": "N-S070-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "The Init Cookie options on a client packet MUST equal those received on the DCCP-Request indicated by the client packet's Acknowledgement Number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "actors": [
+        "client"
+      ],
+      "from_state": "PARTOPEN",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "client.packet.contains_Init_Cookie_options = true",
+      "post_cond": "client.packet.Init_Cookie_options = DCCP-Response[client.packet.AckNo].Init_Cookie_options",
+      "actions": [
+        "set Init Cookie options in client packet equal to those from the DCCP-Response identified by the packet's Acknowledgement Number"
+      ],
+      "modality": "must",
+      "id": "N-S070-006"
+    },
+    {
+      "statement_id": "N-S070-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server SHOULD design its Init Cookie format so that Init Cookies can be checked for tampering;",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S070-007"
+    },
+    {
+      "statement_id": "N-S070-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "it SHOULD respond to a tampered Init Cookie option by resetting the connection with Reset Code 10, \"Bad Init Cookie\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "receive_tampered_Init_Cookie_option",
+      "pre_cond": "received.Init_Cookie_tampered = true",
+      "post_cond": "connection.state = CLOSED",
+      "actions": [
+        "send DCCP-Reset with Reset Code 10 'Bad Init Cookie'"
+      ],
+      "modality": "should",
+      "id": "N-S070-008"
+    }
+  ]
+}

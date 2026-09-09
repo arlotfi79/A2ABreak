@@ -1,0 +1,245 @@
+{
+  "section_id": "S062",
+  "title": "S062 6.2.1.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S062 6.2.1.2 Description"
+  ],
+  "url_anchor": "#s062-6212-description",
+  "word_count": 523,
+  "statement_count": 10,
+  "elapsed_seconds": 90.15,
+  "statements": [
+    {
+      "statement_id": "D-S062-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "The server MUST NOT change the currently selected newsgroup as a result of this command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "object_name": "session",
+      "field_name": "currently_selected_newsgroup",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "MUST NOT change as result of ARTICLE command"
+    },
+    {
+      "statement_id": "D-S062-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "The server MUST NOT change the current article number except when an article number argument was provided and the article exists; in particular, it MUST NOT change it following an unsuccessful response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "object_name": "session",
+      "field_name": "current_article_number",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "MUST update only when article number argument provided and article exists; MUST NOT change on unsuccessful response"
+    },
+    {
+      "statement_id": "D-S062-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In the first form, a message-id is specified, and the server presents the article with that message-id. The server MUST NOT alter the currently selected newsgroup or current article number. The article is returned as a multi-line data block following the 220 response code.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE <message-id> received, article found",
+      "pre_cond": null,
+      "post_cond": "session.currently_selected_newsgroup = unchanged & session.current_article_number = unchanged",
+      "actions": [
+        "send 220 response",
+        "send article headers, empty line, body as multi-line data block"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a message-id and no such article exists, a 430 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE <message-id> received, no such article exists",
+      "pre_cond": null,
+      "post_cond": "session.currently_selected_newsgroup = unchanged & session.current_article_number = unchanged",
+      "actions": [
+        "send 430 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In the second form, an article number is specified. If there is an article with that number in the currently selected newsgroup, the server MUST set the current article number to that number. The article is returned as a multi-line data block following the 220 response code.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE <number> received, article exists in currently selected newsgroup",
+      "pre_cond": "session.currently_selected_newsgroup = valid",
+      "post_cond": "session.current_article_number = <number>",
+      "actions": [
+        "set current article number to specified number",
+        "send 220 response",
+        "send article headers, empty line, body as multi-line data block"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a number or is omitted and the currently selected newsgroup is invalid, a 412 response MUST be returned. (Form 2: article number argument.)",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE <number> received, currently selected newsgroup invalid",
+      "pre_cond": "session.currently_selected_newsgroup = invalid",
+      "post_cond": "session.current_article_number = unchanged",
+      "actions": [
+        "send 412 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a number and that article does not exist in the currently selected newsgroup, a 423 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE <number> received, article not in currently selected newsgroup",
+      "pre_cond": "session.currently_selected_newsgroup = valid",
+      "post_cond": "session.current_article_number = unchanged",
+      "actions": [
+        "send 423 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In the third form, the article indicated by the current article number in the currently selected newsgroup is used. The article is returned as a multi-line data block following the 220 response code.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE (no argument) received, valid newsgroup and valid current article number",
+      "pre_cond": "session.currently_selected_newsgroup = valid & session.current_article_number = valid",
+      "post_cond": "session.current_article_number = unchanged",
+      "actions": [
+        "send 220 response",
+        "send article headers, empty line, body as multi-line data block"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a number or is omitted and the currently selected newsgroup is invalid, a 412 response MUST be returned. (Form 3: no argument.)",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE (no argument) received, currently selected newsgroup invalid",
+      "pre_cond": "session.currently_selected_newsgroup = invalid",
+      "post_cond": "session.current_article_number = unchanged",
+      "actions": [
+        "send 412 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is omitted and the current article number is invalid, a 420 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE (no argument) received, current article number invalid",
+      "pre_cond": "session.currently_selected_newsgroup = valid & session.current_article_number = invalid",
+      "post_cond": "session.current_article_number = unchanged",
+      "actions": [
+        "send 420 response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

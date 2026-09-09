@@ -1,0 +1,150 @@
+{
+  "section_id": "S051",
+  "title": "S051 6.3.1 ENABLE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S051 6.3.1 ENABLE Command"
+  ],
+  "url_anchor": "#s051-631-enable-command",
+  "word_count": 630,
+  "statement_count": 6,
+  "elapsed_seconds": 46.56,
+  "statements": [
+    {
+      "statement_id": "D-S051-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The ENABLE command is only valid in the authenticated state, before any mailbox is selected.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "state_name": "Authenticated",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Authenticated & session.mailbox_selected = false"
+    },
+    {
+      "statement_id": "D-S051-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The ENABLE command is only valid in the authenticated state, before any mailbox is selected. If the ENABLE command is successful, the server MUST send an untagged ENABLED response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S051",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "ENABLE command",
+      "pre_cond": "protocol.state = Authenticated & session.mailbox_selected = false",
+      "post_cond": "session.enabled_extensions updated & server.sent_ENABLED_response = true",
+      "actions": [
+        "server enables each supported and permitted extension for duration of connection",
+        "server sends untagged ENABLED response listing all newly enabled extensions",
+        "server sends tagged OK response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S051-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Clients MUST NOT issue ENABLE once they SELECT/EXAMINE a mailbox.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "object_name": "ENABLE command",
+      "field_name": "mailbox_selected",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "false"
+      ],
+      "guard_semantics": "ENABLE is only permitted when no mailbox has been selected (SELECT/EXAMINE not yet issued in current state)"
+    },
+    {
+      "statement_id": "D-S051-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Once enabled using ENABLE, each extension remains active until the IMAP connection is closed. Once an extension is enabled, there is no way to disable it.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S051",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": null,
+      "trigger": "IMAP connection closed",
+      "pre_cond": "session.enabled_extensions != empty",
+      "post_cond": "session.enabled_extensions = empty",
+      "actions": [
+        "all enabled extensions deactivated on connection close"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S051-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "There are no limitations on pipelining ENABLE. For example, it is possible to send ENABLE and then immediately SELECT, or a LOGIN immediately followed by ENABLE.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S051",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Selected",
+      "trigger": "ENABLE followed immediately by SELECT",
+      "pre_cond": "protocol.state = Authenticated & session.mailbox_selected = false",
+      "post_cond": "protocol.state = Selected & session.enabled_extensions updated",
+      "actions": [
+        "client sends ENABLE command",
+        "client sends SELECT command without waiting for ENABLE response"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S051-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The ENABLE command can be issued multiple times in a session. It is additive.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S051",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "subsequent ENABLE command",
+      "pre_cond": "protocol.state = Authenticated & session.mailbox_selected = false & session.enable_issued_previously = true",
+      "post_cond": "session.enabled_extensions = session.enabled_extensions | new_extensions",
+      "actions": [
+        "server enables additional capabilities from new ENABLE command",
+        "server sends untagged ENABLED response listing only extensions enabled by this command",
+        "server sends tagged OK response"
+      ],
+      "modality": "can"
+    }
+  ]
+}

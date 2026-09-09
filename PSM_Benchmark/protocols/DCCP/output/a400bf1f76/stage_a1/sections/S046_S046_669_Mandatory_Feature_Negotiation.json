@@ -1,0 +1,107 @@
+{
+  "section_id": "S046",
+  "title": "S046 6.6.9 Mandatory Feature Negotiation",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S046 6.6.9 Mandatory Feature Negotiation"
+  ],
+  "url_anchor": "#s046-669-mandatory-feature-negotiation",
+  "word_count": 141,
+  "statement_count": 4,
+  "elapsed_seconds": 26.19,
+  "statements": [
+    {
+      "statement_id": "D-S046-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "Mandatory Change options where the feature number was not understood cause the receiver to reset the connection with Reset Code 6, 'Mandatory Failure'.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S046",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "Mandatory Change option received with unknown feature number",
+      "pre_cond": "connection.mandatory_change_received = true & connection.feature_number_understood = false",
+      "post_cond": "connection.reset_code = 6",
+      "actions": [
+        "send Reset with Reset Code 6 'Mandatory Failure'"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S046-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "Mandatory Change options where the value was invalid and the receiver would normally have sent an empty Confirm option cause the receiver to reset the connection with Reset Code 6, 'Mandatory Failure'.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S046",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "Mandatory Change option received with invalid value (empty Confirm case)",
+      "pre_cond": "connection.mandatory_change_received = true & connection.change_value_valid = false & connection.would_send_empty_confirm = true",
+      "post_cond": "connection.reset_code = 6",
+      "actions": [
+        "send Reset with Reset Code 6 'Mandatory Failure'"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S046-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "For server-priority features, if there was no shared entry in the two endpoints' preference lists, the receiver resets the connection with Reset Code 6, 'Mandatory Failure'.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S046",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "Mandatory Change option received with no shared server-priority preference entry",
+      "pre_cond": "connection.mandatory_change_received = true & connection.feature_type = server_priority & connection.shared_preference_entry = false",
+      "post_cond": "connection.reset_code = 6",
+      "actions": [
+        "send Reset with Reset Code 6 'Mandatory Failure'"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S046-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "Reordering protection may cause a Mandatory Change option to be ignored without resetting the connection.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S046",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Mandatory Change option received and ignored due to reordering protection",
+      "pre_cond": "connection.mandatory_change_received = true & connection.reordering_protection_applies = true",
+      "post_cond": "connection.reset_triggered = false",
+      "actions": [
+        "ignore Mandatory Change option"
+      ],
+      "modality": "may"
+    }
+  ]
+}

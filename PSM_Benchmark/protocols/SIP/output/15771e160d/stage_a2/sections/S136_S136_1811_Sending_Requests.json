@@ -1,0 +1,395 @@
+{
+  "section_id": "S136",
+  "title": "S136 18.1.1 Sending Requests",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S136 18.1.1 Sending Requests"
+  ],
+  "url_anchor": "#s136-1811-sending-requests",
+  "word_count": 877,
+  "statement_count": 16,
+  "elapsed_seconds": 133.89,
+  "statements": [
+    {
+      "statement_id": "N-S136-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If a request is within 200 bytes of the path MTU, or if it is larger than 1300 bytes and the path MTU is unknown, the request MUST be sent using an RFC 2914 [43] congestion controlled transport protocol, such as TCP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_send_attempt",
+      "pre_cond": "(request.size >= MTU - 200) | (request.size > 1300 & path_MTU = unknown)",
+      "post_cond": "transport = congestion_controlled",
+      "actions": [
+        "send request using RFC 2914 congestion controlled transport (e.g., TCP)"
+      ],
+      "modality": "must",
+      "id": "N-S136-001"
+    },
+    {
+      "statement_id": "N-S136-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If this causes a change in the transport protocol from the one indicated in the top Via, the value in the top Via MUST be changed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transport_protocol_changed",
+      "pre_cond": "actual_transport != top_via.transport",
+      "post_cond": "top_via.transport = actual_transport",
+      "actions": [
+        "update top Via transport value to match actual transport used"
+      ],
+      "modality": "must",
+      "id": "N-S136-002"
+    },
+    {
+      "statement_id": "N-S136-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "sip",
+      "stage": "sip_fsm",
+      "description": "However, implementations MUST be able to handle messages up to the maximum datagram packet size.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S136-003"
+    },
+    {
+      "statement_id": "N-S136-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If an element sends a request over TCP because of these message size constraints, and that request would have otherwise been sent over UDP, if the attempt to establish the connection generates either an ICMP Protocol Not Supported, or results in a TCP reset, the element SHOULD retry the request, using UDP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ICMP_protocol_not_supported | TCP_reset",
+      "pre_cond": "request.transport = TCP & request.preferred_transport = UDP",
+      "post_cond": "request.transport = UDP",
+      "actions": [
+        "retry request using UDP"
+      ],
+      "modality": "should",
+      "id": "N-S136-004"
+    },
+    {
+      "statement_id": "N-S136-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "A client that sends a request to a multicast address MUST add the \"maddr\" parameter to its Via header field value containing the destination multicast address, and for IPv4, SHOULD add the \"ttl\" parameter with a value of 1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request_to_multicast_address",
+      "pre_cond": "destination.type = multicast",
+      "post_cond": "via.maddr = destination_multicast_address",
+      "actions": [
+        "add maddr parameter to Via header field value containing destination multicast address"
+      ],
+      "modality": "must",
+      "id": "N-S136-005"
+    },
+    {
+      "statement_id": "N-S136-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "A client that sends a request to a multicast address MUST add the \"maddr\" parameter to its Via header field value containing the destination multicast address, and for IPv4, SHOULD add the \"ttl\" parameter with a value of 1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request_to_multicast_address",
+      "pre_cond": "destination.type = multicast & protocol.version = IPv4",
+      "post_cond": "via.ttl = 1",
+      "actions": [
+        "add ttl parameter with value 1 to Via header field value"
+      ],
+      "modality": "should",
+      "id": "N-S136-006"
+    },
+    {
+      "statement_id": "N-S136-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Before a request is sent, the client transport MUST insert a value of the \"sent-by\" field into the Via header field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "before_request_sent",
+      "pre_cond": null,
+      "post_cond": "via.sent_by != null",
+      "actions": [
+        "insert sent-by IP address or hostname and port into Via header field"
+      ],
+      "modality": "must",
+      "id": "N-S136-007"
+    },
+    {
+      "statement_id": "N-S136-8",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The usage of an FQDN is RECOMMENDED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S136-008"
+    },
+    {
+      "statement_id": "N-S136-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Therefore, the client transport MUST be prepared to receive the response on the same connection used to send the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_sent",
+      "pre_cond": "transport.type = reliable",
+      "post_cond": "client.listening_on_request_connection = true",
+      "actions": [
+        "maintain readiness to receive response on same connection used to send request"
+      ],
+      "modality": "must",
+      "id": "N-S136-009"
+    },
+    {
+      "statement_id": "N-S136-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "To handle this case, the transport layer MUST also be prepared to receive an incoming connection on the source IP address from which the request was sent and port number in the \"sent-by\" field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "transport layer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_sent",
+      "pre_cond": "transport.type = reliable",
+      "post_cond": "client.listening_on_source_ip_sent_by_port = true",
+      "actions": [
+        "listen for incoming connection on source IP address and sent-by port number"
+      ],
+      "modality": "must",
+      "id": "N-S136-010"
+    },
+    {
+      "statement_id": "N-S136-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "It also MUST be prepared to receive incoming connections on any address and port that would be selected by a server based on the procedures described in Section 5 of [4].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "transport layer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_sent",
+      "pre_cond": "transport.type = reliable",
+      "post_cond": "client.listening_on_server_selected_addresses = true",
+      "actions": [
+        "listen for incoming connections on any address and port selected by server per Section 5 of [4]"
+      ],
+      "modality": "must",
+      "id": "N-S136-011"
+    },
+    {
+      "statement_id": "N-S136-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "For unreliable unicast transports, the client transport MUST be prepared to receive responses on the source IP address from which the request is sent (as responses are sent back to the source address) and the port number in the \"sent-by\" field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_sent",
+      "pre_cond": "transport.type = unreliable_unicast",
+      "post_cond": "client.listening_on_source_ip_sent_by_port = true",
+      "actions": [
+        "listen for responses on source IP address and sent-by port number"
+      ],
+      "modality": "must",
+      "id": "N-S136-012"
+    },
+    {
+      "statement_id": "N-S136-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The client MUST be prepared to receive responses on any address and port that would be selected by a server based on the procedures described in Section 5 of [4].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_sent",
+      "pre_cond": "transport.type = unreliable_unicast",
+      "post_cond": "client.listening_on_server_selected_addresses = true",
+      "actions": [
+        "listen for responses on any address and port selected by server per Section 5 of [4]"
+      ],
+      "modality": "must",
+      "id": "N-S136-013"
+    },
+    {
+      "statement_id": "N-S136-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "For multicast, the client transport MUST be prepared to receive responses on the same multicast group and port to which the request is sent (that is, it needs to be a member of the multicast group it sent the request to.)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_sent",
+      "pre_cond": "transport.type = multicast",
+      "post_cond": "client.multicast_group_member = true",
+      "actions": [
+        "join and listen on multicast group and port used to send request"
+      ],
+      "modality": "must",
+      "id": "N-S136-014"
+    },
+    {
+      "statement_id": "N-S136-15",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If a request is destined to an IP address, port, and transport to which an existing connection is open, it is RECOMMENDED that this connection be used to send the request, but another connection MAY be opened and used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_send_attempt",
+      "pre_cond": "existing_connection.destination = request.destination & existing_connection.state = open",
+      "post_cond": "request.sent_on = existing_connection",
+      "actions": [
+        "use existing open connection to send request"
+      ],
+      "modality": "should",
+      "id": "N-S136-015"
+    },
+    {
+      "statement_id": "N-S136-16",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If a request is destined to an IP address, port, and transport to which an existing connection is open, it is RECOMMENDED that this connection be used to send the request, but another connection MAY be opened and used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S136",
+      "actors": [
+        "client transport"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_send_attempt",
+      "pre_cond": "existing_connection.destination = request.destination & existing_connection.state = open",
+      "post_cond": null,
+      "actions": [
+        "open new connection and use it to send request"
+      ],
+      "modality": "may",
+      "id": "N-S136-016"
+    }
+  ]
+}

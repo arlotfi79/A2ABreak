@@ -1,0 +1,137 @@
+{
+  "section_id": "S041",
+  "title": "S041 8.2.2.1 To and Request-URI",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S041 8.2.2.1 To and Request-URI"
+  ],
+  "url_anchor": "#s041-8221-to-and-request-uri",
+  "word_count": 261,
+  "statement_count": 5,
+  "elapsed_seconds": 34.77,
+  "statements": [
+    {
+      "statement_id": "N-S041-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS MAY apply any policy it wishes to determine whether to accept requests when the To header field is not the identity of the UAS.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "request.To_header.identity != UAS.identity",
+      "post_cond": null,
+      "actions": [
+        "apply local policy to determine whether to accept request"
+      ],
+      "modality": "may",
+      "id": "N-S041-001"
+    },
+    {
+      "statement_id": "N-S041-2",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "However, it is RECOMMENDED that a UAS accept requests even if they do not recognize the URI scheme (for example, a tel: URI) in the To header field, or if the To header field does not address a known or current user of this UAS.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "!UAS.recognizes(request.To_header.URI_scheme) | !UAS.knows(request.To_header.user)",
+      "post_cond": "request.accepted = true",
+      "actions": [
+        "accept request"
+      ],
+      "modality": "should",
+      "id": "N-S041-002"
+    },
+    {
+      "statement_id": "N-S041-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If, on the other hand, the UAS decides to reject the request, it SHOULD generate a response with a 403 (Forbidden) status code and pass it to the server transaction for transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "UAS",
+        "server transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS_decides_to_reject_request",
+      "pre_cond": "UAS.decision = reject & request.To_header.identity != UAS.identity",
+      "post_cond": "response.status_code = 403",
+      "actions": [
+        "generate 403 Forbidden response",
+        "pass response to server transaction for transmission"
+      ],
+      "modality": "should",
+      "id": "N-S041-003"
+    },
+    {
+      "statement_id": "N-S041-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the Request-URI uses a scheme not supported by the UAS, it SHOULD reject the request with a 416 (Unsupported URI Scheme) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "!UAS.supports(request.Request-URI.scheme)",
+      "post_cond": "response.status_code = 416",
+      "actions": [
+        "reject request with 416 Unsupported URI Scheme response"
+      ],
+      "modality": "should",
+      "id": "N-S041-004"
+    },
+    {
+      "statement_id": "N-S041-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the Request-URI does not identify an address that the UAS is willing to accept requests for, it SHOULD reject the request with a 404 (Not Found) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "!UAS.accepts_requests_for(request.Request-URI.address)",
+      "post_cond": "response.status_code = 404",
+      "actions": [
+        "reject request with 404 Not Found response"
+      ],
+      "modality": "should",
+      "id": "N-S041-005"
+    }
+  ]
+}

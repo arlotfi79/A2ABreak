@@ -1,0 +1,132 @@
+{
+  "section_id": "S067",
+  "title": "S067 13.4.6 Playing Live Media",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S067 13.4.6 Playing Live Media"
+  ],
+  "url_anchor": "#s067-1346-playing-live-media",
+  "word_count": 182,
+  "statement_count": 5,
+  "elapsed_seconds": 60.39,
+  "statements": [
+    {
+      "statement_id": "N-S067-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "For live media, the SETUP 200 OK response MUST include the Media-Range header (see Section 18.30).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Ready",
+      "trigger": "SETUP_200_OK",
+      "pre_cond": "media.properties.Random_Access = No-Seeking & media.properties.Content_Modifications = Time-Progressing & media.properties.Retention.Time_Duration = 0.0",
+      "post_cond": "response.headers.includes(Media-Range)",
+      "actions": [
+        "include Media-Range header in SETUP 200 OK response"
+      ],
+      "modality": "must",
+      "id": "N-S067-001"
+    },
+    {
+      "statement_id": "N-S067-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A client MAY send PLAY requests without the Range header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Ready",
+      "to_state": null,
+      "trigger": "PLAY_request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S067-002"
+    },
+    {
+      "statement_id": "N-S067-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If the request includes the Range header, it MUST use a symbolic value representing \"now\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Ready",
+      "to_state": null,
+      "trigger": "PLAY_request_with_Range_header",
+      "pre_cond": "request.type = PLAY & request.headers.includes(Range) & session.media.type = live",
+      "post_cond": "request.Range.value.type = symbolic_now",
+      "actions": [
+        "set Range header value to symbolic now (e.g. npt=now-)"
+      ],
+      "modality": "must",
+      "id": "N-S067-003"
+    },
+    {
+      "statement_id": "N-S067-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MUST include the Range header in the response, and it MUST indicate an explicit time value and not a symbolic value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_response",
+      "pre_cond": "session.media.type = live",
+      "post_cond": "response.headers.includes(Range) & response.Range.value.type = explicit_time & response.Range.value.type != symbolic",
+      "actions": [
+        "include Range header in PLAY response",
+        "set Range header to explicit time value"
+      ],
+      "modality": "must",
+      "id": "N-S067-004"
+    },
+    {
+      "statement_id": "N-S067-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "An absolute time value (clock) for the corresponding time MAY be given, i.e., \"clock=20030213T143205Z-\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S067-005"
+    }
+  ]
+}

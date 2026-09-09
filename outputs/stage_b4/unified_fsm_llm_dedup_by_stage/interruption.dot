@@ -1,0 +1,36 @@
+digraph interruption {
+    rankdir=LR;
+    size="10,6";
+    ratio=compress;
+    margin=0.05;
+    dpi=300;
+    nodesep=0.45;
+    ranksep=0.85;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=18];
+    edge [fontname="Helvetica", fontsize=12];
+    label="Interruption FSM";
+    labelloc=t;
+    fontsize=24;
+
+    // States
+    "STREAM_CLOSED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled", fillcolor="#f8d7da", color="#dc3545", label="STREAM_CLOSED"];
+    "STREAM_STATE_OPEN" [fontname="Helvetica", fontsize="18", shape="doublecircle", style="filled", fillcolor="#d4edda", color="#28a745", label="STREAM_STATE_OPEN"];
+    "TASK_STATE_AUTH_REQUIRED" [fontname="Helvetica", fontsize="18", shape="ellipse", style="filled", fillcolor="#cce5ff", color="#004085", label="TASK_STATE_AUTH\nREQUIRED"];
+    "TASK_STATE_CANCELED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled,dashed", fillcolor="#f8d7da", color="#dc3545", label="TASK_STATE_CANCELED"];
+    "TASK_STATE_INPUT_REQUIRED" [fontname="Helvetica", fontsize="18", shape="ellipse", style="filled", fillcolor="#cce5ff", color="#004085", label="TASK_STATE_INPUT\nREQUIRED"];
+    "TASK_STATE_WORKING" [fontname="Helvetica", fontsize="18", shape="circle", style="solid", label="TASK_STATE_WORKING"];
+
+    // Transitions
+    "STREAM_STATE_OPEN" -> "STREAM_CLOSED" [label="task_reached_terminal_or_interrupted_state\n[stream.open = true & (task.state = terminal | task.state\n= interrupted)]", style="solid", color="#5b21b6", fontcolor="#5b21b6", penwidth="2.2"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_INPUT_REQUIRED" [label="agent_requests_input\n[task.state = TASK_STATE_WORKING]", style="dashed", color="#9333ea", fontcolor="#9333ea", penwidth="2.2"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_AUTH_REQUIRED" [label="authorization_required\n[!(authorization.negotiated_out_of_band = true |\nauthorization.negotiated_via_extension = true)]", style="solid", color="#5b21b6", fontcolor="#5b21b6", penwidth="2.2"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_AUTH_REQUIRED" [label="authorization_delegation\n[client.is_a2a_agent = true &\nclient.is_actively_processing_task = true &\nreceived_task.state = TASK_STATE_AUTH_REQUIRED]", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_AUTH_REQUIRED" [label="authorization_delegation_required\n[client.is_a2a_agent = true &\nclient.task.is_actively_being_processed = true]", style="dashed", color="#fd7e14", fontcolor="#fd7e14", penwidth="1.0"];
+    "TASK_STATE_INPUT_REQUIRED" -> "TASK_STATE_WORKING" [label="message_received\n[task.state = TASK_STATE_INPUT_REQUIRED & message.taskId\n= task.taskId & message.contextId = task.contextId]", style="solid", color="#5b21b6", fontcolor="#5b21b6", penwidth="2.2"];
+    "TASK_STATE_AUTH_REQUIRED" -> "TASK_STATE_WORKING" [label="credential_received\n[task.state = TASK_STATE_AUTH_REQUIRED &\ncredential_received_out_of_band = true]", style="dashed", color="#9333ea", fontcolor="#9333ea", penwidth="2.2"];
+    "TASK_STATE_AUTH_REQUIRED" -> "TASK_STATE_AUTH_REQUIRED" [label="message_received\n[task.state = TASK_STATE_AUTH_REQUIRED]", style="solid", color="#fd7e14", fontcolor="#fd7e14", penwidth="1.0"];
+    "TASK_STATE_INPUT_REQUIRED" -> "TASK_STATE_CANCELED" [label="cancel_task_requested\n[!task.state.is_terminal]", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "TASK_STATE_AUTH_REQUIRED" -> "TASK_STATE_CANCELED" [label="cancel_task_requested\n[!task.state.is_terminal]", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+
+}

@@ -1,0 +1,81 @@
+{
+  "section_id": "S072",
+  "title": "S072 8.2 Data Transfer",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S072 8.2 Data Transfer"
+  ],
+  "url_anchor": "#s072-82-data-transfer",
+  "word_count": 247,
+  "statement_count": 3,
+  "elapsed_seconds": 16.98,
+  "statements": [
+    {
+      "statement_id": "D-S072-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "In the central data transfer phase of the connection, both server and client are in the OPEN state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S072",
+      "state_name": "OPEN",
+      "enum_name": "DCCP_STATE",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OPEN"
+    },
+    {
+      "statement_id": "D-S072-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "On receiving a valid DCCP-Sync packet, a DCCP endpoint MUST immediately generate and send a DCCP-SyncAck response (subject to any implementation rate limits); the Acknowledgement Number on that DCCP-SyncAck MUST equal the Sequence Number of the DCCP-Sync.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S072",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "OPEN",
+      "to_state": "OPEN",
+      "trigger": "receive valid DCCP-Sync",
+      "pre_cond": "protocol.state = OPEN",
+      "post_cond": "syncack.ack_number = sync.sequence_number",
+      "actions": [
+        "generate DCCP-SyncAck",
+        "set DCCP-SyncAck Acknowledgement Number = received DCCP-Sync Sequence Number",
+        "send DCCP-SyncAck"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S072-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A particular DCCP implementation might decide to initiate feature negotiation only once the OPEN state was reached, in which case it might not allow data transfer until some time later. Data received during that time SHOULD be rejected and reported using a Data Dropped Drop Block with Drop Code 0, Protocol Constraints.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S072",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "OPEN",
+      "to_state": "OPEN",
+      "trigger": "receive data before feature negotiation complete",
+      "pre_cond": "protocol.state = OPEN & feature_negotiation.complete = false",
+      "post_cond": null,
+      "actions": [
+        "reject received data",
+        "send Data Dropped Drop Block with Drop Code 0 (Protocol Constraints)"
+      ],
+      "modality": "should"
+    }
+  ]
+}

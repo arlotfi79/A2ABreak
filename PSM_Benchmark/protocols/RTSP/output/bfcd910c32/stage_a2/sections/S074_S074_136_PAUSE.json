@@ -1,0 +1,188 @@
+{
+  "section_id": "S074",
+  "title": "S074 13.6 PAUSE",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S074 13.6 PAUSE"
+  ],
+  "url_anchor": "#s074-136-pause",
+  "word_count": 469,
+  "statement_count": 7,
+  "elapsed_seconds": 86.94,
+  "statements": [
+    {
+      "statement_id": "N-S074-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A PAUSE request MUST be made either with the aggregated control URI for aggregated sessions, resulting in all media being halted, or with the media URI for non-aggregated sessions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PAUSE_request_issued",
+      "pre_cond": "session.type = aggregated | session.type = non-aggregated",
+      "post_cond": null,
+      "actions": [
+        "use aggregated control URI when session.type = aggregated",
+        "use media URI when session.type = non-aggregated"
+      ],
+      "modality": "must",
+      "id": "N-S074-001"
+    },
+    {
+      "statement_id": "N-S074-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Any attempt to mute a single media with a PAUSE request in an aggregated session MUST be responded to with a 460 (Only Aggregate Operation Allowed) error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PAUSE_request_targeting_single_media_in_aggregated_session",
+      "pre_cond": "session.type = aggregated & PAUSE.uri = single_media_URI",
+      "post_cond": "response.status_code = 460",
+      "actions": [
+        "respond with 460 Only Aggregate Operation Allowed error"
+      ],
+      "modality": "must",
+      "id": "N-S074-002"
+    },
+    {
+      "statement_id": "N-S074-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "After resuming playback, synchronization of the tracks MUST be maintained.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": null,
+      "trigger": "PLAY_request_after_PAUSE",
+      "pre_cond": "protocol.state = Ready",
+      "post_cond": "tracks.synchronized = true",
+      "actions": [
+        "maintain synchronization of all tracks upon resuming playback"
+      ],
+      "modality": "must",
+      "id": "N-S074-003"
+    },
+    {
+      "statement_id": "N-S074-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "servers MAY close the session and free resources after being paused for the duration specified with the timeout parameter of the Session header in the SETUP message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": null,
+      "trigger": "pause_timeout_expired",
+      "pre_cond": "protocol.state = Ready & pause_duration >= session.timeout",
+      "post_cond": "session.closed = true",
+      "actions": [
+        "close session",
+        "free server resources"
+      ],
+      "modality": "may",
+      "id": "N-S074-004"
+    },
+    {
+      "statement_id": "N-S074-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The pause point after any PAUSE request MUST be returned to the client by adding a Range header with what remains unplayed of the PLAY request's range.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Ready",
+      "trigger": "PAUSE_request_received",
+      "pre_cond": null,
+      "post_cond": "PAUSE.response.Range_header = remaining_unplayed_range",
+      "actions": [
+        "add Range header to PAUSE response containing remaining unplayed range of current PLAY request"
+      ],
+      "modality": "must",
+      "id": "N-S074-005"
+    },
+    {
+      "statement_id": "N-S074-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "For media that is time-progressing and has retention duration=0, the follow-up PLAY request to start media delivery again MUST use \"npt=now-\" and not the answer given in the response to PAUSE.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Ready",
+      "to_state": null,
+      "trigger": "PLAY_request_after_PAUSE",
+      "pre_cond": "protocol.state = Ready & media.time_progressing = true & media.retention_duration = 0",
+      "post_cond": "PLAY.Range = npt_now_minus",
+      "actions": [
+        "set PLAY request Range header to npt=now- instead of range from PAUSE response"
+      ],
+      "modality": "must",
+      "id": "N-S074-006"
+    },
+    {
+      "statement_id": "N-S074-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The 200 OK response MUST include the Range header with the current pause point.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "PAUSE_request_received_while_already_in_Ready_state",
+      "pre_cond": "protocol.state = Ready",
+      "post_cond": "response.status = 200_OK & response.Range_header = current_pause_point",
+      "actions": [
+        "respond with 200 OK",
+        "include Range header containing current pause point in 200 OK response"
+      ],
+      "modality": "must",
+      "id": "N-S074-007"
+    }
+  ]
+}

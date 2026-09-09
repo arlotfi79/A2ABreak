@@ -1,0 +1,112 @@
+{
+  "section_id": "S040",
+  "title": "S040 6.6.3 Loss and Retransmission",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S040 6.6.3 Loss and Retransmission"
+  ],
+  "url_anchor": "#s040-663-loss-and-retransmission",
+  "word_count": 240,
+  "statement_count": 4,
+  "elapsed_seconds": 33.98,
+  "statements": [
+    {
+      "statement_id": "N-S040-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A CHANGING endpoint MUST continue retransmitting Change options until it gets some response or the connection terminates.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "CHANGING endpoint",
+        "other endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": null,
+      "trigger": "retransmission_timer_expiry",
+      "pre_cond": "endpoint.state = CHANGING & !response_received & !connection_terminated",
+      "post_cond": "Change_option_sent",
+      "actions": [
+        "Retransmit Change option on a new packet with a new sequence number"
+      ],
+      "modality": "must",
+      "id": "N-S040-001"
+    },
+    {
+      "statement_id": "N-S040-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints SHOULD use an exponential-backoff timer to decide when to retransmit Change options.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "Endpoints"
+      ],
+      "from_state": "CHANGING",
+      "to_state": null,
+      "trigger": "retransmission_decision_point",
+      "pre_cond": "endpoint.state = CHANGING & !response_received",
+      "post_cond": "retransmission_timer = exponential_backoff",
+      "actions": [
+        "Apply exponential-backoff timer to schedule Change option retransmission"
+      ],
+      "modality": "should",
+      "id": "N-S040-002"
+    },
+    {
+      "statement_id": "N-S040-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "(Packets generated specifically for feature negotiation MUST use such a timer.)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "Endpoints"
+      ],
+      "from_state": "CHANGING",
+      "to_state": null,
+      "trigger": "feature_negotiation_packet_generation",
+      "pre_cond": "packet.purpose = feature_negotiation",
+      "post_cond": "packet.transmission_schedule = exponential_backoff_timer",
+      "actions": [
+        "Use exponential-backoff timer to control transmission of feature-negotiation packets"
+      ],
+      "modality": "must",
+      "id": "N-S040-003"
+    },
+    {
+      "statement_id": "N-S040-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Confirm options are never retransmitted, but the Confirm-sending endpoint MUST generate a Confirm option after every non-reordered Change.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "actors": [
+        "Confirm-sending endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "non_reordered_Change_received",
+      "pre_cond": "Change_option_received & !reordered",
+      "post_cond": "Confirm_option_generated",
+      "actions": [
+        "Generate a Confirm option in response to every non-reordered Change option"
+      ],
+      "modality": "must",
+      "id": "N-S040-004"
+    }
+  ]
+}

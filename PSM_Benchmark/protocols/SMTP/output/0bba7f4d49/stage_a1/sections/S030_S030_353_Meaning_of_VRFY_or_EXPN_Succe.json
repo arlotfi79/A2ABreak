@@ -1,0 +1,109 @@
+{
+  "section_id": "S030",
+  "title": "S030 3.5.3 Meaning of VRFY or EXPN Success Response",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S030 3.5.3 Meaning of VRFY or EXPN Success Response"
+  ],
+  "url_anchor": "#s030-353-meaning-of-vrfy-or-expn-success-response",
+  "word_count": 262,
+  "statement_count": 4,
+  "elapsed_seconds": 26.05,
+  "statements": [
+    {
+      "statement_id": "D-S030-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "A server MUST NOT return a 250 code in response to a VRFY or EXPN command unless it has actually verified the address.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY or EXPN command received with address actually verified",
+      "pre_cond": "server.address_verified = true",
+      "post_cond": "server.reply_code = 250",
+      "actions": [
+        "send 250 reply"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "A server MUST NOT return 250 if all it has done is to verify that the syntax given is valid. In that case, 502 (Command not implemented) or 500 (Syntax error, command unrecognized) SHOULD be returned.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY or EXPN command received with only syntax validation performed",
+      "pre_cond": "server.address_verified = false & server.syntax_checked = true",
+      "post_cond": "server.reply_code = 502 | server.reply_code = 500",
+      "actions": [
+        "send 502 reply",
+        "send 500 reply"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S030-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "There may be circumstances where an address appears to be valid but cannot reasonably be verified in real time. In these situations, reply code 252 SHOULD be returned.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY or EXPN command received with apparent validity but real-time verification not feasible",
+      "pre_cond": "server.apparent_validity = true & server.realtime_verification_feasible = false",
+      "post_cond": "server.reply_code = 252",
+      "actions": [
+        "send 252 reply"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S030-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Reply codes 251 and 551 with VRFY (and EXPN) to indicate addresses that are recognized but that would be forwarded or rejected were mail received for them.",
+      "is_inferred": false,
+      "confidence": 0.82,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY or EXPN command received for recognized but forwardable or rejectable address",
+      "pre_cond": "server.address_recognized = true & (server.address_would_forward = true | server.address_would_reject = true)",
+      "post_cond": "server.reply_code = 251 | server.reply_code = 551",
+      "actions": [
+        "send 251 reply",
+        "send 551 reply"
+      ],
+      "modality": "other"
+    }
+  ]
+}

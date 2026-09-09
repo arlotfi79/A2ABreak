@@ -1,0 +1,125 @@
+{
+  "section_id": "S018",
+  "title": "S018 2.2.5 Broker Token Validation",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S018 2.2.5 Broker Token Validation"
+  ],
+  "url_anchor": "#s018-225-broker-token-validation",
+  "word_count": 304,
+  "statement_count": 5,
+  "elapsed_seconds": 23.69,
+  "statements": [
+    {
+      "statement_id": "D-S018-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST verify the validity of the token either locally or MAY send a request to the introspection endpoint of the AS. The Broker MUST verify the claims in the access token.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S018",
+      "state_name": "TOKEN_VALIDATION",
+      "enum_name": "BrokerConnectionStates",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TOKEN_VALIDATION"
+    },
+    {
+      "statement_id": "D-S018-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Validation of the signature or MAC MUST fail if the signature algorithm is set to 'none' when the key used for the signature algorithm cannot be determined or the computed and received signature/MAC do not match.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S018",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "TOKEN_VALIDATION",
+      "to_state": "VALIDATION_FAILED",
+      "trigger": "signature_or_MAC_validation_failure",
+      "pre_cond": "token.signature_algorithm = 'none' | token.signing_key = null | token.computed_signature != token.received_signature",
+      "post_cond": "protocol.state = VALIDATION_FAILED",
+      "actions": [
+        "reject_token",
+        "deny_client_authentication"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S018-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST check if the access token is still valid, if it is the intended destination (i.e., the audience) of the token, and if the token was issued by an authorized Authorization Server.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S018",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "TOKEN_VALIDATION",
+      "to_state": "VALIDATION_FAILED",
+      "trigger": "token_claim_check_failure",
+      "pre_cond": "token.valid = false | token.audience != broker.id | token.issuer_authorized = false",
+      "post_cond": "protocol.state = VALIDATION_FAILED",
+      "actions": [
+        "reject_token",
+        "deny_client_access"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S018-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker validates the signature or the MAC, depending on how the PoP protocol is implemented, to authenticate the Client.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "S018",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "TOKEN_VALIDATION",
+      "to_state": "CLIENT_AUTHENTICATED",
+      "trigger": "token_validation_success",
+      "pre_cond": "token.valid = true & token.audience = broker.id & token.issuer_authorized = true & token.signature_valid = true",
+      "post_cond": "protocol.state = CLIENT_AUTHENTICATED",
+      "actions": [
+        "accept_token",
+        "authenticate_client"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S018-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The 'cnf' claim MUST contain either the Client's RPK or, if the key is already known by the Broker (e.g., from previous communication), a reference to it.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S018",
+      "object_name": "access_token",
+      "field_name": "cnf",
+      "field_type": "claim",
+      "required": true,
+      "allowed_values": [
+        "client_RPK",
+        "RPK_reference"
+      ],
+      "guard_semantics": "required when Client uses TLS RPK mode to authenticate to Broker"
+    }
+  ]
+}

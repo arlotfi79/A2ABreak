@@ -1,0 +1,738 @@
+{
+  "pipeline_stage": "stage_b2",
+  "protocol_phase": "task_execution",
+  "turn": 1,
+  "status": "complete",
+  "finish_reason": "stop",
+  "web_search": {
+    "executed": true,
+    "mode": "server_side_single_request",
+    "queries": [],
+    "tool_use_blocks": 0,
+    "result_blocks": 0,
+    "requests_billed": 4
+  },
+  "web_searches": [],
+  "raw_text_len": 21016,
+  "raw_text": "I'll start by searching for key spec details to resolve ambiguities in the task execution phase.Now let me search for one more critical detail about the stream closure and the transition from AUTH_REQUIRED back to WORKING.Now I have comprehensive evidence from the spec. Let me synthesize all findings and build the complete FSM.\n\nKey confirmations from search results:\n- The TaskState enum defines: TASK_STATE_SUBMITTED (created), TASK_STATE_WORKING (actively processing), TASK_STATE_COMPLETED (terminal), TASK_STATE_FAILED (terminal), TASK_STATE_CANCELLED (terminal), TASK_STATE_INPUT_REQUIRED (interrupted), and TASK_STATE_REJECTED\n- State transitions are: submitted: Initial task creation; working: Agent begins execution; completed: Agent successfully finishes; failed: Unrecoverable error; input_required: Agent needs additional user input; canceled: User or system cancels the task\n- Stream Termination: When a task reaches a terminal or interrupted state (e.g., COMPLETED, FAILED, CANCELED, REJECTED, or INPUT_REQUIRED), the server closes the stream\n- The agent MAY immediately continue Task processing after receiving the credential, without a requirement that clients send a follow-up message\n- Agents MUST transition the TaskState to TASK_STATE_AUTH_REQUIRED and MUST include a TaskStatus message explaining the required authorization\n- A task which has reached a terminal state (completed, canceled, rejected, or failed) can't be restarted\n\n```json\n{\n  \"stage\": \"task_execution\",\n  \"states\": [\n    {\n      \"state_name\": \"TASK_STATE_SUBMITTED\",\n      \"semantic_type\": \"initial\",\n      \"actor\": \"shared\",\n      \"is_initial\": true,\n      \"is_final\": false,\n      \"invariant_cond\": \"task.state = TASK_STATE_SUBMITTED\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-4-1-045\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_WORKING\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"task.state = TASK_STATE_WORKING\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-4-1-003\", \"D-6-2-001\", \"D-6-5-002\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_INPUT_REQUIRED\",\n      \"semantic_type\": \"interrupted\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"task.state = TASK_STATE_INPUT_REQUIRED\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-6-3-001\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_AUTH_REQUIRED\",\n      \"semantic_type\": \"interrupted\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"task.state = TASK_STATE_AUTH_REQUIRED\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"N-3-2-004\", \"N-7-6-001\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_COMPLETED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"task.state = TASK_STATE_COMPLETED\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-6-1-002\", \"D-6-7-010\", \"D-6-8-009\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_FAILED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"task.state = TASK_STATE_FAILED\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-3-2-004\", \"D-3-2-014\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_CANCELED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"task.state = TASK_STATE_CANCELED\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-3-2-004\", \"D-3-2-014\", \"D-11-3-013\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_REJECTED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"task.state = TASK_STATE_REJECTED\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-4-1-045\"]\n    },\n    {\n      \"state_name\": \"STREAM_STATE_OPEN\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"shared\",\n      \"is_initial\": true,\n      \"is_final\": false,\n      \"invariant_cond\": \"stream.open = true\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-11-7-001\", \"D-3-1-039\"]\n    },\n    {\n      \"state_name\": \"STREAM_ACTIVE\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"stream.state = STREAM_ACTIVE\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-3-5-001\"]\n    },\n    {\n      \"state_name\": \"STREAM_CLOSED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"stream.open = false\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"N-3-5-006\", \"D-3-2-014\"]\n    },\n    {\n      \"state_name\": \"SUBSCRIBE_TO_TASK_REQUESTED\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": null,\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-3-1-039\"]\n    },\n    {\n      \"state_name\": \"PUSH_NOTIFICATION_CONFIG_NONEXISTENT\",\n      \"semantic_type\": \"initial\",\n      \"actor\": \"client\",\n      \"is_initial\": true,\n      \"is_final\": false,\n      \"invariant_cond\": \"push_notification_config.exists = false\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-3-1-043\"]\n    },\n    {\n      \"state_name\": \"PUSH_NOTIFICATION_CONFIG_ACTIVE\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"push_notification_config.exists = true\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-3-1-043\", \"D-3-1-042\"]\n    },\n    {\n      \"state_name\": \"PUSH_NOTIFICATION_CONFIG_DELETED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"push_notification_config.exists = false & no_further_notifications_sent = true\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-3-1-042\"]\n    },\n    {\n      \"state_name\": \"PUSH_NOTIFICATION_DELIVERY_RETRYING\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"push_notification.delivery_attempts >= 1\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-13-2-002\"]\n    },\n    {\n      \"state_name\": \"PUSH_NOTIFICATION_DELIVERY_ABANDONED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"push_notification.delivery_active = false\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-13-2-002\"]\n    },\n    {\n      \"state_name\": \"PUSH_NOTIFICATION_RECEIVED\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": null,\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-13-2-003\"]\n    },\n    {\n      \"state_name\": \"PUSH_NOTIFICATION_ACKNOWLEDGED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"client\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"push_notification.http_response_status >= 200 & push_notification.http_response_status < 300\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-13-2-003\"]\n    }\n  ],\n  \"transitions\": [\n    {\n      \"from_state\": \"TASK_STATE_SUBMITTED\",\n      \"to_state\": \"TASK_STATE_WORKING\",\n      \"trigger\": \"agent_begins_processing\",\n      \"guard\": \"task.state = TASK_STATE_SUBMITTED\",\n      \"actors\": [\"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-4-1-045\", \"D-6-2-001\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_SUBMITTED\",\n      \"to_state\": \"TASK_STATE_REJECTED\",\n      \"trigger\": \"agent_rejects_task\",\n      \"guard\": \"task.state = TASK_STATE_SUBMITTED\",\n      \"actors\": [\"server\"],\n      \"modality\": \"may\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-4-1-045\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_WORKING\",\n      \"to_state\": \"TASK_STATE_WORKING\",\n      \"trigger\": \"artifactUpdate\",\n      \"guard\": \"task.state = TASK_STATE_WORKING & stream.open = true\",\n      \"actors\": [\"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-6-2-010\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_WORKING\",\n      \"to_state\": \"TASK_STATE_COMPLETED\",\n      \"trigger\": \"message_send\",\n      \"guard\": \"task.state = TASK_STATE_WORKING\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-6-1-002\", \"D-6-7-010\", \"D-6-8-009\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_WORKING\",\n      \"to_state\": \"TASK_STATE_INPUT_REQUIRED\",\n      \"trigger\": \"agent_requests_input\",\n      \"guard\": \"task.state = TASK_STATE_WORKING\",\n      \"actors\": [\"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-6-3-005\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_WORKING\",\n      \"to_state\": \"TASK_STATE_REJECTED\",\n      \"trigger\": \"agent_rejects_task\",\n      \"guard\": \"task.state = TASK_STATE_WORKING\",\n      \"actors\": [\"server\"],\n      \"modality\": \"may\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-4-1-045\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_WORKING\",\n      \"to_state\": \"TASK_STATE_FAILED\",\n      \"trigger\": \"task_failed\",\n      \"guard\": \"task.state = TASK_STATE_WORKING\",\n      \"actors\": [\"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-3-2-004\", \"D-3-2-014\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_WORKING\",\n      \"to_state\": \"TASK_STATE_CANCELED\",\n      \"trigger\": \"task_canceled\",\n      \"guard\": \"task.state = TASK_STATE_WORKING\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-3-2-004\", \"D-3-2-014\", \"D-11-3-013\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_WORKING\",\n      \"to_state\": \"TASK_STATE_AUTH_REQUIRED\",\n      \"trigger\": \"authorization_required\",\n      \"guard\": \"task.state = TASK_STATE_WORKING\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-3-2-004\", \"N-7-6-001\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_INPUT_REQUIRED\",\n      \"to_state\": \"TASK_STATE_WORKING\",\n      \"trigger\": \"message_received\",\n      \"guard\": \"task.state = TASK_STATE_INPUT_REQUIRED & message.taskId = task.taskId & message.contextId = task.contextId\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"can\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-3-4-008\", \"D-6-3-006\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_AUTH_REQUIRED\",\n      \"to_state\": \"TASK_STATE_WORKING\",\n      \"trigger\": \"credentials_received\",\n      \"guard\": \"task.state = TASK_STATE_AUTH_REQUIRED\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"may\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-7-6-001\"]\n    },\n    {\n      \"from_state\": \"SUBSCRIBE_TO_TASK_REQUESTED\",\n      \"to_state\": \"STREAM_STATE_OPEN\",\n      \"trigger\": \"subscribe_to_task_requested\",\n      \"guard\": \"!task.state.is_terminal\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": false,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-3-1-039\"]\n    },\n    {\n      \"from_state\": \"STREAM_STATE_OPEN\",\n      \"to_state\": \"STREAM_ACTIVE\",\n      \"trigger\": \"stream_open\",\n      \"guard\": null,\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"may\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-3-5-006\"]\n    },\n    {\n      \"from_state\": \"STREAM_ACTIVE\",\n      \"to_state\": \"STREAM_ACTIVE\",\n      \"trigger\": \"task_event_generated\",\n      \"guard\": \"stream.state = STREAM_ACTIVE\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-3-5-005\"]\n    },\n    {\n      \"from_state\": \"STREAM_ACTIVE\",\n      \"to_state\": \"STREAM_CLOSED\",\n      \"trigger\": \"task_reaches_terminal_or_interrupted_state\",\n      \"guard\": \"task.state IN (TASK_STATE_COMPLETED, TASK_STATE_FAILED, TASK_STATE_CANCELED, TASK_STATE_REJECTED, TASK_STATE_INPUT_REQUIRED, TASK_STATE_AUTH_REQUIRED)\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"N-3-5-006\", \"D-3-2-014\"]\n    },\n    {\n      \"from_state\": \"PUSH_NOTIFICATION_CONFIG_NONEXISTENT\",\n      \"to_state\": \"PUSH_NOTIFICATION_CONFIG_ACTIVE\",\n      \"trigger\": \"create_push_notification_config_requested\",\n      \"guard\": \"agent supports push notifications capability\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-3-1-043\"]\n    },\n    {\n      \"from_state\": \"PUSH_NOTIFICATION_CONFIG_ACTIVE\",\n      \"to_state\": \"PUSH_NOTIFICATION_CONFIG_DELETED\",\n      \"trigger\": \"delete_push_notification_config_requested\",\n      \"guard\": \"push_notification_config.exists = true AND agent.supports_push_notifications = true\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-3-1-042\"]\n    },\n    {\n      \"from_state\": \"PUSH_NOTIFICATION_DELIVERY_RETRYING\",\n      \"to_state\": \"PUSH_NOTIFICATION_DELIVERY_ABANDONED\",\n      \"trigger\": \"consecutive_delivery_failures_threshold_reached\",\n      \"guard\": \"push_notification.consecutive_failures >= push_notification.configured_failure_limit\",\n      \"actors\": [\"agent\"],\n      \"modality\": \"may\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-13-2-002\"]\n    },\n    {\n      \"from_state\": \"PUSH_NOTIFICATION_RECEIVED\",\n      \"to_state\": \"PUSH_NOTIFICATION_ACKNOWLEDGED\",\n      \"trigger\": \"webhook_request_received\",\n      \"guard\": \"webhook_request received with authentication credentials present\",\n      \"actors\": [\"client\"],\n      \"modality\": \"must\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-13-2-003\"]\n    }\n  ],\n  \"inter_stage\": {\n    \"entry_from_previous\": [\"TASK_STATE_SUBMITTED\"],\n    \"exit_to_next\": [\n      {\n        \"from_state\": \"TASK_STATE_INPUT_REQUIRED\",\n        \"to_stage\": \"interruption\",\n        \"reason\": \"Server transitions task to INPUT_REQUIRED, pausing execution. Client must provide input to resume. Bidirectional bridge: interruption phase returns to task_execution via INPUT_REQUIRED → WORKING.\"\n      },\n      {\n        \"from_state\": \"TASK_STATE_AUTH_REQUIRED\",\n        \"to_stage\": \"interruption\",\n        \"reason\": \"Server transitions task to AUTH_REQUIRED, pausing execution. Client or out-of-band process must provide credentials. Bidirectional bridge: interruption returns to task_execution via AUTH_REQUIRED → WORKING.\"\n      }\n    ]\n  },\n  \"discarded_states\": [\n    {\n      \"state_name\": null,\n      \"reason\": \"D-2-2-010: null state_name — no identifiable protocol session state\"\n    },\n    {\n      \"state_name\": \"TASK_STATE_UNSPECIFIED\",\n      \"reason\": \"D-4-1-001: Sentinel/default enum value (proto enum zero value), not a protocol session state\"\n    },\n    {\n      \"state_name\": \"ROLE_UNSPECIFIED\",\n      \"reason\": \"D-4-1-010: Message role enum default value, not a protocol session state\"\n    }\n  ],\n  \"unresolved\": [\n    {\n      \"source_id\": \"D-10-3-016\",\n      \"issue\": \"from_state is compound descriptor 'completed | failed | canceled | rejected' — not a valid single state name. Describes subscribe-to-terminal-task error behavior.\",\n      \"reason_type\": \"semantic_mismatch\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"D-10-3-017\",\n      \"issue\": \"from_state is abstract descriptor 'not_terminal' — not a valid state name. Describes subscribe-to-non-terminal-task behavior, covered by SUBSCRIBE_TO_TASK_REQUESTED → STREAM_STATE_OPEN.\",\n      \"reason_type\": \"semantic_mismatch\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"D-10-4-045\",\n      \"issue\": \"from_state 'TASK_TERMINAL_STATE' is a meta-category, not a real protocol state. Describes subscribe-to-terminal-task error behavior.\",\n      \"reason_type\": \"semantic_mismatch\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"D-11-3-012\",\n      \"issue\": \"from_state and to_state 'TASK_STATE_TERMINAL' is an abstract meta-state, not a concrete protocol state. Self-loop describing subscribe-to-terminal-task error.\",\n      \"reason_type\": \"semantic_mismatch\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"D-13-2-005\",\n      \"issue\": \"Trigger, from_state, to_state, and actors are all null. No resolvable information in section 13.2.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.0\n    },\n    {\n      \"source_id\": \"D-3-3-012\",\n      \"issue\": \"Both states null. Describes error response (UnsupportedOperationError) when streaming not supported — error behavior, not a state transition. Searched section 3.3.4.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.5\n    },\n    {\n      \"source_id\": \"D-9-4-015\",\n      \"issue\": \"Both states null. Describes error response when subscribing to terminal task — guard condition behavior, not a state transition. Searched section 9.4.6.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.5\n    },\n    {\n      \"source_id\": \"D-3-7-004\",\n      \"issue\": \"Both states null. Behavioral constraint about client sending taskId/contextId for ongoing tasks. Searched section 3.7, no state transition found.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"D-4-2-011\",\n      \"issue\": \"Both states null. Describes TaskStatusUpdateEvent delivery mechanism — event transport, not a direct FSM state transition. Task state updates are modeled via task state transitions.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"D-4-3-004\",\n      \"issue\": \"Both states null. Describes HTTP POST mechanics for push notification delivery. Push notification state transitions are modeled separately via PUSH_NOTIFICATION_* states.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"D-4-3-005\",\n      \"issue\": \"Both states null. Describes client-side push notification receipt and validation behavior. Covered by PUSH_NOTIFICATION_RECEIVED → PUSH_NOTIFICATION_ACKNOWLEDGED transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"D-4-3-006\",\n      \"issue\": \"Both states null. Describes push notification delivery failure retry behavior. Covered by PUSH_NOTIFICATION_DELIVERY_RETRYING → PUSH_NOTIFICATION_DELIVERY_ABANDONED transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"D-4-6-010\",\n      \"issue\": \"Both states null. Describes error response for unsupported required extension version — error behavior, not a task state transition. Searched section 4.6.3.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.5\n    },\n    {\n      \"source_id\": \"D-9-4-012\",\n      \"issue\": \"Both states null. Describes SendStreamingMessage operation — the streaming interaction is modeled via STREAM_STATE_OPEN and STREAM_ACTIVE states. Searched section 9.4.2.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.4\n    }\n  ],\n  \"gaps\": [\n    {\n      \"state_name\": \"SUBSCRIBE_TO_TASK_REQUESTED\",\n      \"issue\": \"No incoming transition — unreachable. Client initiates subscription from any non-terminal task state but no explicit transition into this state from task states. Searched sections 3.1.6 and 9.4.6; subscription is a client-initiated action orthogonal to task state.\",\n      \"type\": \"unreachable_state\"\n    },\n    {\n      \"state_name\": \"PUSH_NOTIFICATION_DELIVERY_RETRYING\",\n      \"issue\": \"No incoming transition — unreachable. Entered when push notification HTTP delivery fails, but no explicit transition from a prior delivery state exists in the input data. Searched sections 4.3 and 13.2.\",\n      \"type\": \"unreachable_state\"\n    },\n    {\n      \"state_name\": \"PUSH_NOTIFICATION_RECEIVED\",\n      \"issue\": \"No incoming transition — unreachable. Entered when client's webhook receives a push notification from the server, but no explicit transition from a prior state exists in the input data. Searched sections 4.3 and 13.2.\",\n      \"type\": \"unreachable_state\"\n    }\n  ]\n}\n```",
+  "fsm": {
+    "stage": "task_execution",
+    "states": [
+      {
+        "state_name": "TASK_STATE_SUBMITTED",
+        "semantic_type": "initial",
+        "actor": "shared",
+        "is_initial": true,
+        "is_final": false,
+        "invariant_cond": "task.state = TASK_STATE_SUBMITTED",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-4-1-045"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_WORKING",
+        "semantic_type": "active",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "task.state = TASK_STATE_WORKING",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-4-1-003",
+          "D-6-2-001",
+          "D-6-5-002"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_INPUT_REQUIRED",
+        "semantic_type": "interrupted",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "task.state = TASK_STATE_INPUT_REQUIRED",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-6-3-001"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_AUTH_REQUIRED",
+        "semantic_type": "interrupted",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "N-3-2-004",
+          "N-7-6-001"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_COMPLETED",
+        "semantic_type": "terminal",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "task.state = TASK_STATE_COMPLETED",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-6-1-002",
+          "D-6-7-010",
+          "D-6-8-009"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_FAILED",
+        "semantic_type": "terminal",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "task.state = TASK_STATE_FAILED",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-3-2-004",
+          "D-3-2-014"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_CANCELED",
+        "semantic_type": "terminal",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "task.state = TASK_STATE_CANCELED",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-3-2-004",
+          "D-3-2-014",
+          "D-11-3-013"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_REJECTED",
+        "semantic_type": "terminal",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "task.state = TASK_STATE_REJECTED",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-4-1-045"
+        ]
+      },
+      {
+        "state_name": "STREAM_STATE_OPEN",
+        "semantic_type": "active",
+        "actor": "shared",
+        "is_initial": true,
+        "is_final": false,
+        "invariant_cond": "stream.open = true",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-11-7-001",
+          "D-3-1-039"
+        ]
+      },
+      {
+        "state_name": "STREAM_ACTIVE",
+        "semantic_type": "active",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "stream.state = STREAM_ACTIVE",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-3-5-001"
+        ]
+      },
+      {
+        "state_name": "STREAM_CLOSED",
+        "semantic_type": "terminal",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "stream.open = false",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "N-3-5-006",
+          "D-3-2-014"
+        ]
+      },
+      {
+        "state_name": "SUBSCRIBE_TO_TASK_REQUESTED",
+        "semantic_type": "active",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-3-1-039"
+        ]
+      },
+      {
+        "state_name": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+        "semantic_type": "initial",
+        "actor": "client",
+        "is_initial": true,
+        "is_final": false,
+        "invariant_cond": "push_notification_config.exists = false",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-3-1-043"
+        ]
+      },
+      {
+        "state_name": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+        "semantic_type": "active",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "push_notification_config.exists = true",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-3-1-043",
+          "D-3-1-042"
+        ]
+      },
+      {
+        "state_name": "PUSH_NOTIFICATION_CONFIG_DELETED",
+        "semantic_type": "terminal",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "push_notification_config.exists = false & no_further_notifications_sent = true",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-3-1-042"
+        ]
+      },
+      {
+        "state_name": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+        "semantic_type": "active",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "push_notification.delivery_attempts >= 1",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-13-2-002"
+        ]
+      },
+      {
+        "state_name": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+        "semantic_type": "terminal",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "push_notification.delivery_active = false",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-13-2-002"
+        ]
+      },
+      {
+        "state_name": "PUSH_NOTIFICATION_RECEIVED",
+        "semantic_type": "active",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-13-2-003"
+        ]
+      },
+      {
+        "state_name": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+        "semantic_type": "terminal",
+        "actor": "client",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "push_notification.http_response_status >= 200 & push_notification.http_response_status < 300",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-13-2-003"
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "from_state": "TASK_STATE_SUBMITTED",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "agent_begins_processing",
+        "guard": "task.state = TASK_STATE_SUBMITTED",
+        "actors": [
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-4-1-045",
+          "D-6-2-001"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_SUBMITTED",
+        "to_state": "TASK_STATE_REJECTED",
+        "trigger": "agent_rejects_task",
+        "guard": "task.state = TASK_STATE_SUBMITTED",
+        "actors": [
+          "server"
+        ],
+        "modality": "may",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-4-1-045"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "artifactUpdate",
+        "guard": "task.state = TASK_STATE_WORKING & stream.open = true",
+        "actors": [
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-6-2-010"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_COMPLETED",
+        "trigger": "message_send",
+        "guard": "task.state = TASK_STATE_WORKING",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-6-1-002",
+          "D-6-7-010",
+          "D-6-8-009"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_INPUT_REQUIRED",
+        "trigger": "agent_requests_input",
+        "guard": "task.state = TASK_STATE_WORKING",
+        "actors": [
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-6-3-005"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_REJECTED",
+        "trigger": "agent_rejects_task",
+        "guard": "task.state = TASK_STATE_WORKING",
+        "actors": [
+          "server"
+        ],
+        "modality": "may",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-4-1-045"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_FAILED",
+        "trigger": "task_failed",
+        "guard": "task.state = TASK_STATE_WORKING",
+        "actors": [
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-3-2-004",
+          "D-3-2-014"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_CANCELED",
+        "trigger": "task_canceled",
+        "guard": "task.state = TASK_STATE_WORKING",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-3-2-004",
+          "D-3-2-014",
+          "D-11-3-013"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_AUTH_REQUIRED",
+        "trigger": "authorization_required",
+        "guard": "task.state = TASK_STATE_WORKING",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-3-2-004",
+          "N-7-6-001"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_INPUT_REQUIRED",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "message_received",
+        "guard": "task.state = TASK_STATE_INPUT_REQUIRED & message.taskId = task.taskId & message.contextId = task.contextId",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "can",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-3-4-008",
+          "D-6-3-006"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_AUTH_REQUIRED",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "credentials_received",
+        "guard": "task.state = TASK_STATE_AUTH_REQUIRED",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "may",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-7-6-001"
+        ]
+      },
+      {
+        "from_state": "SUBSCRIBE_TO_TASK_REQUESTED",
+        "to_state": "STREAM_STATE_OPEN",
+        "trigger": "subscribe_to_task_requested",
+        "guard": "!task.state.is_terminal",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": false,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-3-1-039"
+        ]
+      },
+      {
+        "from_state": "STREAM_STATE_OPEN",
+        "to_state": "STREAM_ACTIVE",
+        "trigger": "stream_open",
+        "guard": null,
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "may",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-3-5-006"
+        ]
+      },
+      {
+        "from_state": "STREAM_ACTIVE",
+        "to_state": "STREAM_ACTIVE",
+        "trigger": "task_event_generated",
+        "guard": "stream.state = STREAM_ACTIVE",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-3-5-005"
+        ]
+      },
+      {
+        "from_state": "STREAM_ACTIVE",
+        "to_state": "STREAM_CLOSED",
+        "trigger": "task_reaches_terminal_or_interrupted_state",
+        "guard": "task.state IN (TASK_STATE_COMPLETED, TASK_STATE_FAILED, TASK_STATE_CANCELED, TASK_STATE_REJECTED, TASK_STATE_INPUT_REQUIRED, TASK_STATE_AUTH_REQUIRED)",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "N-3-5-006",
+          "D-3-2-014"
+        ]
+      },
+      {
+        "from_state": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+        "to_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+        "trigger": "create_push_notification_config_requested",
+        "guard": "agent supports push notifications capability",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-3-1-043"
+        ]
+      },
+      {
+        "from_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+        "to_state": "PUSH_NOTIFICATION_CONFIG_DELETED",
+        "trigger": "delete_push_notification_config_requested",
+        "guard": "push_notification_config.exists = true AND agent.supports_push_notifications = true",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-3-1-042"
+        ]
+      },
+      {
+        "from_state": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+        "to_state": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+        "trigger": "consecutive_delivery_failures_threshold_reached",
+        "guard": "push_notification.consecutive_failures >= push_notification.configured_failure_limit",
+        "actors": [
+          "agent"
+        ],
+        "modality": "may",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-13-2-002"
+        ]
+      },
+      {
+        "from_state": "PUSH_NOTIFICATION_RECEIVED",
+        "to_state": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+        "trigger": "webhook_request_received",
+        "guard": "webhook_request received with authentication credentials present",
+        "actors": [
+          "client"
+        ],
+        "modality": "must",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-13-2-003"
+        ]
+      }
+    ],
+    "inter_stage": {
+      "entry_from_previous": [
+        "TASK_STATE_SUBMITTED"
+      ],
+      "exit_to_next": [
+        {
+          "from_state": "TASK_STATE_INPUT_REQUIRED",
+          "to_stage": "interruption",
+          "reason": "Server transitions task to INPUT_REQUIRED, pausing execution. Client must provide input to resume. Bidirectional bridge: interruption phase returns to task_execution via INPUT_REQUIRED → WORKING."
+        },
+        {
+          "from_state": "TASK_STATE_AUTH_REQUIRED",
+          "to_stage": "interruption",
+          "reason": "Server transitions task to AUTH_REQUIRED, pausing execution. Client or out-of-band process must provide credentials. Bidirectional bridge: interruption returns to task_execution via AUTH_REQUIRED → WORKING."
+        }
+      ]
+    },
+    "discarded_states": [
+      {
+        "state_name": null,
+        "reason": "D-2-2-010: null state_name — no identifiable protocol session state"
+      },
+      {
+        "state_name": "TASK_STATE_UNSPECIFIED",
+        "reason": "D-4-1-001: Sentinel/default enum value (proto enum zero value), not a protocol session state"
+      },
+      {
+        "state_name": "ROLE_UNSPECIFIED",
+        "reason": "D-4-1-010: Message role enum default value, not a protocol session state"
+      }
+    ],
+    "unresolved": [
+      {
+        "source_id": "D-10-3-016",
+        "issue": "from_state is compound descriptor 'completed | failed | canceled | rejected' — not a valid single state name. Describes subscribe-to-terminal-task error behavior.",
+        "reason_type": "semantic_mismatch",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "D-10-3-017",
+        "issue": "from_state is abstract descriptor 'not_terminal' — not a valid state name. Describes subscribe-to-non-terminal-task behavior, covered by SUBSCRIBE_TO_TASK_REQUESTED → STREAM_STATE_OPEN.",
+        "reason_type": "semantic_mismatch",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "D-10-4-045",
+        "issue": "from_state 'TASK_TERMINAL_STATE' is a meta-category, not a real protocol state. Describes subscribe-to-terminal-task error behavior.",
+        "reason_type": "semantic_mismatch",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "D-11-3-012",
+        "issue": "from_state and to_state 'TASK_STATE_TERMINAL' is an abstract meta-state, not a concrete protocol state. Self-loop describing subscribe-to-terminal-task error.",
+        "reason_type": "semantic_mismatch",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "D-13-2-005",
+        "issue": "Trigger, from_state, to_state, and actors are all null. No resolvable information in section 13.2.",
+        "reason_type": "both_null",
+        "confidence": 0.0
+      },
+      {
+        "source_id": "D-3-3-012",
+        "issue": "Both states null. Describes error response (UnsupportedOperationError) when streaming not supported — error behavior, not a state transition. Searched section 3.3.4.",
+        "reason_type": "both_null",
+        "confidence": 0.5
+      },
+      {
+        "source_id": "D-9-4-015",
+        "issue": "Both states null. Describes error response when subscribing to terminal task — guard condition behavior, not a state transition. Searched section 9.4.6.",
+        "reason_type": "both_null",
+        "confidence": 0.5
+      },
+      {
+        "source_id": "D-3-7-004",
+        "issue": "Both states null. Behavioral constraint about client sending taskId/contextId for ongoing tasks. Searched section 3.7, no state transition found.",
+        "reason_type": "both_null",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "D-4-2-011",
+        "issue": "Both states null. Describes TaskStatusUpdateEvent delivery mechanism — event transport, not a direct FSM state transition. Task state updates are modeled via task state transitions.",
+        "reason_type": "both_null",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "D-4-3-004",
+        "issue": "Both states null. Describes HTTP POST mechanics for push notification delivery. Push notification state transitions are modeled separately via PUSH_NOTIFICATION_* states.",
+        "reason_type": "both_null",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "D-4-3-005",
+        "issue": "Both states null. Describes client-side push notification receipt and validation behavior. Covered by PUSH_NOTIFICATION_RECEIVED → PUSH_NOTIFICATION_ACKNOWLEDGED transition.",
+        "reason_type": "both_null",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "D-4-3-006",
+        "issue": "Both states null. Describes push notification delivery failure retry behavior. Covered by PUSH_NOTIFICATION_DELIVERY_RETRYING → PUSH_NOTIFICATION_DELIVERY_ABANDONED transition.",
+        "reason_type": "both_null",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "D-4-6-010",
+        "issue": "Both states null. Describes error response for unsupported required extension version — error behavior, not a task state transition. Searched section 4.6.3.",
+        "reason_type": "both_null",
+        "confidence": 0.5
+      },
+      {
+        "source_id": "D-9-4-012",
+        "issue": "Both states null. Describes SendStreamingMessage operation — the streaming interaction is modeled via STREAM_STATE_OPEN and STREAM_ACTIVE states. Searched section 9.4.2.",
+        "reason_type": "both_null",
+        "confidence": 0.4
+      }
+    ],
+    "gaps": [
+      {
+        "state_name": "SUBSCRIBE_TO_TASK_REQUESTED",
+        "issue": "No incoming transition — unreachable. Client initiates subscription from any non-terminal task state but no explicit transition into this state from task states. Searched sections 3.1.6 and 9.4.6; subscription is a client-initiated action orthogonal to task state.",
+        "type": "unreachable_state"
+      },
+      {
+        "state_name": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+        "issue": "No incoming transition — unreachable. Entered when push notification HTTP delivery fails, but no explicit transition from a prior delivery state exists in the input data. Searched sections 4.3 and 13.2.",
+        "type": "unreachable_state"
+      },
+      {
+        "state_name": "PUSH_NOTIFICATION_RECEIVED",
+        "issue": "No incoming transition — unreachable. Entered when client's webhook receives a push notification from the server, but no explicit transition from a prior state exists in the input data. Searched sections 4.3 and 13.2.",
+        "type": "unreachable_state"
+      }
+    ]
+  },
+  "cost": {
+    "pipeline_stage": "stage_b2",
+    "protocol_phase": "task_execution",
+    "model": "anthropic/claude-opus-4-6",
+    "turn": 1,
+    "input_tokens": 224889,
+    "output_tokens": 53022,
+    "total_tokens": 277911,
+    "cumulative_input_tokens": 224889,
+    "cumulative_output_tokens": 53022,
+    "cumulative_total_tokens": 277911,
+    "elapsed_seconds": 850.3,
+    "timestamp": "2026-05-18T04:57:57Z",
+    "cost_usd": 2.489995,
+    "web_search_requests": 4,
+    "web_search_executed": true,
+    "web_search_queries": []
+  },
+  "timestamp": "2026-05-18T04:57:57Z"
+}

@@ -1,0 +1,142 @@
+{
+  "section_id": "S022",
+  "title": "S022 2.4.2 Authorization Success",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S022 2.4.2 Authorization Success"
+  ],
+  "url_anchor": "#s022-242-authorization-success",
+  "word_count": 164,
+  "statement_count": 5,
+  "elapsed_seconds": 40.57,
+  "statements": [
+    {
+      "statement_id": "N-S022-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Broker starts a new Session, it MUST also set Session Present to 0 in the CONNACK packet to signal a new Session to the Client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authorization_success & new_session_started",
+      "pre_cond": "authorization.result = success & session.is_new = true",
+      "post_cond": "connack.session_present = 0",
+      "actions": [
+        "Set CONNACK reason code to 0x00 (Success)",
+        "Set Session Present flag to 0 in CONNACK packet",
+        "Send CONNACK to Client"
+      ],
+      "modality": "must",
+      "id": "N-S022-001"
+    },
+    {
+      "statement_id": "N-S022-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Otherwise, it MUST set Session Present to 1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authorization_success & existing_session_resumed",
+      "pre_cond": "authorization.result = success & session.is_new = false",
+      "post_cond": "connack.session_present = 1",
+      "actions": [
+        "Set Session Present flag to 1 in CONNACK packet",
+        "Send CONNACK to Client"
+      ],
+      "modality": "must",
+      "id": "N-S022-002"
+    },
+    {
+      "statement_id": "N-S022-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Having accepted the connection, the Broker MUST be prepared to store the token during the connection and after disconnection for future use.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_accepted",
+      "pre_cond": "authorization.result = success",
+      "post_cond": "token.persisted = true",
+      "actions": [
+        "Store access token for the lifetime of the connection",
+        "Retain stored token after disconnection for future use"
+      ],
+      "modality": "must",
+      "id": "N-S022-003"
+    },
+    {
+      "statement_id": "N-S022-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the token is not self-contained and the Broker uses token introspection, it MAY cache the validation result to authorize the subsequent PUBLISH and SUBSCRIBE packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token_introspection_performed",
+      "pre_cond": "token.self_contained = false & broker.uses_introspection = true",
+      "post_cond": "introspection.result.cached = true",
+      "actions": [
+        "Cache token introspection validation result for subsequent PUBLISH and SUBSCRIBE authorization"
+      ],
+      "modality": "may",
+      "id": "N-S022-004"
+    },
+    {
+      "statement_id": "N-S022-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "mqtt_fsm",
+      "description": "The Broker SHOULD also use a cache timeout to introspect tokens regularly.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S022",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "introspection_cache_timeout_expires",
+      "pre_cond": "introspection.result.cached = true",
+      "post_cond": "introspection.result.cache_expired = true",
+      "actions": [
+        "Start cache timeout timer for introspection result",
+        "Re-introspect token when cache timeout expires"
+      ],
+      "modality": "should",
+      "id": "N-S022-005"
+    }
+  ]
+}

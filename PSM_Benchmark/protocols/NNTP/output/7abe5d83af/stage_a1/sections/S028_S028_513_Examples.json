@@ -1,0 +1,231 @@
+{
+  "section_id": "S028",
+  "title": "S028 5.1.3 Examples",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S028 5.1.3 Examples"
+  ],
+  "url_anchor": "#s028-513-examples",
+  "word_count": 134,
+  "statement_count": 10,
+  "elapsed_seconds": 71.17,
+  "statements": [
+    {
+      "statement_id": "D-S028-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "[Initial connection set-up completed.]",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S028",
+      "state_name": "Initial connection set-up completed",
+      "enum_name": "ConnectionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S028-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "200 NNTP Service Ready, posting permitted",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S028",
+      "state_name": "NNTP Service Ready, posting permitted",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.posting_permitted = true"
+    },
+    {
+      "statement_id": "D-S028-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "201 NNTP Service Ready, posting prohibited",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S028",
+      "state_name": "NNTP Service Ready, posting prohibited",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.posting_permitted = false"
+    },
+    {
+      "statement_id": "D-S028-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "[Server closes connection.]",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S028",
+      "state_name": "Server closes connection",
+      "enum_name": "ConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S028-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Example of a normal connection from an authorized client that then terminates the session: [Initial connection set-up completed.] [S] 200 NNTP Service Ready, posting permitted",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S028",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Initial connection set-up completed",
+      "to_state": "NNTP Service Ready, posting permitted",
+      "trigger": "initial_connection_setup_completed",
+      "pre_cond": "client.authorized = true & session.posting_permitted = true",
+      "post_cond": "session.state = NNTP Service Ready, posting permitted",
+      "actions": [
+        "server sends 200 NNTP Service Ready, posting permitted"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S028-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Example of a normal connection from an authorized client that is not permitted to post: [Initial connection set-up completed.] [S] 201 NNTP Service Ready, posting prohibited",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S028",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Initial connection set-up completed",
+      "to_state": "NNTP Service Ready, posting prohibited",
+      "trigger": "initial_connection_setup_completed",
+      "pre_cond": "client.authorized = true & session.posting_permitted = false",
+      "post_cond": "session.state = NNTP Service Ready, posting prohibited",
+      "actions": [
+        "server sends 201 NNTP Service Ready, posting prohibited"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S028-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Example of a normal connection from an unauthorized client: [Initial connection set-up completed.] [S] 502 NNTP Service permanently unavailable [Server closes connection.]",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S028",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Initial connection set-up completed",
+      "to_state": "Server closes connection",
+      "trigger": "initial_connection_setup_completed",
+      "pre_cond": "client.authorized = false",
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "server sends 502 NNTP Service permanently unavailable",
+        "server closes connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S028-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Example of a connection from a client if the server is unable to provide service: [Initial connection set-up completed.] [S] 400 NNTP Service temporarily unavailable [Server closes connection.]",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S028",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Initial connection set-up completed",
+      "to_state": "Server closes connection",
+      "trigger": "initial_connection_setup_completed",
+      "pre_cond": "server.available = false",
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "server sends 400 NNTP Service temporarily unavailable",
+        "server closes connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S028-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "[C] QUIT [S] 205 NNTP Service exits normally [Server closes connection.] \u2014 from posting permitted state",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S028",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "NNTP Service Ready, posting permitted",
+      "to_state": "Server closes connection",
+      "trigger": "QUIT",
+      "pre_cond": null,
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "server sends 205 NNTP Service exits normally",
+        "server closes connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S028-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "[C] QUIT [S] 205 NNTP Service exits normally [Server closes connection.] \u2014 from posting prohibited state",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S028",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "NNTP Service Ready, posting prohibited",
+      "to_state": "Server closes connection",
+      "trigger": "QUIT",
+      "pre_cond": null,
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "server sends 205 NNTP Service exits normally",
+        "server closes connection"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

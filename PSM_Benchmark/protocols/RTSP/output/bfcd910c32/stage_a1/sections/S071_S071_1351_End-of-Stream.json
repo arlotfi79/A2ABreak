@@ -1,0 +1,113 @@
+{
+  "section_id": "S071",
+  "title": "S071 13.5.1 End-of-Stream",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S071 13.5.1 End-of-Stream"
+  ],
+  "url_anchor": "#s071-1351-end-of-stream",
+  "word_count": 630,
+  "statement_count": 4,
+  "elapsed_seconds": 46.85,
+  "statements": [
+    {
+      "statement_id": "D-S071-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A PLAY_NOTIFY request with the Notify-Reason header set to end-of-stream indicates the completion or near completion of the PLAY request and the ending delivery of the media stream(s). The request MUST NOT be issued unless the server is in the Play state.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S071",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "end-of-stream (stream completion or near-completion)",
+      "pre_cond": "server.state = Play",
+      "post_cond": null,
+      "actions": [
+        "send PLAY_NOTIFY with Notify-Reason=end-of-stream",
+        "include Request-Status header indicating which PLAY request and its completion status",
+        "include Range header with actual numeric end position",
+        "include Scale header if scale != 1",
+        "include RTP-Info header with last sequence number if RTP transport is used"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S071-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The sender of a PLAY_NOTIFY MAY issue an updated PLAY_NOTIFY, in the case of a PLAY_NOTIFY sent with wrong information. In this case, a new PLAY_NOTIFY MUST be sent including the correct status for the completion and all additional information.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "previously sent PLAY_NOTIFY(end-of-stream) contained wrong information",
+      "pre_cond": "server.state = Play & prior PLAY_NOTIFY(end-of-stream) sent with incorrect data",
+      "post_cond": null,
+      "actions": [
+        "send updated PLAY_NOTIFY with Notify-Reason=end-of-stream",
+        "include correct completion status and all required headers"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S071-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The end-of-stream notification does not prevent the client from sending a new PLAY request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S071",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "receipt of PLAY_NOTIFY(end-of-stream)",
+      "pre_cond": "client.received PLAY_NOTIFY with Notify-Reason=end-of-stream",
+      "post_cond": "client.may_send_PLAY = true",
+      "actions": [
+        "client remains eligible to issue a new PLAY request"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S071-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In cases where one or more media resources have a significantly shorter duration than some other resources in the aggregated session, the server MAY send end-of-stream notifications using individual media resource URIs... when the remaining media resources come to the end of the stream, they MUST send a PLAY_NOTIFY request using the aggregate control URI to indicate that no more resources remain.",
+      "is_inferred": false,
+      "confidence": 0.82,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "last remaining aggregated media resources reach end-of-stream",
+      "pre_cond": "server.state = Play & session.aggregated_control = true & all media resources ended",
+      "post_cond": null,
+      "actions": [
+        "send PLAY_NOTIFY using aggregate control URI with Notify-Reason=end-of-stream"
+      ],
+      "modality": "must"
+    }
+  ]
+}

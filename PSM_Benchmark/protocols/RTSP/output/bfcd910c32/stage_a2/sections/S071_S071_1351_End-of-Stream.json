@@ -1,0 +1,326 @@
+{
+  "section_id": "S071",
+  "title": "S071 13.5.1 End-of-Stream",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S071 13.5.1 End-of-Stream"
+  ],
+  "url_anchor": "#s071-1351-end-of-stream",
+  "word_count": 630,
+  "statement_count": 13,
+  "elapsed_seconds": 165.06,
+  "statements": [
+    {
+      "statement_id": "N-S071-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The request MUST NOT be issued unless the server is in the Play state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "send_PLAY_NOTIFY(Notify-Reason=end-of-stream)",
+      "pre_cond": "server.state = Play",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S071-001"
+    },
+    {
+      "statement_id": "N-S071-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The Request-Status header (Section 18.42) MUST be included to indicate which request the notification is for and its completion status.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "send_PLAY_NOTIFY(Notify-Reason=end-of-stream)",
+      "pre_cond": "server.state = Play",
+      "post_cond": "PLAY_NOTIFY.Request-Status != null",
+      "actions": [
+        "include Request-Status header in PLAY_NOTIFY end-of-stream request"
+      ],
+      "modality": "must",
+      "id": "N-S071-002"
+    },
+    {
+      "statement_id": "N-S071-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The sender of a PLAY_NOTIFY MAY issue an updated PLAY_NOTIFY, in the case of a PLAY_NOTIFY sent with wrong information.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "PLAY_NOTIFY_sent_with_wrong_information",
+      "pre_cond": "server.state = Play & PLAY_NOTIFY.info_correct = false",
+      "post_cond": null,
+      "actions": [
+        "send updated PLAY_NOTIFY with corrected information"
+      ],
+      "modality": "may",
+      "id": "N-S071-003"
+    },
+    {
+      "statement_id": "N-S071-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In this case, a new PLAY_NOTIFY MUST be sent including the correct status for the completion and all additional information.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "PLAY_NOTIFY_sent_with_wrong_information",
+      "pre_cond": "server.state = Play & PLAY_NOTIFY.info_correct = false",
+      "post_cond": "new_PLAY_NOTIFY.correct_status = true & new_PLAY_NOTIFY.all_additional_info = true",
+      "actions": [
+        "send new PLAY_NOTIFY with correct completion status and all additional information"
+      ],
+      "modality": "must",
+      "id": "N-S071-004"
+    },
+    {
+      "statement_id": "N-S071-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "PLAY_NOTIFY requests with the Notify-Reason header set to end-of-stream MUST include a Range header and the Scale header if the scale value is not 1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "send_PLAY_NOTIFY(Notify-Reason=end-of-stream)",
+      "pre_cond": "server.state = Play",
+      "post_cond": "PLAY_NOTIFY.Range != null & (scale.value = 1 | PLAY_NOTIFY.Scale != null)",
+      "actions": [
+        "include Range header in PLAY_NOTIFY end-of-stream request",
+        "include Scale header in PLAY_NOTIFY end-of-stream request if scale value is not 1"
+      ],
+      "modality": "must",
+      "id": "N-S071-005"
+    },
+    {
+      "statement_id": "N-S071-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MUST NOT use the \"now\" constant in the Range header; it MUST use the actual numeric end position in the proper timescale.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "send_PLAY_NOTIFY(Notify-Reason=end-of-stream)",
+      "pre_cond": "server.state = Play",
+      "post_cond": "PLAY_NOTIFY.Range.value != \"now\"",
+      "actions": [
+        "do not use \"now\" constant in the Range header of PLAY_NOTIFY end-of-stream request"
+      ],
+      "modality": "must",
+      "id": "N-S071-006"
+    },
+    {
+      "statement_id": "N-S071-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MUST NOT use the \"now\" constant in the Range header; it MUST use the actual numeric end position in the proper timescale.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "send_PLAY_NOTIFY(Notify-Reason=end-of-stream)",
+      "pre_cond": "server.state = Play",
+      "post_cond": "PLAY_NOTIFY.Range.value = numeric_end_position",
+      "actions": [
+        "set Range header to actual numeric end position in the proper timescale in PLAY_NOTIFY end-of-stream request"
+      ],
+      "modality": "must",
+      "id": "N-S071-007"
+    },
+    {
+      "statement_id": "N-S071-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "If RTP is used as media transport, an RTP-Info header MUST be included, and the RTP-Info header MUST indicate the last sequence number in the sequence parameter.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "send_PLAY_NOTIFY(Notify-Reason=end-of-stream)",
+      "pre_cond": "server.state = Play & transport.protocol = RTP",
+      "post_cond": "PLAY_NOTIFY.RTP-Info != null",
+      "actions": [
+        "include RTP-Info header in PLAY_NOTIFY end-of-stream request"
+      ],
+      "modality": "must",
+      "id": "N-S071-008"
+    },
+    {
+      "statement_id": "N-S071-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "If RTP is used as media transport, an RTP-Info header MUST be included, and the RTP-Info header MUST indicate the last sequence number in the sequence parameter.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "send_PLAY_NOTIFY(Notify-Reason=end-of-stream)",
+      "pre_cond": "server.state = Play & transport.protocol = RTP",
+      "post_cond": "PLAY_NOTIFY.RTP-Info.seq = last_sequence_number",
+      "actions": [
+        "set RTP-Info sequence parameter to last sequence number in PLAY_NOTIFY end-of-stream request"
+      ],
+      "modality": "must",
+      "id": "N-S071-009"
+    },
+    {
+      "statement_id": "N-S071-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "In those cases, an RTSP session under aggregated control SHOULD send only a single PLAY_NOTIFY request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "media_resources_end_at_approximately_same_time",
+      "pre_cond": "server.state = Play & session.aggregated_control = true & resources.end_time_difference = small",
+      "post_cond": "PLAY_NOTIFY.count = 1 & PLAY_NOTIFY.uri = aggregate_control_URI",
+      "actions": [
+        "send single PLAY_NOTIFY using aggregate control URI for all media resources"
+      ],
+      "modality": "should",
+      "id": "N-S071-010"
+    },
+    {
+      "statement_id": "N-S071-11",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In cases where one or more media resources have a significantly shorter duration than some other resources in the aggregated session, the server MAY send end-of-stream notifications using individual media resource URIs to indicate to agents that there will be no more media for this particular media resource related to the current active PLAY request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "short_duration_resource_reaches_end_of_stream",
+      "pre_cond": "server.state = Play & session.aggregated_control = true & resource.duration << other_resources.duration",
+      "post_cond": null,
+      "actions": [
+        "send PLAY_NOTIFY end-of-stream notification using individual media resource URI for short-duration resource"
+      ],
+      "modality": "may",
+      "id": "N-S071-011"
+    },
+    {
+      "statement_id": "N-S071-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In such cases, when the remaining media resources come to the end of the stream, they MUST send a PLAY_NOTIFY request using the aggregate control URI to indicate that no more resources remain.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "remaining_media_resources_reach_end_of_stream",
+      "pre_cond": "server.state = Play & session.aggregated_control = true & individual_end-of-stream_notifications_sent = true",
+      "post_cond": "PLAY_NOTIFY.uri = aggregate_control_URI",
+      "actions": [
+        "send PLAY_NOTIFY end-of-stream request using aggregate control URI when all remaining resources end"
+      ],
+      "modality": "must",
+      "id": "N-S071-012"
+    },
+    {
+      "statement_id": "N-S071-13",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "A PLAY_NOTIFY request with Notify-Reason header set to end-of-stream MUST NOT carry a message body.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "send_PLAY_NOTIFY(Notify-Reason=end-of-stream)",
+      "pre_cond": "server.state = Play",
+      "post_cond": "PLAY_NOTIFY.body = null",
+      "actions": [
+        "omit message body from PLAY_NOTIFY end-of-stream request"
+      ],
+      "modality": "must",
+      "id": "N-S071-013"
+    }
+  ]
+}

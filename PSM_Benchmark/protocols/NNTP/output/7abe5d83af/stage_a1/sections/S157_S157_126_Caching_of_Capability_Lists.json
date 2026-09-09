@@ -1,0 +1,156 @@
+{
+  "section_id": "S157",
+  "title": "S157 12.6 Caching of Capability Lists",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S157 12.6 Caching of Capability Lists"
+  ],
+  "url_anchor": "#s157-126-caching-of-capability-lists",
+  "word_count": 360,
+  "statement_count": 7,
+  "elapsed_seconds": 42.15,
+  "statements": [
+    {
+      "statement_id": "D-S157-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Initial connection set-up completed; server in initial unencrypted ready state, responding with 200 NNTP Service Ready.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S157",
+      "state_name": "Initial connection set-up completed",
+      "enum_name": "ConnectionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "connection.encrypted = false"
+    },
+    {
+      "statement_id": "D-S157-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "After client and server negotiate encryption on the link and server responds 283 Encrypted link established, the connection is in the encrypted link state.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S157",
+      "state_name": "Encrypted link established",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.encrypted = true"
+    },
+    {
+      "statement_id": "D-S157-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Client sends XENCRYPT; client and server negotiate encryption on the link; server responds 283 Encrypted link established, transitioning the connection to the encrypted state.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S157",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Initial connection set-up completed",
+      "to_state": "Encrypted link established",
+      "trigger": "XENCRYPT command + encryption negotiation",
+      "pre_cond": "connection.encrypted = false",
+      "post_cond": "connection.encrypted = true",
+      "actions": [
+        "server sends 283 Encrypted link established",
+        "capability list updated to reflect encrypted-state extensions"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S157-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Client sends XSECRET on an encrypted link; server responds 290 Password accepted.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S157",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Encrypted link established",
+      "to_state": null,
+      "trigger": "XSECRET command",
+      "pre_cond": "connection.encrypted = true",
+      "post_cond": null,
+      "actions": [
+        "server sends 290 Password accepted"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S157-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Client sends XSECRET on an unencrypted link; server responds 483 Only permitted on secure links; connection state does not change.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S157",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Initial connection set-up completed",
+      "to_state": "Initial connection set-up completed",
+      "trigger": "XSECRET command",
+      "pre_cond": "connection.encrypted = false",
+      "post_cond": "connection.encrypted = false",
+      "actions": [
+        "server sends 483 Only permitted on secure links"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S157-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Whenever there is a relevant change to the server state, the results of the CAPABILITIES command are required to change accordingly.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S157",
+      "object_name": "CAPABILITIES response",
+      "field_name": "capability list",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "capability list must reflect current server state"
+    },
+    {
+      "statement_id": "D-S157-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Information about extensions related to security and privacy MUST NOT be cached, since this could allow a variety of attacks.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S157",
+      "object_name": "capability list cache",
+      "field_name": "security and privacy extension information",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "security_extension_info.cached = false (MUST NOT be cached)"
+    }
+  ]
+}

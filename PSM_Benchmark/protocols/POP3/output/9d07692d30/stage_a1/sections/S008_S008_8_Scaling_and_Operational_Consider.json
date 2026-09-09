@@ -1,0 +1,84 @@
+{
+  "section_id": "S008",
+  "title": "S008 8. Scaling and Operational Considerations",
+  "depth": 3,
+  "parent_path": [
+    "POP3",
+    "S008 8. Scaling and Operational Considerations"
+  ],
+  "url_anchor": "#s008-8-scaling-and-operational-considerations",
+  "word_count": 549,
+  "statement_count": 3,
+  "elapsed_seconds": 21.41,
+  "statements": [
+    {
+      "statement_id": "D-S008-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "following a POP3 login by a client which was ended by a QUIT, delete all messages downloaded during the session with the RETR command",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "UPDATE",
+      "trigger": "QUIT",
+      "pre_cond": "session.quit_received = true",
+      "post_cond": "all messages downloaded via RETR during session are marked for deletion",
+      "actions": [
+        "delete all messages retrieved via RETR command during the session"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S008-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "It is important not to delete messages in the event of abnormal connection termination (ie, if no QUIT was received from the client) because the client may not have successfully received or stored the messages.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "abnormal_connection_termination",
+      "pre_cond": "session.quit_received = false",
+      "post_cond": "session.retr_messages_deleted = false",
+      "actions": [
+        "do not delete messages downloaded during the session"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S008-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "Clients must not assume that a site policy will automate message deletions, and should continue to explicitly delete messages using the DELE command when appropriate.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S008",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "client_done_with_message",
+      "pre_cond": null,
+      "post_cond": "message.marked_for_deletion = true",
+      "actions": [
+        "issue DELE command explicitly"
+      ],
+      "modality": "should"
+    }
+  ]
+}

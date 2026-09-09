@@ -1,0 +1,166 @@
+{
+  "section_id": "S213",
+  "title": "S213 19.3.2 User-Approved TLS Procedure",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S213 19.3.2 User-Approved TLS Procedure"
+  ],
+  "url_anchor": "#s213-1932-user-approved-tls-procedure",
+  "word_count": 430,
+  "statement_count": 7,
+  "elapsed_seconds": 36.61,
+  "statements": [
+    {
+      "statement_id": "D-S213-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Each proxy MUST set up the TLS session to the next hop if not already present (i.e., run the TLS handshake, but do not send the RTSP request).",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S213",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RTSP request received and TLS session not yet established",
+      "pre_cond": "tls_session.present = false",
+      "post_cond": "tls_session.present = true",
+      "actions": [
+        "run TLS handshake to next hop"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S213-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Check if a matching identity and hash of the peer certificate are present in the Accept-Credentials header. If present, send the message to the next hop and conclude these procedures.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S213",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "matching identity and hash found in Accept-Credentials header",
+      "pre_cond": "accept_credentials.match = true",
+      "post_cond": null,
+      "actions": [
+        "forward RTSP request to next hop"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S213-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The proxy responds to the RTSP request with a 470 or 407 response code when no matching identity and hash are present in the Accept-Credentials header. The proxy MUST include a Connection-Credentials header with the next hop's identity and certificate.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S213",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "no matching identity and hash found in Accept-Credentials header",
+      "pre_cond": "accept_credentials.match = false",
+      "post_cond": null,
+      "actions": [
+        "send 470 or 407 response with Connection-Credentials header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S213-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client MUST upon receiving a 470 (Connection Authorization Required) or 407 (Proxy Authentication Required) response with Connection-Credentials header take the decision on whether or not to accept the certificate.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S213",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "470 or 407 response with Connection-Credentials header received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "evaluate peer certificate",
+        "optionally consult user"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S213-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If the certificate is accepted, the client has to again send the RTSP request. In that request, the client has to include the Accept-Credentials header including the hash over the DER-encoded certificate for all trusted proxies in the chain.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S213",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client accepts proxy certificate",
+      "pre_cond": "certificate.accepted = true",
+      "post_cond": null,
+      "actions": [
+        "resend RTSP request",
+        "include Accept-Credentials header with DER-encoded certificate hash for all trusted proxies"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S213-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "In the 470 or 407 response message the proxy MUST include a Connection-Credentials header with the next hop's identity and certificate.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S213",
+      "object_name": "470 or 407 response",
+      "field_name": "Connection-Credentials",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S213-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The client has to include the Accept-Credentials header including the hash over the DER-encoded certificate for all trusted proxies in the chain when resending the RTSP request after accepting the certificate.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S213",
+      "object_name": "retransmitted RTSP request",
+      "field_name": "Accept-Credentials",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

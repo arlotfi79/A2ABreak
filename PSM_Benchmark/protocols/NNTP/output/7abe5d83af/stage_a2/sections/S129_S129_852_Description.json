@@ -1,0 +1,320 @@
+{
+  "section_id": "S129",
+  "title": "S129 8.5.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S129 8.5.2 Description"
+  ],
+  "url_anchor": "#s129-852-description",
+  "word_count": 775,
+  "statement_count": 13,
+  "elapsed_seconds": 227.68,
+  "statements": [
+    {
+      "statement_id": "N-S129-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "It MAY take the information directly from the articles or from the overview database.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S129-001"
+    },
+    {
+      "statement_id": "N-S129-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In the case of headers, an implementation MAY restrict the use of this command to a specific list of headers or MAY allow it to be used with any header; it may behave differently when it is used with a message-id argument and when it is used with a range or no argument.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S129-002"
+    },
+    {
+      "statement_id": "N-S129-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the article is specified by message-id (the first form of the command), the article number MUST be replaced with zero, except that if there is a currently selected newsgroup and the article is present in that group, the server MAY use the article's number in that group.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR_received",
+      "pre_cond": "HDR.argument_type = message_id",
+      "post_cond": "response.article_number = 0 | (newsgroup.selected = true & article.present_in_group = true & response.article_number = article.group_number)",
+      "actions": [
+        "set article number in response to zero",
+        "optionally use article group number if newsgroup is currently selected and article is present in that group"
+      ],
+      "modality": "must",
+      "id": "N-S129-003"
+    },
+    {
+      "statement_id": "N-S129-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In the other two forms of the command, the article number MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR_received",
+      "pre_cond": "HDR.argument_type = range | HDR.argument_type = omitted",
+      "post_cond": "response.article_number.present = true",
+      "actions": [
+        "include article number in response"
+      ],
+      "modality": "must",
+      "id": "N-S129-004"
+    },
+    {
+      "statement_id": "N-S129-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the requested header is not present in the article, or if it is present but empty, a line for that article is included in the output, but the header content portion of the line is empty (the space after the article number MAY be retained or omitted).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S129-005"
+    },
+    {
+      "statement_id": "N-S129-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is a message-id and no such article exists, a 430 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR_received",
+      "pre_cond": "HDR.argument_type = message_id & article.exists = false",
+      "post_cond": "response.code = 430",
+      "actions": [
+        "send 430 response"
+      ],
+      "modality": "must",
+      "id": "N-S129-006"
+    },
+    {
+      "statement_id": "N-S129-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is a range or is omitted and the currently selected newsgroup is invalid, a 412 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR_received",
+      "pre_cond": "(HDR.argument_type = range | HDR.argument_type = omitted) & newsgroup.selected = false",
+      "post_cond": "response.code = 412",
+      "actions": [
+        "send 412 response"
+      ],
+      "modality": "must",
+      "id": "N-S129-007"
+    },
+    {
+      "statement_id": "N-S129-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is a range and no articles in that number range exist in the currently selected newsgroup, including the case where the second number is less than the first one, a 423 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR_received",
+      "pre_cond": "HDR.argument_type = range & newsgroup.selected = true & range.articles_exist = false",
+      "post_cond": "response.code = 423",
+      "actions": [
+        "send 423 response"
+      ],
+      "modality": "must",
+      "id": "N-S129-008"
+    },
+    {
+      "statement_id": "N-S129-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the second argument is omitted and the current article number is invalid, a 420 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR_received",
+      "pre_cond": "HDR.argument_type = omitted & current_article.valid = false",
+      "post_cond": "response.code = 420",
+      "actions": [
+        "send 420 response"
+      ],
+      "modality": "must",
+      "id": "N-S129-009"
+    },
+    {
+      "statement_id": "N-S129-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "A server MAY only allow HDR commands for a limited set of fields; it may behave differently in this respect for the first (message-id) form from how it would for the other forms.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S129-010"
+    },
+    {
+      "statement_id": "N-S129-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If so, it MUST respond with the generic 503 response to attempts to request other fields, rather than return erroneous results, such as a successful empty response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR_received",
+      "pre_cond": "server.hdr_field_restriction = true & HDR.field.allowed = false",
+      "post_cond": "response.code = 503",
+      "actions": [
+        "send 503 response"
+      ],
+      "modality": "must",
+      "id": "N-S129-011"
+    },
+    {
+      "statement_id": "N-S129-12",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If HDR uses the overview database and it is inconsistent for the requested field, the server MAY return what results it can, or it MAY respond with the generic 503 response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HDR_received",
+      "pre_cond": "server.uses_overview_db = true & overview_db.consistent_for_field = false",
+      "post_cond": "response.code = 225 | response.code = 503",
+      "actions": [
+        "return partial results or send 503 response"
+      ],
+      "modality": "may",
+      "id": "N-S129-012"
+    },
+    {
+      "statement_id": "N-S129-13",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In the latter case, the field MUST NOT appear in the output from LIST HEADERS.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S129",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST_HEADERS_received",
+      "pre_cond": "overview_db.consistent_for_field = false & server.hdr_503_issued_for_field = true",
+      "post_cond": "field.in_LIST_HEADERS_output = false",
+      "actions": [
+        "exclude field from LIST HEADERS response output"
+      ],
+      "modality": "must",
+      "id": "N-S129-013"
+    }
+  ]
+}

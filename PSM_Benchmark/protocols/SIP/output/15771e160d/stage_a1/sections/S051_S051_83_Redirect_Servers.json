@@ -1,0 +1,139 @@
+{
+  "section_id": "S051",
+  "title": "S051 8.3 Redirect Servers",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S051 8.3 Redirect Servers"
+  ],
+  "url_anchor": "#s051-83-redirect-servers",
+  "word_count": 681,
+  "statement_count": 6,
+  "elapsed_seconds": 29.7,
+  "statements": [
+    {
+      "statement_id": "D-S051-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The redirect server maintains transaction state for an entire SIP transaction.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S051",
+      "state_name": "TRANSACTION_ACTIVE",
+      "enum_name": "RedirectServerTransactionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S051-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "This response ends the SIP transaction.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S051",
+      "state_name": "TRANSACTION_TERMINATED",
+      "enum_name": "RedirectServerTransactionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S051-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "After receiving a request other than CANCEL, the server either refuses the request or gathers the list of alternative locations from the location service and returns a final response of class 3xx.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S051",
+      "actors": [
+        "redirect server",
+        "client"
+      ],
+      "from_state": "TRANSACTION_ACTIVE",
+      "to_state": "TRANSACTION_TERMINATED",
+      "trigger": "receive_non_CANCEL_request",
+      "pre_cond": "request.method != CANCEL",
+      "post_cond": "response.class = 3xx | response.class = 4xx",
+      "actions": [
+        "gather_alternative_locations_from_location_service",
+        "populate_Contact_header_with_alternative_locations",
+        "send_3xx_final_response"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S051-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "For well-formed CANCEL requests, it SHOULD return a 2xx response. This response ends the SIP transaction.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S051",
+      "actors": [
+        "redirect server",
+        "client"
+      ],
+      "from_state": "TRANSACTION_ACTIVE",
+      "to_state": "TRANSACTION_TERMINATED",
+      "trigger": "receive_CANCEL_request",
+      "pre_cond": "request.method = CANCEL & request.well_formed = true",
+      "post_cond": "response.class = 2xx",
+      "actions": [
+        "send_2xx_response"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S051-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Redirect servers MUST NOT redirect a request to a URI equal to the one in the Request-URI; instead, provided that the URI does not point to itself, the server MAY proxy the request to the destination URI, or MAY reject it with a 404.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S051",
+      "actors": [
+        "redirect server"
+      ],
+      "from_state": "TRANSACTION_ACTIVE",
+      "to_state": "TRANSACTION_TERMINATED",
+      "trigger": "redirect_URI_equals_Request_URI",
+      "pre_cond": "redirect_uri = request.request_uri",
+      "post_cond": "response.status = 404",
+      "actions": [
+        "send_404_response"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S051-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "When a redirect server returns a 3xx response to a request, it populates the list of (one or more) alternative locations into the Contact header field.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S051",
+      "object_name": "3xx response",
+      "field_name": "Contact",
+      "field_type": "header field",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

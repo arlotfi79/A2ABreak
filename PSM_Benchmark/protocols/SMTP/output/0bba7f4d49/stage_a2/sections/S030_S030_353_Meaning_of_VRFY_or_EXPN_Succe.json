@@ -1,0 +1,133 @@
+{
+  "section_id": "S030",
+  "title": "S030 3.5.3 Meaning of VRFY or EXPN Success Response",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S030 3.5.3 Meaning of VRFY or EXPN Success Response"
+  ],
+  "url_anchor": "#s030-353-meaning-of-vrfy-or-expn-success-response",
+  "word_count": 262,
+  "statement_count": 5,
+  "elapsed_seconds": 52.37,
+  "statements": [
+    {
+      "statement_id": "1-S030-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "A server MUST NOT return a 250 code in response to a VRFY or EXPN command unless it has actually verified the address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY_or_EXPN_received",
+      "pre_cond": "server.address_actually_verified = false",
+      "post_cond": "response.code != 250",
+      "actions": [
+        "prohibit sending 250 response code"
+      ],
+      "modality": "must",
+      "id": "N-S030-001"
+    },
+    {
+      "statement_id": "2-S030-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "In particular, a server MUST NOT return 250 if all it has done is to verify that the syntax given is valid.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY_or_EXPN_received",
+      "pre_cond": "server.only_syntax_verified = true",
+      "post_cond": "response.code != 250",
+      "actions": [
+        "prohibit sending 250 response code when only syntax was verified"
+      ],
+      "modality": "must",
+      "id": "N-S030-002"
+    },
+    {
+      "statement_id": "3-S030-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "In that case, 502 (Command not implemented) or 500 (Syntax error, command unrecognized) SHOULD be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY_or_EXPN_received",
+      "pre_cond": "server.only_syntax_verified = true",
+      "post_cond": "response.code = 502 | response.code = 500",
+      "actions": [
+        "send 502 or 500 reply code"
+      ],
+      "modality": "should",
+      "id": "N-S030-003"
+    },
+    {
+      "statement_id": "4-S030-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "In these situations, reply code 252 SHOULD be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY_or_EXPN_received",
+      "pre_cond": "server.address_appears_valid = true & server.realtime_verification_feasible = false",
+      "post_cond": "response.code = 252",
+      "actions": [
+        "send 252 reply code"
+      ],
+      "modality": "should",
+      "id": "N-S030-004"
+    },
+    {
+      "statement_id": "5-S030-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "Implementations generally SHOULD be more aggressive about address verification in the case of VRFY than in the case of RCPT, even if it takes a little longer to do so.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S030-005"
+    }
+  ]
+}

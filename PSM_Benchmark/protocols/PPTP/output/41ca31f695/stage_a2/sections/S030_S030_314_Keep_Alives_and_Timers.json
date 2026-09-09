@@ -1,0 +1,112 @@
+{
+  "section_id": "S030",
+  "title": "S030 3.1.4 Keep Alives and Timers",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S030 3.1.4 Keep Alives and Timers"
+  ],
+  "url_anchor": "#s030-314-keep-alives-and-timers",
+  "word_count": 107,
+  "statement_count": 4,
+  "elapsed_seconds": 74.77,
+  "statements": [
+    {
+      "statement_id": "N-S030-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "A control connection SHOULD be closed by closing the underlying TCP connection under the following circumstances:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": "closed",
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "close underlying TCP connection"
+      ],
+      "modality": "should",
+      "id": "N-S030-001"
+    },
+    {
+      "statement_id": "N-S030-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If a control connection is not in the established state (i.e., Start-Control-Connection-Request and Start-Control-Connection-Reply have not been exchanged), a control connection SHOULD be closed after 60 seconds by a peer waiting for a Start-Control-Connection-Request or Start-Control-Connection-Reply message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": "closed",
+      "trigger": "60_second_timer_expired_awaiting_Start-Control-Connection-Request_or_Reply",
+      "pre_cond": "connection.state != established & (Start-Control-Connection-Request.received = false | Start-Control-Connection-Reply.received = false) & timer.elapsed >= 60",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "expire 60-second wait timer",
+        "close control connection by closing underlying TCP connection"
+      ],
+      "modality": "should",
+      "id": "N-S030-002"
+    },
+    {
+      "statement_id": "N-S030-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "peer",
+      "stage": "pptp_fsm",
+      "description": "If a peer's control connection is in the established state and has not received a control message for 60 seconds, it SHOULD send a Echo-Request message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "peer"
+      ],
+      "from_state": "established",
+      "to_state": null,
+      "trigger": "no_control_message_received_for_60_seconds",
+      "pre_cond": "connection.state = established & timer.no_message_elapsed >= 60",
+      "post_cond": "Echo-Request.sent = true",
+      "actions": [
+        "send Echo-Request message"
+      ],
+      "modality": "should",
+      "id": "N-S030-003"
+    },
+    {
+      "statement_id": "N-S030-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If an Echo-Reply is not received 60 seconds after the Echo-Request message transmission, the control connection SHOULD be closed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "peer"
+      ],
+      "from_state": "established",
+      "to_state": "closed",
+      "trigger": "Echo-Reply_not_received_60s_after_Echo-Request_transmission",
+      "pre_cond": "connection.state = established & Echo-Request.sent = true & Echo-Reply.received = false & timer.echo_elapsed >= 60",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "close control connection by closing underlying TCP connection"
+      ],
+      "modality": "should",
+      "id": "N-S030-004"
+    }
+  ]
+}

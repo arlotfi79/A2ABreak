@@ -1,0 +1,88 @@
+{
+  "section_id": "S014",
+  "title": "S014 3.4.2 Knowing When to Keep Quiet",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S014 3.4.2 Knowing When to Keep Quiet"
+  ],
+  "url_anchor": "#s014-342-knowing-when-to-keep-quiet",
+  "word_count": 285,
+  "statement_count": 3,
+  "elapsed_seconds": 72.49,
+  "statements": [
+    {
+      "statement_id": "1-S014-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "To be sure that a TCP implementation does not create a segment carrying a sequence number that may be duplicated by an old segment remaining in the network, the TCP endpoint must keep quiet for an MSL before assigning any sequence numbers upon starting up or recovering from a situation where memory of sequence numbers in use was lost.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "TCP endpoint",
+        "TCP implementation"
+      ],
+      "from_state": "CLOSED",
+      "to_state": null,
+      "trigger": "startup | sequence_number_memory_lost",
+      "pre_cond": "endpoint.starting_up = true | endpoint.sequence_number_memory_lost = true",
+      "post_cond": "endpoint.quiet_period_elapsed >= MSL & endpoint.sequence_numbers_assigned = false",
+      "actions": [
+        "enter quiet period of duration MSL",
+        "refrain from assigning any sequence numbers until quiet period expires"
+      ],
+      "modality": "must",
+      "id": "N-S014-001"
+    },
+    {
+      "statement_id": "2-S014-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "This is an engineering choice, and may be changed if experience indicates it is desirable to do so.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S014-002"
+    },
+    {
+      "statement_id": "3-S014-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "Note that if a TCP endpoint is reinitialized in some sense, yet retains its memory of sequence numbers in use, then it need not wait at all; it must only be sure to use sequence numbers larger than those recently used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "TCP endpoint"
+      ],
+      "from_state": "CLOSED",
+      "to_state": null,
+      "trigger": "reinitialization & sequence_number_memory_retained",
+      "pre_cond": "endpoint.reinitialized = true & endpoint.sequence_number_memory_retained = true",
+      "post_cond": "endpoint.ISS > endpoint.recently_used_sequence_numbers_max",
+      "actions": [
+        "skip MSL quiet period",
+        "select initial sequence numbers strictly greater than all recently used sequence numbers"
+      ],
+      "modality": "must",
+      "id": "N-S014-003"
+    }
+  ]
+}

@@ -1,0 +1,350 @@
+{
+  "section_id": "S014",
+  "title": "S014 5. Path Attributes",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S014 5. Path Attributes"
+  ],
+  "url_anchor": "#s014-5-path-attributes",
+  "word_count": 502,
+  "statement_count": 14,
+  "elapsed_seconds": 107.61,
+  "statements": [
+    {
+      "statement_id": "N-S014-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "BGP implementations MUST recognize all well-known attributes.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive UPDATE message",
+      "pre_cond": null,
+      "post_cond": "well_known_attributes.recognized = true",
+      "actions": [
+        "recognize all well-known attributes"
+      ],
+      "modality": "must",
+      "id": "N-S014-001"
+    },
+    {
+      "statement_id": "N-S014-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "Some of these attributes are mandatory and MUST be included in every UPDATE message that contains NLRI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send UPDATE message containing NLRI",
+      "pre_cond": "UPDATE.contains_NLRI = true",
+      "post_cond": "UPDATE.mandatory_well_known_attributes.included = true",
+      "actions": [
+        "include mandatory well-known attributes in UPDATE message"
+      ],
+      "modality": "must",
+      "id": "N-S014-002"
+    },
+    {
+      "statement_id": "N-S014-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "Others are discretionary and MAY or MAY NOT be sent in a particular UPDATE message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S014-003"
+    },
+    {
+      "statement_id": "N-S014-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "peer",
+      "stage": "bgp_fsm",
+      "description": "Once a BGP peer has updated any well-known attributes, it MUST pass these attributes to its peers in any updates it transmits.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send UPDATE message",
+      "pre_cond": "peer.updated_well_known_attributes = true",
+      "post_cond": "UPDATE.well_known_attributes.forwarded = true",
+      "actions": [
+        "pass updated well-known attributes to peers in all transmitted updates"
+      ],
+      "modality": "must",
+      "id": "N-S014-004"
+    },
+    {
+      "statement_id": "N-S014-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "In addition to well-known attributes, each path MAY contain one or more optional attributes.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S014-005"
+    },
+    {
+      "statement_id": "N-S014-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Paths with unrecognized transitive optional attributes SHOULD be accepted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive UPDATE message with unrecognized transitive optional attribute",
+      "pre_cond": "attribute.optional = true & attribute.transitive = true & attribute.recognized = false",
+      "post_cond": "path.accepted = true",
+      "actions": [
+        "accept path carrying unrecognized transitive optional attribute"
+      ],
+      "modality": "should",
+      "id": "N-S014-006"
+    },
+    {
+      "statement_id": "N-S014-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If a path with an unrecognized transitive optional attribute is accepted and passed to other BGP peers, then the unrecognized transitive optional attribute of that path MUST be passed, along with the path, to other BGP peers with the Partial bit in the Attribute Flags octet set to 1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "forward path with unrecognized transitive optional attribute to peers",
+      "pre_cond": "attribute.optional = true & attribute.transitive = true & attribute.recognized = false & path.accepted = true & path.forwarded = true",
+      "post_cond": "attribute.forwarded = true & attribute.partial_bit = 1",
+      "actions": [
+        "pass unrecognized transitive optional attribute along with the path to other BGP peers",
+        "set Partial bit in Attribute Flags octet to 1"
+      ],
+      "modality": "must",
+      "id": "N-S014-007"
+    },
+    {
+      "statement_id": "N-S014-8",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If a path with a recognized, transitive optional attribute is accepted and passed along to other BGP peers and the Partial bit in the Attribute Flags octet is set to 1 by some previous AS, it MUST NOT be set back to 0 by the current AS.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP speaker",
+        "AS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "forward path with recognized transitive optional attribute carrying Partial bit = 1",
+      "pre_cond": "attribute.optional = true & attribute.transitive = true & attribute.recognized = true & path.accepted = true & path.forwarded = true & attribute.partial_bit = 1",
+      "post_cond": "attribute.partial_bit = 1",
+      "actions": [
+        "preserve Partial bit at value 1; do not reset Partial bit to 0"
+      ],
+      "modality": "must",
+      "id": "N-S014-008"
+    },
+    {
+      "statement_id": "N-S014-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Unrecognized non-transitive optional attributes MUST be quietly ignored and not passed along to other BGP peers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive UPDATE message with unrecognized non-transitive optional attribute",
+      "pre_cond": "attribute.optional = true & attribute.transitive = false & attribute.recognized = false",
+      "post_cond": "attribute.ignored = true & attribute.forwarded = false",
+      "actions": [
+        "silently ignore unrecognized non-transitive optional attribute",
+        "do not forward unrecognized non-transitive optional attribute to other BGP peers"
+      ],
+      "modality": "must",
+      "id": "N-S014-009"
+    },
+    {
+      "statement_id": "N-S014-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "New, transitive optional attributes MAY be attached to the path by the originator or by any other BGP speaker in the path.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "originator",
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S014-010"
+    },
+    {
+      "statement_id": "N-S014-11",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "All optional attributes (both transitive and non-transitive), MAY be updated (if appropriate) by BGP speakers in the path.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S014-011"
+    },
+    {
+      "statement_id": "N-S014-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "peer",
+      "stage": "bgp_fsm",
+      "description": "The sender of an UPDATE message SHOULD order path attributes within the UPDATE message in ascending order of attribute type.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "sender",
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send UPDATE message",
+      "pre_cond": null,
+      "post_cond": "UPDATE.path_attributes.order = ascending_by_attribute_type",
+      "actions": [
+        "order path attributes within UPDATE message in ascending order of attribute type"
+      ],
+      "modality": "should",
+      "id": "N-S014-012"
+    },
+    {
+      "statement_id": "N-S014-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "peer",
+      "stage": "bgp_fsm",
+      "description": "The receiver of an UPDATE message MUST be prepared to handle path attributes within UPDATE messages that are out of order.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "receiver",
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive UPDATE message with out-of-order path attributes",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "accept and process path attributes that appear out of order in received UPDATE messages"
+      ],
+      "modality": "must",
+      "id": "N-S014-013"
+    },
+    {
+      "statement_id": "N-S014-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The mandatory category refers to an attribute that MUST be present in both IBGP and EBGP exchanges if NLRI are contained in the UPDATE message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send UPDATE message containing NLRI",
+      "pre_cond": "UPDATE.contains_NLRI = true",
+      "post_cond": "UPDATE.mandatory_attributes.present = true",
+      "actions": [
+        "include mandatory attributes in IBGP UPDATE messages containing NLRI",
+        "include mandatory attributes in EBGP UPDATE messages containing NLRI"
+      ],
+      "modality": "must",
+      "id": "N-S014-014"
+    }
+  ]
+}

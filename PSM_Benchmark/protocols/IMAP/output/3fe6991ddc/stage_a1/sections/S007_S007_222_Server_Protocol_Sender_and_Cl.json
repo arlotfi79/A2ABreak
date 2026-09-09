@@ -1,0 +1,102 @@
+{
+  "section_id": "S007",
+  "title": "S007 2.2.2 Server Protocol Sender and Client Protocol Receiver",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S007 2.2.2 Server Protocol Sender and Client Protocol Receiver"
+  ],
+  "url_anchor": "#s007-222-server-protocol-sender-and-client-protocol-receiver",
+  "word_count": 315,
+  "statement_count": 4,
+  "elapsed_seconds": 54.53,
+  "statements": [
+    {
+      "statement_id": "D-S007-001",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "There are three possible server completion responses: OK (indicating success), NO (indicating failure), or BAD (indicating a protocol error such as unrecognized command or command syntax error).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "object_name": "server completion response",
+      "field_name": "completion_status",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "OK",
+        "NO",
+        "BAD"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S007-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Any client command with a protocol syntax error, including (but not limited to) missing or extraneous spaces or arguments, SHOULD be rejected and the client given a BAD server completion response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "protocol syntax error in client command",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "reject command",
+        "send BAD completion response to client"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S007-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The protocol receiver of an IMAP4rev2 client reads a response line from the server. It then takes action on the response based upon the first token of the response, which can be a tag, a \"*\", or a \"+\".",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server response line received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "parse first token",
+        "dispatch on token type: tag | untagged (*) | continuation (+)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S007-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The server completion result response is tagged with the same tag as the client command that began the operation. Thus, if more than one command is in progress, the tag in a server completion response identifies the command to which the response applies.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "object_name": "server completion response",
+      "field_name": "tag",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

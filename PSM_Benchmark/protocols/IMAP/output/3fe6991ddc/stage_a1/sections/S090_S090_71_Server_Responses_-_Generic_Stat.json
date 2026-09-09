@@ -1,0 +1,137 @@
+{
+  "section_id": "S090",
+  "title": "S090 7.1 Server Responses - Generic Status Responses",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S090 7.1 Server Responses - Generic Status Responses"
+  ],
+  "url_anchor": "#s090-71-server-responses---generic-status-responses",
+  "word_count": 2052,
+  "statement_count": 6,
+  "elapsed_seconds": 140.53,
+  "statements": [
+    {
+      "statement_id": "D-S090-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server returns the CLOSED response code when the currently selected mailbox is closed implicitly using the SELECT or EXAMINE command on another mailbox. The CLOSED response code serves as a boundary between responses for the previously opened mailbox (which was closed) and the newly selected mailbox; all responses before the CLOSED response code relate to the mailbox that was closed, and all subsequent responses relate to the newly opened mailbox.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S090",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "SELECT or EXAMINE on another mailbox",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "protocol.state = Selected & session.mailbox = new_mailbox",
+      "actions": [
+        "implicitly close currently selected mailbox",
+        "send untagged CLOSED response code",
+        "open newly selected mailbox"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S090-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "There is no need to return the CLOSED response code on completion of the CLOSE or the UNSELECT command (or similar), whose purpose is to close the currently selected mailbox without opening a new one.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S090",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Selected",
+      "to_state": "Authenticated",
+      "trigger": "CLOSE or UNSELECT command",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "protocol.state = Authenticated",
+      "actions": [
+        "close currently selected mailbox without opening a new one"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S090-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "READ-ONLY: The mailbox is selected as read-only, or its access while selected has changed from read-write to read-only.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S090",
+      "state_name": "READ-ONLY",
+      "enum_name": "SelectedAccessMode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Selected & mailbox.access = read-only"
+    },
+    {
+      "statement_id": "D-S090-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "READ-WRITE: The mailbox is selected as read-write, or its access while selected has changed from read-only to read-write.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S090",
+      "state_name": "READ-WRITE",
+      "enum_name": "SelectedAccessMode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = Selected & mailbox.access = read-write"
+    },
+    {
+      "statement_id": "D-S090-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "PREAUTH and BYE are always untagged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S090",
+      "object_name": "PREAUTH",
+      "field_name": "tag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "untagged"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S090-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "PREAUTH and BYE are always untagged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S090",
+      "object_name": "BYE",
+      "field_name": "tag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "untagged"
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

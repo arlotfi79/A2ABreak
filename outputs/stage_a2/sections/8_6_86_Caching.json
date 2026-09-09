@@ -1,0 +1,184 @@
+{
+  "section_id": "8.6",
+  "title": "8.6. Caching",
+  "depth": 3,
+  "parent_path": [
+    "8. Agent Discovery: The Agent Card",
+    "8.6. Caching"
+  ],
+  "url_anchor": "#86-caching",
+  "word_count": 153,
+  "statement_count": 7,
+  "elapsed_seconds": 19.89,
+  "statements": [
+    {
+      "statement_id": "N-8.6-001",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Servers and clients SHOULD use standard HTTP caching mechanisms to reduce unnecessary network overhead.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Apply standard HTTP caching mechanisms when serving or fetching Agent Cards"
+      ],
+      "modality": "should",
+      "id": "N-8-6-001"
+    },
+    {
+      "statement_id": "N-8.6-002",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Agent Card HTTP endpoints SHOULD include a Cache-Control response header with a max-age directive appropriate for the agent's expected update frequency",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": null,
+      "post_cond": "response.headers.Cache-Control.max-age != null",
+      "actions": [
+        "Include Cache-Control response header with a max-age directive appropriate for the agent's expected update frequency in Agent Card HTTP responses"
+      ],
+      "modality": "should",
+      "id": "N-8-6-002"
+    },
+    {
+      "statement_id": "N-8.6-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Agent Card HTTP endpoints SHOULD include an ETag response header derived from the Agent Card's version field or a hash of the card content",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": null,
+      "post_cond": "response.headers.ETag != null",
+      "actions": [
+        "Include an ETag response header derived from the Agent Card's version field or a hash of the card content in Agent Card HTTP responses"
+      ],
+      "modality": "should",
+      "id": "N-8-6-003"
+    },
+    {
+      "statement_id": "N-8.6-004",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Agent Card HTTP endpoints MAY include a Last-Modified response header",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Optionally include a Last-Modified response header in Agent Card HTTP responses"
+      ],
+      "modality": "may",
+      "id": "N-8-6-004"
+    },
+    {
+      "statement_id": "N-8.6-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients SHOULD honor HTTP caching semantics as defined in RFC 9111 when fetching Agent Cards",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": null,
+      "post_cond": "client.http_caching_honored = true",
+      "actions": [
+        "Honor HTTP caching semantics as defined in RFC 9111 when fetching Agent Cards"
+      ],
+      "modality": "should",
+      "id": "N-8-6-005"
+    },
+    {
+      "statement_id": "N-8.6-006",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "When a cached Agent Card has expired, clients SHOULD use conditional requests (If-None-Match with the stored ETag, or If-Modified-Since) to avoid re-downloading unchanged cards",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_cache_expired",
+      "pre_cond": "agent_card.cached = true & agent_card.cache_expired = true",
+      "post_cond": "request.headers.If-None-Match != null | request.headers.If-Modified-Since != null",
+      "actions": [
+        "Send conditional request using If-None-Match with the stored ETag, or If-Modified-Since header to avoid re-downloading unchanged Agent Cards"
+      ],
+      "modality": "should",
+      "id": "N-8-6-006"
+    },
+    {
+      "statement_id": "N-8.6-007",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "When the server does not include caching headers, clients MAY apply an implementation-specific default cache duration",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": "server.caching_headers_present = false",
+      "post_cond": "client.cache_duration = implementation_specific",
+      "actions": [
+        "Apply an implementation-specific default cache duration when the server does not include caching headers"
+      ],
+      "modality": "may",
+      "id": "N-8-6-007"
+    }
+  ]
+}

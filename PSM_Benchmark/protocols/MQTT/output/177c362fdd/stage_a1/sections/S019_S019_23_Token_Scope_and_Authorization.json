@@ -1,0 +1,150 @@
+{
+  "section_id": "S019",
+  "title": "S019 2.3 Token Scope and Authorization",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S019 2.3 Token Scope and Authorization"
+  ],
+  "url_anchor": "#s019-23-token-scope-and-authorization",
+  "word_count": 438,
+  "statement_count": 6,
+  "elapsed_seconds": 33.3,
+  "statements": [
+    {
+      "statement_id": "D-S019-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "The token or its introspection result MUST be cached to allow a Client's future PUBLISH and SUBSCRIBE messages.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S019",
+      "object_name": "session",
+      "field_name": "cached_token_or_introspection_result",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S019-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "During the CONNECT, if the Will Flag is set to 1, the Broker MUST also authorize the publication of the Will Topic and Will Message using the token's scope field.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S019",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECT",
+      "to_state": null,
+      "trigger": "Will Flag = 1 in CONNECT",
+      "pre_cond": "connection.will_flag = 1",
+      "post_cond": "server.will_topic_authorized = true",
+      "actions": [
+        "authorize Will Topic and Will Message using token scope field"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S019-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MAY signal in the CONNACK explicitly whether Wildcard Subscriptions are supported by returning a CONNACK property 'Wildcard Subscription Available'.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S019",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECT",
+      "to_state": "CONNACK",
+      "trigger": "CONNECT received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send CONNACK with Wildcard Subscription Available property"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S019-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the scope is empty, the Broker records no permissions for the Client for any topic. In this case, the Client is not able to publish or subscribe to any protected topics.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S019",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "CONNECT",
+      "to_state": null,
+      "trigger": "scope is empty",
+      "pre_cond": "session.scope = empty",
+      "post_cond": "session.publish_permitted = false & session.subscribe_permitted = false",
+      "actions": [
+        "record no topic permissions for client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S019-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The non-empty scope is used to authorize the Will Topic, if provided, in the CONNECT packet, during connection setup and, if the connection request succeeds, the Topic Names or Topic Filters requested in the future PUBLISH and SUBSCRIBE packets.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S019",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECT",
+      "to_state": "Connected",
+      "trigger": "connection request succeeds & scope is non-empty",
+      "pre_cond": "session.scope != empty & connection.request_succeeds = true",
+      "post_cond": "session.publish_permitted = scope_authorized & session.subscribe_permitted = scope_authorized",
+      "actions": [
+        "authorize Will Topic using scope",
+        "authorize future PUBLISH Topic Names using scope",
+        "authorize future SUBSCRIBE Topic Filters using scope"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S019-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "For the authorization to succeed, the Broker MUST verify that the Topic Name or Topic Filter in question is either an exact match to or a subset of at least one topic_filter in the scope.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S019",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Connected",
+      "to_state": null,
+      "trigger": "PUBLISH or SUBSCRIBE received",
+      "pre_cond": "session.scope != empty",
+      "post_cond": "authorization.result = (topic_name_or_filter matches scope)",
+      "actions": [
+        "verify Topic Name or Topic Filter is exact match or subset of at least one scope topic_filter"
+      ],
+      "modality": "must"
+    }
+  ]
+}

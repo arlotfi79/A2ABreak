@@ -1,0 +1,177 @@
+{
+  "section_id": "S075",
+  "title": "S075 Appendix B. TCP Requirement Summary",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S075 Appendix B. TCP Requirement Summary"
+  ],
+  "url_anchor": "#s075-appendix-b-tcp-requirement-summary",
+  "word_count": 4323,
+  "statement_count": 8,
+  "elapsed_seconds": 84.73,
+  "statements": [
+    {
+      "statement_id": "D-S075-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "SYN-RECEIVED remembers last state (MUST-11)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S075",
+      "state_name": "SYN-RECEIVED",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = SYN-RECEIVED"
+    },
+    {
+      "statement_id": "D-S075-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "In TIME-WAIT state for 2MSL seconds (MUST-13)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S075",
+      "state_name": "TIME-WAIT",
+      "enum_name": "TCPState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TIME-WAIT & timer.duration >= 2MSL"
+    },
+    {
+      "statement_id": "D-S075-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Function: simultaneously LISTENs for same port (MUST-42)",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S075",
+      "state_name": "LISTEN",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = LISTEN"
+    },
+    {
+      "statement_id": "D-S075-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "SYN-RECEIVED remembers last state (MUST-11): the connection must retain which prior state was active when transitioning into SYN-RECEIVED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S075",
+      "object_name": "SYN-RECEIVED",
+      "field_name": "last_state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S075-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Accept SYN from TIME-WAIT state (MAY-2)",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S075",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "TIME-WAIT",
+      "to_state": null,
+      "trigger": "receive SYN",
+      "pre_cond": "protocol.state = TIME-WAIT",
+      "post_cond": null,
+      "actions": [
+        "accept SYN",
+        "begin new connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S075-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Close connection on R2 retransmissions (MUST-20)",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S075",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "retransmission_count reaches R2",
+      "pre_cond": "connection.retransmission_count >= R2",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "close connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S075-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Inform application of aborted conn (MUST-12): TCP must inform the application layer when a connection is aborted",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S075",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "connection abort",
+      "pre_cond": null,
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "notify application of aborted connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S075-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Support simultaneous open attempts (MUST-10)",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S075",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "SYN-RECEIVED",
+      "trigger": "receive SYN during simultaneous open",
+      "pre_cond": "protocol.state = SYN-SENT",
+      "post_cond": "protocol.state = SYN-RECEIVED",
+      "actions": [
+        "send SYN-ACK",
+        "record last_state = SYN-SENT"
+      ],
+      "modality": "must"
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "section_id": "S078",
+  "title": "S078 6.4.4.1 SAVE Result Option and SEARCH Result Variable",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S078 6.4.4.1 SAVE Result Option and SEARCH Result Variable"
+  ],
+  "url_anchor": "#s078-6441-save-result-option-and-search-result-variable",
+  "word_count": 632,
+  "statement_count": 8,
+  "elapsed_seconds": 43.26,
+  "statements": [
+    {
+      "statement_id": "D-S078-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Upon successful completion of a SELECT or an EXAMINE command (after the tagged OK response), the current search result variable is reset to the empty sequence.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SELECT_OK | EXAMINE_OK",
+      "pre_cond": null,
+      "post_cond": "session.search_result_variable = empty_sequence",
+      "actions": [
+        "reset search result variable to empty sequence"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S078-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "A successful SEARCH command with the SAVE result option sets the value of the search result variable to the list of messages found in the SEARCH command.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH_SAVE_success",
+      "pre_cond": "command.result_option = SAVE",
+      "post_cond": "session.search_result_variable = found_messages",
+      "actions": [
+        "set search result variable to list of messages found by SEARCH"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S078-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "A SEARCH command that caused the server to return the BAD tagged response MUST NOT change the search result variable.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH_BAD",
+      "pre_cond": null,
+      "post_cond": "session.search_result_variable = session.search_result_variable",
+      "actions": [
+        "leave search result variable unchanged"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S078-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "A SEARCH command with no SAVE result option that caused the server to return NO tagged response MUST NOT change the search result variable.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH_NO",
+      "pre_cond": "command.result_option != SAVE",
+      "post_cond": "session.search_result_variable = session.search_result_variable",
+      "actions": [
+        "leave search result variable unchanged"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S078-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "A successful SEARCH command with no SAVE result option MUST NOT change the search result variable.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH_success",
+      "pre_cond": "command.result_option != SAVE",
+      "post_cond": "session.search_result_variable = session.search_result_variable",
+      "actions": [
+        "leave search result variable unchanged"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S078-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "A SEARCH command with the SAVE result option that caused the server to return the NO tagged response sets the value of the search result variable to the empty sequence.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH_SAVE_NO",
+      "pre_cond": "command.result_option = SAVE",
+      "post_cond": "session.search_result_variable = empty_sequence",
+      "actions": [
+        "set search result variable to empty sequence"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S078-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "When a message listed in the search result variable is EXPUNGEd, it is automatically removed from the list.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "EXPUNGE",
+      "pre_cond": "expunged_message in session.search_result_variable",
+      "post_cond": "expunged_message !in session.search_result_variable",
+      "actions": [
+        "remove expunged message from search result variable"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S078-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "If the server decides to send a new UIDVALIDITY value while the mailbox is opened, it causes the resetting of the search variable to the empty sequence.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S078",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_UIDVALIDITY_sent",
+      "pre_cond": "session.mailbox_open = true",
+      "post_cond": "session.search_result_variable = empty_sequence",
+      "actions": [
+        "reset search result variable to empty sequence"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

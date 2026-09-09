@@ -1,0 +1,161 @@
+{
+  "section_id": "S072",
+  "title": "S072 6.3.13 IDLE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S072 6.3.13 IDLE Command"
+  ],
+  "url_anchor": "#s072-6313-idle-command",
+  "word_count": 544,
+  "statement_count": 6,
+  "elapsed_seconds": 130.35,
+  "statements": [
+    {
+      "statement_id": "N-S072-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server chooses to send unsolicited FETCH responses, they MUST include a UID FETCH item.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S072",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IDLE",
+      "to_state": null,
+      "trigger": "server sends unsolicited FETCH response during IDLE",
+      "pre_cond": "server.idle_command.active = true & server.sending_unsolicited_fetch = true",
+      "post_cond": "fetch_response.contains_uid_fetch_item = true",
+      "actions": [
+        "include UID FETCH item in unsolicited FETCH response"
+      ],
+      "modality": "must",
+      "id": "N-S072-001"
+    },
+    {
+      "statement_id": "N-S072-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "At that point, the server MAY send any remaining queued untagged responses and then MUST immediately send the tagged response to the IDLE command and prepare to process other commands.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S072",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IDLE",
+      "to_state": null,
+      "trigger": "receipt of DONE continuation from client",
+      "pre_cond": "server.idle_command.active = true & client.sent_done = true",
+      "post_cond": "server.queued_untagged_responses.sent = true",
+      "actions": [
+        "send remaining queued untagged responses"
+      ],
+      "modality": "may",
+      "id": "N-S072-002"
+    },
+    {
+      "statement_id": "N-S072-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "At that point, the server MAY send any remaining queued untagged responses and then MUST immediately send the tagged response to the IDLE command and prepare to process other commands.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S072",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IDLE",
+      "to_state": "Selected",
+      "trigger": "receipt of DONE continuation from client",
+      "pre_cond": "server.idle_command.active = true & client.sent_done = true",
+      "post_cond": "server.tagged_response.sent = true & server.ready_for_commands = true",
+      "actions": [
+        "send tagged response to IDLE command immediately",
+        "prepare to process other commands"
+      ],
+      "modality": "must",
+      "id": "N-S072-003"
+    },
+    {
+      "statement_id": "N-S072-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The client MUST NOT send a command while the server is waiting for the DONE, since the server will not be able to distinguish a command from a continuation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S072",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "IDLE",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "server.waiting_for_done = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S072-004"
+    },
+    {
+      "statement_id": "N-S072-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MAY consider a client inactive if it has an IDLE command running, and if such a server has an inactivity timeout, it MAY log the client off implicitly at the end of its timeout period.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S072",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "IDLE",
+      "to_state": null,
+      "trigger": "IDLE command running",
+      "pre_cond": "server.idle_command.active = true",
+      "post_cond": "server.client_status = inactive",
+      "actions": [
+        "consider client inactive"
+      ],
+      "modality": "may",
+      "id": "N-S072-005"
+    },
+    {
+      "statement_id": "N-S072-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MAY consider a client inactive if it has an IDLE command running, and if such a server has an inactivity timeout, it MAY log the client off implicitly at the end of its timeout period.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S072",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "IDLE",
+      "to_state": "Logout",
+      "trigger": "inactivity timeout expiry",
+      "pre_cond": "server.idle_command.active = true & server.inactivity_timeout.expired = true",
+      "post_cond": "session.logged_off = true",
+      "actions": [
+        "log client off implicitly"
+      ],
+      "modality": "may",
+      "id": "N-S072-006"
+    }
+  ]
+}

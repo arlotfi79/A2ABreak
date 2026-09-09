@@ -1,0 +1,306 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "C-001",
+      "title": "Auth-Required Delegation Chain Lacks Structured Scope Propagation, Enabling Scope Amplification",
+      "attack_scenario": "The protocol explicitly enables multi-hop authorization delegation chains (section 7.6): when Agent B (server to Agent A, client to Agent C) receives TASK_STATE_AUTH_REQUIRED from Agent C, Agent B may propagate this by transitioning its own task to TASK_STATE_AUTH_REQUIRED. The spec acknowledges this 'enables forming a chain of Tasks in TASK_STATE_AUTH_REQUIRED.' However, the protocol defines no structured scope object, schema, or machine-readable authorization specification for the auth request. The TaskStatus.message is free-form (a Message with Parts), and the spec only says it SHOULD provide details 'potentially using a PushNotificationAuthenticationInfo-like structure.' Even this suggested structure only describes authentication schemes (e.g., 'Bearer'), not authorization scopes or permissions. In a chain User → Agent A → Agent B → Agent C: Agent C requests 'read:calendar' scope via free-form text. Agent B receives this, creates its OWN free-form TaskStatus.message for Agent A, and can request 'read:calendar read:email read:contacts' — amplifying the scope. Agent A propagates this to the User, who has no protocol mechanism to verify the request originated from Agent C or that the scope matches the original. Even with all parties fully compliant, scope amplification is undetectable because the protocol provides no structured scope to compare across hops.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "authorization_required",
+          "actor": "server (Agent C)",
+          "note": "Agent C determines it needs secondary credentials (e.g., OAuth token for a third-party API) and transitions its task T2 to AUTH_REQUIRED. The TaskStatus.message describes the need in free-form text/DataPart with no protocol-defined scope schema."
+        },
+        {
+          "step": 2,
+          "stage": "task_execution → interruption (inter-stage)",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_requested",
+          "actor": "server (Agent C)",
+          "note": "T2's AUTH_REQUIRED state crosses into the interruption phase. Agent B (as client to C) receives the auth requirement with free-form scope description."
+        },
+        {
+          "step": 3,
+          "stage": "interruption",
+          "state": "TASK_STATE_WORKING → TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_delegation",
+          "actor": "client (Agent B, acting as A2A agent)",
+          "note": "Agent B propagates the auth request to its own task T1 by transitioning T1 to AUTH_REQUIRED. Guard only checks client.is_a2a_agent and client.is_actively_processing_task — no guard constrains or verifies the scope. Agent B creates a NEW free-form TaskStatus.message for T1, which may amplify, distort, or fabricate the scope relative to Agent C's original request."
+        },
+        {
+          "step": 4,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "self-loop (message_received) or credential flow",
+          "actor": "client (User/Agent A)",
+          "note": "Agent A (or the end User) receives the amplified auth request. No protocol mechanism exists to verify the scope matches Agent C's original request. The User provides credentials based on the unverifiable, potentially amplified scope."
+        },
+        {
+          "step": 5,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED → TASK_STATE_WORKING",
+          "transition": "credential_received",
+          "actor": "server",
+          "note": "Credentials (potentially over-scoped) flow back through the chain. No protocol guard verifies the received credentials match the originally requested scope. Task resumes with potentially over-privileged credentials."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "task_execution",
+          "state_name": "TASK_STATE_AUTH_REQUIRED",
+          "actor": "shared",
+          "relevance": "The state where auth requirements are signaled. The invariant (task.state = TASK_STATE_AUTH_REQUIRED) records only the state flag, not the scope/permissions being requested. No state variable records what was requested."
+        },
+        {
+          "stage": "interruption",
+          "state_name": "TASK_STATE_AUTH_REQUIRED",
+          "actor": "shared",
+          "relevance": "The auth handling state in the interruption phase. The self-loop (message_received) allows messages but the protocol cannot distinguish scope-matching credentials from arbitrary data."
+        },
+        {
+          "stage": "interruption",
+          "state_name": "TASK_STATE_WORKING",
+          "actor": "server",
+          "relevance": "The intermediate state on the middleman agent where the authorization_delegation transition originates. No scope context is carried from the received AUTH_REQUIRED to the propagated AUTH_REQUIRED."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "task_execution",
+          "from_state": "TASK_STATE_WORKING",
+          "to_stage": "task_execution",
+          "to_state": "TASK_STATE_AUTH_REQUIRED",
+          "trigger": "authorization_required",
+          "relevance": "The originating transition that creates the auth request. The guard (task.state = TASK_STATE_WORKING) only checks current state, not the scope being requested. No protocol-defined scope object is associated with this transition."
+        },
+        {
+          "from_stage": "interruption",
+          "from_state": "TASK_STATE_WORKING",
+          "to_stage": "interruption",
+          "to_state": "TASK_STATE_AUTH_REQUIRED",
+          "trigger": "authorization_delegation",
+          "relevance": "The critical delegation transition where scope amplification occurs. Guard (client.is_a2a_agent = true) verifies the client is an agent but imposes no constraint on the scope being propagated. The middleman creates a new free-form auth request with no protocol mechanism to ensure fidelity to the original."
+        },
+        {
+          "from_stage": "interruption",
+          "from_state": "TASK_STATE_AUTH_REQUIRED",
+          "to_stage": "interruption",
+          "to_state": "TASK_STATE_WORKING",
+          "trigger": "credential_received",
+          "relevance": "The resolution transition where credentials are accepted. Guard (task.state = TASK_STATE_AUTH_REQUIRED) only checks state, not whether received credentials match the originally requested scope."
+        }
+      ],
+      "missing_primitive": "A protocol-defined structured authorization scope object (schema/data type) that accompanies TASK_STATE_AUTH_REQUIRED transitions. This scope object should: (1) specify the exact permissions/scope required in a machine-readable format, (2) be cryptographically or structurally linked across delegation hops so that middleman agents cannot amplify scope without detection, (3) be verifiable by the credential provider (end user or upstream client) against the original request. The existing PushNotificationAuthenticationInfo-like structure only describes authentication schemes, not authorization scopes.",
+      "why_compliance_does_not_prevent": "All parties are fully compliant: Agent C correctly transitions to AUTH_REQUIRED and provides auth details per the SHOULD. Agent B correctly follows the delegation pattern described in section 7.6 and transitions its own task to AUTH_REQUIRED. Agent A correctly obtains credentials. But the TaskStatus.message is free-form (Message with Parts, no required schema), so Agent B's compliant propagation of auth details can contain any content — broader scope, different scope, or fabricated scope. No protocol guard, state invariant, or data structure exists to constrain or verify scope fidelity across hops. Even perfectly benevolent agents may inadvertently amplify scope because the protocol provides no machine-readable scope format to preserve across hops.",
+      "spec_sections_searched": [
+        "7.6",
+        "7.5",
+        "4.1",
+        "4.2",
+        "3.4",
+        "3.1",
+        "13.1"
+      ],
+      "preliminary_confidence": "HIGH"
+    },
+    {
+      "candidate_id": "C-002",
+      "title": "No Principal Identity Propagation Across Auth Delegation Hops Prevents Informed Authorization",
+      "attack_scenario": "In a multi-hop auth delegation chain (User → Agent A → Agent B → Agent C), the A2A protocol establishes identity at the HTTP transport layer per each hop. At each hop, only the immediate caller's identity is known: Agent B knows Agent A's identity; Agent C knows Agent B's identity. The original User's identity is not carried forward. The protocol explicitly states 'A2A protocol payloads don't carry user or client identity information directly. Identity is established at the transport/HTTP layer.' When Agent C enters TASK_STATE_AUTH_REQUIRED and this propagates up the chain to the User, Agent C has no protocol-level knowledge of the User's identity or authorization level. Agent C cannot tailor its auth requirements to the User. More critically, when credentials flow back (User → A → B → C), each intermediary agent receives the User's credentials (e.g., OAuth token) but the protocol provides no mechanism to bind these credentials to the specific delegation chain or verify that the delegation was authorized by the original principal. Agent B receives the User's OAuth token as regular message data and can use it for purposes unrelated to the original delegation, because the protocol carries no provenance linking the credential to its intended use.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "REQUEST_AUTHORIZED",
+          "transition": "initial_message_authorized (inter-stage to initiation)",
+          "actor": "client (User → Agent A)",
+          "note": "User authenticates with Agent A. REQUEST_AUTHORIZED state records client.permissions.sufficient = true but carries only the User's identity. This identity will not propagate beyond this hop."
+        },
+        {
+          "step": 2,
+          "stage": "authentication",
+          "state": "REQUEST_AUTHORIZED",
+          "transition": "initial_message_authorized (inter-stage to initiation)",
+          "actor": "client (Agent A → Agent B)",
+          "note": "Agent A authenticates with Agent B using Agent A's own credentials. The original User's identity is lost at this boundary — Agent B's REQUEST_AUTHORIZED state records Agent A's identity, not the User's."
+        },
+        {
+          "step": 3,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING → TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_required",
+          "actor": "server (Agent C)",
+          "note": "Agent C needs credentials for a third-party resource. Agent C knows only Agent B's identity (from transport layer). Agent C cannot assess whether the original User should be authorized for the requested action."
+        },
+        {
+          "step": 4,
+          "stage": "interruption",
+          "state": "TASK_STATE_WORKING → TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_delegation",
+          "actor": "client (Agent B)",
+          "note": "Agent B propagates auth request to Agent A. The delegation transition carries no field identifying the original principal (the User) or the originating agent (Agent C). Each hop creates an independent auth request with no linkage."
+        },
+        {
+          "step": 5,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED → TASK_STATE_WORKING",
+          "transition": "credential_received",
+          "actor": "server",
+          "note": "User provides credentials which flow back through the chain as regular Message data. Each intermediary (Agent A, Agent B) receives the credential without any protocol binding that restricts its use to the specific delegation context."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "authentication",
+          "state_name": "REQUEST_AUTHORIZED",
+          "actor": "server",
+          "relevance": "The state records authorization_check.performed and client.permissions.sufficient but only for the immediate caller. At each hop, the REQUEST_AUTHORIZED state carries only the direct caller's identity, not the originating principal."
+        },
+        {
+          "stage": "interruption",
+          "state_name": "TASK_STATE_AUTH_REQUIRED",
+          "actor": "shared",
+          "relevance": "The auth delegation state carries no principal identity information. The invariant (task.state = TASK_STATE_AUTH_REQUIRED) records only the state, not who the authorization is being sought for."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "authentication",
+          "from_state": "REQUEST_AUTHORIZED",
+          "to_stage": "initiation",
+          "to_state": "TASK_STATE_NONEXISTENT",
+          "trigger": "initial_message_authorized",
+          "relevance": "The inter-stage boundary where the authenticated identity crosses into task lifecycle. Only the immediate caller's identity is available — at each hop in a chain, the original principal is lost."
+        },
+        {
+          "from_stage": "interruption",
+          "from_state": "TASK_STATE_WORKING",
+          "to_stage": "interruption",
+          "to_state": "TASK_STATE_AUTH_REQUIRED",
+          "trigger": "authorization_delegation",
+          "relevance": "The delegation transition where principal identity should be propagated but isn't. Guard checks client.is_a2a_agent but includes no principal identity verification or propagation."
+        }
+      ],
+      "missing_primitive": "A protocol-level delegation context or principal identity token that travels with the auth-required delegation chain, enabling downstream agents to know the original principal, and credential providers to verify the delegation chain's legitimacy. This could be a structured field in the Task or Message model carrying the principal's identity across hops, or a protocol-defined requirement for delegation tokens (e.g., referencing OAuth On-Behalf-Of or similar patterns). The protocol's 'No Identity in Payload' design is incompatible with its multi-hop auth delegation chain feature.",
+      "why_compliance_does_not_prevent": "All parties follow the spec: each agent authenticates at the transport layer (MUST), authorization is enforced per hop (MUST), and the auth delegation chain operates per section 7.6. But the protocol's design places identity exclusively at the transport layer, and each hop establishes only the immediate caller's identity. No protocol field, message structure, or state variable carries the original principal's identity through the chain. A fully compliant Agent C receiving credentials from Agent B has no protocol-defined way to verify these credentials were authorized by the original User, not just by Agent B acting on its own behalf. The tension between 'No Identity in Payload' and multi-hop delegation chains is a protocol design gap, not an implementation oversight.",
+      "spec_sections_searched": [
+        "7.2",
+        "7.3",
+        "7.5",
+        "7.6",
+        "4.1",
+        "3.4",
+        "13.1"
+      ],
+      "preliminary_confidence": "MEDIUM"
+    },
+    {
+      "candidate_id": "C-003",
+      "title": "Secondary Credentials Delivered as Undifferentiated Message Parts Persist in Retrievable Task History",
+      "attack_scenario": "The protocol defines in-task authorization (section 7.6) where secondary credentials are delivered via message/send as regular Message Parts (TextPart, DataPart, or FilePart). The spec explicitly states: 'The A2A Client then obtains these new credentials out-of-band and provides them in a subsequent message/send or message/stream request.' These credential-bearing messages become part of the Task's history array (Task.history: list[Message]). The protocol defines GetTask with an optional historyLength parameter that returns past messages from the task's history. The Message and Part data models contain no sensitivity classification, ephemeral flag, or access-control annotation. The protocol also states 'An agent MAY serve multiple concurrent streams to one or more clients for the same task,' meaning multiple authorized clients can access the same task. Consequently, any client authorized for a task can query GetTask with historyLength and retrieve ALL messages, including those containing secondary credentials (OAuth tokens, API keys, etc.), because the protocol provides no mechanism to distinguish or filter credential-bearing messages from regular conversation messages in history retrieval.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "authorization_required",
+          "actor": "server",
+          "note": "Server determines it needs secondary credentials and transitions the task to AUTH_REQUIRED. The TaskStatus.message describes what authentication is needed."
+        },
+        {
+          "step": 2,
+          "stage": "task_execution → interruption (inter-stage)",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_requested",
+          "actor": "server",
+          "note": "Auth requirement crosses to interruption phase. Client is informed of the need for credentials."
+        },
+        {
+          "step": 3,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "credential_received (or client_sends_input via message/send)",
+          "actor": "client",
+          "note": "Client sends credentials via message/send. The credentials are in a DataPart or TextPart within a regular Message object. This Message has no sensitivity flag — it is structurally identical to any other message. The server stores it in the task's history array."
+        },
+        {
+          "step": 4,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED → TASK_STATE_WORKING",
+          "transition": "credential_received",
+          "actor": "server",
+          "note": "Server processes the credentials and resumes task execution. The credential-bearing message remains in task history."
+        },
+        {
+          "step": 5,
+          "stage": "interruption → task_execution (inter-stage)",
+          "state": "TASK_STATE_WORKING",
+          "transition": "interruption_resolved",
+          "actor": "shared",
+          "note": "Task resumes in task_execution phase. History including credential message persists."
+        },
+        {
+          "step": 6,
+          "stage": "task_execution",
+          "state": "TASK_STATE_COMPLETED",
+          "transition": "message_send (task completes)",
+          "actor": "server",
+          "note": "Task completes. Task history (including credential message) persists. Any authorized client can now call GetTask with historyLength > 0 and retrieve the credential-bearing message alongside regular messages. The protocol provides no filtering or redaction mechanism."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "task_execution",
+          "state_name": "TASK_STATE_AUTH_REQUIRED",
+          "actor": "shared",
+          "relevance": "The state where credential delivery occurs. Credentials enter the task as regular Message Parts during the transition out of this state, becoming part of the task's persistent history."
+        },
+        {
+          "stage": "task_execution",
+          "state_name": "TASK_STATE_COMPLETED",
+          "actor": "server",
+          "relevance": "Terminal state where history persists. The protocol defines no credential cleanup or history redaction upon task completion. Credential-bearing messages remain retrievable."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "task_execution",
+          "from_state": "TASK_STATE_AUTH_REQUIRED",
+          "to_stage": "task_execution",
+          "to_state": "TASK_STATE_WORKING",
+          "trigger": "credentials_received",
+          "relevance": "The transition where credentials are processed. The guard (task.state = TASK_STATE_AUTH_REQUIRED) checks only the task state. The credential message is stored in history as part of this transition, with no protocol-level sensitivity marking."
+        },
+        {
+          "from_stage": "task_execution",
+          "from_state": "TASK_STATE_COMPLETED",
+          "to_stage": "termination",
+          "to_state": "TASK_STATE_COMPLETED",
+          "trigger": "task_completed",
+          "relevance": "The terminal transition. No guard or protocol mechanism triggers credential cleanup or history redaction. The complete history, including credential messages, crosses into the termination phase intact."
+        }
+      ],
+      "missing_primitive": "A protocol-level message or part sensitivity classification mechanism — such as an ephemeral/sensitive flag on Message or Part objects — that: (1) allows credential-bearing messages to be marked as security-sensitive at the protocol level, (2) instructs servers to exclude such messages from task history retrieval (GetTask with historyLength), (3) optionally triggers credential cleanup when the task reaches a terminal state. Alternatively, a dedicated credential delivery channel separate from the regular Message flow (e.g., a protocol-defined credential exchange operation rather than overloading message/send) would prevent credentials from entering the general-purpose message history.",
+      "why_compliance_does_not_prevent": "All parties are fully compliant: the client delivers credentials via message/send per section 7.6 guidance. The server stores messages in task history per the Task data model (history: list[Message]). GetTask returns history when historyLength is specified per the protocol's operation definitions. The protocol mandates authorization scoping at the task level (section 13.1) but not at the message level. A second authorized client querying the same task sees ALL messages, including credential-bearing ones, because the Message data model (messageId, role, parts, kind, taskId, contextId, metadata) contains no sensitivity field, and the Part types (TextPart, FilePart, DataPart) contain no ephemeral marker. Even a server that wants to redact credentials from history cannot do so in a protocol-compliant way because the protocol provides no signal to identify which messages contain credentials.",
+      "spec_sections_searched": [
+        "7.6",
+        "4.1",
+        "4.2",
+        "3.1",
+        "3.4",
+        "3.5",
+        "13.1"
+      ],
+      "preliminary_confidence": "MEDIUM"
+    }
+  ],
+  "structural_observations": [
+    "The protocol's 'No Identity in Payload' design principle (identity handled at HTTP transport layer) is architecturally sound for point-to-point interactions but creates a fundamental tension with the multi-hop auth delegation chain feature defined in section 7.6. This tension manifests as both C-001 (scope amplification) and C-002 (principal identity loss). The protocol explicitly enables 'forming a chain of Tasks in TASK_STATE_AUTH_REQUIRED' but the transport-layer identity model only captures the immediate caller at each hop.",
+    "Agent Card signing (JWS) is MAY and signature verification is SHOULD, making the protocol's primary trust root — the Agent Card that determines endpoint URLs, authentication schemes, and security configurations — optionally integrity-protected. While TLS protects the card in transit, the protocol also models card caching (AGENT_CARD_CACHE_VALID → AGENT_CARD_CACHE_EXPIRED cycle in the discovery phase FSM), and cached cards have no integrity protection if unsigned. This was not reported as a candidate because signing is a deliberately optional protocol feature, but it means the security of all subsequent protocol phases depends on a trust decision made with an optionally verified document.",
+    "The FSM's authorization_delegation transition in the interruption phase (TASK_STATE_WORKING → TASK_STATE_AUTH_REQUIRED, guard: client.is_a2a_agent = true) creates independent, unlinked TASK_STATE_AUTH_REQUIRED states at each hop. These states share no protocol-defined correlation identifier, delegation chain ID, or scope binding. Each auth request is a standalone free-form message with no structural relationship to the auth requests at other hops.",
+    "The TASK_STATE_AUTH_REQUIRED self-loop in the interruption phase (trigger: message_received, modality: SHOULD) allows the server to remain in AUTH_REQUIRED state while receiving messages. The protocol defines no maximum number of auth retry cycles, no timeout, and no rate limiting for auth requests. While clients can always cancel (transition to TASK_STATE_CANCELED), the unbounded self-loop means a server could repeatedly request different credentials from a client with no protocol-defined limit.",
+    "Push notification authentication (PushNotificationConfig.authentication and .token) fields are both optional in the data model. The Streaming & Async guide states the webhook endpoint 'MUST rigorously verify the authenticity of incoming notification requests,' but the protocol provides no default or fallback authentication mechanism when the optional authentication fields are omitted. This creates a potential gap between the verification requirement and the available mechanisms."
+  ]
+}

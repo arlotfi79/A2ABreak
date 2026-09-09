@@ -1,0 +1,554 @@
+{
+  "section_id": "S071",
+  "title": "S071 4.3.2 Command-Reply Sequences",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S071 4.3.2 Command-Reply Sequences"
+  ],
+  "url_anchor": "#s071-432-command-reply-sequences",
+  "word_count": 452,
+  "statement_count": 23,
+  "elapsed_seconds": 314.47,
+  "statements": [
+    {
+      "statement_id": "D-S071-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "smtp_fsm",
+      "description": "CONNECTION ESTABLISHMENT \u2014 the opening phase of an SMTP session; server replies S: 220 or E: 554.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "state_name": "CONNECTION_ESTABLISHMENT",
+      "enum_name": "SMTPSessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S071-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "DATA intermediate state: I: 354 -> data -> S: 250 / E: 552, 554, 451, 452 / E: 450, 550 \u2014 the session phase entered after the server issues a 354 intermediate reply, during which the client transmits message data.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S071",
+      "state_name": "DATA_TRANSFER",
+      "enum_name": "SMTPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S071-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "smtp_fsm",
+      "description": "CONNECTION ESTABLISHMENT S: 220 \u2014 server sends 220 upon accepting the TCP connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECTION_ESTABLISHMENT",
+      "to_state": null,
+      "trigger": "TCP_connection_opened",
+      "pre_cond": "session.state = CONNECTION_ESTABLISHMENT",
+      "post_cond": "session.reply_code = 220",
+      "actions": [
+        "send 220 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "smtp_fsm",
+      "description": "CONNECTION ESTABLISHMENT E: 554 \u2014 server sends 554 when rejecting the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECTION_ESTABLISHMENT",
+      "to_state": null,
+      "trigger": "TCP_connection_opened",
+      "pre_cond": "session.state = CONNECTION_ESTABLISHMENT",
+      "post_cond": "session.reply_code = 554",
+      "actions": [
+        "send 554 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "EHLO or HELO S: 250 \u2014 server accepts the client greeting command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "EHLO_or_HELO_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 250",
+      "actions": [
+        "send 250 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "EHLO or HELO E: 504, 550, 502 \u2014 server rejects the client greeting command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "EHLO_or_HELO_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 504 | session.reply_code = 550 | session.reply_code = 502",
+      "actions": [
+        "send error reply (504, 550, or 502)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "MAIL S: 250 \u2014 server accepts the MAIL command, initiating a mail transaction.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "MAIL_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 250",
+      "actions": [
+        "send 250 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "MAIL E: 552, 451, 452, 550, 553, 503, 455, 555 \u2014 server rejects the MAIL command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "MAIL_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 552 | session.reply_code = 451 | session.reply_code = 452 | session.reply_code = 550 | session.reply_code = 553 | session.reply_code = 503 | session.reply_code = 455 | session.reply_code = 555",
+      "actions": [
+        "send error reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "RCPT S: 250, 251 \u2014 server accepts the RCPT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 250 | session.reply_code = 251",
+      "actions": [
+        "send 250 or 251 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "RCPT E: 550, 551, 552, 553, 450, 451, 452, 503, 455, 555 \u2014 server rejects the RCPT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 550 | session.reply_code = 551 | session.reply_code = 552 | session.reply_code = 553 | session.reply_code = 450 | session.reply_code = 451 | session.reply_code = 452 | session.reply_code = 503 | session.reply_code = 455 | session.reply_code = 555",
+      "actions": [
+        "send error reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "DATA I: 354 \u2014 server sends 354 intermediate reply; session enters DATA_TRANSFER state and client begins transmitting message data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "DATA_TRANSFER",
+      "trigger": "DATA_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 354 & session.state = DATA_TRANSFER",
+      "actions": [
+        "send 354 intermediate reply",
+        "client begins message data transmission"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "DATA I: 354 -> data -> S: 250 \u2014 after data transmission ends, server sends 250 to accept the message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "DATA_TRANSFER",
+      "to_state": null,
+      "trigger": "end_of_data",
+      "pre_cond": "session.state = DATA_TRANSFER",
+      "post_cond": "session.reply_code = 250",
+      "actions": [
+        "send 250 reply",
+        "message accepted"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "DATA I: 354 -> data -> E: 552, 554, 451, 452, 450, 550 \u2014 after data transmission ends, server rejects the message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "DATA_TRANSFER",
+      "to_state": null,
+      "trigger": "end_of_data",
+      "pre_cond": "session.state = DATA_TRANSFER",
+      "post_cond": "session.reply_code = 552 | session.reply_code = 554 | session.reply_code = 451 | session.reply_code = 452 | session.reply_code = 450 | session.reply_code = 550",
+      "actions": [
+        "send error reply",
+        "message rejected"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "DATA E: 503, 554 \u2014 server rejects the DATA command before entering data transfer state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DATA_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 503 | session.reply_code = 554",
+      "actions": [
+        "send 503 or 554 error reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "RSET S: 250 \u2014 server acknowledges RSET and resets the transaction state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RSET_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 250",
+      "actions": [
+        "send 250 reply",
+        "transaction state reset"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "QUIT S: 221 \u2014 server sends 221 and closes the transmission channel.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "QUIT_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 221",
+      "actions": [
+        "send 221 reply",
+        "close transmission channel"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-017",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "421 Service shutting down and closing transmission channel \u2014 any SMTP command can return 421 under unusual circumstances.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "service_shutdown",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 421",
+      "actions": [
+        "send 421 reply",
+        "close transmission channel"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S071-018",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "500 \u2014 command line too long or command name not recognized; can be returned by any SMTP command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unrecognized_or_too_long_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 500",
+      "actions": [
+        "send 500 reply"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S071-019",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "501 Syntax error in command or arguments \u2014 can be returned by any SMTP command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "syntax_error_in_command_or_arguments",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 501",
+      "actions": [
+        "send 501 reply"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S071-020",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "NOOP S: 250 \u2014 server acknowledges the NOOP command without altering session state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "NOOP_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 250",
+      "actions": [
+        "send 250 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-021",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "VRFY S: 250, 251, 252 \u2014 server responds successfully to the VRFY command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "VRFY_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 250 | session.reply_code = 251 | session.reply_code = 252",
+      "actions": [
+        "send 250, 251, or 252 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-022",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "EXPN S: 250, 252 \u2014 server responds successfully to the EXPN command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "EXPN_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 250 | session.reply_code = 252",
+      "actions": [
+        "send 250 or 252 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-023",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "HELP S: 211, 214 \u2014 server responds successfully to the HELP command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "HELP_command",
+      "pre_cond": null,
+      "post_cond": "session.reply_code = 211 | session.reply_code = 214",
+      "actions": [
+        "send 211 or 214 reply"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

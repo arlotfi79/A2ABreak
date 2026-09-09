@@ -1,0 +1,518 @@
+{
+ "proto": "PPTP",
+ "system": "ours",
+ "gt_states": 9,
+ "gt_transitions": 19,
+ "cand_states": 11,
+ "cand_transitions": 37,
+ "states_matched": 8,
+ "states_P": 0.7273,
+ "states_R": 0.8889,
+ "states_F1": 0.8,
+ "trans_matched": 11,
+ "trans_P": 0.2973,
+ "trans_R": 0.5789,
+ "trans_F1": 0.3929,
+ "unmatched_classes": {
+  "wrong_or_unsupported": 1,
+  "real_behavior_not_in_gt": 24
+ },
+ "tokens_in": 3568,
+ "tokens_out": 3930,
+ "cost": 0.11609,
+ "seconds": 59.9,
+ "raw": {
+  "state_matches": [
+   {
+    "gt": "Idle",
+    "candidate": "idle",
+    "confidence": 1.0,
+    "reason": "Both are the initial resting state"
+   },
+   {
+    "gt": "Wait Control Reply",
+    "candidate": "wait_ctl_reply",
+    "confidence": 1.0,
+    "reason": "Both wait for Start-Control-Connection-Reply"
+   },
+   {
+    "gt": "Established",
+    "candidate": "established",
+    "confidence": 1.0,
+    "reason": "Both represent active connection"
+   },
+   {
+    "gt": "Wait Stop Reply",
+    "candidate": "wait_stop_reply",
+    "confidence": 1.0,
+    "reason": "Both wait for Stop-Control-Connection-Reply"
+   },
+   {
+    "gt": "Wait Connect",
+    "candidate": "wait_connect",
+    "confidence": 1.0,
+    "reason": "Both wait for Incoming-Call-Connected"
+   },
+   {
+    "gt": "Wait Disconnect",
+    "candidate": "wait_disconnect",
+    "confidence": 1.0,
+    "reason": "Both wait for Call-Disconnect-Notify after Call-Clear-Request"
+   },
+   {
+    "gt": "Collision Handling",
+    "candidate": "collision",
+    "confidence": 0.6,
+    "reason": "Both represent collision handling, though candidate never transitions into collision state"
+   },
+   {
+    "gt": "Wait Incoming Reply",
+    "candidate": null,
+    "confidence": 0.5,
+    "reason": "No distinct candidate state; wait_reply is shared for multiple call types"
+   },
+   {
+    "gt": "Wait Outgoing Reply",
+    "candidate": "wait_reply",
+    "confidence": 0.7,
+    "reason": "Candidate wait_reply used for outgoing call reply waiting among others"
+   }
+  ],
+  "transition_matches": [
+   {
+    "gt_index": 0,
+    "gt": {
+     "from": "Established",
+     "to": "Wait Disconnect",
+     "event": "Local Terminate",
+     "action": "Send Call Clear Request"
+    },
+    "candidate_index": 27,
+    "candidate": {
+     "from": "established",
+     "event": "cond local terminate",
+     "action": "send CallClearRequest",
+     "to": "wait_disconnect"
+    },
+    "confidence": 1.0,
+    "reason": "Same event, action, and state transition for call-level local terminate"
+   },
+   {
+    "gt_index": 1,
+    "gt": {
+     "from": "Wait Disconnect",
+     "to": "Idle",
+     "event": "Timeout (60s)",
+     "action": "Close TCP and release resources"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No timeout transition from wait_disconnect in candidate"
+   },
+   {
+    "gt_index": 2,
+    "gt": {
+     "from": "Idle",
+     "to": "Wait Control Reply",
+     "event": "TCP Open Indication",
+     "action": "Send Start Control Connection Request"
+    },
+    "candidate_index": 0,
+    "candidate": {
+     "from": "idle",
+     "event": "cond TCP established",
+     "action": "send StartCtlConnRequest",
+     "to": "wait_ctl_reply"
+    },
+    "confidence": 1.0,
+    "reason": "TCP open triggers sending Start-Control-Connection-Request"
+   },
+   {
+    "gt_index": 3,
+    "gt": {
+     "from": "Wait Control Reply",
+     "to": "Collision Handling",
+     "event": "Collision Detected",
+     "action": "Handle collision (higher IP wins)"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "Candidate collision transition goes to idle, not to collision state"
+   },
+   {
+    "gt_index": 4,
+    "gt": {
+     "from": "Collision Handling",
+     "to": "Wait Control Reply",
+     "event": "TCP Termination from loser",
+     "action": "Accept winner request"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No transition from collision state in candidate"
+   },
+   {
+    "gt_index": 5,
+    "gt": {
+     "from": "Collision Handling",
+     "to": "Established",
+     "event": "Receive Start Control Connection Reply (Version OK)",
+     "action": "Accept winner connection"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No transition from collision state in candidate"
+   },
+   {
+    "gt_index": 6,
+    "gt": {
+     "from": "Wait Control Reply",
+     "to": "Established",
+     "event": "Receive Start Control Connection Reply (Version OK)",
+     "action": "Establish control connection"
+    },
+    "candidate_index": 1,
+    "candidate": {
+     "from": "wait_ctl_reply",
+     "event": "receive StartCtlReply ok",
+     "action": "establish control connection",
+     "to": "established"
+    },
+    "confidence": 1.0,
+    "reason": "Exact match on receiving successful reply"
+   },
+   {
+    "gt_index": 7,
+    "gt": {
+     "from": "Wait Control Reply",
+     "to": "Wait Stop Reply",
+     "event": "Receive Start Control Connection Reply (Version Not OK)",
+     "action": "Send Stop Control Connection Request"
+    },
+    "candidate_index": 3,
+    "candidate": {
+     "from": "wait_ctl_reply",
+     "event": "receive StartCtlReply unsupported",
+     "action": "send StopCtlConnRequest",
+     "to": "wait_stop_reply"
+    },
+    "confidence": 1.0,
+    "reason": "Version mismatch triggers stop request"
+   },
+   {
+    "gt_index": 8,
+    "gt": {
+     "from": "Wait Control Reply",
+     "to": "Idle",
+     "event": "Timeout (60s)",
+     "action": "Close TCP"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No timeout from wait_ctl_reply in candidate"
+   },
+   {
+    "gt_index": 9,
+    "gt": {
+     "from": "Established",
+     "to": "Wait Stop Reply",
+     "event": "Local Terminate",
+     "action": "Send Stop Control Connection Request"
+    },
+    "candidate_index": 4,
+    "candidate": {
+     "from": "established",
+     "event": "cond local terminate",
+     "action": "send StopCtlConnRequest",
+     "to": "wait_stop_reply"
+    },
+    "confidence": 1.0,
+    "reason": "Control-level local terminate sends stop request"
+   },
+   {
+    "gt_index": 10,
+    "gt": {
+     "from": "Established",
+     "to": "Wait Stop Reply",
+     "event": "Receive Stop Control Connection Request",
+     "action": "Send Stop Control Connection Reply"
+    },
+    "candidate_index": 5,
+    "candidate": {
+     "from": "established",
+     "event": "receive StopCtlConnRequest",
+     "action": "send StopCtlConnReply; close TCP connection",
+     "to": "idle"
+    },
+    "confidence": 0.6,
+    "reason": "Same event and action but candidate goes to idle instead of wait_stop_reply; partial match"
+   },
+   {
+    "gt_index": 11,
+    "gt": {
+     "from": "Wait Stop Reply",
+     "to": "Idle",
+     "event": "Receive Stop Control Connection Reply",
+     "action": "Close TCP, return to Idle"
+    },
+    "candidate_index": 6,
+    "candidate": {
+     "from": "wait_stop_reply",
+     "event": "receive StopCtlConnReply",
+     "action": "close TCP connection",
+     "to": "idle"
+    },
+    "confidence": 1.0,
+    "reason": "Exact match"
+   },
+   {
+    "gt_index": 12,
+    "gt": {
+     "from": "Idle",
+     "to": "Wait Incoming Reply",
+     "event": "Receive Incoming Call Request",
+     "action": "Send Incoming Call Reply"
+    },
+    "candidate_index": 22,
+    "candidate": {
+     "from": "idle",
+     "event": "receive InCallReq accepted",
+     "action": "send IncomingCallReply ok",
+     "to": "wait_connect"
+    },
+    "confidence": 0.5,
+    "reason": "Similar but candidate goes to wait_connect and specifies accepted; GT has intermediate Wait Incoming Reply state"
+   },
+   {
+    "gt_index": 13,
+    "gt": {
+     "from": "Wait Incoming Reply",
+     "to": "Wait Connect",
+     "event": "Receive Incoming Call Reply (Accept)",
+     "action": "Wait for Incoming Call Connected"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "Candidate skips Wait Incoming Reply state for PNS side"
+   },
+   {
+    "gt_index": 14,
+    "gt": {
+     "from": "Wait Connect",
+     "to": "Established",
+     "event": "Receive Incoming Call Connected",
+     "action": "Confirm session establishment"
+    },
+    "candidate_index": 23,
+    "candidate": {
+     "from": "wait_connect",
+     "event": "receive InCallConnected",
+     "action": "",
+     "to": "established"
+    },
+    "confidence": 1.0,
+    "reason": "Same transition: receive connected, move to established"
+   },
+   {
+    "gt_index": 15,
+    "gt": {
+     "from": "Wait Incoming Reply",
+     "to": "Idle",
+     "event": "Receive Incoming Call Reply (Reject)",
+     "action": "Return to Idle"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No matching state for Wait Incoming Reply in candidate"
+   },
+   {
+    "gt_index": 16,
+    "gt": {
+     "from": "Idle",
+     "to": "Wait Outgoing Reply",
+     "event": "Send Outgoing Call Request",
+     "action": "Wait for PAC response"
+    },
+    "candidate_index": 34,
+    "candidate": {
+     "from": "idle",
+     "event": "cond open indication",
+     "action": "send OutgoingCallRequest",
+     "to": "wait_reply"
+    },
+    "confidence": 0.9,
+    "reason": "PNS sends outgoing call request and waits"
+   },
+   {
+    "gt_index": 17,
+    "gt": {
+     "from": "Wait Outgoing Reply",
+     "to": "Established",
+     "event": "Receive Outgoing Call Reply (No Error)",
+     "action": "Establish call"
+    },
+    "candidate_index": 36,
+    "candidate": {
+     "from": "wait_reply",
+     "event": "receive OutCallReply ok",
+     "action": "connect telco call",
+     "to": "established"
+    },
+    "confidence": 1.0,
+    "reason": "Successful outgoing call reply establishes call"
+   },
+   {
+    "gt_index": 18,
+    "gt": {
+     "from": "Wait Outgoing Reply",
+     "to": "Idle",
+     "event": "Receive Outgoing Call Reply (Error)",
+     "action": "Return to Idle"
+    },
+    "candidate_index": 35,
+    "candidate": {
+     "from": "wait_reply",
+     "event": "receive OutCallReply error",
+     "action": "",
+     "to": "idle"
+    },
+    "confidence": 1.0,
+    "reason": "Error reply returns to idle"
+   }
+  ],
+  "unmatched_candidate_transitions": [
+   {
+    "candidate_index": 2,
+    "class": "wrong_or_unsupported",
+    "reason": "Collision detected goes directly to idle with close TCP; GT has intermediate collision handling state. This simplifies/alters the collision protocol."
+   },
+   {
+    "candidate_index": 7,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server-side handling of unsupported Start-Control-Connection-Request; valid protocol behavior from PAC/PNS server perspective"
+   },
+   {
+    "candidate_index": 8,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server-side accepting Start-Control-Connection-Request and replying; valid server-side behavior"
+   },
+   {
+    "candidate_index": 9,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Echo timeout detection causing connection teardown; specified in RFC"
+   },
+   {
+    "candidate_index": 10,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Echo reply timeout closing control connection; specified in RFC"
+   },
+   {
+    "candidate_index": 11,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Keepalive echo mechanism sending EchoRequest on idle timeout; specified in RFC"
+   },
+   {
+    "candidate_index": 12,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Handling duplicate Start-Control-Connection-Request in established state"
+   },
+   {
+    "candidate_index": 13,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Set-Link-Info processing during established session; specified in RFC"
+   },
+   {
+    "candidate_index": 14,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: ring detected triggers Incoming-Call-Request; valid PAC behavior"
+   },
+   {
+    "candidate_index": 15,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: incoming call reply reject returns to idle"
+   },
+   {
+    "candidate_index": 16,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: abort during wait_reply sends CallDisconnectNotify"
+   },
+   {
+    "candidate_index": 17,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: incoming call reply accept triggers answer and sends Connected"
+   },
+   {
+    "candidate_index": 18,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: receiving CallClearRequest sends CallDisconnectNotify"
+   },
+   {
+    "candidate_index": 19,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: telco dropped sends CallDisconnectNotify"
+   },
+   {
+    "candidate_index": 20,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: local disconnect sends CallDisconnectNotify"
+   },
+   {
+    "candidate_index": 21,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PNS-side: rejecting incoming call request with error reply"
+   },
+   {
+    "candidate_index": 24,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PNS-side: caller failure in wait_connect sends CallDisconnectNotify"
+   },
+   {
+    "candidate_index": 25,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PNS-side: receiving CallDisconnectNotify returns to idle"
+   },
+   {
+    "candidate_index": 28,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PNS-side: receiving CallDisconnectNotify in wait_disconnect returns to idle (replaces timeout in GT)"
+   },
+   {
+    "candidate_index": 29,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: rejecting invalid outgoing call request with error reply"
+   },
+   {
+    "candidate_index": 30,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: valid outgoing call request triggers dialing"
+   },
+   {
+    "candidate_index": 31,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: incomplete call sends error reply"
+   },
+   {
+    "candidate_index": 32,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: CallClearRequest during wait_cs_ans sends disconnect notify"
+   },
+   {
+    "candidate_index": 33,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PAC-side: telco answer sends successful OutgoingCallReply"
+   },
+   {
+    "candidate_index": 37,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PNS-side: abort during outgoing call wait sends CallClearRequest"
+   }
+  ]
+ }
+}

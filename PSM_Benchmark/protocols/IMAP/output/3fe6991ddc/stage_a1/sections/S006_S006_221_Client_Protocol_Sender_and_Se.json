@@ -1,0 +1,104 @@
+{
+  "section_id": "S006",
+  "title": "S006 2.2.1 Client Protocol Sender and Server Protocol Receiver",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S006 2.2.1 Client Protocol Sender and Server Protocol Receiver"
+  ],
+  "url_anchor": "#s006-221-client-protocol-sender-and-server-protocol-receiver",
+  "word_count": 330,
+  "statement_count": 4,
+  "elapsed_seconds": 41.83,
+  "statements": [
+    {
+      "statement_id": "D-S006-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "the command continuation request is still pending; the client takes the appropriate action for the response and reads another response from the server",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S006",
+      "state_name": "command continuation pending",
+      "enum_name": "CommandState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S006-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "the server sends a command continuation request response if it is ready for the octets (if appropriate) and the remainder of the command. This response is prefixed with the token \"+\".",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S006",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "command continuation pending",
+      "trigger": "server ready for command continuation",
+      "pre_cond": "command.incomplete = true",
+      "post_cond": "command.continuation_pending = true",
+      "actions": [
+        "server sends continuation request response prefixed with \"+\""
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If, instead, the server detected an error in the command, it sends a BAD completion response with a tag matching the command to reject the command and prevent the client from sending any more of the command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S006",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "command continuation pending",
+      "to_state": null,
+      "trigger": "server detects error in command",
+      "pre_cond": null,
+      "post_cond": "command.rejected = true",
+      "actions": [
+        "server sends BAD completion response with matching tag",
+        "client stops sending command data"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "the client MUST send a complete command (including receiving all command continuation request responses and sending command continuations for the command) before initiating a new command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S006",
+      "actors": [
+        "client"
+      ],
+      "from_state": "command continuation pending",
+      "to_state": null,
+      "trigger": "all command continuations completed",
+      "pre_cond": "command.continuation_pending = false",
+      "post_cond": "command.complete = true",
+      "actions": [
+        "client may initiate new command"
+      ],
+      "modality": "must"
+    }
+  ]
+}

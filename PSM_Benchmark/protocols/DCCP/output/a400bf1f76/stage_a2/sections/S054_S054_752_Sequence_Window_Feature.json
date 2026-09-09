@@ -1,0 +1,89 @@
+{
+  "section_id": "S054",
+  "title": "S054 7.5.2 Sequence Window Feature",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S054 7.5.2 Sequence Window Feature"
+  ],
+  "url_anchor": "#s054-752-sequence-window-feature",
+  "word_count": 288,
+  "statement_count": 3,
+  "elapsed_seconds": 25.34,
+  "statements": [
+    {
+      "statement_id": "1-S054-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "Change options suggesting Sequence Window values out of this range are invalid and MUST be handled accordingly.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S054",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_Change(Sequence_Window, out_of_range_value)",
+      "pre_cond": "change_option.sequence_window_value < 32 | change_option.sequence_window_value > 70368744177663",
+      "post_cond": null,
+      "actions": [
+        "treat Change option as invalid",
+        "handle invalid Change option accordingly"
+      ],
+      "modality": "must",
+      "id": "N-S054-001"
+    },
+    {
+      "statement_id": "2-S054-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Endpoints SHOULD send Change L(Sequence Window) options, as necessary, as the connection progresses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S054",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "sequence_window_value_change_required",
+      "pre_cond": null,
+      "post_cond": "connection.sequence_window_updated = true",
+      "actions": [
+        "send Change L(Sequence Window) option with updated value"
+      ],
+      "modality": "should",
+      "id": "N-S054-002"
+    },
+    {
+      "statement_id": "3-S054-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Also, an endpoint MUST NOT persistently send more than its Sequence Window number of packets per round-trip time; that is, DCCP A MUST NOT persistently send more than Sequence Window/A packets per RTT.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S054",
+      "actors": [
+        "DCCP A",
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "packet_send_attempt",
+      "pre_cond": "endpoint.packets_sent_per_rtt >= endpoint.sequence_window_value",
+      "post_cond": null,
+      "actions": [
+        "do not persistently send more than Sequence Window/A packets per RTT"
+      ],
+      "modality": "must",
+      "id": "N-S054-003"
+    }
+  ]
+}

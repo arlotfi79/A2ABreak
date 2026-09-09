@@ -1,0 +1,152 @@
+{
+  "section_id": "S024",
+  "title": "S024 3.1 PUBLISH Packets from the Publisher Client to the Broker",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S024 3.1 PUBLISH Packets from the Publisher Client to the Broker"
+  ],
+  "url_anchor": "#s024-31-publish-packets-from-the-publisher-client-to-the-broker",
+  "word_count": 236,
+  "statement_count": 6,
+  "elapsed_seconds": 26.76,
+  "statements": [
+    {
+      "statement_id": "D-S024-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Client is allowed to publish to the topic, the Broker publishes the message to all valid subscribers of the topic.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S024",
+      "actors": [
+        "broker",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH_received",
+      "pre_cond": "authorization.result = authorized",
+      "post_cond": "message.forwarded = true",
+      "actions": [
+        "publish message to all valid subscribers of the topic"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S024-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "In the case of an authorization failure, the Broker MUST return an error if the Client has set the QoS level of the PUBLISH packet to greater than or equal to 1. Depending on the QoS level, the Broker responds with either a PUBACK or PUBREC packet with reason code 0x87 (Not authorized).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S024",
+      "actors": [
+        "broker",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH_received",
+      "pre_cond": "authorization.result = not_authorized & publish.qos >= 1",
+      "post_cond": "error_response.sent = true",
+      "actions": [
+        "send PUBACK with reason_code=0x87 if QoS=1",
+        "send PUBREC with reason_code=0x87 if QoS=2"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S024-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "On receiving an acknowledgment with 0x87 (Not authorized), the Client MAY reauthenticate by providing a new token.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S024",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Reauthenticating",
+      "trigger": "PUBACK_or_PUBREC_received_reason_0x87",
+      "pre_cond": "acknowledgment.reason_code = 0x87",
+      "post_cond": "client.reauthentication_initiated = true",
+      "actions": [
+        "provide new token",
+        "reauthenticate"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S024-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "For QoS level 0, the Broker sends a DISCONNECT packet with reason code 0x87 (Not authorized) and closes the Network Connection.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S024",
+      "actors": [
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "PUBLISH_received",
+      "pre_cond": "authorization.result = not_authorized & publish.qos = 0",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "send DISCONNECT with reason_code=0x87",
+        "close Network Connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S024-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker sends a DISCONNECT packet and closes the Network Connection on authorization failure for QoS 0.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S024",
+      "state_name": "Disconnected",
+      "enum_name": "ConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "connection.state = Disconnected"
+    },
+    {
+      "statement_id": "D-S024-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "For all QoS levels, the Broker MAY return 0x80 (Unspecified error) if they do not want to leak the Topic Names to unauthorized clients.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S024",
+      "actors": [
+        "broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH_received",
+      "pre_cond": "authorization.result = not_authorized",
+      "post_cond": "error_response.sent = true",
+      "actions": [
+        "send error response with reason_code=0x80"
+      ],
+      "modality": "may"
+    }
+  ]
+}

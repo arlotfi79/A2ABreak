@@ -1,0 +1,260 @@
+{
+  "section_id": "S053",
+  "title": "S053 6.3.2 SELECT Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S053 6.3.2 SELECT Command"
+  ],
+  "url_anchor": "#s053-632-select-command",
+  "word_count": 700,
+  "statement_count": 10,
+  "elapsed_seconds": 213.09,
+  "statements": [
+    {
+      "statement_id": "N-S053-1",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "REQUIRED untagged responses:  FLAGS, EXISTS, LIST",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "selected",
+      "trigger": "SELECT command received",
+      "pre_cond": "protocol.state = authenticated | protocol.state = selected",
+      "post_cond": "server.sent_FLAGS = true & server.sent_EXISTS = true & server.sent_LIST = true",
+      "actions": [
+        "send untagged FLAGS response",
+        "send untagged EXISTS response",
+        "send untagged LIST response"
+      ],
+      "modality": "must",
+      "id": "N-S053-001"
+    },
+    {
+      "statement_id": "N-S053-2",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "REQUIRED OK untagged responses:  PERMANENTFLAGS, UIDNEXT, UIDVALIDITY",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "selected",
+      "trigger": "SELECT command received",
+      "pre_cond": "protocol.state = authenticated | protocol.state = selected",
+      "post_cond": "server.sent_PERMANENTFLAGS_OK = true & server.sent_UIDNEXT_OK = true & server.sent_UIDVALIDITY_OK = true",
+      "actions": [
+        "send untagged OK [PERMANENTFLAGS] response",
+        "send untagged OK [UIDNEXT] response",
+        "send untagged OK [UIDVALIDITY] response"
+      ],
+      "modality": "must",
+      "id": "N-S053-002"
+    },
+    {
+      "statement_id": "N-S053-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Before returning an OK to the client, the server MUST send the following untagged data to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "selected",
+      "trigger": "SELECT command received",
+      "pre_cond": "protocol.state = authenticated | protocol.state = selected",
+      "post_cond": "server.sent_required_untagged_data = true",
+      "actions": [
+        "send all required untagged responses before sending tagged OK"
+      ],
+      "modality": "must",
+      "id": "N-S053-003"
+    },
+    {
+      "statement_id": "N-S053-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MUST return a LIST response with the mailbox name.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "selected",
+      "trigger": "SELECT command received",
+      "pre_cond": "protocol.state = authenticated | protocol.state = selected",
+      "post_cond": "server.sent_LIST = true",
+      "actions": [
+        "send untagged LIST response with mailbox name"
+      ],
+      "modality": "must",
+      "id": "N-S053-004"
+    },
+    {
+      "statement_id": "N-S053-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The list of mailbox attributes MUST be accurate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S053-005"
+    },
+    {
+      "statement_id": "N-S053-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server allows denormalized UTF-8 mailbox names (see Section 5.1) and the supplied mailbox name differs from the normalized version, the server MUST return LIST with the OLDNAME extended data item.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "selected",
+      "trigger": "SELECT command received",
+      "pre_cond": "(protocol.state = authenticated | protocol.state = selected) & server.allows_denormalized_UTF8 = true & mailbox.supplied_name != mailbox.normalized_name",
+      "post_cond": "server.sent_LIST_OLDNAME = true",
+      "actions": [
+        "send untagged LIST response with OLDNAME extended data item"
+      ],
+      "modality": "must",
+      "id": "N-S053-006"
+    },
+    {
+      "statement_id": "N-S053-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "When deselecting a selected mailbox, the server MUST return an untagged OK response with the \"[CLOSED]\" response code when the currently selected mailbox is closed (see Section 7.1).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": null,
+      "trigger": "SELECT command received",
+      "pre_cond": "protocol.state = selected",
+      "post_cond": "server.sent_CLOSED_response = true",
+      "actions": [
+        "send untagged OK response with [CLOSED] response code before deselecting current mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S053-007"
+    },
+    {
+      "statement_id": "N-S053-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the client is permitted to modify the mailbox, the server SHOULD prefix the text of the tagged OK response with the \"[READ-WRITE]\" response code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "selected",
+      "trigger": "SELECT command completed with OK",
+      "pre_cond": "(protocol.state = authenticated | protocol.state = selected) & client.has_modify_permission = true",
+      "post_cond": "tagged_OK.response_code = READ-WRITE",
+      "actions": [
+        "prefix tagged OK response with [READ-WRITE] response code"
+      ],
+      "modality": "should",
+      "id": "N-S053-008"
+    },
+    {
+      "statement_id": "N-S053-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the client is not permitted to modify the mailbox but is permitted read access, the mailbox is selected as read-only, and the server MUST prefix the text of the tagged OK response to SELECT with the \"[READ-ONLY]\" response code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "selected",
+      "trigger": "SELECT command completed with OK",
+      "pre_cond": "(protocol.state = authenticated | protocol.state = selected) & client.has_modify_permission = false & client.has_read_permission = true",
+      "post_cond": "tagged_OK.response_code = READ-ONLY & mailbox.access_mode = read-only",
+      "actions": [
+        "prefix tagged OK response to SELECT with [READ-ONLY] response code"
+      ],
+      "modality": "must",
+      "id": "N-S053-009"
+    },
+    {
+      "statement_id": "N-S053-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Read-only access through SELECT differs from the EXAMINE command in that certain read-only mailboxes MAY permit the change of permanent state on a per-user (as opposed to global) basis.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S053-010"
+    }
+  ]
+}

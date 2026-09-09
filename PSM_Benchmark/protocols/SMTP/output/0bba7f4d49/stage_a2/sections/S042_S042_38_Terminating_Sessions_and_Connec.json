@@ -1,0 +1,87 @@
+{
+  "section_id": "S042",
+  "title": "S042 3.8 Terminating Sessions and Connections",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S042 3.8 Terminating Sessions and Connections"
+  ],
+  "url_anchor": "#s042-38-terminating-sessions-and-connections",
+  "word_count": 269,
+  "statement_count": 3,
+  "elapsed_seconds": 85.62,
+  "statements": [
+    {
+      "statement_id": "1-S042-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "An SMTP server MUST NOT intentionally close the connection under normal operational circumstances (see Section 7.8) except: o  After receiving a QUIT command and responding with a 221 reply. o  After detecting the need to shut down the SMTP service and returning a 421 response code.  This response code can be issued after the server receives any command or, if necessary, asynchronously from command receipt (on the assumption that the client will receive it after the next command is issued). o  After a timeout, as specified in Section 4.5.3.2, occurs waiting for the client to send a command or data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "!connection.quit_received_and_221_replied & !server.shutdown_detected_and_421_returned & !timer.command_or_data_timeout_expired",
+      "post_cond": "connection.state = OPEN",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S042-001"
+    },
+    {
+      "statement_id": "2-S042-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "An SMTP server that is forcibly shut down via external means SHOULD attempt to send a line containing a 421 response code to the SMTP client before exiting.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "SMTP server",
+        "SMTP client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "external_forced_shutdown",
+      "pre_cond": "server.forced_shutdown_via_external_means = true",
+      "post_cond": "421_response_sent_to_client = true",
+      "actions": [
+        "send a line containing a 421 response code to the SMTP client before exiting"
+      ],
+      "modality": "should",
+      "id": "N-S042-002"
+    },
+    {
+      "statement_id": "3-S042-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "SMTP clients that experience a connection close, reset, or other communications failure due to circumstances not under their control (in violation of the intent of this specification but sometimes unavoidable) SHOULD, to maintain the robustness of the mail system, treat the mail transaction as if a 451 response had been received and act accordingly.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_close | connection_reset | communications_failure",
+      "pre_cond": "failure.cause = not_under_client_control",
+      "post_cond": "transaction.state = AS_IF_451_RECEIVED",
+      "actions": [
+        "treat the mail transaction as if a 451 response had been received",
+        "act accordingly"
+      ],
+      "modality": "should",
+      "id": "N-S042-003"
+    }
+  ]
+}

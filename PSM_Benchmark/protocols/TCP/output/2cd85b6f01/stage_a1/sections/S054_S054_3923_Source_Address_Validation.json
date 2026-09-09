@@ -1,0 +1,84 @@
+{
+  "section_id": "S054",
+  "title": "S054 3.9.2.3 Source Address Validation",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S054 3.9.2.3 Source Address Validation"
+  ],
+  "url_anchor": "#s054-3923-source-address-validation",
+  "word_count": 96,
+  "statement_count": 3,
+  "elapsed_seconds": 21.81,
+  "statements": [
+    {
+      "statement_id": "D-S054-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An incoming SYN with an invalid source address MUST be ignored either by TCP or by the IP layer (MUST-63).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S054",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "receive SYN with invalid source address",
+      "pre_cond": "segment.SYN = 1 & source_address.valid = false",
+      "post_cond": null,
+      "actions": [
+        "discard segment",
+        "do not generate connection state",
+        "do not generate reply"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S054-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "A TCP implementation MUST silently discard an incoming SYN segment that is addressed to a broadcast or multicast address (MUST-57).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S054",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "receive SYN addressed to broadcast or multicast",
+      "pre_cond": "segment.SYN = 1 & (destination.type = broadcast | destination.type = multicast)",
+      "post_cond": null,
+      "actions": [
+        "silently discard segment",
+        "do not generate connection state",
+        "do not generate reply"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S054-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Source address validation guidance is applicable to all incoming segments, not just SYNs.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S054",
+      "object_name": "incoming segment",
+      "field_name": "source_address",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "valid unicast address"
+      ],
+      "guard_semantics": "segment must carry a valid, non-broadcast, non-multicast source address to be processed"
+    }
+  ]
+}

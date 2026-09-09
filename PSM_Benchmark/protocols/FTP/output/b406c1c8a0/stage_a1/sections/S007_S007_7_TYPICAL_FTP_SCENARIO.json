@@ -1,0 +1,301 @@
+{
+  "section_id": "S007",
+  "title": "S007 7. TYPICAL FTP SCENARIO",
+  "depth": 3,
+  "parent_path": [
+    "FTP",
+    "S007 7. TYPICAL FTP SCENARIO"
+  ],
+  "url_anchor": "#s007-7-typical-ftp-scenario",
+  "word_count": 189,
+  "statement_count": 13,
+  "elapsed_seconds": 98.3,
+  "statements": [
+    {
+      "statement_id": "D-S007-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "Connect to host S, port L, establishing control connections. <---- 220 Service ready",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "state_name": "Service ready",
+      "enum_name": "SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S007-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "<---- 331 User name ok, need password",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "state_name": "Need password",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S007-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "<---- 230 User logged in",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S007",
+      "state_name": "User logged in",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S007-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "<---- 150 File status okay; about to open data connection. Server makes data connection to port U.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S007",
+      "state_name": "About to open data connection",
+      "enum_name": "DataTransferState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S007-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "terminate QUIT <CRLF> ----> Server closes all connections.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S007",
+      "state_name": "Closed",
+      "enum_name": "SessionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S007-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "ftp (host) multics<CR> Connect to host S, port L, establishing control connections. <---- 220 Service ready",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Service ready",
+      "trigger": "Connect to host S port L",
+      "pre_cond": null,
+      "post_cond": "connection.control_connection = established",
+      "actions": [
+        "establish control connection",
+        "send 220 Service ready"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S007-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "USER Doe<CRLF>----> <---- 331 User name ok, need password",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Service ready",
+      "to_state": "Need password",
+      "trigger": "USER",
+      "pre_cond": "session.state = Service ready",
+      "post_cond": null,
+      "actions": [
+        "send USER command",
+        "receive 331 User name ok need password"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S007-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "PASS mumble<CRLF>----> <---- 230 User logged in",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Need password",
+      "to_state": "User logged in",
+      "trigger": "PASS",
+      "pre_cond": "session.state = Need password",
+      "post_cond": "session.authenticated = true",
+      "actions": [
+        "send PASS command",
+        "receive 230 User logged in"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S007-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "RETR test.pl1<CRLF> ----> <---- 150 File status okay; about to open data connection. Server makes data connection to port U.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "User logged in",
+      "to_state": "About to open data connection",
+      "trigger": "RETR",
+      "pre_cond": "session.state = User logged in",
+      "post_cond": null,
+      "actions": [
+        "send RETR command",
+        "receive 150 File status okay about to open data connection",
+        "server opens data connection to port U"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S007-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "<---- 226 Closing data connection, file transfer successful",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "About to open data connection",
+      "to_state": "User logged in",
+      "trigger": "226 Closing data connection",
+      "pre_cond": "session.state = About to open data connection",
+      "post_cond": "connection.data_connection = closed",
+      "actions": [
+        "receive 226 Closing data connection file transfer successful",
+        "close data connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S007-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "TYPE I<CRLF> ----> <---- 200 Command OK",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "User logged in",
+      "to_state": "User logged in",
+      "trigger": "TYPE",
+      "pre_cond": "session.state = User logged in",
+      "post_cond": null,
+      "actions": [
+        "send TYPE command",
+        "receive 200 Command OK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S007-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "STOR >udd>cn>fd<CRLF> ----> <---- 550 Access denied",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "User logged in",
+      "to_state": "User logged in",
+      "trigger": "STOR",
+      "pre_cond": "session.state = User logged in",
+      "post_cond": null,
+      "actions": [
+        "send STOR command",
+        "receive 550 Access denied"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S007-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "terminate QUIT <CRLF> ----> Server closes all connections.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "User logged in",
+      "to_state": "Closed",
+      "trigger": "QUIT",
+      "pre_cond": "session.state = User logged in",
+      "post_cond": "connection.all_connections = closed",
+      "actions": [
+        "send QUIT command",
+        "server closes all connections"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

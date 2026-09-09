@@ -1,0 +1,268 @@
+{
+  "section_id": "S034",
+  "title": "S034 4.4.5 Reacquisition and expiration",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S034 4.4.5 Reacquisition and expiration"
+  ],
+  "url_anchor": "#s034-445-reacquisition-and-expiration",
+  "word_count": 544,
+  "statement_count": 12,
+  "elapsed_seconds": 90.09,
+  "statements": [
+    {
+      "statement_id": "D-S034-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "T1 is the time at which the client enters the RENEWING state and attempts to contact the server that originally issued the client's network address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "state_name": "RENEWING",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S034-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "T2 is the time at which the client enters the REBINDING state and attempts to contact any server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "state_name": "REBINDING",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S034-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client has successfully reacquired its network address, returns to BOUND state and may continue network processing.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "state_name": "BOUND",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S034-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the lease expires before the client receives a DHCPACK, the client moves to INIT state, MUST immediately stop any other network processing and requests network initialization parameters as if the client were uninitialized.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "state_name": "INIT",
+      "enum_name": "ClientState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S034-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "At time T1 the client moves to RENEWING state and sends (via unicast) a DHCPREQUEST message to the server to extend its lease.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "BOUND",
+      "to_state": "RENEWING",
+      "trigger": "T1_expires",
+      "pre_cond": "timer.T1 = expired",
+      "post_cond": "client.state = RENEWING",
+      "actions": [
+        "send DHCPREQUEST via unicast",
+        "set ciaddr to current network address",
+        "record local time of DHCPREQUEST transmission"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S034-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "When the client receives a DHCPACK from the server, the client computes the lease expiration time as the sum of the time at which the client sent the DHCPREQUEST message and the duration of the lease in the DHCPACK message. The client has successfully reacquired its network address, returns to BOUND state and may continue network processing.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "RENEWING",
+      "to_state": "BOUND",
+      "trigger": "receive_DHCPACK",
+      "pre_cond": "client.state = RENEWING & message.xid = client.DHCPREQUEST.xid",
+      "post_cond": "client.state = BOUND",
+      "actions": [
+        "compute lease expiration time as DHCPREQUEST_send_time + lease_duration"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S034-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If no DHCPACK arrives before time T2, the client moves to REBINDING state and sends (via broadcast) a DHCPREQUEST message to extend its lease.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "RENEWING",
+      "to_state": "REBINDING",
+      "trigger": "T2_expires",
+      "pre_cond": "client.state = RENEWING & timer.T2 = expired & DHCPACK.received = false",
+      "post_cond": "client.state = REBINDING",
+      "actions": [
+        "send DHCPREQUEST via broadcast",
+        "set ciaddr to current network address"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S034-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the lease expires before the client receives a DHCPACK, the client moves to INIT state, MUST immediately stop any other network processing and requests network initialization parameters as if the client were uninitialized.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REBINDING",
+      "to_state": "INIT",
+      "trigger": "lease_expires",
+      "pre_cond": "client.lease.expired = true & DHCPACK.received = false",
+      "post_cond": "client.state = INIT",
+      "actions": [
+        "stop network processing immediately",
+        "request network initialization parameters"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S034-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "In both RENEWING and REBINDING states, if the client receives no response to its DHCPREQUEST message, the client SHOULD wait one-half of the remaining time until T2 (in RENEWING state), down to a minimum of 60 seconds, before retransmitting the DHCPREQUEST message.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "RENEWING",
+      "to_state": "RENEWING",
+      "trigger": "retransmit_timeout",
+      "pre_cond": "client.state = RENEWING & response.received = false",
+      "post_cond": "client.state = RENEWING",
+      "actions": [
+        "wait max(0.5 * remaining_time_until_T2, 60 seconds)",
+        "retransmit DHCPREQUEST"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S034-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "In both RENEWING and REBINDING states, if the client receives no response to its DHCPREQUEST message, the client SHOULD wait one-half of the remaining lease time (in REBINDING state), down to a minimum of 60 seconds, before retransmitting the DHCPREQUEST message.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REBINDING",
+      "to_state": "REBINDING",
+      "trigger": "retransmit_timeout",
+      "pre_cond": "client.state = REBINDING & response.received = false",
+      "post_cond": "client.state = REBINDING",
+      "actions": [
+        "wait max(0.5 * remaining_lease_time, 60 seconds)",
+        "retransmit DHCPREQUEST"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S034-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "A client MAY choose to renew or extend its lease prior to T1.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "BOUND",
+      "to_state": "RENEWING",
+      "trigger": "early_renewal_requested",
+      "pre_cond": "client.state = BOUND & timer.T1 = not_expired",
+      "post_cond": "client.state = RENEWING",
+      "actions": [
+        "send DHCPREQUEST"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S034-012",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "dhcp_fsm",
+      "description": "The client MUST NOT include a 'server identifier' in the DHCPREQUEST message (in RENEWING and REBINDING states).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S034",
+      "object_name": "DHCPREQUEST",
+      "field_name": "server identifier",
+      "field_type": "option",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "client.state = RENEWING | client.state = REBINDING"
+    }
+  ]
+}

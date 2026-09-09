@@ -1,0 +1,112 @@
+{
+  "section_id": "S024",
+  "title": "S024 3.1 PUBLISH Packets from the Publisher Client to the Broker",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S024 3.1 PUBLISH Packets from the Publisher Client to the Broker"
+  ],
+  "url_anchor": "#s024-31-publish-packets-from-the-publisher-client-to-the-broker",
+  "word_count": 236,
+  "statement_count": 4,
+  "elapsed_seconds": 30.76,
+  "statements": [
+    {
+      "statement_id": "N-S024-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "On receiving the PUBLISH packet, the Broker MUST use the type of packet (i.e., PUBLISH) and the Topic Name in the packet header to match against the scope array items in the cached token or its introspection result.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH_packet_received",
+      "pre_cond": null,
+      "post_cond": "broker.authorization_check_performed = true",
+      "actions": [
+        "match PUBLISH packet type and Topic Name against scope array items in cached token or introspection result"
+      ],
+      "modality": "must",
+      "id": "N-S024-001"
+    },
+    {
+      "statement_id": "N-S024-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "In the case of an authorization failure, the Broker MUST return an error if the Client has set the QoS level of the PUBLISH packet to greater than or equal to 1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authorization_failure & PUBLISH_QoS_gte_1",
+      "pre_cond": "authorization.result = failure & publish.qos >= 1",
+      "post_cond": "broker.error_response_sent = true",
+      "actions": [
+        "send PUBACK or PUBREC with reason code 0x87 (Not authorized)"
+      ],
+      "modality": "must",
+      "id": "N-S024-002"
+    },
+    {
+      "statement_id": "N-S024-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "On receiving an acknowledgment with 0x87 (Not authorized), the Client MAY reauthenticate by providing a new token, as described in Section 4.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "acknowledgment_received_with_reason_code_0x87",
+      "pre_cond": "acknowledgment.reason_code = 0x87",
+      "post_cond": null,
+      "actions": [
+        "reauthenticate by providing a new token"
+      ],
+      "modality": "may",
+      "id": "N-S024-003"
+    },
+    {
+      "statement_id": "N-S024-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "For all QoS levels, the Broker MAY return 0x80 (Unspecified error) if they do not want to leak the Topic Names to unauthorized clients.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authorization_failure",
+      "pre_cond": "authorization.result = failure",
+      "post_cond": null,
+      "actions": [
+        "return reason code 0x80 (Unspecified error) instead of 0x87"
+      ],
+      "modality": "may",
+      "id": "N-S024-004"
+    }
+  ]
+}

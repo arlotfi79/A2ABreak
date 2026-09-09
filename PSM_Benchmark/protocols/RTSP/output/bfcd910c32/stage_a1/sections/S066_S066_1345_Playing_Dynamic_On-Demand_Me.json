@@ -1,0 +1,103 @@
+{
+  "section_id": "S066",
+  "title": "S066 13.4.5 Playing Dynamic On-Demand Media",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S066 13.4.5 Playing Dynamic On-Demand Media"
+  ],
+  "url_anchor": "#s066-1345-playing-dynamic-on-demand-media",
+  "word_count": 171,
+  "statement_count": 4,
+  "elapsed_seconds": 23.79,
+  "statements": [
+    {
+      "statement_id": "D-S066-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "There are two ways for the client to be informed about changes of media resources in Play state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S066",
+      "state_name": "Play",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = Play"
+    },
+    {
+      "statement_id": "D-S066-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The first being that the client will receive a PLAY_NOTIFY request with the Notify-Reason header set to media-properties-update. The client can use the value of the Media-Range header to decide further actions, if the Media-Range header is present in the PLAY_NOTIFY request.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S066",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "PLAY_NOTIFY(Notify-Reason=media-properties-update)",
+      "pre_cond": "session.state = Play",
+      "post_cond": null,
+      "actions": [
+        "inspect Media-Range header",
+        "decide further actions based on Media-Range"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S066-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The second way is that the client issues a GET_PARAMETER request without a body but including a Media-Range header. The 200 OK response MUST include the current Media-Range header.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S066",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "send GET_PARAMETER(no-body, Media-Range)",
+      "pre_cond": "session.state = Play",
+      "post_cond": "response.Media-Range = current_media_range",
+      "actions": [
+        "send GET_PARAMETER request with Media-Range header and no body",
+        "receive 200 OK with current Media-Range header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S066-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Dynamic on-demand media is indicated by the content of the Media-Properties header in the SETUP response when: the Random Access property is set to Random-Access; the Content Modifications property is set to Dynamic; the Retention property is set to Unlimited or Time-Limited.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S066",
+      "object_name": "SETUP response",
+      "field_name": "Media-Properties",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "Random-Access=Random-Access",
+        "Content-Modifications=Dynamic",
+        "Retention=Unlimited|Time-Limited"
+      ],
+      "guard_semantics": "classifies session as dynamic on-demand media"
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "section_id": "S041",
+  "title": "S041 8.2.1 FSM Definition",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S041 8.2.1 FSM Definition"
+  ],
+  "url_anchor": "#s041-821-fsm-definition",
+  "word_count": 263,
+  "statement_count": 5,
+  "elapsed_seconds": 35.02,
+  "statements": [
+    {
+      "statement_id": "N-S041-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "BGP MUST maintain a separate FSM for each configured peer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "BGP"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "peer_configured",
+      "pre_cond": null,
+      "post_cond": "bgp.fsm_per_configured_peer = true",
+      "actions": [
+        "Instantiate and maintain a separate FSM for each configured peer"
+      ],
+      "modality": "must",
+      "id": "N-S041-001"
+    },
+    {
+      "statement_id": "N-S041-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "A BGP implementation MUST connect to and listen on TCP port 179 for incoming connections in addition to trying to connect to peers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "BGP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "bgp_started",
+      "pre_cond": null,
+      "post_cond": "bgp.listening_port = 179 & bgp.active_connect_enabled = true",
+      "actions": [
+        "Listen on TCP port 179 for incoming connections",
+        "Attempt outgoing TCP connections to configured peers"
+      ],
+      "modality": "must",
+      "id": "N-S041-002"
+    },
+    {
+      "statement_id": "N-S041-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "state_machine",
+      "stage": "bgp_fsm",
+      "description": "For each incoming connection, a state machine MUST be instantiated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "BGP implementation",
+        "state machine"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "incoming_TCP_connection_received",
+      "pre_cond": null,
+      "post_cond": "state_machine.instantiated = true & state_machine.associated_connection = incoming_connection",
+      "actions": [
+        "Instantiate a new FSM for the incoming TCP connection"
+      ],
+      "modality": "must",
+      "id": "N-S041-003"
+    },
+    {
+      "statement_id": "N-S041-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "During this time, both an incoming and outgoing connection may exist for the same configured peering.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "BGP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "peer_identity_known_bgp_id_unknown",
+      "pre_cond": "connection.peer_identity_known = true & connection.bgp_identifier_known = false",
+      "post_cond": "connection.incoming_exists = true & connection.outgoing_exists = true",
+      "actions": [],
+      "modality": "may",
+      "id": "N-S041-004"
+    },
+    {
+      "statement_id": "N-S041-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "There may be more than one connection between a pair of peers if the connections are configured to use a different pair of IP addresses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "BGP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "connection.configured_ip_address_pair != peer.default_ip_address_pair",
+      "post_cond": "connection.count_between_peer_pair > 1",
+      "actions": [],
+      "modality": "may",
+      "id": "N-S041-005"
+    }
+  ]
+}

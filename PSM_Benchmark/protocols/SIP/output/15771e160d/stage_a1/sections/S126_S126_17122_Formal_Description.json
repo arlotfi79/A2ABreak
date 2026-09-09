@@ -1,0 +1,333 @@
+{
+  "section_id": "S126",
+  "title": "S126 17.1.2.2 Formal Description",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S126 17.1.2.2 Formal Description"
+  ],
+  "url_anchor": "#s126-17122-formal-description",
+  "word_count": 506,
+  "statement_count": 15,
+  "elapsed_seconds": 50.65,
+  "statements": [
+    {
+      "statement_id": "D-S126-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The 'Trying' state is entered when the TU initiates a new client transaction with a request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "state_name": "Trying",
+      "enum_name": "NonInviteClientTransactionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Trying"
+    },
+    {
+      "statement_id": "D-S126-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a provisional response is received while in the 'Trying' state, the client transaction SHOULD move to the 'Proceeding' state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "state_name": "Proceeding",
+      "enum_name": "NonInviteClientTransactionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Proceeding"
+    },
+    {
+      "statement_id": "D-S126-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the client transaction enters the 'Completed' state, it MUST set Timer K to fire in T4 seconds for unreliable transports, and zero seconds for reliable transports.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "state_name": "Completed",
+      "enum_name": "NonInviteClientTransactionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Completed"
+    },
+    {
+      "statement_id": "D-S126-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the transaction is in the terminated state, it MUST be destroyed immediately.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "state_name": "Terminated",
+      "enum_name": "NonInviteClientTransactionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "transaction.state = Terminated"
+    },
+    {
+      "statement_id": "D-S126-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The 'Trying' state is entered when the TU initiates a new client transaction with a request. The client transaction SHOULD set timer F to fire in 64*T1 seconds. The request MUST be passed to the transport layer for transmission. If an unreliable transport is in use, the client transaction MUST set timer E to fire in T1 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "TU",
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": "Trying",
+      "trigger": "TU initiates new client transaction",
+      "pre_cond": null,
+      "post_cond": "transaction.state = Trying",
+      "actions": [
+        "set Timer F to 64*T1 seconds",
+        "pass request to transport layer",
+        "set Timer E to T1 seconds (unreliable transport only)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S126-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If timer E fires while still in this state, the timer is reset, but this time with a value of MIN(2*T1, T2). This process continues so that retransmissions occur with an exponentially increasing interval that caps at T2.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Trying",
+      "to_state": "Trying",
+      "trigger": "Timer E fires",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Trying",
+      "actions": [
+        "reset Timer E to MIN(2*T1, T2) (exponential backoff capped at T2)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S126-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If Timer F fires while the client transaction is still in the 'Trying' state, the client transaction SHOULD inform the TU about the timeout, and then it SHOULD enter the 'Terminated' state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Terminated",
+      "trigger": "Timer F fires",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU of timeout"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S126-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a provisional response is received while in the 'Trying' state, the response MUST be passed to the TU, and then the client transaction SHOULD move to the 'Proceeding' state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Proceeding",
+      "trigger": "provisional response received",
+      "pre_cond": "transaction.state = Trying",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "pass response to TU"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S126-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a final response (status codes 200-699) is received while in the 'Trying' state, the response MUST be passed to the TU, and the client transaction MUST transition to the 'Completed' state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Trying",
+      "to_state": "Completed",
+      "trigger": "final response received (200-699)",
+      "pre_cond": "transaction.state = Trying & response.status_code >= 200 & response.status_code <= 699",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "pass response to TU",
+        "set Timer K to T4 seconds (unreliable) or 0 seconds (reliable)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S126-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If Timer E fires while in the 'Proceeding' state, the request MUST be passed to the transport layer for retransmission, and Timer E MUST be reset with a value of T2 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Proceeding",
+      "trigger": "Timer E fires",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "pass request to transport layer for retransmission",
+        "reset Timer E to T2 seconds"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S126-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If timer F fires while in the 'Proceeding' state, the TU MUST be informed of a timeout, and the client transaction MUST transition to the terminated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Terminated",
+      "trigger": "Timer F fires",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU of timeout"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S126-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a final response (status codes 200-699) is received while in the 'Proceeding' state, the response MUST be passed to the TU, and the client transaction MUST transition to the 'Completed' state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Completed",
+      "trigger": "final response received (200-699)",
+      "pre_cond": "transaction.state = Proceeding & response.status_code >= 200 & response.status_code <= 699",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "pass response to TU",
+        "set Timer K to T4 seconds (unreliable) or 0 seconds (reliable)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S126-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If Timer K fires while in this state, the client transaction MUST transition to the 'Terminated' state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": "Terminated",
+      "trigger": "Timer K fires",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S126-014",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "If an unreliable transport is in use, the client transaction MUST set timer E to fire in T1 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "object_name": "non-INVITE client transaction",
+      "field_name": "Timer E",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": "T1 seconds initial, exponential backoff MIN(2^n * T1, T2), capped at T2",
+      "guard_semantics": "transport.reliable = false"
+    },
+    {
+      "statement_id": "D-S126-015",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "Once the client transaction enters the 'Completed' state, it MUST set Timer K to fire in T4 seconds for unreliable transports, and zero seconds for reliable transports.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S126",
+      "object_name": "non-INVITE client transaction",
+      "field_name": "Timer K",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": "T4 seconds (unreliable transport) | 0 seconds (reliable transport)",
+      "guard_semantics": "transaction.state = Completed"
+    }
+  ]
+}

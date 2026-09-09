@@ -1,0 +1,231 @@
+{
+  "section_id": "4.3",
+  "title": "4.3. Push Notification Objects",
+  "depth": 3,
+  "parent_path": [
+    "4. Protocol Data Model",
+    "4.3. Push Notification Objects"
+  ],
+  "url_anchor": "#43-push-notification-objects",
+  "word_count": 342,
+  "statement_count": 9,
+  "elapsed_seconds": 46.35,
+  "statements": [
+    {
+      "statement_id": "N-4.3-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "The agent MUST include authentication credentials in the request headers as specified in the PushNotificationConfig.authentication field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_sent",
+      "pre_cond": "push_notification_config.authentication != null",
+      "post_cond": "request.headers.authorization != null",
+      "actions": [
+        "Include authentication credentials in the HTTP request headers as specified in PushNotificationConfig.authentication"
+      ],
+      "modality": "must",
+      "id": "N-4-3-001"
+    },
+    {
+      "statement_id": "N-4.3-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients MUST respond with HTTP 2xx status codes to acknowledge successful receipt",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_received",
+      "pre_cond": null,
+      "post_cond": "response.status_code >= 200 & response.status_code < 300",
+      "actions": [
+        "Respond with HTTP 2xx status code to acknowledge successful receipt of the push notification"
+      ],
+      "modality": "must",
+      "id": "N-4-3-002"
+    },
+    {
+      "statement_id": "N-4.3-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients SHOULD process notifications idempotently, as duplicate deliveries may occur",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Process push notifications idempotently to handle duplicate deliveries safely"
+      ],
+      "modality": "should",
+      "id": "N-4-3-003"
+    },
+    {
+      "statement_id": "N-4.3-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients MUST validate the task ID matches an expected task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_received",
+      "pre_cond": null,
+      "post_cond": "notification.task_id = expected_task.id",
+      "actions": [
+        "Validate that the task ID in the push notification payload matches an expected task"
+      ],
+      "modality": "must",
+      "id": "N-4-3-004"
+    },
+    {
+      "statement_id": "N-4.3-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients SHOULD implement appropriate security measures to verify the notification source",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement appropriate security measures to verify the source of the push notification"
+      ],
+      "modality": "should",
+      "id": "N-4-3-005"
+    },
+    {
+      "statement_id": "N-4.3-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MUST attempt delivery at least once for each configured webhook",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_update_occurred",
+      "pre_cond": "push_notification_config.url != null",
+      "post_cond": "push_notification.delivery_attempts >= 1",
+      "actions": [
+        "Attempt HTTP POST delivery to each configured webhook URL at least once when a task update occurs"
+      ],
+      "modality": "must",
+      "id": "N-4-3-006"
+    },
+    {
+      "statement_id": "N-4.3-007",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MAY implement retry logic with exponential backoff for failed deliveries",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_delivery_failed",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement retry logic with exponential backoff upon failed webhook delivery"
+      ],
+      "modality": "may",
+      "id": "N-4-3-007"
+    },
+    {
+      "statement_id": "N-4.3-008",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents SHOULD include a reasonable timeout for webhook requests (recommended: 10-30 seconds)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_sent",
+      "pre_cond": null,
+      "post_cond": "webhook_request.timeout != null",
+      "actions": [
+        "Set a reasonable timeout (recommended 10-30 seconds) on outgoing webhook HTTP POST requests"
+      ],
+      "modality": "should",
+      "id": "N-4-3-008"
+    },
+    {
+      "statement_id": "N-4.3-009",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MAY stop attempting delivery after a configured number of consecutive failures",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_delivery_failed",
+      "pre_cond": "push_notification.consecutive_failures >= push_notification_config.max_retries",
+      "post_cond": null,
+      "actions": [
+        "Cease further delivery attempts after a configured number of consecutive webhook delivery failures"
+      ],
+      "modality": "may",
+      "id": "N-4-3-009"
+    }
+  ]
+}

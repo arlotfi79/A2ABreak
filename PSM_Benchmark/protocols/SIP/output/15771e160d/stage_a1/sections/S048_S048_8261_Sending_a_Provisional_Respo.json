@@ -1,0 +1,85 @@
+{
+  "section_id": "S048",
+  "title": "S048 8.2.6.1 Sending a Provisional Response",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S048 8.2.6.1 Sending a Provisional Response"
+  ],
+  "url_anchor": "#s048-8261-sending-a-provisional-response",
+  "word_count": 110,
+  "statement_count": 3,
+  "elapsed_seconds": 20.72,
+  "statements": [
+    {
+      "statement_id": "D-S048-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "UASs SHOULD NOT issue a provisional response for a non-INVITE request. Rather, UASs SHOULD generate a final response to a non-INVITE request as soon as possible.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S048",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "non-INVITE request received",
+      "pre_cond": "transaction.method != INVITE",
+      "post_cond": "transaction.response_type = final",
+      "actions": [
+        "skip provisional response",
+        "generate final response immediately"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S048-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When a 100 (Trying) response is generated, any Timestamp header field present in the request MUST be copied into this 100 (Trying) response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S048",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "100 Trying response generation",
+      "pre_cond": "request.Timestamp != null",
+      "post_cond": "response.Timestamp = request.Timestamp",
+      "actions": [
+        "copy Timestamp header from request to 100 Trying response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S048-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If there is a delay in generating the response, the UAS SHOULD add a delay value into the Timestamp value in the response. This value MUST contain the difference between the time of sending of the response and receipt of the request, measured in seconds.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S048",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "delayed 100 Trying response generation",
+      "pre_cond": "response.delay > 0 & request.Timestamp != null",
+      "post_cond": "response.Timestamp.delay = (time_of_sending - time_of_receipt)",
+      "actions": [
+        "add delay value to Timestamp in 100 Trying response"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "section_id": "S004",
+  "title": "S004 1.3 MQTT-Related Terminology",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S004 1.3 MQTT-Related Terminology"
+  ],
+  "url_anchor": "#s004-13-mqtt-related-terminology",
+  "word_count": 1031,
+  "statement_count": 9,
+  "elapsed_seconds": 102.38,
+  "statements": [
+    {
+      "statement_id": "D-S004-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "A stateful interaction between a Client and a Broker. Some Sessions last only as long as the Network Connection; others can span multiple Network Connections.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "state_name": "Session",
+      "enum_name": "MQTTConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S004-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client requests to connect to the Broker. This is the first packet sent by a Client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send CONNECT packet"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "CONNACK packets contain return codes that indicate either a success or an error state in response to a Client's CONNECT packet.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "Session",
+      "trigger": "CONNACK received (success)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "receive CONNACK with success return code"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "CONNACK packets contain return codes that indicate either a success or an error state in response to a Client's CONNECT packet.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "error state",
+      "trigger": "CONNACK received (error)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "receive CONNACK with error return code"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "An AUTH Control Packet is sent from the Client to the Broker or from the Broker to the Client as part of an extended authentication exchange. The Authentication Method is set in the CONNECT packet, and consequent AUTH packets follow the same Authentication Method.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S004",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "AUTH sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "exchange AUTH packet during extended authentication"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The DISCONNECT packet is the final MQTT Control Packet sent from the Client or the Broker. It indicates the reason why the Network Connection is being closed.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DISCONNECT sent",
+      "pre_cond": null,
+      "post_cond": "connection.network_connection = closed",
+      "actions": [
+        "send DISCONNECT packet",
+        "close Network Connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Network Connection is closed without the Client first sending a DISCONNECT packet with reason code 0x00 (Normal disconnection) and the MQTT Connection has a Will Message, the Will Message is published.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Network Connection closed without Normal disconnection",
+      "pre_cond": "connection.will_flag = true & connection.disconnect_reason_code != 0x00",
+      "post_cond": null,
+      "actions": [
+        "publish Will Message"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Network Connection is not closed normally, the Broker sends a last Will Message for the Client if the Client provided one in its CONNECT packet. Situations include: an I/O error or network failure detected by the Broker; the Client fails to communicate within the Keep Alive period; the Client closes the Network Connection without first sending a DISCONNECT packet with reason code 0x00; the Broker closes the Network Connection without first receiving a DISCONNECT packet with reason code 0x00.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "Session",
+      "to_state": null,
+      "trigger": "abnormal Network Connection closure",
+      "pre_cond": "connection.will_flag = true",
+      "post_cond": null,
+      "actions": [
+        "publish Will Message"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Will Flag is set in the CONNECT flags, then the Payload of the CONNECT packet includes information about the Will. The information consists of the Will Properties, Will Topic, and Will Payload fields.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "object_name": "CONNECT",
+      "field_name": "Will Flag",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "connection.will_flag = true \u2192 CONNECT.payload includes Will Properties, Will Topic, Will Payload"
+    }
+  ]
+}

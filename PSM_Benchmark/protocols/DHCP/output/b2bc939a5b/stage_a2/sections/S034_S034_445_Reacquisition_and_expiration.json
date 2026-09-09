@@ -1,0 +1,304 @@
+{
+  "section_id": "S034",
+  "title": "S034 4.4.5 Reacquisition and expiration",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S034 4.4.5 Reacquisition and expiration"
+  ],
+  "url_anchor": "#s034-445-reacquisition-and-expiration",
+  "word_count": 544,
+  "statement_count": 12,
+  "elapsed_seconds": 187.28,
+  "statements": [
+    {
+      "statement_id": "N-S034-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "dhcp_fsm",
+      "description": "T1 MUST be earlier than T2, which, in turn, MUST be earlier than the time at which the client's lease will expire.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "T1 < T2 & T2 < lease.expiry_time",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S034-001"
+    },
+    {
+      "statement_id": "N-S034-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client MUST NOT include a 'server identifier' in the DHCPREQUEST message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "RENEWING",
+      "to_state": null,
+      "trigger": "send_DHCPREQUEST",
+      "pre_cond": "client.state = RENEWING",
+      "post_cond": "DHCPREQUEST.server_identifier_option = absent",
+      "actions": [
+        "omit 'server identifier' option from DHCPREQUEST message"
+      ],
+      "modality": "must",
+      "id": "N-S034-002"
+    },
+    {
+      "statement_id": "N-S034-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client MUST NOT include a 'server identifier' in the DHCPREQUEST message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REBINDING",
+      "to_state": null,
+      "trigger": "send_DHCPREQUEST",
+      "pre_cond": "client.state = REBINDING",
+      "post_cond": "DHCPREQUEST.server_identifier_option = absent",
+      "actions": [
+        "omit 'server identifier' option from DHCPREQUEST message"
+      ],
+      "modality": "must",
+      "id": "N-S034-003"
+    },
+    {
+      "statement_id": "N-S034-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "dhcp_fsm",
+      "description": "Times T1 and T2 SHOULD be chosen with some random \"fuzz\" around a fixed value, to avoid synchronization of client reacquisition.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "apply random fuzz to T1 and T2 values around their fixed base values to prevent synchronized client reacquisition"
+      ],
+      "modality": "should",
+      "id": "N-S034-004"
+    },
+    {
+      "statement_id": "N-S034-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "A client MAY choose to renew or extend its lease prior to T1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "BOUND",
+      "to_state": "RENEWING",
+      "trigger": "client_initiates_early_renewal",
+      "pre_cond": "client.state = BOUND & current_time < T1",
+      "post_cond": "client.state = RENEWING",
+      "actions": [
+        "initiate lease renewal before T1 timer fires"
+      ],
+      "modality": "may",
+      "id": "N-S034-005"
+    },
+    {
+      "statement_id": "N-S034-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server MAY choose to extend the client's lease according to policy set by the network administrator.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S034-006"
+    },
+    {
+      "statement_id": "N-S034-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server SHOULD return T1 and T2, and their values SHOULD be adjusted from their original values to take account of the time remaining on the lease.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DHCPACK",
+      "pre_cond": null,
+      "post_cond": "DHCPACK.T1_option = adjusted_T1 & DHCPACK.T2_option = adjusted_T2",
+      "actions": [
+        "include T1 option in DHCPACK adjusted for time remaining on lease",
+        "include T2 option in DHCPACK adjusted for time remaining on lease"
+      ],
+      "modality": "should",
+      "id": "N-S034-007"
+    },
+    {
+      "statement_id": "N-S034-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "In both RENEWING and REBINDING states, if the client receives no response to its DHCPREQUEST message, the client SHOULD wait one-half of the remaining time until T2 (in RENEWING state) and one-half of the remaining lease time (in REBINDING state), down to a minimum of 60 seconds, before retransmitting the DHCPREQUEST message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "RENEWING | REBINDING",
+      "to_state": null,
+      "trigger": "DHCPREQUEST_no_response",
+      "pre_cond": "(client.state = RENEWING | client.state = REBINDING) & DHCPREQUEST.response_received = false",
+      "post_cond": null,
+      "actions": [
+        "if client.state = RENEWING: wait max(60s, 0.5 * (T2 - current_time)) before retransmitting DHCPREQUEST",
+        "if client.state = REBINDING: wait max(60s, 0.5 * remaining_lease_time) before retransmitting DHCPREQUEST"
+      ],
+      "modality": "should",
+      "id": "N-S034-008"
+    },
+    {
+      "statement_id": "N-S034-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the lease expires before the client receives a DHCPACK, the client moves to INIT state, MUST immediately stop any other network processing and requests network initialization parameters as if the client were uninitialized.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REBINDING",
+      "to_state": "INIT",
+      "trigger": "lease_expired",
+      "pre_cond": "lease.expired = true & DHCPACK.received = false",
+      "post_cond": "client.state = INIT & network_processing.active = false",
+      "actions": [
+        "move to INIT state",
+        "immediately stop all other network processing",
+        "request network initialization parameters as if uninitialized"
+      ],
+      "modality": "must",
+      "id": "N-S034-009"
+    },
+    {
+      "statement_id": "N-S034-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client then receives a DHCPACK allocating that client its previous network address, the client SHOULD continue network processing.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "INIT",
+      "to_state": "BOUND",
+      "trigger": "DHCPACK_received_with_previous_address",
+      "pre_cond": "client.state = INIT & DHCPACK.yiaddr = client.previous_network_address",
+      "post_cond": "client.state = BOUND & network_processing.active = true",
+      "actions": [
+        "resume network processing with previously held network address"
+      ],
+      "modality": "should",
+      "id": "N-S034-010"
+    },
+    {
+      "statement_id": "N-S034-11",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client is given a new network address, it MUST NOT continue using the previous network address and SHOULD notify the local users of the problem.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "INIT",
+      "to_state": null,
+      "trigger": "DHCPACK_received_with_new_address",
+      "pre_cond": "client.state = INIT & DHCPACK.yiaddr != client.previous_network_address",
+      "post_cond": "client.previous_address.in_use = false",
+      "actions": [
+        "cease using previous network address immediately"
+      ],
+      "modality": "must",
+      "id": "N-S034-011"
+    },
+    {
+      "statement_id": "N-S034-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client is given a new network address, it MUST NOT continue using the previous network address and SHOULD notify the local users of the problem.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "client"
+      ],
+      "from_state": "INIT",
+      "to_state": null,
+      "trigger": "DHCPACK_received_with_new_address",
+      "pre_cond": "client.state = INIT & DHCPACK.yiaddr != client.previous_network_address",
+      "post_cond": null,
+      "actions": [
+        "notify local users that a new network address has been assigned in place of the previous one"
+      ],
+      "modality": "should",
+      "id": "N-S034-012"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "section_id": "S246",
+  "title": "S246 21.5.4 503 Service Unavailable",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S246 21.5.4 503 Service Unavailable"
+  ],
+  "url_anchor": "#s246-2154-503-service-unavailable",
+  "word_count": 116,
+  "statement_count": 5,
+  "elapsed_seconds": 33.93,
+  "statements": [
+    {
+      "statement_id": "N-S246-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The server MAY indicate when the client should retry the request in a Retry-After header field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S246",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_503_response",
+      "pre_cond": "response.status = 503",
+      "post_cond": null,
+      "actions": [
+        "Include Retry-After header field indicating retry time in 503 response"
+      ],
+      "modality": "may",
+      "id": "N-S246-001"
+    },
+    {
+      "statement_id": "N-S246-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If no Retry-After is given, the client MUST act as if it had received a 500 (Server Internal Error) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S246",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_503_without_Retry-After",
+      "pre_cond": "response.status = 503 & Retry-After.present = false",
+      "post_cond": "client.effective_response = 500",
+      "actions": [
+        "Process 503 response as if it were a 500 (Server Internal Error) response"
+      ],
+      "modality": "must",
+      "id": "N-S246-002"
+    },
+    {
+      "statement_id": "N-S246-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "A client (proxy or UAC) receiving a 503 (Service Unavailable) SHOULD attempt to forward the request to an alternate server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S246",
+      "actors": [
+        "client",
+        "proxy",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_503",
+      "pre_cond": "response.status = 503",
+      "post_cond": "request.forwarded_to_alternate = true",
+      "actions": [
+        "Attempt to forward the original request to an alternate server"
+      ],
+      "modality": "should",
+      "id": "N-S246-003"
+    },
+    {
+      "statement_id": "N-S246-4",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "It SHOULD NOT forward any other requests to that server for the duration specified in the Retry-After header field, if present.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S246",
+      "actors": [
+        "client",
+        "proxy",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_503_with_Retry-After",
+      "pre_cond": "response.status = 503 & Retry-After.present = true",
+      "post_cond": "server.blacklisted_until = Retry-After.expiry",
+      "actions": [
+        "Suppress forwarding of subsequent requests to that server for the Retry-After duration"
+      ],
+      "modality": "should",
+      "id": "N-S246-004"
+    },
+    {
+      "statement_id": "N-S246-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Servers MAY refuse the connection or drop the request instead of responding with 503 (Service Unavailable).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S246",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "overload_or_maintenance_condition",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Refuse the connection",
+        "Drop the request without sending 503 response"
+      ],
+      "modality": "may",
+      "id": "N-S246-005"
+    }
+  ]
+}

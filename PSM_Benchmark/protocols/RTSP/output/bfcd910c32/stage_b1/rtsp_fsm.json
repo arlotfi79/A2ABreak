@@ -1,0 +1,691 @@
+{
+  "stage": "rtsp_fsm",
+  "states": [
+    {
+      "state_name": "Init",
+      "semantic_type": "initial",
+      "actor": "endpoint",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.exists = false",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S059-001",
+        "D-S283-001"
+      ]
+    },
+    {
+      "state_name": "Ready",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = Ready",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S059-002",
+        "D-S283-002",
+        "D-S062-001",
+        "D-S074-001"
+      ]
+    },
+    {
+      "state_name": "Play",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = Play",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S059-003",
+        "D-S283-003",
+        "D-S056-001",
+        "D-S064-001",
+        "D-S066-001",
+        "D-S188-001"
+      ]
+    },
+    {
+      "state_name": "Terminated",
+      "semantic_type": "terminal",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = Terminated",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S009-002"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "Init",
+      "to_state": "Ready",
+      "trigger": "receive SETUP_success",
+      "guard": "protocol.state = Init",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "generate session identifier",
+        "set transport parameters"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S059-004",
+        "D-S283-006",
+        "N-S059-009"
+      ]
+    },
+    {
+      "from_state": "Init",
+      "to_state": "Init",
+      "trigger": "receive SETUP_redirect",
+      "guard": "protocol.state = Init",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send 3rr redirect response"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-007"
+      ]
+    },
+    {
+      "from_state": "Init",
+      "to_state": "Init",
+      "trigger": "receive REDIRECT",
+      "guard": "protocol.state = Init",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "terminate all sessions"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-008"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "receive SETUP",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "update transport parameters"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S059-005",
+        "D-S283-009",
+        "D-S283-010"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "receive TEARDOWN_media",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "remove media stream",
+        "free associated resources"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-013",
+        "D-S076-005"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "receive PAUSE",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send 200 OK response"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-018",
+        "D-S074-003",
+        "N-S074-007"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "receive REDIRECT_timed",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "set redirect deadline"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-019"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Play",
+      "trigger": "receive PLAY",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "begin media delivery"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-014",
+        "D-S283-015",
+        "D-S062-003",
+        "D-S005-004"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "receive TEARDOWN_session",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "destroy session state"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-011",
+        "D-S283-012"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "receive REDIRECT_immediate",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "remove session"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-020"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "timeout session",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "remove session"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-021"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "cond redirect_deadline",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "teardown session"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-022"
+      ]
+    },
+    {
+      "from_state": "Ready",
+      "to_state": "Terminated",
+      "trigger": "receive server_TEARDOWN",
+      "guard": "protocol.state = Ready",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "terminate session context"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S009-006",
+        "N-S077-003",
+        "D-S077-001"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "receive PLAY",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "replace current play action"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-026",
+        "D-S283-027",
+        "D-S062-004",
+        "D-S289-001"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "cond end_of_range",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "stop media delivery"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-025",
+        "D-S062-005"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "cond end_of_media",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "set resume point to end"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-024"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "receive PLAY_NOTIFY",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send 200 response"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-028",
+        "N-S070-002"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "receive SETUP",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "change transport parameters"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S059-006",
+        "D-S283-031"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "receive REDIRECT_timed",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "set redirect deadline"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-035"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "send PLAY_NOTIFY_eos",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send end-of-stream notification"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S071-001",
+        "D-S070-001"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "send PLAY_NOTIFY_update",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send media properties update"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S072-001",
+        "N-S072-004"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "cond scale_change",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "modify playback scale value"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S073-001",
+        "N-S073-002"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Ready",
+      "trigger": "receive PAUSE",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "halt media delivery"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-023",
+        "D-S056-002",
+        "D-S005-005"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Ready",
+      "trigger": "cond delivery_exceeds_stop",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "pause media delivery immediately"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S064-002"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "receive TEARDOWN_session",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "destroy session state"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-032",
+        "D-S283-033"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "receive REDIRECT_immediate",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "remove session"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-036"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "timeout session",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "stop media playout"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-038"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "cond redirect_deadline",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "teardown session"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S283-037"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "receive TEARDOWN_affected",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "terminate media session"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S060-004"
+      ]
+    },
+    {
+      "from_state": "Play",
+      "to_state": "Terminated",
+      "trigger": "receive TEARDOWN_aggregate",
+      "guard": "protocol.state = Play",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "halt delivery immediately",
+        "destroy session state"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S076-003",
+        "D-S056-003"
+      ]
+    }
+  ],
+  "inter_stage": {
+    "entry_from_previous": [],
+    "exit_to_next": []
+  },
+  "discarded_states": [
+    "Session Establishment (D-S002-001): phase label not protocol state",
+    "Media Delivery Control (D-S002-002): phase label not protocol state",
+    "Established (D-S005-001, D-S009-001): alias for Ready based on transition patterns",
+    "Playing (D-S005-002): alias for Play",
+    "Paused (D-S005-003): alias for Ready based on transition patterns",
+    "null (D-S045-004, D-S123-001): no state name defined",
+    "Closed (D-S048-006): connection-level state not session state",
+    "established session (D-S050-001): alias for Ready",
+    "Media Initialization (D-S058-001): pre-session phase label not distinct state",
+    "Timed Out (D-S123-002): alias for Terminated",
+    "No Binding (D-S181-001): pipelined requests binding sub-FSM state",
+    "Binding Exists (D-S181-002): pipelined requests binding sub-FSM state",
+    "Session Established (D-S197-006): alias for active session state",
+    "Session Terminated (D-S197-007): alias for Terminated"
+  ],
+  "unresolved": [
+    "D-S009-004: Established->Terminated via TEARDOWN_aggregated conflicts with S283 Ready->Init via TEARDOWN_session for same event",
+    "D-S009-005: Established->Terminated via all_media_resources_removed parallels S283 Ready->Init when last media removed",
+    "D-S009-007: Established->Terminated via REDIRECT_received parallels S283 Ready->Init via REDIRECT_immediate",
+    "D-S009-008: Established->Terminated via redirect_deadline_expired parallels S283 Ready->Init via redirect_deadline",
+    "N-S009-002: Established->Terminated via client_liveness_timeout parallels S283 Ready->Init via timeout",
+    "D-S197-002 through D-S197-004: Session_Established->Session_Terminated overlaps with Ready/Play->Init transitions from S283 state table"
+  ],
+  "gaps": [
+    "Established in S009 may cover both Ready and Play states; server_TEARDOWN transition from Play to Terminated is not explicitly modeled in input",
+    "No explicit Play->Terminated transitions for REDIRECT or liveness timeout; only Play->Init from S283 normative state table",
+    "Connection-level state machine (open/closed/persistent/closing) from S047/S048/S160 is not modeled as it operates on a separate axis",
+    "Pipelined-Requests binding sub-FSM (No_Binding/Binding_Exists from S181) is not integrated into main session FSM due to single initial state constraint",
+    "Session keep-alive self-transition (D-S050-005) applies to both Ready and Play but is not modeled as a separate FSM transition"
+  ]
+}

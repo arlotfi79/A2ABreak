@@ -1,0 +1,392 @@
+{
+  "section_id": "S039",
+  "title": "S039 6.6.2 Processing Received Options",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S039 6.6.2 Processing Received Options"
+  ],
+  "url_anchor": "#s039-662-processing-received-options",
+  "word_count": 525,
+  "statement_count": 17,
+  "elapsed_seconds": 233.64,
+  "statements": [
+    {
+      "statement_id": "D-S039-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "STABLE is the normal state, where the endpoint knows the feature's value and thinks the other endpoint agrees.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "state_name": "STABLE",
+      "enum_name": "feature_negotiation_state",
+      "semantic_type": "active",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "F.state = STABLE"
+    },
+    {
+      "statement_id": "D-S039-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "An endpoint enters the CHANGING state when it first sends a Change for the feature and returns to STABLE once it receives a corresponding Confirm.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "state_name": "CHANGING",
+      "enum_name": "feature_negotiation_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "F.state = CHANGING"
+    },
+    {
+      "statement_id": "D-S039-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "UNSTABLE indicates that an endpoint in CHANGING state changed its preference list but has not yet transmitted a Change option with the new preference list.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "state_name": "UNSTABLE",
+      "enum_name": "feature_negotiation_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "F.state = UNSTABLE"
+    },
+    {
+      "statement_id": "D-S039-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "app/protocol evt : snd Change L [STABLE -> CHANGING]",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "STABLE",
+      "to_state": "CHANGING",
+      "trigger": "app/protocol event",
+      "pre_cond": "F.state = STABLE",
+      "post_cond": "F.state = CHANGING",
+      "actions": [
+        "send Change L"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "rcv Confirm R : accept value [CHANGING -> STABLE, nonempty Confirm R with valid value]",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "STABLE",
+      "trigger": "receive nonempty Confirm R",
+      "pre_cond": "F.state = CHANGING & O.type = Confirm_R & O.len > 3 & option.value.valid = true",
+      "post_cond": "F.state = STABLE & F.value = new_value",
+      "actions": [
+        "set F.value := new value",
+        "set F.state := STABLE"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S039-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "rcv empty Confirm R : revert to old value [CHANGING -> STABLE]",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "STABLE",
+      "trigger": "receive empty Confirm R",
+      "pre_cond": "F.state = CHANGING & O.type = Confirm_R & O.len <= 3",
+      "post_cond": "F.state = STABLE",
+      "actions": [
+        "revert to old value",
+        "set F.state := STABLE"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S039-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "rcv Change R : calc new value, snd Confirm L [CHANGING -> STABLE, from diagram arc label and pseudocode step 3 which imposes no state guard]",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "STABLE",
+      "trigger": "receive Change R with valid value",
+      "pre_cond": "F.state = CHANGING & O.type = Change_R & option.value.valid = true",
+      "post_cond": "F.state = STABLE",
+      "actions": [
+        "calculate new value",
+        "send Confirm L on a future packet",
+        "set F.state := STABLE"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S039-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "pref list changes [CHANGING -> UNSTABLE]",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "UNSTABLE",
+      "trigger": "preference list changes",
+      "pre_cond": "F.state = CHANGING",
+      "post_cond": "F.state = UNSTABLE",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "snd Change L [UNSTABLE -> CHANGING]",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "UNSTABLE",
+      "to_state": "CHANGING",
+      "trigger": "send Change L (with new preference list)",
+      "pre_cond": "F.state = UNSTABLE",
+      "post_cond": "F.state = CHANGING",
+      "actions": [
+        "send Change L"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "rcv Change R : calc new value, snd Confirm L [STABLE -> STABLE self-loop]",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "STABLE",
+      "to_state": "STABLE",
+      "trigger": "receive Change R with valid value",
+      "pre_cond": "F.state = STABLE & O.type = Change_R & option.value.valid = true",
+      "post_cond": "F.state = STABLE",
+      "actions": [
+        "calculate new value",
+        "send Confirm L on a future packet",
+        "set F.state := STABLE"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S039-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "rcv Confirm R : ignore [STABLE -> STABLE self-loop]",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "STABLE",
+      "to_state": "STABLE",
+      "trigger": "receive Confirm R",
+      "pre_cond": "F.state = STABLE & O.type = Confirm_R",
+      "post_cond": "F.state = STABLE",
+      "actions": [
+        "ignore"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "timeout/rcv non-ack : snd Change L [CHANGING -> CHANGING self-loop]",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "CHANGING",
+      "trigger": "timeout or receive non-ack",
+      "pre_cond": "F.state = CHANGING",
+      "post_cond": "F.state = CHANGING",
+      "actions": [
+        "send Change L"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "rcv Confirm/Change R : ignore [UNSTABLE -> UNSTABLE self-loop]",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "UNSTABLE",
+      "to_state": "UNSTABLE",
+      "trigger": "receive Confirm R or Change R",
+      "pre_cond": "F.state = UNSTABLE & (O.type = Confirm_R | O.type = Change_R)",
+      "post_cond": "F.state = UNSTABLE",
+      "actions": [
+        "ignore"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "If F is unknown and the option was Mandatory, Reset connection and return",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive Mandatory option for unknown feature",
+      "pre_cond": "F.unknown = true & option.mandatory = true",
+      "post_cond": null,
+      "actions": [
+        "reset connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S039-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "If F is unknown and O.type == Change R, Send Empty Confirm L on a future packet",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive Change R for unknown feature (non-Mandatory)",
+      "pre_cond": "F.unknown = true & O.type = Change_R & option.mandatory = false",
+      "post_cond": null,
+      "actions": [
+        "send Empty Confirm L on a future packet"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S039-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "If O.type == Change R, option value is invalid, and option was Mandatory, Reset connection and return",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive Mandatory Change R with invalid value",
+      "pre_cond": "O.type = Change_R & option.value.valid = false & option.mandatory = true",
+      "post_cond": null,
+      "actions": [
+        "reset connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S039-017",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "If F.state == CHANGING and O.type == Confirm R and O.len > 3 and the option's value is invalid, Reset connection and return",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": null,
+      "trigger": "receive nonempty Confirm R with invalid value",
+      "pre_cond": "F.state = CHANGING & O.type = Confirm_R & O.len > 3 & option.value.valid = false",
+      "post_cond": null,
+      "actions": [
+        "reset connection"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "section_id": "S027",
+  "title": "S027 3.1.1 Control Connection Originator (may be PAC or PNS)",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S027 3.1.1 Control Connection Originator (may be PAC or PNS)"
+  ],
+  "url_anchor": "#s027-311-control-connection-originator-may-be-pac-or-pns",
+  "word_count": 330,
+  "statement_count": 5,
+  "elapsed_seconds": 62.38,
+  "statements": [
+    {
+      "statement_id": "N-S027-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If the version of the reply is lower than the version sent in the request, the older (lower) version should be used provided it is supported.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "wait_ctl_reply",
+      "to_state": null,
+      "trigger": "Start-Control-Connection-Reply received with lower supported version",
+      "pre_cond": "protocol.state = wait_ctl_reply & reply.version < request.version & reply.version.supported = true",
+      "post_cond": "connection.version = reply.version",
+      "actions": [
+        "Use the older (lower) version from the reply"
+      ],
+      "modality": "should",
+      "id": "N-S027-001"
+    },
+    {
+      "statement_id": "N-S027-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If the version is earlier and not supported, a Stop-Control-Connection-Request SHOULD be sent to the peer and the originator moves into the wait_stop_reply state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "originator",
+        "peer"
+      ],
+      "from_state": "wait_ctl_reply",
+      "to_state": "wait_stop_reply",
+      "trigger": "Start-Control-Connection-Reply received with unsupported earlier version",
+      "pre_cond": "protocol.state = wait_ctl_reply & reply.version < request.version & reply.version.supported = false",
+      "post_cond": "protocol.state = wait_stop_reply",
+      "actions": [
+        "Send Stop-Control-Connection-Request to peer",
+        "Enter wait_stop_reply state"
+      ],
+      "modality": "should",
+      "id": "N-S027-002"
+    },
+    {
+      "statement_id": "N-S027-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "In the event of a local termination, the originator MUST send a Stop-Control-Connection-Request and enter the wait_stop_reply state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "established",
+      "to_state": "wait_stop_reply",
+      "trigger": "Local termination event",
+      "pre_cond": "protocol.state = established & local_termination = true",
+      "post_cond": "protocol.state = wait_stop_reply",
+      "actions": [
+        "Send Stop-Control-Connection-Request",
+        "Enter wait_stop_reply state"
+      ],
+      "modality": "must",
+      "id": "N-S027-003"
+    },
+    {
+      "statement_id": "N-S027-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If the originator receives a Stop-Control-Connection-Request it SHOULD send a Stop-Control-Connection-Reply and close the TCP connection making sure that the final TCP information has been \"pushed\" properly.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "Receipt of Stop-Control-Connection-Request",
+      "pre_cond": "protocol.state = established",
+      "post_cond": "protocol.state = idle & tcp.connection = closed & tcp.data_pushed = true",
+      "actions": [
+        "Send Stop-Control-Connection-Reply",
+        "Ensure final TCP information is pushed properly",
+        "Close TCP connection"
+      ],
+      "modality": "should",
+      "id": "N-S027-004"
+    },
+    {
+      "statement_id": "N-S027-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If a Stop-Control-Connection-Reply is received, the TCP connection SHOULD be closed and the control connection becomes idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "wait_stop_reply",
+      "to_state": "idle",
+      "trigger": "Receipt of Stop-Control-Connection-Reply",
+      "pre_cond": "protocol.state = wait_stop_reply",
+      "post_cond": "protocol.state = idle & tcp.connection = closed",
+      "actions": [
+        "Close TCP connection",
+        "Transition control connection to idle state"
+      ],
+      "modality": "should",
+      "id": "N-S027-005"
+    }
+  ]
+}

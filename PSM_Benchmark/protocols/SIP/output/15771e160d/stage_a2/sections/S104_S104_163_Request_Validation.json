@@ -1,0 +1,423 @@
+{
+  "section_id": "S104",
+  "title": "S104 16.3 Request Validation",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S104 16.3 Request Validation"
+  ],
+  "url_anchor": "#s104-163-request-validation",
+  "word_count": 617,
+  "statement_count": 17,
+  "elapsed_seconds": 148.38,
+  "statements": [
+    {
+      "statement_id": "N-S104-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Before an element can proxy a request, it MUST verify the message's validity.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_for_proxying",
+      "pre_cond": null,
+      "post_cond": "message.validity = verified",
+      "actions": [
+        "verify_message_validity"
+      ],
+      "modality": "must",
+      "id": "N-S104-001"
+    },
+    {
+      "statement_id": "N-S104-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If any of these checks fail, the element MUST behave as a user agent server (see Section 8.2) and respond with an error code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "validation_check_failed",
+      "pre_cond": "validation_check.result = failed",
+      "post_cond": null,
+      "actions": [
+        "behave_as_user_agent_server",
+        "send_error_response"
+      ],
+      "modality": "must",
+      "id": "N-S104-002"
+    },
+    {
+      "statement_id": "N-S104-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Notice that a proxy is not required to detect merged requests and MUST NOT treat merged requests as an error condition.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "merged_request_received",
+      "pre_cond": "request.merged = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S104-003"
+    },
+    {
+      "statement_id": "N-S104-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The request MUST be well-formed enough to be handled with a server transaction.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": null,
+      "post_cond": "request.well_formed_for_server_transaction = true",
+      "actions": [
+        "check_request_well_formedness"
+      ],
+      "modality": "must",
+      "id": "N-S104-004"
+    },
+    {
+      "statement_id": "N-S104-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "Any components involved in the remainder of these Request Validation steps or the Request Forwarding section MUST be well-formed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": null,
+      "post_cond": "message.validation_and_forwarding_components.well_formed = true",
+      "actions": [
+        "verify_well_formedness_of_validation_and_forwarding_components"
+      ],
+      "modality": "must",
+      "id": "N-S104-005"
+    },
+    {
+      "statement_id": "N-S104-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Any other components, well-formed or not, SHOULD be ignored and remain unchanged when the message is forwarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_forwarded",
+      "pre_cond": "message.component.involved_in_validation = false",
+      "post_cond": "message.other_components.unchanged = true",
+      "actions": [
+        "ignore_unrelated_components",
+        "forward_other_components_unchanged"
+      ],
+      "modality": "should",
+      "id": "N-S104-006"
+    },
+    {
+      "statement_id": "N-S104-7",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "An element MUST NOT refuse to proxy a request because it contains a method or header field it does not know about.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_with_unknown_method_or_header",
+      "pre_cond": "request.method.known = false | request.header_field.known = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S104-007"
+    },
+    {
+      "statement_id": "N-S104-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the Request-URI has a URI whose scheme is not understood by the proxy, the proxy SHOULD reject the request with a 416 (Unsupported URI Scheme) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "URI_scheme_check_failed",
+      "pre_cond": "request.Request-URI.scheme.understood = false",
+      "post_cond": null,
+      "actions": [
+        "send_416_Unsupported_URI_Scheme_response"
+      ],
+      "modality": "should",
+      "id": "N-S104-008"
+    },
+    {
+      "statement_id": "N-S104-9",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the request contains a Max-Forwards header field with a field value of zero (0), the element MUST NOT forward the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Max-Forwards_zero_check",
+      "pre_cond": "request.Max-Forwards = 0",
+      "post_cond": "request.forwarded = false",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S104-009"
+    },
+    {
+      "statement_id": "N-S104-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the request was for OPTIONS, the element MAY act as the final recipient and respond per Section 11.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Max-Forwards_zero_check",
+      "pre_cond": "request.Max-Forwards = 0 & request.method = OPTIONS",
+      "post_cond": null,
+      "actions": [
+        "act_as_final_recipient",
+        "respond_per_section_11"
+      ],
+      "modality": "may",
+      "id": "N-S104-010"
+    },
+    {
+      "statement_id": "N-S104-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Otherwise, the element MUST return a 483 (Too many hops) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Max-Forwards_zero_check",
+      "pre_cond": "request.Max-Forwards = 0 & request.method != OPTIONS",
+      "post_cond": null,
+      "actions": [
+        "send_483_Too_Many_Hops_response"
+      ],
+      "modality": "must",
+      "id": "N-S104-011"
+    },
+    {
+      "statement_id": "N-S104-12",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "An element MAY check for forwarding loops before forwarding a request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_for_forwarding",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "check_for_forwarding_loops"
+      ],
+      "modality": "may",
+      "id": "N-S104-012"
+    },
+    {
+      "statement_id": "N-S104-13",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "To determine if the request has looped, the element MAY perform the branch parameter calculation described in Step 8 of Section 16.6 on this message and compare it to the parameter received in that Via header field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Via_sent-by_matches_proxy_value",
+      "pre_cond": "request.Via.sent-by = proxy.previously_inserted_sent-by",
+      "post_cond": null,
+      "actions": [
+        "calculate_branch_parameter_per_section_16.6_step_8",
+        "compare_branch_to_received_Via_parameter"
+      ],
+      "modality": "may",
+      "id": "N-S104-013"
+    },
+    {
+      "statement_id": "N-S104-14",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a loop is detected, the element MAY return a 482 (Loop Detected) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "loop_detected",
+      "pre_cond": "request.loop_detected = true",
+      "post_cond": null,
+      "actions": [
+        "send_482_Loop_Detected_response"
+      ],
+      "modality": "may",
+      "id": "N-S104-014"
+    },
+    {
+      "statement_id": "N-S104-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the request contains a Proxy-Require header field (Section 20.29) with one or more option-tags this element does not understand, the element MUST return a 420 (Bad Extension) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unknown_Proxy-Require_option_tag_received",
+      "pre_cond": "request.Proxy-Require.present = true & request.Proxy-Require.option_tags.all_understood = false",
+      "post_cond": null,
+      "actions": [
+        "send_420_Bad_Extension_response"
+      ],
+      "modality": "must",
+      "id": "N-S104-015"
+    },
+    {
+      "statement_id": "N-S104-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The response MUST include an Unsupported (Section 20.40) header field listing those option-tags the element did not understand.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unknown_Proxy-Require_option_tag_received",
+      "pre_cond": "request.Proxy-Require.option_tags.all_understood = false",
+      "post_cond": "response.Unsupported_header.present = true",
+      "actions": [
+        "include_Unsupported_header_listing_unknown_option_tags_in_420_response"
+      ],
+      "modality": "must",
+      "id": "N-S104-016"
+    },
+    {
+      "statement_id": "N-S104-17",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If an element requires credentials before forwarding a request, the request MUST be inspected as described in Section 22.3.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_requiring_credentials",
+      "pre_cond": "element.requires_credentials = true",
+      "post_cond": null,
+      "actions": [
+        "inspect_Proxy-Authorization_per_section_22.3"
+      ],
+      "modality": "must",
+      "id": "N-S104-017"
+    }
+  ]
+}

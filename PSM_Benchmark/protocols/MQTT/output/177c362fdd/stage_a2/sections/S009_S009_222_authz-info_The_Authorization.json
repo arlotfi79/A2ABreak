@@ -1,0 +1,160 @@
+{
+  "section_id": "S009",
+  "title": "S009 2.2.2 authz-info: The Authorization Information Topic",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S009 2.2.2 authz-info: The Authorization Information Topic"
+  ],
+  "url_anchor": "#s009-222-authz-info-the-authorization-information-topic",
+  "word_count": 390,
+  "statement_count": 6,
+  "elapsed_seconds": 75.05,
+  "statements": [
+    {
+      "statement_id": "N-S009-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The \"authz-info\" topic MUST only be published (i.e., the Clients are not allowed to subscribe to it).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SUBSCRIBE to authz-info topic",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "reject SUBSCRIBE requests targeting authz-info topic"
+      ],
+      "modality": "must",
+      "id": "N-S009-001"
+    },
+    {
+      "statement_id": "N-S009-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST verify the validity of the token (i.e., through local validation or introspection if the token is a reference), as described in Section 2.2.5.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH received on authz-info topic",
+      "pre_cond": null,
+      "post_cond": "token.validity_checked = true",
+      "actions": [
+        "validate token via local validation or introspection"
+      ],
+      "modality": "must",
+      "id": "N-S009-002"
+    },
+    {
+      "statement_id": "N-S009-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the token is not valid, the Broker MUST discard the token.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token validation result: invalid",
+      "pre_cond": "token.valid = false",
+      "post_cond": "token.discarded = true",
+      "actions": [
+        "discard token"
+      ],
+      "modality": "must",
+      "id": "N-S009-003"
+    },
+    {
+      "statement_id": "N-S009-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the QoS level is equal to 0, and the token is not valid, or if the claims cannot be obtained in the case of an introspected token, the Broker MUST send a DISCONNECT packet with reason code 0x87 (Not authorized).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "connected",
+      "to_state": "disconnected",
+      "trigger": "PUBLISH received on authz-info & QoS=0 & (token.valid=false | token.claims_obtainable=false)",
+      "pre_cond": "publish.qos = 0 & (token.valid = false | token.claims_obtainable = false)",
+      "post_cond": "connection.state = disconnected",
+      "actions": [
+        "send DISCONNECT with reason code 0x87"
+      ],
+      "modality": "must",
+      "id": "N-S009-004"
+    },
+    {
+      "statement_id": "N-S009-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the PUBLISH Payload does not parse to a token, the Broker MUST send a DISCONNECT with reason code 0x99 (Payload format invalid).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "connected",
+      "to_state": "disconnected",
+      "trigger": "PUBLISH received on authz-info & payload.parse_error=true & QoS=0",
+      "pre_cond": "publish.payload.parseable = false & publish.qos = 0",
+      "post_cond": "connection.state = disconnected",
+      "actions": [
+        "send DISCONNECT with reason code 0x99"
+      ],
+      "modality": "must",
+      "id": "N-S009-005"
+    },
+    {
+      "statement_id": "N-S009-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the QoS level of the PUBLISH packet is greater than or equal to 1, and the token is not valid, or the claims cannot be obtained in the case of an introspected token, the Broker MUST send reason code 0x87 (Not authorized) in the PUBACK or PUBREC.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH received on authz-info & QoS>=1 & (token.valid=false | token.claims_obtainable=false)",
+      "pre_cond": "publish.qos >= 1 & (token.valid = false | token.claims_obtainable = false)",
+      "post_cond": null,
+      "actions": [
+        "send PUBACK or PUBREC with reason code 0x87"
+      ],
+      "modality": "must",
+      "id": "N-S009-006"
+    }
+  ]
+}

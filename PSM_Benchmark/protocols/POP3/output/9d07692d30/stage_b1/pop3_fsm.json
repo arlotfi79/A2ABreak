@@ -1,0 +1,518 @@
+{
+  "stage": "pop3_fsm",
+  "states": [
+    {
+      "state_name": "WaitForConnection",
+      "semantic_type": "initial",
+      "actor": "endpoint",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "protocol.state = WaitForConnection",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S010-001",
+        "D-S010-006"
+      ]
+    },
+    {
+      "state_name": "AUTHORIZATION",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = AUTHORIZATION",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S003-001",
+        "D-S004-001",
+        "D-S007-002",
+        "D-S009-001",
+        "D-S011-001"
+      ]
+    },
+    {
+      "state_name": "TRANSACTION",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TRANSACTION",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S003-002",
+        "D-S004-002",
+        "D-S005-001",
+        "D-S007-001",
+        "D-S009-002"
+      ]
+    },
+    {
+      "state_name": "UPDATE",
+      "semantic_type": "closing",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = UPDATE",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S003-003",
+        "D-S006-001",
+        "D-S007-003"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "WaitForConnection",
+      "to_state": "AUTHORIZATION",
+      "trigger": "receive connection",
+      "guard": "protocol.state = WaitForConnection",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send greeting"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S010-002",
+        "D-S003-004",
+        "D-S004-003",
+        "N-S007-022"
+      ]
+    },
+    {
+      "from_state": "AUTHORIZATION",
+      "to_state": "TRANSACTION",
+      "trigger": "cond auth_success",
+      "guard": "protocol.state = AUTHORIZATION & authentication.result = success & maildrop.lock_acquired = true",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "acquire maildrop lock",
+        "assign message numbers",
+        "send positive response"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S003-005",
+        "D-S004-004"
+      ]
+    },
+    {
+      "from_state": "AUTHORIZATION",
+      "to_state": "TRANSACTION",
+      "trigger": "receive APOP_success",
+      "guard": "protocol.state = AUTHORIZATION & apop.digest = correct",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "send +OK response",
+        "enter TRANSACTION state"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S007-011",
+        "N-S007-020"
+      ]
+    },
+    {
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "receive APOP_failure",
+      "guard": "protocol.state = AUTHORIZATION & apop.digest != correct",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "send -ERR response"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S007-012"
+      ]
+    },
+    {
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "receive USER",
+      "guard": "protocol.state = AUTHORIZATION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "may",
+      "actions": [
+        "process USER command"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S009-003",
+        "N-S007-011",
+        "N-S007-013",
+        "N-S007-014",
+        "N-S007-016"
+      ]
+    },
+    {
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "cond auth_rejected_lock",
+      "guard": "protocol.state = AUTHORIZATION & lock.acquired = true",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "release maildrop lock",
+        "send -ERR response"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S004-004"
+      ]
+    },
+    {
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "cond auth_failed_retry",
+      "guard": "protocol.state = AUTHORIZATION & connection.open = true",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "may",
+      "actions": [
+        "issue new authentication command"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S004-006"
+      ]
+    },
+    {
+      "from_state": "AUTHORIZATION",
+      "to_state": "WaitForConnection",
+      "trigger": "receive QUIT",
+      "guard": "protocol.state = AUTHORIZATION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send +OK response",
+        "close TCP connection"
+      ],
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S004-007",
+        "D-S006-003",
+        "D-S010-005"
+      ]
+    },
+    {
+      "from_state": "AUTHORIZATION",
+      "to_state": "WaitForConnection",
+      "trigger": "cond auth_failure_close",
+      "guard": "protocol.state = AUTHORIZATION & authentication.result = failure",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "actions": [
+        "release lock",
+        "send -ERR response",
+        "close connection"
+      ],
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-S004-005",
+        "N-S004-005"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "UPDATE",
+      "trigger": "receive QUIT",
+      "guard": "protocol.state = TRANSACTION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "enter UPDATE state"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S003-006",
+        "D-S005-003",
+        "D-S006-002",
+        "D-S008-001"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "receive STAT",
+      "guard": "protocol.state = TRANSACTION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S009-006"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "receive LIST",
+      "guard": "protocol.state = TRANSACTION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S009-007",
+        "N-S005-012"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "receive RETR",
+      "guard": "protocol.state = TRANSACTION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S009-008"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "receive DELE",
+      "guard": "protocol.state = TRANSACTION & message.deleted = false",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "mark message as deleted",
+        "reply +OK"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S005-010",
+        "D-S009-009"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "receive NOOP",
+      "guard": "protocol.state = TRANSACTION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S009-010"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "receive RSET",
+      "guard": "protocol.state = TRANSACTION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "unmark all deleted messages",
+        "reply +OK"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S005-011",
+        "D-S009-011"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "receive TOP",
+      "guard": "protocol.state = TRANSACTION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "may",
+      "actions": [
+        "send headers and body lines"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S007-004",
+        "D-S009-014"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "receive UIDL",
+      "guard": "protocol.state = TRANSACTION",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "may",
+      "actions": [
+        "send unique-id listing"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S007-005",
+        "D-S009-015"
+      ]
+    },
+    {
+      "from_state": "UPDATE",
+      "to_state": "WaitForConnection",
+      "trigger": "cond update_complete",
+      "guard": "protocol.state = UPDATE",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "remove deleted messages",
+        "release maildrop lock",
+        "send goodbye response",
+        "close TCP connection"
+      ],
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S003-007",
+        "D-S006-005",
+        "D-S010-005"
+      ]
+    },
+    {
+      "from_state": "TRANSACTION",
+      "to_state": "WaitForConnection",
+      "trigger": "cond abnormal_termination",
+      "guard": "protocol.state = TRANSACTION & session.quit_received = false",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "retain all messages",
+        "close TCP connection"
+      ],
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "N-S008-007",
+        "N-S006-001"
+      ]
+    }
+  ],
+  "inter_stage": {
+    "entry_from_previous": [],
+    "exit_to_next": []
+  },
+  "discarded_states": [
+    {
+      "state_name": "wait for next connection",
+      "reason": "Merged with WaitForConnection as obvious alias for the same server idle state",
+      "source_ids": [
+        "D-S010-006"
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "N-S003-002",
+      "description": "invalid_command_received: server must send -ERR response; applies to any state with no state change, cannot be placed as a specific transition"
+    },
+    {
+      "id": "N-S003-003",
+      "description": "command_received_in_incorrect_state: server must send -ERR response; applies to any state with no state change"
+    },
+    {
+      "id": "N-S006-002",
+      "description": "processing_message_deletion in UPDATE: server must remove only individually marked messages; behavioral constraint within UPDATE state"
+    },
+    {
+      "id": "N-S007-007",
+      "description": "session_end: server must maintain unique-id persistence across sessions; behavioral invariant not tied to a specific transition"
+    },
+    {
+      "id": "N-S016-004",
+      "description": "PASS_command_issued must be immediately preceded by successful USER command; sequencing constraint within AUTHORIZATION"
+    },
+    {
+      "id": "N-S013-001",
+      "description": "authentication_command_received: server should determine permitted auth method per mailbox; policy constraint within AUTHORIZATION"
+    }
+  ],
+  "gaps": [
+    {
+      "description": "Inactivity autologout timer (D-S003-008): server should close TCP connection without removing messages from any active state; from_state and to_state both unspecified in source, preventing explicit transition modeling from AUTHORIZATION and TRANSACTION to session termination"
+    }
+  ]
+}

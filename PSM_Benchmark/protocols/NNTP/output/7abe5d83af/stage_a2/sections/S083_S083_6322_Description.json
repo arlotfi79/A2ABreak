@@ -1,0 +1,255 @@
+{
+  "section_id": "S083",
+  "title": "S083 6.3.2.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S083 6.3.2.2 Description"
+  ],
+  "url_anchor": "#s083-6322-description",
+  "word_count": 424,
+  "statement_count": 10,
+  "elapsed_seconds": 77.82,
+  "statements": [
+    {
+      "statement_id": "N-S083-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server desires a copy of that article, a 335 response MUST be returned, instructing the client to send the entire article.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "IHAVE_COMMAND_RECEIVED",
+      "to_state": "WAITING_FOR_ARTICLE",
+      "trigger": "server_desires_article",
+      "pre_cond": "server.desires_article = true",
+      "post_cond": "response.code = 335",
+      "actions": [
+        "send 335 response"
+      ],
+      "modality": "must",
+      "id": "N-S083-001"
+    },
+    {
+      "statement_id": "N-S083-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server does not want the article (if, for example, the server already has a copy of it), a 435 response MUST be returned, indicating that the article is not wanted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IHAVE_COMMAND_RECEIVED",
+      "to_state": null,
+      "trigger": "server_does_not_want_article",
+      "pre_cond": "server.wants_article = false",
+      "post_cond": "response.code = 435",
+      "actions": [
+        "send 435 response"
+      ],
+      "modality": "must",
+      "id": "N-S083-002"
+    },
+    {
+      "statement_id": "N-S083-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Finally, if the article isn't wanted immediately but the client should retry later if possible (if, for example, another client is in the process of sending the same article to the server), a 436 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "IHAVE_COMMAND_RECEIVED",
+      "to_state": null,
+      "trigger": "article_not_immediately_wanted_retry_later",
+      "pre_cond": "server.wants_article_now = false & server.retry_later = true",
+      "post_cond": "response.code = 436",
+      "actions": [
+        "send 436 response"
+      ],
+      "modality": "must",
+      "id": "N-S083-003"
+    },
+    {
+      "statement_id": "N-S083-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "If transmission of the article is requested, the client MUST send the entire article, including headers and body, to the server as a multi-line data block (see Section 3.1.1).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "ARTICLE_TRANSFER_REQUESTED",
+      "to_state": "WAITING_FOR_TRANSFER_RESPONSE",
+      "trigger": "335_response_received",
+      "pre_cond": "server.response.code = 335",
+      "post_cond": "client.sent_article = true",
+      "actions": [
+        "send entire article including headers and body as multi-line data block"
+      ],
+      "modality": "must",
+      "id": "N-S083-004"
+    },
+    {
+      "statement_id": "N-S083-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST return a 235 response, indicating that the article was successfully transferred; a 436 response, indicating that the transfer failed but should be tried again later; or a 437 response, indicating that the article was rejected.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "server"
+      ],
+      "from_state": "WAITING_FOR_ARTICLE",
+      "to_state": null,
+      "trigger": "article_transmission_complete",
+      "pre_cond": "client.sent_article = true",
+      "post_cond": "response.code = 235 | response.code = 436 | response.code = 437",
+      "actions": [
+        "send 235 response on success",
+        "send 436 response on transient failure",
+        "send 437 response on rejection"
+      ],
+      "modality": "must",
+      "id": "N-S083-005"
+    },
+    {
+      "statement_id": "N-S083-6",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "It SHOULD NOT be used when the client is a personal news-reading program, since use of this command indicates that the article has already been posted at another site and is simply being forwarded from another host.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S083-006"
+    },
+    {
+      "statement_id": "N-S083-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "However, despite this, the server MAY elect not to post or forward the article if, after further examination of the article, it deems it inappropriate to do so.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S083-007"
+    },
+    {
+      "statement_id": "N-S083-8",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "The client SHOULD NOT assume that the article has been successfully transferred unless it receives an affirmative response from the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "WAITING_FOR_TRANSFER_RESPONSE",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "client.received_affirmative_response = false",
+      "post_cond": "client.transfer_assumed_successful = false",
+      "actions": [
+        "do not assume successful transfer without affirmative server response"
+      ],
+      "modality": "should",
+      "id": "N-S083-008"
+    },
+    {
+      "statement_id": "N-S083-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "A lack of response (such as a dropped network connection or a network timeout) SHOULD be treated the same as a 436 response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "client"
+      ],
+      "from_state": "WAITING_FOR_TRANSFER_RESPONSE",
+      "to_state": null,
+      "trigger": "connection_dropped | network_timeout",
+      "pre_cond": "client.waiting_for_response = true & (connection.dropped = true | timer.timeout = true)",
+      "post_cond": "client.response.treated_as = 436",
+      "actions": [
+        "treat lack of response as 436 response"
+      ],
+      "modality": "should",
+      "id": "N-S083-009"
+    },
+    {
+      "statement_id": "N-S083-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "an NNTP server MAY acknowledge the successful transfer of the article (with a 235 response) but later silently discard it.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S083",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S083-010"
+    }
+  ]
+}

@@ -1,0 +1,374 @@
+{
+  "section_id": "3.3",
+  "title": "3.3. Operation Semantics",
+  "depth": 3,
+  "parent_path": [
+    "3. A2A Protocol Operations",
+    "3.3. Operation Semantics"
+  ],
+  "url_anchor": "#33-operation-semantics",
+  "word_count": 1050,
+  "statement_count": 16,
+  "elapsed_seconds": 197.76,
+  "statements": [
+    {
+      "statement_id": "D-3-3-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "All error responses in the A2A protocol, regardless of binding, MUST convey the following information: Error Code: A machine-readable identifier for the error type (e.g., string code, numeric code, or protocol-specific status)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3.2",
+      "object_name": "ErrorPayload",
+      "field_name": "error_code",
+      "field_type": "string | numeric | protocol-specific status",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-3-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "All error responses in the A2A protocol, regardless of binding, MUST convey the following information: Error Message: A human-readable description of the error",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3.2",
+      "object_name": "ErrorPayload",
+      "field_name": "error_message",
+      "field_type": "string",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-3-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Error Details (optional): An array of objects providing additional structured information about the error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3.2",
+      "object_name": "ErrorPayload",
+      "field_name": "error_details",
+      "field_type": "array of objects",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-3-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Each object in the array MUST include a @type key that identifies the object's type (using ProtoJSON Any representation).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3.2",
+      "object_name": "ErrorDetail",
+      "field_name": "@type",
+      "field_type": "string",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-3-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "termination",
+      "description": "A duplicate cancellation request MAY return TaskNotFoundError if the task has already been canceled and purged.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "3.3.1",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TASK_STATE_CANCELED",
+      "to_state": null,
+      "trigger": "cancel_task",
+      "pre_cond": "task.state = TASK_STATE_CANCELED & task.purged = true",
+      "post_cond": "TaskNotFoundError.returned = true",
+      "actions": [
+        "Server returns TaskNotFoundError in response to duplicate cancellation request on already-purged task"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-3-3-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Servers MUST reject requests with invalid or missing authentication credentials",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "3.3.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "!request.credentials.valid | !request.credentials.present",
+      "post_cond": "authentication_error.returned = true",
+      "actions": [
+        "Server rejects the request",
+        "Server returns authentication error response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-3-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Servers MUST return an authorization error when the authenticated client lacks required permissions",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "3.3.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "client.authenticated = true & !client.has_required_permissions",
+      "post_cond": "authorization_error.returned = true",
+      "actions": [
+        "Server returns authorization error response",
+        "Server MUST NOT reveal existence of resources the client is not authorized to access"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-3-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers MUST validate all input parameters before processing",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "3.3.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "!request.input_parameters.valid",
+      "post_cond": "validation_error.returned = true",
+      "actions": [
+        "Server validates all input parameters before processing",
+        "Server returns validation error response for invalid parameters"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-3-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers MUST return a not found error when a requested resource does not exist or is not accessible to the authenticated client. Servers SHOULD NOT distinguish between 'does not exist' and 'not authorized' to prevent information leakage.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "3.3.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "!resource.exists | !resource.accessible_to_client",
+      "post_cond": "resource_not_found_error.returned = true",
+      "actions": [
+        "Server returns not found error without distinguishing between non-existent and unauthorized resource"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-3-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "termination",
+      "description": "TaskNotCancelableError: An attempt was made to cancel a task that is not in a cancelable state (e.g., it has already reached a terminal state like completed, failed, or canceled).",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "3.3.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TASK_STATE_TERMINAL",
+      "to_state": null,
+      "trigger": "cancel_task",
+      "pre_cond": "task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED",
+      "post_cond": "TaskNotCancelableError.returned = true",
+      "actions": [
+        "Server returns TaskNotCancelableError"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-3-3-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "If AgentCard.capabilities.pushNotifications is false or not present, operations related to push notification configuration (Create, Get, List, Delete) MUST return PushNotificationNotSupportedError.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "3.3.4",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_config_operation",
+      "pre_cond": "AgentCard.capabilities.pushNotifications = false | !AgentCard.capabilities.pushNotifications.present",
+      "post_cond": "PushNotificationNotSupportedError.returned = true",
+      "actions": [
+        "Server returns PushNotificationNotSupportedError"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-3-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "If AgentCard.capabilities.streaming is false or not present, attempts to use SendStreamingMessage MUST return UnsupportedOperationError.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "3.3.4",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_streaming_message",
+      "pre_cond": "AgentCard.capabilities.streaming = false | !AgentCard.capabilities.streaming.present",
+      "post_cond": "UnsupportedOperationError.returned = true",
+      "actions": [
+        "Server returns UnsupportedOperationError for SendStreamingMessage"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-3-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "If AgentCard.capabilities.streaming is false or not present, attempts to use SubscribeToTask operations MUST return UnsupportedOperationError.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "3.3.4",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "subscribe_to_task",
+      "pre_cond": "AgentCard.capabilities.streaming = false | !AgentCard.capabilities.streaming.present",
+      "post_cond": "UnsupportedOperationError.returned = true",
+      "actions": [
+        "Server returns UnsupportedOperationError for SubscribeToTask"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-3-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "If AgentCard.capabilities.extendedAgentCard is false or not present, attempts to call the Get Extended Agent Card operation MUST return UnsupportedOperationError.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "3.3.4",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card",
+      "pre_cond": "AgentCard.capabilities.extendedAgentCard = false | !AgentCard.capabilities.extendedAgentCard.present",
+      "post_cond": "UnsupportedOperationError.returned = true",
+      "actions": [
+        "Server returns UnsupportedOperationError"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-3-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "If the agent declares support but has not configured an extended card, it MUST return ExtendedAgentCardNotConfiguredError.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "3.3.4",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card",
+      "pre_cond": "AgentCard.capabilities.extendedAgentCard = true & !agent.extended_card.configured",
+      "post_cond": "ExtendedAgentCardNotConfiguredError.returned = true",
+      "actions": [
+        "Server returns ExtendedAgentCardNotConfiguredError"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-3-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "When a server requests use of an extension marked as required: true in the Agent Card but the client does not declare support for it, the agent MUST return ExtensionSupportRequiredError.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.3.4",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "extension.required = true & !client.declared_extension_support",
+      "post_cond": "ExtensionSupportRequiredError.returned = true",
+      "actions": [
+        "Server returns ExtensionSupportRequiredError"
+      ],
+      "modality": "must"
+    }
+  ]
+}

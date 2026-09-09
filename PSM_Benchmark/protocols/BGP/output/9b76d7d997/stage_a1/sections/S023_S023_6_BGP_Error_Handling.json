@@ -1,0 +1,87 @@
+{
+  "section_id": "S023",
+  "title": "S023 6. BGP Error Handling.",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S023 6. BGP Error Handling."
+  ],
+  "url_anchor": "#s023-6-bgp-error-handling",
+  "word_count": 193,
+  "statement_count": 3,
+  "elapsed_seconds": 19.21,
+  "statements": [
+    {
+      "statement_id": "D-S023-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "When any of the conditions described here are detected, a NOTIFICATION message, with the indicated Error Code, Error Subcode, and Data fields, is sent, and the BGP connection is closed (unless it is explicitly stated that no NOTIFICATION message is to be sent and the BGP connection is not to be closed).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S023",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "error_detected",
+      "pre_cond": null,
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "send NOTIFICATION message with Error Code, Error Subcode, and Data fields",
+        "close BGP connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S023-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "The phrase 'the BGP connection is closed' means the TCP connection has been closed, the associated Adj-RIB-In has been cleared, and all resources for that BGP connection have been deallocated. Entries in the Loc-RIB associated with the remote peer are marked as invalid. The local system recalculates its best routes for the destinations of the routes marked as invalid. Before the invalid routes are deleted from the system, it advertises, to its peers, either withdraws for the routes marked as invalid, or the new best routes before the invalid routes are deleted from the system.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S023",
+      "actors": [
+        "bgp",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "BGP_connection_closed",
+      "pre_cond": null,
+      "post_cond": "connection.tcp_closed = true & connection.adj_rib_in_cleared = true & connection.resources_deallocated = true",
+      "actions": [
+        "close TCP connection",
+        "clear Adj-RIB-In",
+        "deallocate all resources for the BGP connection",
+        "mark Loc-RIB entries associated with remote peer as invalid",
+        "recalculate best routes for destinations of invalid routes",
+        "advertise withdrawals or new best routes to peers before deleting invalid routes"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S023-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "If no Error Subcode is specified, then a zero MUST be used. Unless specified explicitly, the Data field of the NOTIFICATION message that is sent to indicate an error is empty.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S023",
+      "object_name": "NOTIFICATION",
+      "field_name": "Error Subcode",
+      "field_type": "field",
+      "required": true,
+      "allowed_values": [
+        "0 when no specific subcode is defined"
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

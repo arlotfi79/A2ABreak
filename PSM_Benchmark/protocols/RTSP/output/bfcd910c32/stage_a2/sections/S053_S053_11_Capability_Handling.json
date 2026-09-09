@@ -1,0 +1,111 @@
+{
+  "section_id": "S053",
+  "title": "S053 11. Capability Handling",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S053 11. Capability Handling"
+  ],
+  "url_anchor": "#s053-11-capability-handling",
+  "word_count": 719,
+  "statement_count": 4,
+  "elapsed_seconds": 68.95,
+  "statements": [
+    {
+      "statement_id": "1-S053-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The OPTIONS response MUST contain a Public header that declares all methods supported for the indicated resource.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPTIONS_request_received",
+      "pre_cond": null,
+      "post_cond": "response.has_Public_header = true",
+      "actions": [
+        "include_Public_header_in_OPTIONS_response_listing_all_supported_methods"
+      ],
+      "modality": "must",
+      "id": "N-S053-001"
+    },
+    {
+      "statement_id": "2-S053-2",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Proxies are required to add this header whenever the Supported header is present, but proxies may also add it independently of the requester.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S053",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_with_Supported_header_forwarded",
+      "pre_cond": "message.has_Supported_header = true",
+      "post_cond": "message.has_Proxy_Supported_header = true",
+      "actions": [
+        "add_Proxy_Supported_header_to_forwarded_message"
+      ],
+      "modality": "must",
+      "id": "N-S053-002"
+    },
+    {
+      "statement_id": "3-S053-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Proxies are required to add this header whenever the Supported header is present, but proxies may also add it independently of the requester.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S053",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S053-003"
+    },
+    {
+      "statement_id": "4-S053-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "Therefore, the endpoint receiving a request containing a Require MUST negatively acknowledge any feature that it does not understand and not perform the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_with_Require_header_received",
+      "pre_cond": "request.has_Require_header = true & endpoint.supports(request.Require.feature) = false",
+      "post_cond": "request_performed = false & response.status_code = 551 & response.has_Unsupported_header = true",
+      "actions": [
+        "send_551_Option_Not_Supported_response",
+        "include_Unsupported_header_listing_unsupported_features",
+        "do_not_perform_request"
+      ],
+      "modality": "must",
+      "id": "N-S053-004"
+    }
+  ]
+}

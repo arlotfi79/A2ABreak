@@ -1,0 +1,477 @@
+{
+ "proto": "DHCP",
+ "system": "ours",
+ "gt_states": 8,
+ "gt_transitions": 19,
+ "cand_states": 10,
+ "cand_transitions": 30,
+ "states_matched": 8,
+ "states_P": 0.8,
+ "states_R": 1.0,
+ "states_F1": 0.8889,
+ "trans_matched": 15,
+ "trans_P": 0.5,
+ "trans_R": 0.7895,
+ "trans_F1": 0.6122,
+ "unmatched_classes": {
+  "real_behavior_not_in_gt": 12,
+  "wrong_or_unsupported": 3
+ },
+ "tokens_in": 3275,
+ "tokens_out": 3703,
+ "cost": 0.10895,
+ "seconds": 44.7,
+ "raw": {
+  "state_matches": [
+   {
+    "gt": "INIT",
+    "candidate": "INIT",
+    "confidence": 1.0,
+    "reason": "Same name, same initial state, same protocol situation."
+   },
+   {
+    "gt": "INIT-REBOOT",
+    "candidate": "INIT_REBOOT",
+    "confidence": 1.0,
+    "reason": "Same state, just hyphen vs underscore naming difference."
+   },
+   {
+    "gt": "REBOOTING",
+    "candidate": "REBOOTING",
+    "confidence": 1.0,
+    "reason": "Identical state name and meaning."
+   },
+   {
+    "gt": "SELECTING",
+    "candidate": "SELECTING",
+    "confidence": 1.0,
+    "reason": "Identical state name and meaning."
+   },
+   {
+    "gt": "REQUESTING",
+    "candidate": "REQUESTING",
+    "confidence": 1.0,
+    "reason": "Identical state name and meaning."
+   },
+   {
+    "gt": "BOUND",
+    "candidate": "BOUND",
+    "confidence": 1.0,
+    "reason": "Identical state name and meaning."
+   },
+   {
+    "gt": "RENEWING",
+    "candidate": "RENEWING",
+    "confidence": 1.0,
+    "reason": "Identical state name and meaning."
+   },
+   {
+    "gt": "REBINDING",
+    "candidate": "REBINDING",
+    "confidence": 1.0,
+    "reason": "Identical state name and meaning."
+   }
+  ],
+  "transition_matches": [
+   {
+    "gt_index": 0,
+    "gt": {
+     "from": "INIT",
+     "event": "",
+     "action": "Send DHCPDISCOVER",
+     "to": "SELECTING"
+    },
+    "candidate_index": 0,
+    "candidate": {
+     "from": "INIT",
+     "event": "send DHCPDISCOVER",
+     "action": "broadcast DHCPDISCOVER",
+     "to": "SELECTING"
+    },
+    "confidence": 1.0,
+    "reason": "Both transition from INIT to SELECTING by sending DHCPDISCOVER."
+   },
+   {
+    "gt_index": 1,
+    "gt": {
+     "from": "SELECTING",
+     "event": "Select offer",
+     "action": "Send DHCPREQUEST",
+     "to": "REQUESTING"
+    },
+    "candidate_index": 10,
+    "candidate": {
+     "from": "SELECTING",
+     "event": "select offer",
+     "action": "select server from offers; send DHCPREQUEST",
+     "to": "REQUESTING"
+    },
+    "confidence": 1.0,
+    "reason": "Both select an offer and send DHCPREQUEST, transitioning SELECTING->REQUESTING."
+   },
+   {
+    "gt_index": 2,
+    "gt": {
+     "from": "SELECTING",
+     "event": "receive DHCPOFFER",
+     "action": "Collect replies",
+     "to": "SELECTING"
+    },
+    "candidate_index": 8,
+    "candidate": {
+     "from": "SELECTING",
+     "event": "receive DHCPOFFER",
+     "action": "collect replies",
+     "to": "SELECTING"
+    },
+    "confidence": 1.0,
+    "reason": "Identical: receive DHCPOFFER, collect replies, stay in SELECTING."
+   },
+   {
+    "gt_index": 3,
+    "gt": {
+     "from": "REQUESTING",
+     "event": "receive DHCPACK",
+     "action": "Record lease Set timers",
+     "to": "BOUND"
+    },
+    "candidate_index": 17,
+    "candidate": {
+     "from": "REQUESTING",
+     "event": "receive DHCPACK",
+     "action": "record lease; set timer T1; set timer T2",
+     "to": "BOUND"
+    },
+    "confidence": 1.0,
+    "reason": "Both receive DHCPACK in REQUESTING, record lease, set timers, go to BOUND."
+   },
+   {
+    "gt_index": 4,
+    "gt": {
+     "from": "REQUESTING",
+     "event": "receive DHCPACK (not accept)",
+     "action": "Send DHCPDECLINE",
+     "to": "INIT"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.3,
+    "reason": "Candidate index 12 (SELECTING receive DHCPACK unacceptable -> DHCPDECLINE -> INIT) is from SELECTING not REQUESTING, so it doesn't match the source state."
+   },
+   {
+    "gt_index": 5,
+    "gt": {
+     "from": "REQUESTING",
+     "event": "receive DHCPNAK",
+     "action": "Discard offer",
+     "to": "INIT"
+    },
+    "candidate_index": 15,
+    "candidate": {
+     "from": "REQUESTING",
+     "event": "receive DHCPNAK",
+     "action": "discard offer; restart configuration",
+     "to": "INIT"
+    },
+    "confidence": 1.0,
+    "reason": "Both receive DHCPNAK in REQUESTING, discard offer, go to INIT."
+   },
+   {
+    "gt_index": 6,
+    "gt": {
+     "from": "REQUESTING",
+     "event": "receive DHCPOFFER",
+     "action": "Discard",
+     "to": "REQUESTING"
+    },
+    "candidate_index": 13,
+    "candidate": {
+     "from": "REQUESTING",
+     "event": "receive DHCPOFFER",
+     "action": "discard",
+     "to": "REQUESTING"
+    },
+    "confidence": 1.0,
+    "reason": "Identical: discard DHCPOFFER while in REQUESTING."
+   },
+   {
+    "gt_index": 7,
+    "gt": {
+     "from": "INIT-REBOOT",
+     "event": "",
+     "action": "Send DHCPREQUEST",
+     "to": "REBOOTING"
+    },
+    "candidate_index": 3,
+    "candidate": {
+     "from": "INIT_REBOOT",
+     "event": "send DHCPREQUEST",
+     "action": "send DHCPREQUEST",
+     "to": "REBOOTING"
+    },
+    "confidence": 1.0,
+    "reason": "Both transition from INIT-REBOOT to REBOOTING by sending DHCPREQUEST."
+   },
+   {
+    "gt_index": 8,
+    "gt": {
+     "from": "REBOOTING",
+     "event": "receive DHCPACK",
+     "action": "Record lease Set timers T1 T2",
+     "to": "BOUND"
+    },
+    "candidate_index": 7,
+    "candidate": {
+     "from": "REBOOTING",
+     "event": "receive DHCPACK",
+     "action": "record lease; set timer T1; set timer T2",
+     "to": "BOUND"
+    },
+    "confidence": 1.0,
+    "reason": "Both receive DHCPACK in REBOOTING, record lease, set timers, go to BOUND."
+   },
+   {
+    "gt_index": 9,
+    "gt": {
+     "from": "REBOOTING",
+     "event": "receive DHCPNAK",
+     "action": "Restart",
+     "to": "INIT"
+    },
+    "candidate_index": 6,
+    "candidate": {
+     "from": "REBOOTING",
+     "event": "receive DHCPNAK",
+     "action": "restart",
+     "to": "INIT"
+    },
+    "confidence": 1.0,
+    "reason": "Identical: receive DHCPNAK in REBOOTING, restart, go to INIT."
+   },
+   {
+    "gt_index": 10,
+    "gt": {
+     "from": "BOUND",
+     "event": "timer T1 expires",
+     "action": "Send DHCPREQUEST",
+     "to": "RENEWING"
+    },
+    "candidate_index": 19,
+    "candidate": {
+     "from": "BOUND",
+     "event": "timeout T1 expires",
+     "action": "send DHCPREQUEST to server",
+     "to": "RENEWING"
+    },
+    "confidence": 1.0,
+    "reason": "Both: T1 expires in BOUND, send DHCPREQUEST, go to RENEWING."
+   },
+   {
+    "gt_index": 11,
+    "gt": {
+     "from": "BOUND",
+     "event": "receive DHCPOFFER",
+     "action": "Discard",
+     "to": "BOUND"
+    },
+    "candidate_index": 18,
+    "candidate": {
+     "from": "BOUND",
+     "event": "receive unsolicited msg",
+     "action": "discard",
+     "to": "BOUND"
+    },
+    "confidence": 0.6,
+    "reason": "Candidate uses 'unsolicited msg' which encompasses DHCPOFFER, DHCPACK, DHCPNAK. This is a generalized version covering GT transitions 11, 12, and 13. Matching to DHCPOFFER as the primary unsolicited message case."
+   },
+   {
+    "gt_index": 12,
+    "gt": {
+     "from": "BOUND",
+     "event": "receive DHCPACK",
+     "action": "Discard",
+     "to": "BOUND"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.4,
+    "reason": "Candidate index 18 (unsolicited msg) could cover this but already matched to GT index 11."
+   },
+   {
+    "gt_index": 13,
+    "gt": {
+     "from": "BOUND",
+     "event": "receive DHCPNAK",
+     "action": "Discard",
+     "to": "BOUND"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.4,
+    "reason": "Candidate index 18 (unsolicited msg) could cover this but already matched to GT index 11."
+   },
+   {
+    "gt_index": 14,
+    "gt": {
+     "from": "RENEWING",
+     "event": "Receive DHCPACK",
+     "action": "Record lease; Set timers T1, T2",
+     "to": "BOUND"
+    },
+    "candidate_index": 23,
+    "candidate": {
+     "from": "RENEWING",
+     "event": "receive DHCPACK",
+     "action": "record lease; set timer T1; set timer T2",
+     "to": "BOUND"
+    },
+    "confidence": 1.0,
+    "reason": "Identical: receive DHCPACK in RENEWING, record lease, set timers, go to BOUND."
+   },
+   {
+    "gt_index": 15,
+    "gt": {
+     "from": "RENEWING",
+     "event": "timer T2 expires",
+     "action": "send Broadcast DHCPREQUEST",
+     "to": "REBINDING"
+    },
+    "candidate_index": 24,
+    "candidate": {
+     "from": "RENEWING",
+     "event": "timeout T2 expires",
+     "action": "broadcast DHCPREQUEST",
+     "to": "REBINDING"
+    },
+    "confidence": 1.0,
+    "reason": "Both: T2 expires in RENEWING, broadcast DHCPREQUEST, go to REBINDING."
+   },
+   {
+    "gt_index": 16,
+    "gt": {
+     "from": "RENEWING",
+     "event": "receive DHCPNAK",
+     "action": "Halt network",
+     "to": "INIT"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate transition from RENEWING on DHCPNAK. The candidate omits this transition."
+   },
+   {
+    "gt_index": 17,
+    "gt": {
+     "from": "REBINDING",
+     "event": "receive DHCPACK",
+     "action": "Record lease; Set timers T1, T2",
+     "to": "BOUND"
+    },
+    "candidate_index": 27,
+    "candidate": {
+     "from": "REBINDING",
+     "event": "receive DHCPACK",
+     "action": "record lease; set timer T1; set timer T2",
+     "to": "BOUND"
+    },
+    "confidence": 1.0,
+    "reason": "Identical: receive DHCPACK in REBINDING, record lease, set timers, go to BOUND."
+   },
+   {
+    "gt_index": 18,
+    "gt": {
+     "from": "REBINDING",
+     "event": "receive DHCPNAK",
+     "action": "Halt network",
+     "to": "INIT"
+    },
+    "candidate_index": 26,
+    "candidate": {
+     "from": "REBINDING",
+     "event": "receive DHCPNAK",
+     "action": "halt network",
+     "to": "INIT"
+    },
+    "confidence": 1.0,
+    "reason": "Identical: receive DHCPNAK in REBINDING, halt network, go to INIT."
+   }
+  ],
+  "unmatched_candidate_transitions": [
+   {
+    "candidate_index": 1,
+    "class": "real_behavior_not_in_gt",
+    "reason": "INIT receiving and discarding unsolicited DHCPACK is plausible protocol behavior not explicitly in GT."
+   },
+   {
+    "candidate_index": 2,
+    "class": "wrong_or_unsupported",
+    "reason": "INIT receiving DHCPACK with previous address and going directly to BOUND is not standard DHCP client behavior per RFC 2131. The client should go through INIT-REBOOT/REBOOTING."
+   },
+   {
+    "candidate_index": 4,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Self-loop in INIT_REBOOT for preparing DHCPREQUEST with known address is plausible preparatory behavior not in GT."
+   },
+   {
+    "candidate_index": 5,
+    "class": "wrong_or_unsupported",
+    "reason": "INIT_REBOOT receiving DHCPACK and going to BOUND skips the REBOOTING state. The GT has INIT-REBOOT -> REBOOTING -> BOUND."
+   },
+   {
+    "candidate_index": 9,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Discarding DHCPOFFER with bad xid in SELECTING is plausible protocol behavior (validation check) not in GT."
+   },
+   {
+    "candidate_index": 11,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Timeout with no DHCPOFFER causing retransmission and return to INIT is plausible protocol behavior for retransmission/restart."
+   },
+   {
+    "candidate_index": 12,
+    "class": "wrong_or_unsupported",
+    "reason": "Receiving unacceptable DHCPACK in SELECTING and sending DHCPDECLINE should happen from REQUESTING (or BOUND), not SELECTING. The GT has this from REQUESTING."
+   },
+   {
+    "candidate_index": 14,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Timeout retransmission of DHCPREQUEST in REQUESTING is plausible protocol behavior not explicitly in GT."
+   },
+   {
+    "candidate_index": 16,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Exhausted retransmissions in REQUESTING causing restart to INIT is plausible protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 20,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Early renewal triggering transition from BOUND to RENEWING is plausible protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 21,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Sending DHCPRELEASE from BOUND to GracefulShutdown is valid protocol behavior (graceful release) not modeled in GT."
+   },
+   {
+    "candidate_index": 22,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Detecting address in use in BOUND, sending DHCPDECLINE and going to INIT is plausible protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 25,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Retransmission of DHCPREQUEST in RENEWING when no response is plausible protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 28,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Lease expiration timeout in REBINDING causing halt and return to INIT is plausible protocol behavior not in GT."
+   },
+   {
+    "candidate_index": 29,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Retransmission of DHCPREQUEST in REBINDING is plausible protocol behavior not in GT."
+   }
+  ]
+ }
+}

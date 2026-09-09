@@ -1,0 +1,188 @@
+{
+  "section_id": "S195",
+  "title": "S195 18.47 Seek-Style",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S195 18.47 Seek-Style"
+  ],
+  "url_anchor": "#s195-1847-seek-style",
+  "word_count": 742,
+  "statement_count": 7,
+  "elapsed_seconds": 51.7,
+  "statements": [
+    {
+      "statement_id": "N-S195-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "Seek-Style is a general-header that MAY be included in any PLAY request to indicate the client's preference for any media stream that has the random access properties.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S195",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_sent",
+      "pre_cond": "media.has_random_access_properties = true",
+      "post_cond": "request.seek_style_header.present = true",
+      "actions": [
+        "include Seek-Style header in PLAY request"
+      ],
+      "modality": "may",
+      "id": "N-S195-001"
+    },
+    {
+      "statement_id": "N-S195-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MUST always include the header in any PLAY response for media with random access properties to indicate what policy was applied.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S195",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_response_sent",
+      "pre_cond": "media.has_random_access_properties = true",
+      "post_cond": "response.seek_style_header.present = true",
+      "actions": [
+        "include Seek-Style header in PLAY response indicating applied policy"
+      ],
+      "modality": "must",
+      "id": "N-S195-002"
+    },
+    {
+      "statement_id": "N-S195-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server that receives an unknown Seek-Style policy MUST ignore it and select the server default policy.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S195",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received_with_unknown_seek_style_policy",
+      "pre_cond": "request.seek_style_header.policy = unknown",
+      "post_cond": "server.applied_policy = default",
+      "actions": [
+        "ignore unknown Seek-Style policy",
+        "select server default policy"
+      ],
+      "modality": "must",
+      "id": "N-S195-003"
+    },
+    {
+      "statement_id": "N-S195-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A client receiving an unknown policy MUST ignore it and use the Range header and any media synchronization information as basis to determine what the server did.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S195",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_response_received_with_unknown_seek_style_policy",
+      "pre_cond": "response.seek_style_header.policy = unknown",
+      "post_cond": "client.policy_determination_basis = Range_header | media_synchronization_info",
+      "actions": [
+        "ignore unknown Seek-Style policy",
+        "use Range header and media synchronization information to determine server action"
+      ],
+      "modality": "must",
+      "id": "N-S195-004"
+    },
+    {
+      "statement_id": "N-S195-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the server searched to a random access point, the server MUST return the CoRAP policy in the Seek-Style header and adjust the Range header to reflect the position of the selected RAP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S195",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_sought_to_RAP_during_CoRAP_PLAY",
+      "pre_cond": "server.sought_to_rap = true & request.seek_style = CoRAP",
+      "post_cond": "response.seek_style_header.policy = CoRAP & response.range_header.start = selected_RAP_position",
+      "actions": [
+        "return CoRAP policy in Seek-Style header",
+        "adjust Range header to reflect position of selected RAP"
+      ],
+      "modality": "must",
+      "id": "N-S195-005"
+    },
+    {
+      "statement_id": "N-S195-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In case the random access point is farther away and the server chooses to continue from the current pause point, it MUST include the \"Next\" policy in the Seek-Style header and adjust the Range header start point to the current pause point.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S195",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_continues_from_pause_point_during_CoRAP_PLAY",
+      "pre_cond": "rap.is_farther_away = true & server.continues_from_pause_point = true & request.seek_style = CoRAP",
+      "post_cond": "response.seek_style_header.policy = Next & response.range_header.start = current_pause_point",
+      "actions": [
+        "include 'Next' policy in Seek-Style header",
+        "adjust Range header start point to current pause point"
+      ],
+      "modality": "must",
+      "id": "N-S195-006"
+    },
+    {
+      "statement_id": "N-S195-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "This policy MUST only be used on the client's explicit request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S195",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_with_Next_seek_style",
+      "pre_cond": "client.explicit_request_for_Next_policy = true",
+      "post_cond": null,
+      "actions": [
+        "apply Next seek-style policy only when client has explicitly requested it"
+      ],
+      "modality": "must",
+      "id": "N-S195-007"
+    }
+  ]
+}

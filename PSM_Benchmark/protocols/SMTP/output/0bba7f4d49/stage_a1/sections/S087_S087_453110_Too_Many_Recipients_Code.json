@@ -1,0 +1,108 @@
+{
+  "section_id": "S087",
+  "title": "S087 4.5.3.1.10 Too Many Recipients Code",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S087 4.5.3.1.10 Too Many Recipients Code"
+  ],
+  "url_anchor": "#s087-453110-too-many-recipients-code",
+  "word_count": 283,
+  "statement_count": 4,
+  "elapsed_seconds": 25.91,
+  "statements": [
+    {
+      "statement_id": "D-S087-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If an SMTP server has an implementation limit on the number of RCPT commands and this limit is exhausted, it MUST use a response code of 452.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_implementation_limit_exhausted",
+      "pre_cond": "server.rcpt_count >= server.rcpt_implementation_limit",
+      "post_cond": null,
+      "actions": [
+        "send 452 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S087-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the server has a configured site-policy limitation on the number of RCPT commands, it MAY instead use a 5yz response code.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_site_policy_limit_exhausted",
+      "pre_cond": "server.rcpt_count >= server.rcpt_site_policy_limit",
+      "post_cond": null,
+      "actions": [
+        "send 5yz response"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S087-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "It would be reasonable to return a 503 response to any DATA command received subsequent to the 452 (or 552) code or to simply return the 503 after DATA without returning any previous negative response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DATA_command_received_after_452_or_552",
+      "pre_cond": "server.rcpt_limit_exceeded = true",
+      "post_cond": null,
+      "actions": [
+        "send 503 response"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S087-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Clients SHOULD treat a 552 code in this case (too many recipients) as a temporary, rather than permanent, failure.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S087",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_552_to_RCPT_too_many_recipients",
+      "pre_cond": null,
+      "post_cond": "client.rcpt_failure_type = temporary",
+      "actions": [
+        "classify 552 as temporary failure",
+        "schedule retransmission of affected recipients"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,285 @@
+{
+  "section_id": "S030",
+  "title": "S030 4.4.1 Initialization and allocation of network address",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S030 4.4.1 Initialization and allocation of network address"
+  ],
+  "url_anchor": "#s030-441-initialization-and-allocation-of-network-address",
+  "word_count": 804,
+  "statement_count": 13,
+  "elapsed_seconds": 134.8,
+  "statements": [
+    {
+      "statement_id": "D-S030-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client begins in INIT state and forms a DHCPDISCOVER message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "state_name": "INIT",
+      "enum_name": "ClientState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "client.state = INIT"
+    },
+    {
+      "statement_id": "D-S030-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Once the DHCPACK message from the server arrives, the client is initialized and moves to BOUND state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "state_name": "BOUND",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = BOUND"
+    },
+    {
+      "statement_id": "D-S030-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "SELECTING state referenced in Table 5: 'Requested IP address MUST (in SELECTING or INIT-REBOOT)' and 'Server identifier MUST (after SELECTING)' in DHCPREQUEST.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "state_name": "SELECTING",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = SELECTING"
+    },
+    {
+      "statement_id": "D-S030-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "INIT-REBOOT state referenced in Table 5: 'Requested IP address MUST (in SELECTING or INIT-REBOOT)' and 'Server identifier MUST NOT (after INIT-REBOOT, BOUND, RENEWING or REBINDING)'.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "state_name": "INIT-REBOOT",
+      "enum_name": "ClientState",
+      "semantic_type": "initial",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = INIT-REBOOT"
+    },
+    {
+      "statement_id": "D-S030-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "RENEWING state referenced in Table 5: 'Requested IP address MUST NOT (in BOUND or RENEWING)' and 'Server identifier MUST NOT (after INIT-REBOOT, BOUND, RENEWING or REBINDING)'.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "state_name": "RENEWING",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = RENEWING"
+    },
+    {
+      "statement_id": "D-S030-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "REBINDING state referenced in Table 5: 'ciaddr 0 or client's network address (BOUND/RENEW/REBIND)' and 'Server identifier MUST NOT (after INIT-REBOOT, BOUND, RENEWING or REBINDING)'.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S030",
+      "state_name": "REBINDING",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = REBINDING"
+    },
+    {
+      "statement_id": "D-S030-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client begins in INIT state and forms a DHCPDISCOVER message. The client generates and records a random transaction identifier and inserts that identifier into the 'xid' field. The client then broadcasts the DHCPDISCOVER on the local hardware broadcast address to the 0xffffffff IP broadcast address and 'DHCP server' UDP port.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "client"
+      ],
+      "from_state": "INIT",
+      "to_state": null,
+      "trigger": "initialization",
+      "pre_cond": "client.state = INIT",
+      "post_cond": "client.xid_generated = true & client.local_time_recorded = true & client.dhcpdiscover_broadcast = true",
+      "actions": [
+        "set ciaddr to 0x00000000",
+        "generate random transaction identifier",
+        "record local time",
+        "broadcast DHCPDISCOVER to 0xffffffff on DHCP server UDP port"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S030-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the parameters are acceptable, the client records the address of the server that supplied the parameters from the 'server identifier' field and sends that address in the 'server identifier' field of a DHCPREQUEST broadcast message.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "client"
+      ],
+      "from_state": "SELECTING",
+      "to_state": null,
+      "trigger": "DHCPOFFER_selected",
+      "pre_cond": "client.state = SELECTING & client.dhcpoffer_received = true & client.parameters_acceptable = true",
+      "post_cond": "client.server_identifier_recorded = true & client.dhcprequest_broadcast = true",
+      "actions": [
+        "select one DHCPOFFER from collected offers",
+        "extract server identifier from DHCPOFFER server identifier option",
+        "record server address",
+        "broadcast DHCPREQUEST with server identifier and same xid as DHCPOFFER"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S030-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Once the DHCPACK message from the server arrives, the client is initialized and moves to BOUND state. The client records the lease expiration time as the sum of the time at which the original request was sent and the duration of the lease from the DHCPACK message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "BOUND",
+      "trigger": "receive_DHCPACK",
+      "pre_cond": "client.dhcprequest_sent = true & message.type = DHCPACK",
+      "post_cond": "client.state = BOUND & client.lease_expiration = client.request_time + message.lease_duration",
+      "actions": [
+        "record lease expiration time",
+        "move to BOUND state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S030-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the 'xid' of an arriving DHCPOFFER message does not match the 'xid' of the most recent DHCPDISCOVER message, the DHCPOFFER message must be silently discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_DHCPOFFER",
+      "pre_cond": "message.type = DHCPOFFER & message.xid != client.xid",
+      "post_cond": null,
+      "actions": [
+        "silently discard DHCPOFFER"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Any arriving DHCPACK messages must be silently discarded (during DHCPOFFER collection phase, before DHCPREQUEST is sent).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_DHCPACK_during_offer_collection",
+      "pre_cond": "client.dhcpoffer_collection_phase = true & message.type = DHCPACK",
+      "post_cond": null,
+      "actions": [
+        "silently discard DHCPACK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the network address appears to be in use, the client MUST send a DHCPDECLINE message to the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "address_conflict_detected",
+      "pre_cond": "client.arp_check_result = address_in_use",
+      "post_cond": "client.dhcpdecline_sent = true",
+      "actions": [
+        "send DHCPDECLINE to server"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S030-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client SHOULD broadcast an ARP reply to announce the client's new IP address and clear any outdated ARP cache entries in hosts on the client's subnet (after moving to BOUND state).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "client"
+      ],
+      "from_state": "BOUND",
+      "to_state": "BOUND",
+      "trigger": "address_verified_not_in_use",
+      "pre_cond": "client.state = BOUND & client.arp_check_result = address_available",
+      "post_cond": "client.arp_announcement_sent = true",
+      "actions": [
+        "broadcast ARP reply announcing new IP address"
+      ],
+      "modality": "should"
+    }
+  ]
+}

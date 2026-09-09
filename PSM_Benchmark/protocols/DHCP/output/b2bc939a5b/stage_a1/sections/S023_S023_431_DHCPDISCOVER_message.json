@@ -1,0 +1,113 @@
+{
+  "section_id": "S023",
+  "title": "S023 4.3.1 DHCPDISCOVER message",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S023 4.3.1 DHCPDISCOVER message"
+  ],
+  "url_anchor": "#s023-431-dhcpdiscover-message",
+  "word_count": 1160,
+  "statement_count": 4,
+  "elapsed_seconds": 32.5,
+  "statements": [
+    {
+      "statement_id": "D-S023-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "When a server receives a DHCPDISCOVER message from a client, the server chooses a network address for the requesting client. Once the network address and lease have been determined, the server constructs a DHCPOFFER message with the offered configuration parameters and sends the DHCPOFFER message to the requesting client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S023",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPDISCOVER received",
+      "pre_cond": "server.address_available = true",
+      "post_cond": "server.dhcpoffer_sent = true",
+      "actions": [
+        "select network address for client",
+        "choose lease expiration time",
+        "construct DHCPOFFER with configuration parameters",
+        "insert xid from DHCPDISCOVER into DHCPOFFER xid field",
+        "send DHCPOFFER to requesting client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S023-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "If no address is available, the server may choose to report the problem to the system administrator.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S023",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPDISCOVER received",
+      "pre_cond": "server.address_available = false",
+      "post_cond": null,
+      "actions": [
+        "report problem to system administrator"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S023-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "A server MAY, for administrative reasons, assign an address other than the one requested, or may refuse to allocate an address to a particular client even though free addresses are available.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S023",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPDISCOVER received",
+      "pre_cond": "server.administrative_policy_denies_client = true",
+      "post_cond": "server.address_allocated = false",
+      "actions": [
+        "refuse to allocate address to client"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S023-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server SHOULD NOT reuse the selected network address before the client responds to the server's DHCPOFFER message. The server may choose to record the address as offered to the client.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S023",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPOFFER sent",
+      "pre_cond": null,
+      "post_cond": "server.address_reserved_as_offered = true",
+      "actions": [
+        "record address as offered to client",
+        "do not reuse selected network address until client responds"
+      ],
+      "modality": "should"
+    }
+  ]
+}

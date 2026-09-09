@@ -1,0 +1,586 @@
+{
+  "section_id": "S062",
+  "title": "S062 13.4.1 General Usage",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S062 13.4.1 General Usage"
+  ],
+  "url_anchor": "#s062-1341-general-usage",
+  "word_count": 1664,
+  "statement_count": 24,
+  "elapsed_seconds": 278.81,
+  "statements": [
+    {
+      "statement_id": "N-S062-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A PLAY request MUST include a Session header to indicate to which session the request applies.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_sent",
+      "pre_cond": "session.state = Ready | session.state = Play",
+      "post_cond": null,
+      "actions": [
+        "include Session header in PLAY request"
+      ],
+      "modality": "must",
+      "id": "N-S062-001"
+    },
+    {
+      "statement_id": "N-S062-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Upon receipt of the PLAY request, the server MUST position the normal play time to the beginning of the range specified in the received Range header, within the limits of the media resource and in accordance with the Seek-Style header (Section 18.47).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "session.state = Ready | session.state = Play",
+      "post_cond": "server.play_time = request.range.start",
+      "actions": [
+        "position normal play time to beginning of range specified in Range header"
+      ],
+      "modality": "must",
+      "id": "N-S062-002"
+    },
+    {
+      "statement_id": "N-S062-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "It MUST deliver stream data until the end of the range if given, until a new PLAY request is received, until a PAUSE request (Section 13.5) is received, or until the end of the media is reached.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": null,
+      "post_cond": "media_delivery.active = true",
+      "actions": [
+        "deliver stream data until end of range | new PLAY request received | PAUSE request received | end of media reached"
+      ],
+      "modality": "must",
+      "id": "N-S062-003"
+    },
+    {
+      "statement_id": "N-S062-4",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If no Range header is present in the PLAY request, the server SHALL play from current pause point until the end of media.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "request.Range_header = null",
+      "post_cond": "server.play_position = session.pause_point",
+      "actions": [
+        "play from current pause point until end of media"
+      ],
+      "modality": "shall",
+      "id": "N-S062-004"
+    },
+    {
+      "statement_id": "N-S062-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If a given range value points outside of the media, the response MUST be the 457 (Invalid Range) error code and include the Media-Range header (Section 18.30) with the valid range for the media.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "request.range.outside_media = true",
+      "post_cond": null,
+      "actions": [
+        "send 457 Invalid Range error response",
+        "include Media-Range header with valid media range"
+      ],
+      "modality": "must",
+      "id": "N-S062-005"
+    },
+    {
+      "statement_id": "N-S062-6",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "For a start point that is beyond the media front edge, i.e., beyond the current value for \"now\", the server SHALL adjust the start value to the current front edge.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "request.range.start > media.front_edge",
+      "post_cond": "play.start = media.front_edge",
+      "actions": [
+        "adjust start value to current front edge"
+      ],
+      "modality": "shall",
+      "id": "N-S062-006"
+    },
+    {
+      "statement_id": "N-S062-7",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In that case, the server SHALL deliver media from the requested (and possibly adjusted) start point until the first of either the provided stop point or the end of the media.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "request.range.stop > media.current_edge",
+      "post_cond": null,
+      "actions": [
+        "deliver media from adjusted start point until min(request.range.stop, media.end)"
+      ],
+      "modality": "shall",
+      "id": "N-S062-007"
+    },
+    {
+      "statement_id": "N-S062-8",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "Please note that if one simply wants to play from a particular start point until the end of media, using a Range header with an implicit stop point is RECOMMENDED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S062-008"
+    },
+    {
+      "statement_id": "N-S062-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If a client requests to start playing at the end of media, either explicitly with a Range header or implicitly with a pause point that is at the end of media, a 457 (Invalid Range) error MUST be sent and include the Media-Range header (Section 18.30).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "request.range.start = media.end | session.pause_point = media.end",
+      "post_cond": null,
+      "actions": [
+        "send 457 Invalid Range error response",
+        "include Media-Range header in response"
+      ],
+      "modality": "must",
+      "id": "N-S062-009"
+    },
+    {
+      "statement_id": "N-S062-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A client desiring to play the media from the beginning MUST send a PLAY request with a Range header pointing at the beginning, e.g., \"npt=0-\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_desires_play_from_beginning",
+      "pre_cond": "client.desired_play_start = media.beginning",
+      "post_cond": null,
+      "actions": [
+        "send PLAY request with Range header pointing at beginning of media"
+      ],
+      "modality": "must",
+      "id": "N-S062-010"
+    },
+    {
+      "statement_id": "N-S062-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If a PLAY request is received without a Range header and media delivery has stopped at the end, the server SHOULD respond with a 457 (Invalid Range) error response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "request.Range_header = null & media_delivery.stopped_at_end = true",
+      "post_cond": null,
+      "actions": [
+        "respond with 457 Invalid Range error response"
+      ],
+      "modality": "should",
+      "id": "N-S062-011"
+    },
+    {
+      "statement_id": "N-S062-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In that response, the current pause point MUST be included in a Range header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "request.Range_header = null & media_delivery.stopped_at_end = true & response.status = 457",
+      "post_cond": null,
+      "actions": [
+        "include current pause point in Range header of 457 error response"
+      ],
+      "modality": "must",
+      "id": "N-S062-012"
+    },
+    {
+      "statement_id": "N-S062-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the pause point is located later than the given end value, a 457 (Invalid Range) response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_request_received",
+      "pre_cond": "session.pause_point > request.range.end_value",
+      "post_cond": null,
+      "actions": [
+        "return 457 Invalid Range response"
+      ],
+      "modality": "must",
+      "id": "N-S062-013"
+    },
+    {
+      "statement_id": "N-S062-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Servers MUST include a Range header in any PLAY response, even if no Range header was present in the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_response_sent",
+      "pre_cond": null,
+      "post_cond": "response.Range_header != null",
+      "actions": [
+        "include Range header in PLAY response"
+      ],
+      "modality": "must",
+      "id": "N-S062-014"
+    },
+    {
+      "statement_id": "N-S062-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The response MUST use the same format as the request's Range header contained.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_response_sent",
+      "pre_cond": "request.Range_header != null",
+      "post_cond": "response.Range_header.format = request.Range_header.format",
+      "actions": [
+        "use same Range header format as in PLAY request"
+      ],
+      "modality": "must",
+      "id": "N-S062-015"
+    },
+    {
+      "statement_id": "N-S062-16",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If no Range header was in the request, the format used in any previous PLAY request within the session SHOULD be used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_response_sent",
+      "pre_cond": "request.Range_header = null & session.previous_PLAY_range_format != null",
+      "post_cond": null,
+      "actions": [
+        "use Range format from previous PLAY request within session"
+      ],
+      "modality": "should",
+      "id": "N-S062-016"
+    },
+    {
+      "statement_id": "N-S062-17",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If no format has been indicated in a previous request, the server MAY use any time format supported by the media and indicated in the Accept-Ranges header in the SETUP request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_response_sent",
+      "pre_cond": "request.Range_header = null & session.previous_PLAY_range_format = null",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S062-017"
+    },
+    {
+      "statement_id": "N-S062-18",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "It is RECOMMENDED that NPT is used if supported by the media.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S062-018"
+    },
+    {
+      "statement_id": "N-S062-19",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "For any media with retention longer than 0 seconds, the currently valid Media-Range header SHALL also be included in the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_error_response_sent",
+      "pre_cond": "media.retention > 0",
+      "post_cond": "response.Media_Range_header != null",
+      "actions": [
+        "include currently valid Media-Range header in PLAY error response"
+      ],
+      "modality": "shall",
+      "id": "N-S062-019"
+    },
+    {
+      "statement_id": "N-S062-20",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A PLAY response MAY include a header carrying synchronization information.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_response_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S062-020"
+    },
+    {
+      "statement_id": "N-S062-21",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If it is necessary to put the stream into the Ready state, a PAUSE request MUST be issued.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": "Ready",
+      "trigger": "PAUSE_request_issued",
+      "pre_cond": "session.state = Play & client.requires_ready_state = true",
+      "post_cond": "session.state = Ready",
+      "actions": [
+        "issue PAUSE request"
+      ],
+      "modality": "must",
+      "id": "N-S062-021"
+    },
+    {
+      "statement_id": "N-S062-22",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Such a request MUST replace the current PLAY action with the new one requested, i.e., being handled in the same way as if as the request was received in Ready state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY_request_received",
+      "pre_cond": "session.state = Play",
+      "post_cond": "server.current_play_action = new_play_request",
+      "actions": [
+        "replace current PLAY action with new PLAY request",
+        "handle new PLAY request as if received in Ready state"
+      ],
+      "modality": "must",
+      "id": "N-S062-022"
+    },
+    {
+      "statement_id": "N-S062-23",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In the case that the range in the Range header has an implicit start time (\"-endtime\"), the server MUST continue to play from where it currently was until the specified endpoint.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY_request_received",
+      "pre_cond": "session.state = Play & request.range.start = implicit",
+      "post_cond": null,
+      "actions": [
+        "continue playing from current position until specified endpoint"
+      ],
+      "modality": "must",
+      "id": "N-S062-023"
+    },
+    {
+      "statement_id": "N-S062-24",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server SHALL also indicate which policy it uses for selecting the actual start point by including a Seek-Style header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY_response_sent",
+      "pre_cond": null,
+      "post_cond": "response.Seek_Style_header != null",
+      "actions": [
+        "include Seek-Style header in PLAY response indicating start point selection policy"
+      ],
+      "modality": "shall",
+      "id": "N-S062-024"
+    }
+  ]
+}

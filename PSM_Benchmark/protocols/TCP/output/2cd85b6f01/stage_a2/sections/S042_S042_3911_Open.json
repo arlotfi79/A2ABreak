@@ -1,0 +1,162 @@
+{
+  "section_id": "S042",
+  "title": "S042 3.9.1.1 Open",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S042 3.9.1.1 Open"
+  ],
+  "url_anchor": "#s042-3911-open",
+  "word_count": 616,
+  "statement_count": 6,
+  "elapsed_seconds": 75.07,
+  "statements": [
+    {
+      "statement_id": "1-S042-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Every passive OPEN call either creates a new connection record in LISTEN state, or it returns an error; it MUST NOT affect any previously created connection record (MUST-41).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "TCP endpoint",
+        "application"
+      ],
+      "from_state": null,
+      "to_state": "LISTEN",
+      "trigger": "passive OPEN call",
+      "pre_cond": null,
+      "post_cond": "connection.state = LISTEN | connection.error_returned = true",
+      "actions": [
+        "create new connection record in LISTEN state or return error",
+        "do not affect any previously created connection record"
+      ],
+      "modality": "must",
+      "id": "N-S042-001"
+    },
+    {
+      "statement_id": "2-S042-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "A TCP implementation that supports multiple concurrent connections MUST provide an OPEN call that will functionally allow an application to LISTEN on a port while a connection block with the same local port is in SYN-SENT or SYN-RECEIVED state (MUST-42).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "TCP implementation",
+        "application"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN call to LISTEN on port",
+      "pre_cond": "connection.local_port = port & (connection.state = SYN-SENT | connection.state = SYN-RECEIVED)",
+      "post_cond": null,
+      "actions": [
+        "allow application to LISTEN on port while existing connection block with same local port is in SYN-SENT or SYN-RECEIVED state"
+      ],
+      "modality": "must",
+      "id": "N-S042-002"
+    },
+    {
+      "statement_id": "3-S042-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "The optional \"local IP address\" parameter MUST be supported to allow the specification of the local IP address (MUST-43).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S042-003"
+    },
+    {
+      "statement_id": "4-S042-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "If an application on a multihomed host does not specify the local IP address when actively opening a TCP connection, then the TCP implementation MUST ask the IP layer to select a local IP address before sending the (first) SYN (MUST-44).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "TCP implementation",
+        "IP layer",
+        "application"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "active OPEN without local IP address on multihomed host",
+      "pre_cond": "host.multihomed = true & local_ip_address.specified = false",
+      "post_cond": "local_ip_address.selected = true",
+      "actions": [
+        "ask IP layer to select a local IP address before sending the first SYN"
+      ],
+      "modality": "must",
+      "id": "N-S042-004"
+    },
+    {
+      "statement_id": "5-S042-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "At all other times, a previous segment has either been sent or received on this connection, and TCP implementations MUST use the same local address that was used in those previous segments (MUST-45).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "segment send or receive on connection with prior segment history",
+      "pre_cond": "connection.previous_segment_sent = true | connection.previous_segment_received = true",
+      "post_cond": null,
+      "actions": [
+        "use the same local address that was used in previous segments on this connection"
+      ],
+      "modality": "must",
+      "id": "N-S042-005"
+    },
+    {
+      "statement_id": "6-S042-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "A TCP implementation MUST reject as an error a local OPEN call for an invalid remote IP address (e.g., a broadcast or multicast address) (MUST-46).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN call with invalid remote IP address",
+      "pre_cond": "remote_ip_address.valid = false",
+      "post_cond": "connection.open_rejected = true",
+      "actions": [
+        "reject OPEN call as an error"
+      ],
+      "modality": "must",
+      "id": "N-S042-006"
+    }
+  ]
+}

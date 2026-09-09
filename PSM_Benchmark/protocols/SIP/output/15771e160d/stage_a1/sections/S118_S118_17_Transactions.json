@@ -1,0 +1,133 @@
+{
+  "section_id": "S118",
+  "title": "S118 17 Transactions",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S118 17 Transactions"
+  ],
+  "url_anchor": "#s118-17-transactions",
+  "word_count": 736,
+  "statement_count": 5,
+  "elapsed_seconds": 42.83,
+  "statements": [
+    {
+      "statement_id": "D-S118-001",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In the case of a transaction where the request was an INVITE (known as an INVITE transaction), the transaction also includes the ACK only if the final response was not a 2xx response. If the response was a 2xx, the ACK is not considered part of the transaction.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S118",
+      "object_name": "INVITE transaction",
+      "field_name": "ACK",
+      "field_type": "message",
+      "required": false,
+      "allowed_values": [
+        "included when final_response.code != 2xx",
+        "excluded when final_response.code = 2xx"
+      ],
+      "guard_semantics": "final_response.code != 2xx"
+    },
+    {
+      "statement_id": "D-S118-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The client transaction is responsible for receiving responses and delivering them to the TU, filtering out any response retransmissions or disallowed responses (such as a response to ACK).",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S118",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "filter response retransmissions",
+        "filter disallowed responses",
+        "deliver response to TU"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S118-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "In the case of an INVITE request, the client transaction is responsible for generating the ACK request for any final response excepting a 2xx response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S118",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "final response received",
+      "pre_cond": "transaction.method = INVITE & final_response.code != 2xx",
+      "post_cond": null,
+      "actions": [
+        "generate ACK request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S118-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The server transaction filters any request retransmissions from the network. In the case of an INVITE transaction, it absorbs the ACK request for any final response excepting a 2xx response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S118",
+      "actors": [
+        "server transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request received from transport",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "filter request retransmissions",
+        "absorb ACK when transaction.method = INVITE & final_response.code != 2xx"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S118-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Retransmissions of the 2xx response are handled by the UA core, not the transaction layer. Similarly, generation of the ACK for the 2xx is handled by the UA core.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S118",
+      "actors": [
+        "UA core",
+        "transaction layer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "2xx response to INVITE",
+      "pre_cond": "transaction.method = INVITE & final_response.code = 2xx",
+      "post_cond": null,
+      "actions": [
+        "UA core retransmits 2xx",
+        "UA core generates ACK"
+      ],
+      "modality": "must"
+    }
+  ]
+}

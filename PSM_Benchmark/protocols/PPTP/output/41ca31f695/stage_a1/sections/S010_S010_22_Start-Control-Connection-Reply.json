@@ -1,0 +1,183 @@
+{
+  "section_id": "S010",
+  "title": "S010 2.2 Start-Control-Connection-Reply",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S010 2.2 Start-Control-Connection-Reply"
+  ],
+  "url_anchor": "#s010-22-start-control-connection-reply",
+  "word_count": 535,
+  "statement_count": 7,
+  "elapsed_seconds": 40.71,
+  "statements": [
+    {
+      "statement_id": "D-S010-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "The Start-Control-Connection-Reply is a PPTP control message sent in reply to a received Start-Control-Connection-Request message. This message contains a result code indicating the result of the control connection establishment attempt.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S010",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Start-Control-Connection-Reply received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "evaluate Result Code"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Result Code 1 - Successful channel establishment",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S010",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Start-Control-Connection-Reply received with Result Code 1",
+      "pre_cond": "message.result_code = 1",
+      "post_cond": "connection.control_channel = established",
+      "actions": [
+        "establish control channel"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Result Code 2 - General error -- Error Code indicates the problem",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S010",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Start-Control-Connection-Reply received with Result Code 2",
+      "pre_cond": "message.result_code = 2",
+      "post_cond": "connection.control_channel = failed",
+      "actions": [
+        "read Error Code",
+        "abort control channel establishment"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Result Code 3 - Command channel already exists",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S010",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Start-Control-Connection-Reply received with Result Code 3",
+      "pre_cond": "message.result_code = 3",
+      "post_cond": "connection.control_channel = already_exists",
+      "actions": [
+        "reject duplicate control channel establishment"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Result Code 4 - Requester is not authorized to establish a command channel",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S010",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Start-Control-Connection-Reply received with Result Code 4",
+      "pre_cond": "message.result_code = 4",
+      "post_cond": "connection.control_channel = failed",
+      "actions": [
+        "abort control channel establishment due to authorization failure"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Result Code 5 - The protocol version of the requester is not supported",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S010",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Start-Control-Connection-Reply received with Result Code 5",
+      "pre_cond": "message.result_code = 5",
+      "post_cond": "connection.control_channel = failed",
+      "actions": [
+        "abort control channel establishment due to version mismatch"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "pptp_fsm",
+      "description": "Result Code indicates the result of the control connection establishment attempt; Error Code is set to 0 unless a General Error exists, in which case Result Code is set to 2 and Error Code is set to the value corresponding to the general error condition.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "object_name": "Start-Control-Connection-Reply",
+      "field_name": "Result Code",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "guard_semantics": "Determines success or failure of control connection establishment; drives state transition outcome"
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "section_id": "S004",
+  "title": "S004 4. The AUTHORIZATION State",
+  "depth": 3,
+  "parent_path": [
+    "POP3",
+    "S004 4. The AUTHORIZATION State"
+  ],
+  "url_anchor": "#s004-4-the-authorization-state",
+  "word_count": 416,
+  "statement_count": 7,
+  "elapsed_seconds": 107.89,
+  "statements": [
+    {
+      "statement_id": "1-S004-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "The client must now identify and authenticate itself to the POP3 server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "server_greeting_received",
+      "pre_cond": "protocol.state = AUTHORIZATION",
+      "post_cond": null,
+      "actions": [
+        "client identifies itself to POP3 server",
+        "client authenticates itself to POP3 server"
+      ],
+      "modality": "must",
+      "id": "N-S004-001"
+    },
+    {
+      "statement_id": "2-S004-2",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "While there is no single authentication mechanism that is required of all POP3 servers, a POP3 server must of course support at least one authentication mechanism.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "other",
+      "id": "N-S004-002"
+    },
+    {
+      "statement_id": "3-S004-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "While there is no single authentication mechanism that is required of all POP3 servers, a POP3 server must of course support at least one authentication mechanism.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "client_authentication_attempted",
+      "pre_cond": "protocol.state = AUTHORIZATION",
+      "post_cond": "server.supported_auth_mechanism_count >= 1",
+      "actions": [
+        "support at least one authentication mechanism"
+      ],
+      "modality": "must",
+      "id": "N-S004-003"
+    },
+    {
+      "statement_id": "4-S004-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "(If a lock was acquired but the POP3 server intends to respond with a negative status indicator, the POP3 server must release the lock prior to rejecting the command.)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "authentication_rejected_with_lock_held",
+      "pre_cond": "protocol.state = AUTHORIZATION & lock.acquired = true & server.response_intent = negative",
+      "post_cond": "lock.released = true",
+      "actions": [
+        "release maildrop lock",
+        "send negative status indicator"
+      ],
+      "modality": "must",
+      "id": "N-S004-004"
+    },
+    {
+      "statement_id": "5-S004-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "After returning a negative status indicator, the server may close the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "negative_status_indicator_sent",
+      "pre_cond": "protocol.state = AUTHORIZATION & server.last_response = negative",
+      "post_cond": null,
+      "actions": [
+        "close TCP connection"
+      ],
+      "modality": "may",
+      "id": "N-S004-005"
+    },
+    {
+      "statement_id": "6-S004-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "If the server does not close the connection, the client may either issue a new authentication command and start again, or the client may issue the QUIT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "authentication_failed_connection_still_open",
+      "pre_cond": "protocol.state = AUTHORIZATION & connection.open = true",
+      "post_cond": null,
+      "actions": [
+        "issue new authentication command"
+      ],
+      "modality": "may",
+      "id": "N-S004-006"
+    },
+    {
+      "statement_id": "7-S004-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "If the server does not close the connection, the client may either issue a new authentication command and start again, or the client may issue the QUIT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "authentication_failed_connection_still_open",
+      "pre_cond": "protocol.state = AUTHORIZATION & connection.open = true",
+      "post_cond": null,
+      "actions": [
+        "issue QUIT command"
+      ],
+      "modality": "may",
+      "id": "N-S004-007"
+    }
+  ]
+}

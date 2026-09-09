@@ -1,0 +1,135 @@
+{
+  "section_id": "S063",
+  "title": "S063 4.2 SMTP Replies",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S063 4.2 SMTP Replies"
+  ],
+  "url_anchor": "#s063-42-smtp-replies",
+  "word_count": 623,
+  "statement_count": 6,
+  "elapsed_seconds": 104.4,
+  "statements": [
+    {
+      "statement_id": "D-S063-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Greeting appears only in the 220 response that announces that the server is opening its part of the connection.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S063",
+      "state_name": "Greeting",
+      "enum_name": "ServerConnectionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S063-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Greeting appears only in the 220 response that announces that the server is opening its part of the connection.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S063",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Greeting",
+      "trigger": "server_opens_connection",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 220 Greeting"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S063-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "The number is for use by automata to determine what state to enter next; the text is for the human user.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S063",
+      "object_name": "Reply-code",
+      "field_name": "first-digit",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "determines next FSM state"
+    },
+    {
+      "statement_id": "D-S063-004",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "In the absence of extensions negotiated with the client, SMTP servers MUST NOT send reply codes whose first digits are other than 2, 3, 4, or 5.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "object_name": "Reply-code",
+      "field_name": "first-digit",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "guard_semantics": "MUST NOT send first digits other than 2, 3, 4, or 5 absent extension negotiation"
+    },
+    {
+      "statement_id": "D-S063-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Clients that receive such out-of-range codes SHOULD normally treat them as fatal errors and terminate the mail transaction.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S063",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "out_of_range_reply_code_received",
+      "pre_cond": "reply.first_digit != 2 & reply.first_digit != 3 & reply.first_digit != 4 & reply.first_digit != 5",
+      "post_cond": "transaction.terminated = true",
+      "actions": [
+        "treat as fatal error",
+        "terminate mail transaction"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S063-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "Every command MUST generate exactly one reply.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "object_name": "command",
+      "field_name": "reply",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "exactly one reply per command required for FSM synchronization"
+    }
+  ]
+}

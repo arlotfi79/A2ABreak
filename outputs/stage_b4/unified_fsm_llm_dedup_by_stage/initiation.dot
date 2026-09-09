@@ -1,0 +1,40 @@
+digraph initiation {
+    rankdir=LR;
+    size="10,6";
+    ratio=compress;
+    margin=0.05;
+    dpi=300;
+    nodesep=0.45;
+    ranksep=0.85;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=18];
+    edge [fontname="Helvetica", fontsize=12];
+    label="Initiation FSM";
+    labelloc=t;
+    fontsize=24;
+
+    // States
+    "STREAM_CLOSED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled", fillcolor="#f8d7da", color="#dc3545", label="STREAM_CLOSED"];
+    "STREAM_STATE_OPEN" [fontname="Helvetica", fontsize="18", shape="doublecircle", style="filled", fillcolor="#d4edda", color="#28a745", label="STREAM_STATE_OPEN"];
+    "TASK_STATE_NONEXISTENT" [fontname="Helvetica", fontsize="18", shape="doublecircle", style="filled,dashed", fillcolor="#d4edda", color="#28a745", label="TASK_STATE\nNONEXISTENT"];
+    "TASK_STATE_REJECTED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled", fillcolor="#f8d7da", color="#dc3545", label="TASK_STATE_REJECTED"];
+    "TASK_STATE_SUBMITTED" [fontname="Helvetica", fontsize="18", shape="doublecircle", style="filled", fillcolor="#d4edda", color="#28a745", label="TASK_STATE_SUBMITTED"];
+    "TASK_STATE_WORKING" [fontname="Helvetica", fontsize="18", shape="circle", style="solid", label="TASK_STATE_WORKING"];
+    "VERSION_NEGOTIATION_ERROR" [fontname="Helvetica", fontsize="18", shape="diamond", style="filled", fillcolor="#fff3cd", color="#fd7e14", label="VERSION_NEGOTIATION\nERROR"];
+    "REQUEST_AUTHORIZED" [fontname="Helvetica", fontsize="18", shape="circle", style="dashed", color="#6c757d", penwidth="2.0", label="REQUEST_AUTHORIZED\n[boundary]"];
+
+    // Transitions
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_WORKING" [label="send_message_requested", style="solid", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_WORKING" [label="send_message_request_received\n[configuration.returnImmediately = true]", style="dashed", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_WORKING" [label="POST /message:stream", style="dashed", color="#666666", fontcolor="#666666", penwidth="1.0"];
+    "STREAM_STATE_OPEN" -> "STREAM_CLOSED" [label="message_delivered\n[stream.open = true & stream.mode = MESSAGE_ONLY]", style="dashed", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_NONEXISTENT" [label="agent_sends_clarification_message\n[task.created = false]", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "TASK_STATE_SUBMITTED" -> "TASK_STATE_REJECTED" [label="agent_rejects_task\n[task.state = TASK_STATE_SUBMITTED]", style="solid", color="#5b21b6", fontcolor="#5b21b6", penwidth="2.2"];
+    "TASK_STATE_NONEXISTENT" -> "VERSION_NEGOTIATION_ERROR" [label="message_send_request_received\n[request.A2A_Version != null & server.version_supported =\nfalse]", style="dashed", color="#666666", fontcolor="#666666", penwidth="1.0"];
+    "TASK_STATE_NONEXISTENT" -> "VERSION_NEGOTIATION_ERROR" [label="request_received\n[!server.version_supported]", style="dashed", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_SUBMITTED" [label="message_send\n[configuration.pushNotificationConfig != null &\nconfiguration.pushNotificationConfig.url != null]", style="dashed", color="#666666", fontcolor="#666666", penwidth="1.0"];
+    "TASK_STATE_NONEXISTENT" -> "TASK_STATE_SUBMITTED" [label="task_creation", style="dashed", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "TASK_STATE_NONEXISTENT" -> "STREAM_STATE_OPEN" [label="POST_message_stream", style="dashed", color="#666666", fontcolor="#666666", penwidth="1.0"];
+    "REQUEST_AUTHORIZED" -> "TASK_STATE_NONEXISTENT" [label="initial_message_authorized\n[client.permissions.sufficient = true]", style="dashed", color="#9333ea", fontcolor="#9333ea", penwidth="2.2"];
+
+}

@@ -1,0 +1,1203 @@
+{
+  "section_id": "S108",
+  "title": "S108 16.7 Response Processing",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S108 16.7 Response Processing"
+  ],
+  "url_anchor": "#s108-167-response-processing",
+  "word_count": 2678,
+  "statement_count": 49,
+  "elapsed_seconds": 809.22,
+  "statements": [
+    {
+      "statement_id": "N-S108-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "sip_fsm",
+      "description": "If none is found, the element MUST process the response (even if it is an informational response) as a stateless proxy (described below).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_received_no_matching_client_transaction",
+      "pre_cond": "client_transaction.match = false",
+      "post_cond": "response.processing_mode = stateless_proxy",
+      "actions": [
+        "Process response as stateless proxy"
+      ],
+      "modality": "must",
+      "id": "N-S108-001"
+    },
+    {
+      "statement_id": "N-S108-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "As client transactions pass responses to the proxy layer, the following processing MUST take place:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "client transaction",
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_passed_to_proxy_layer",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Find appropriate response context",
+        "Update timer C for provisional responses",
+        "Remove topmost Via header field value",
+        "Add response to response context",
+        "Check if response should be forwarded immediately",
+        "Choose best final response when necessary"
+      ],
+      "modality": "must",
+      "id": "N-S108-002"
+    },
+    {
+      "statement_id": "N-S108-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The following processing MUST be performed on each response that is forwarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_selected_for_forwarding",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Aggregate authorization header field values if necessary",
+        "Optionally rewrite Record-Route header field values",
+        "Forward the response",
+        "Generate any necessary CANCEL requests"
+      ],
+      "modality": "must",
+      "id": "N-S108-003"
+    },
+    {
+      "statement_id": "N-S108-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "For an INVITE transaction, if the response is a provisional response with status codes 101 to 199 inclusive (i.e., anything but 100), the proxy MUST reset timer C for that client transaction.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "provisional_response_received_101_to_199",
+      "pre_cond": "transaction.method = INVITE & response.status_code >= 101 & response.status_code <= 199",
+      "post_cond": "timer_C.reset = true",
+      "actions": [
+        "Reset timer C for the client transaction"
+      ],
+      "modality": "must",
+      "id": "N-S108-004"
+    },
+    {
+      "statement_id": "N-S108-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "The timer MAY be reset to a different value, but this value MUST be greater than 3 minutes.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "timer_C_reset",
+      "pre_cond": "timer_C.reset = true",
+      "post_cond": "timer_C.value > 180",
+      "actions": [
+        "Set timer C to a value greater than 3 minutes if reset to a different value"
+      ],
+      "modality": "must",
+      "id": "N-S108-005"
+    },
+    {
+      "statement_id": "N-S108-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If no Via header field values remain in the response, the response was meant for this element and MUST NOT be forwarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "topmost_via_removed",
+      "pre_cond": "response.via_header_count = 0",
+      "post_cond": "response.forwarded = false",
+      "actions": [
+        "Do not forward response",
+        "Apply UAC processing rules from Section 8.1.3"
+      ],
+      "modality": "must",
+      "id": "N-S108-006"
+    },
+    {
+      "statement_id": "N-S108-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the proxy chooses to recurse on any contacts in a 3xx response by adding them to the target set, it MUST remove them from the response before adding the response to the response context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "3xx_response_received_proxy_recurses_on_contacts",
+      "pre_cond": "response.status_class = 3xx & proxy.recurse_on_contacts = true",
+      "post_cond": "response.recursed_contacts_removed = true",
+      "actions": [
+        "Remove recursed contacts from 3xx response before adding response to response context"
+      ],
+      "modality": "must",
+      "id": "N-S108-007"
+    },
+    {
+      "statement_id": "N-S108-8",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "However, a proxy SHOULD NOT recurse to a non-SIPS URI if the Request-URI of the original request was a SIPS URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "recurse_decision_on_3xx_response",
+      "pre_cond": "original_request.request_uri.scheme = SIPS",
+      "post_cond": "proxy.recurse_target.scheme != non-SIPS",
+      "actions": [
+        "Do not recurse to non-SIPS URI when original Request-URI was SIPS"
+      ],
+      "modality": "should",
+      "id": "N-S108-008"
+    },
+    {
+      "statement_id": "N-S108-9",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the proxy recurses on all of the contacts in a 3xx response, the proxy SHOULD NOT add the resulting contactless response to the response context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "proxy_recurses_on_all_3xx_contacts",
+      "pre_cond": "proxy.recurses_on_all_contacts = true & response.status_class = 3xx",
+      "post_cond": "contactless_response.added_to_context = false",
+      "actions": [
+        "Do not add contactless 3xx response to response context"
+      ],
+      "modality": "should",
+      "id": "N-S108-009"
+    },
+    {
+      "statement_id": "N-S108-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a proxy receives a 416 (Unsupported URI Scheme) response to a request whose Request-URI scheme was not SIP, but the scheme in the original received request was SIP or SIPS (that is, the proxy changed the scheme from SIP or SIPS to something else when it proxied a request), the proxy SHOULD add a new URI to the target set.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "416_response_received",
+      "pre_cond": "response.status_code = 416 & request.request_uri.scheme != SIP & (original_request.request_uri.scheme = SIP | original_request.request_uri.scheme = SIPS)",
+      "post_cond": "target_set.new_uri_added = true",
+      "actions": [
+        "Add new URI to target set"
+      ],
+      "modality": "should",
+      "id": "N-S108-010"
+    },
+    {
+      "statement_id": "N-S108-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "This URI SHOULD be a SIP URI version of the non-SIP URI that was just tried.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_uri_added_to_target_set_after_416",
+      "pre_cond": "target_set.new_uri_added = true",
+      "post_cond": "new_target_uri.scheme = SIP",
+      "actions": [
+        "Use SIP URI version of the non-SIP URI as the new target"
+      ],
+      "modality": "should",
+      "id": "N-S108-011"
+    },
+    {
+      "statement_id": "N-S108-12",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "As with a 3xx response, if a proxy \"recurses\" on the 416 by trying a SIP or SIPS URI instead, the 416 response SHOULD NOT be added to the response context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "proxy_recurses_on_416_via_sip_or_sips_uri",
+      "pre_cond": "proxy.recurse_on_416 = true",
+      "post_cond": "response_416.added_to_context = false",
+      "actions": [
+        "Do not add 416 response to response context when recursing via SIP or SIPS URI"
+      ],
+      "modality": "should",
+      "id": "N-S108-012"
+    },
+    {
+      "statement_id": "N-S108-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "Until a final response has been sent on the server transaction, the following responses MUST be forwarded immediately:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "provisional_or_2xx_response_received",
+      "pre_cond": "server_transaction.final_response_sent = false & ((response.status_class = 1xx & response.status_code != 100) | response.status_class = 2xx)",
+      "post_cond": "response.forwarded_immediately = true",
+      "actions": [
+        "Forward immediately any provisional response other than 100 (Trying)",
+        "Forward immediately any 2xx response"
+      ],
+      "modality": "must",
+      "id": "N-S108-013"
+    },
+    {
+      "statement_id": "N-S108-14",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a 6xx response is received, it is not immediately forwarded, but the stateful proxy SHOULD cancel all client pending transactions as described in Section 10, and it MUST NOT create any new branches in this context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "6xx_response_received",
+      "pre_cond": "response.status_class = 6xx",
+      "post_cond": "new_branches_created_in_context = false",
+      "actions": [
+        "Cancel all pending client transactions per Section 10",
+        "Do not create new branches in this response context"
+      ],
+      "modality": "must",
+      "id": "N-S108-014"
+    },
+    {
+      "statement_id": "N-S108-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "After a final response has been sent on the server transaction, the following responses MUST be forwarded immediately:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "2xx_to_INVITE_received_after_final_response_sent",
+      "pre_cond": "server_transaction.final_response_sent = true & response.status_class = 2xx & transaction.method = INVITE",
+      "post_cond": "response.forwarded_immediately = true",
+      "actions": [
+        "Forward immediately any 2xx response to an INVITE request"
+      ],
+      "modality": "must",
+      "id": "N-S108-015"
+    },
+    {
+      "statement_id": "N-S108-16",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy MUST NOT immediately forward any other responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_received_after_final_response_sent",
+      "pre_cond": "server_transaction.final_response_sent = true & !(response.status_class = 2xx & transaction.method = INVITE)",
+      "post_cond": "response.forwarded_immediately = false",
+      "actions": [
+        "Do not immediately forward responses other than 2xx to INVITE after final response has been sent"
+      ],
+      "modality": "must",
+      "id": "N-S108-016"
+    },
+    {
+      "statement_id": "N-S108-17",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "In particular, a stateful proxy MUST NOT forward any 100 (Trying) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "100_trying_response_received",
+      "pre_cond": "response.status_code = 100",
+      "post_cond": "response.forwarded = false",
+      "actions": [
+        "Do not forward any 100 Trying response"
+      ],
+      "modality": "must",
+      "id": "N-S108-017"
+    },
+    {
+      "statement_id": "N-S108-18",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "Any response chosen for immediate forwarding MUST be processed as described in steps \"Aggregate Authorization Header Field Values\" through \"Record-Route\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_chosen_for_immediate_forwarding",
+      "pre_cond": "response.forward_immediately = true",
+      "post_cond": null,
+      "actions": [
+        "Process response through steps: Aggregate Authorization Header Field Values, Record-Route, Forward response, Generate CANCELs"
+      ],
+      "modality": "must",
+      "id": "N-S108-018"
+    },
+    {
+      "statement_id": "N-S108-19",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy MUST send a final response to a response context's server transaction if no final responses have been immediately forwarded by the above rules and all client transactions in this response context have been terminated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "all_client_transactions_terminated",
+      "pre_cond": "server_transaction.final_response_forwarded = false & client_transactions.all_terminated = true",
+      "post_cond": "server_transaction.final_response_sent = true",
+      "actions": [
+        "Send final response to response context server transaction"
+      ],
+      "modality": "must",
+      "id": "N-S108-019"
+    },
+    {
+      "statement_id": "N-S108-20",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The stateful proxy MUST choose the \"best\" final response among those received and stored in the response context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "best_response_selection_required",
+      "pre_cond": "client_transactions.all_terminated = true & server_transaction.final_response_forwarded = false",
+      "post_cond": "best_final_response.selected = true",
+      "actions": [
+        "Choose best final response from response context"
+      ],
+      "modality": "must",
+      "id": "N-S108-020"
+    },
+    {
+      "statement_id": "N-S108-21",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If there are no final responses in the context, the proxy MUST send a 408 (Request Timeout) response to the server transaction.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "best_response_selection_with_no_final_responses",
+      "pre_cond": "response_context.final_responses.count = 0",
+      "post_cond": "server_transaction.response_sent.status_code = 408",
+      "actions": [
+        "Send 408 Request Timeout response to server transaction"
+      ],
+      "modality": "must",
+      "id": "N-S108-021"
+    },
+    {
+      "statement_id": "N-S108-22",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Otherwise, the proxy MUST forward a response from the responses stored in the response context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "best_response_selection_with_final_responses_available",
+      "pre_cond": "response_context.final_responses.count > 0",
+      "post_cond": "response.forwarded = true",
+      "actions": [
+        "Forward response selected from response context"
+      ],
+      "modality": "must",
+      "id": "N-S108-022"
+    },
+    {
+      "statement_id": "N-S108-23",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "It MUST choose from the 6xx class responses if any exist in the context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_class_selection",
+      "pre_cond": "response_context.6xx_responses.count > 0",
+      "post_cond": "selected_response.status_class = 6xx",
+      "actions": [
+        "Choose 6xx class response for forwarding"
+      ],
+      "modality": "must",
+      "id": "N-S108-023"
+    },
+    {
+      "statement_id": "N-S108-24",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If no 6xx class responses are present, the proxy SHOULD choose from the lowest response class stored in the response context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_class_selection_no_6xx",
+      "pre_cond": "response_context.6xx_responses.count = 0",
+      "post_cond": "selected_response.class = response_context.lowest_available_class",
+      "actions": [
+        "Choose response from lowest response class in response context"
+      ],
+      "modality": "should",
+      "id": "N-S108-024"
+    },
+    {
+      "statement_id": "N-S108-25",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy MAY select any response within that chosen class.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_selection_within_class",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Optionally select any response within the chosen response class"
+      ],
+      "modality": "may",
+      "id": "N-S108-025"
+    },
+    {
+      "statement_id": "N-S108-26",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy SHOULD give preference to responses that provide information affecting resubmission of this request, such as 401, 407, 415, 420, and 484 if the 4xx class is chosen.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_selection_within_4xx_class",
+      "pre_cond": "chosen_response_class = 4xx",
+      "post_cond": null,
+      "actions": [
+        "Prefer 401, 407, 415, 420, and 484 responses when selecting from 4xx class"
+      ],
+      "modality": "should",
+      "id": "N-S108-026"
+    },
+    {
+      "statement_id": "N-S108-27",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A proxy which receives a 503 (Service Unavailable) response SHOULD NOT forward it upstream unless it can determine that any subsequent requests it might proxy will also generate a 503.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "503_response_received",
+      "pre_cond": "response.status_code = 503 & proxy.determines_all_subsequent_requests_503 = false",
+      "post_cond": "response.forwarded_upstream = false",
+      "actions": [
+        "Do not forward 503 response upstream unless proxy cannot service any requests"
+      ],
+      "modality": "should",
+      "id": "N-S108-027"
+    },
+    {
+      "statement_id": "N-S108-28",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the only response that was received is a 503, the proxy SHOULD generate a 500 response and forward that upstream.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "only_response_is_503",
+      "pre_cond": "response_context.responses.count = 1 & response_context.responses[0].status_code = 503",
+      "post_cond": "response.forwarded_upstream.status_code = 500",
+      "actions": [
+        "Generate 500 response",
+        "Forward 500 response upstream"
+      ],
+      "modality": "should",
+      "id": "N-S108-028"
+    },
+    {
+      "statement_id": "N-S108-29",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The forwarded response MUST be processed as described in steps \"Aggregate Authorization Header Field Values\" through \"Record-Route\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "best_response_chosen_for_forwarding",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Process response through: Aggregate Authorization Header Field Values, Record-Route steps"
+      ],
+      "modality": "must",
+      "id": "N-S108-029"
+    },
+    {
+      "statement_id": "N-S108-30",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A proxy MUST NOT insert a tag into the To header field of a 1xx or 2xx response if the request did not contain one.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "1xx_or_2xx_response_forwarding",
+      "pre_cond": "(response.status_class = 1xx | response.status_class = 2xx) & request.to.tag = null",
+      "post_cond": "response.to.tag_inserted = false",
+      "actions": [
+        "Do not insert To tag in 1xx or 2xx response when request contained no To tag"
+      ],
+      "modality": "must",
+      "id": "N-S108-030"
+    },
+    {
+      "statement_id": "N-S108-31",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A proxy MUST NOT modify the tag in the To header field of a 1xx or 2xx response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "1xx_or_2xx_response_forwarding",
+      "pre_cond": "response.status_class = 1xx | response.status_class = 2xx",
+      "post_cond": "response.to.tag_modified = false",
+      "actions": [
+        "Do not modify To tag in 1xx or 2xx response"
+      ],
+      "modality": "must",
+      "id": "N-S108-031"
+    },
+    {
+      "statement_id": "N-S108-32",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "sip_fsm",
+      "description": "An element SHOULD preserve the To tag when simply forwarding a 3-6xx response to a request that did not contain a To tag.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "3xx_to_6xx_response_forwarding",
+      "pre_cond": "(response.status_class = 3xx | response.status_class = 4xx | response.status_class = 5xx | response.status_class = 6xx) & request.to.tag = null",
+      "post_cond": "response.to.tag_preserved = true",
+      "actions": [
+        "Preserve To tag when forwarding 3-6xx response when request had no To tag"
+      ],
+      "modality": "should",
+      "id": "N-S108-032"
+    },
+    {
+      "statement_id": "N-S108-33",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A proxy MUST NOT modify the To tag in any forwarded response to a request that contains a To tag.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_forwarding",
+      "pre_cond": "request.to.tag != null",
+      "post_cond": "response.to.tag_modified = false",
+      "actions": [
+        "Do not modify To tag in any forwarded response when request contained a To tag"
+      ],
+      "modality": "must",
+      "id": "N-S108-033"
+    },
+    {
+      "statement_id": "N-S108-34",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the selected response is a 401 (Unauthorized) or 407 (Proxy Authentication Required), the proxy MUST collect any WWW-Authenticate and Proxy-Authenticate header field values from all other 401 (Unauthorized) and 407 (Proxy Authentication Required) responses received so far in this response context and add them to this response without modification before forwarding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "401_or_407_response_selected_for_forwarding",
+      "pre_cond": "response.status_code = 401 | response.status_code = 407",
+      "post_cond": "response.includes_all_context_wwwauthenticate_proxyauthenticate = true",
+      "actions": [
+        "Collect WWW-Authenticate and Proxy-Authenticate values from all 401 and 407 responses in response context",
+        "Add collected values to selected response without modification before forwarding"
+      ],
+      "modality": "must",
+      "id": "N-S108-034"
+    },
+    {
+      "statement_id": "N-S108-35",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the selected response contains a Record-Route header field value originally provided by this proxy, the proxy MAY choose to rewrite the value before forwarding the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_forwarding_with_proxy_record_route",
+      "pre_cond": "response.record_route_contains_proxy_value = true",
+      "post_cond": null,
+      "actions": [
+        "Optionally rewrite Record-Route header field value before forwarding response"
+      ],
+      "modality": "may",
+      "id": "N-S108-035"
+    },
+    {
+      "statement_id": "N-S108-36",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the proxy received the request over TLS, and sent it out over a non-TLS connection, the proxy MUST rewrite the URI in the Record-Route header field to be a SIPS URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_forwarding_request_received_tls_sent_non_tls",
+      "pre_cond": "request.received_transport = TLS & request.sent_transport != TLS",
+      "post_cond": "response.record_route_uri.scheme = SIPS",
+      "actions": [
+        "Rewrite Record-Route header field URI to SIPS URI"
+      ],
+      "modality": "must",
+      "id": "N-S108-036"
+    },
+    {
+      "statement_id": "N-S108-37",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the proxy received the request over a non-TLS connection, and sent it out over TLS, the proxy MUST rewrite the URI in the Record-Route header field to be a SIP URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_forwarding_request_received_non_tls_sent_tls",
+      "pre_cond": "request.received_transport != TLS & request.sent_transport = TLS",
+      "post_cond": "response.record_route_uri.scheme = SIP",
+      "actions": [
+        "Rewrite Record-Route header field URI to SIP URI"
+      ],
+      "modality": "must",
+      "id": "N-S108-037"
+    },
+    {
+      "statement_id": "N-S108-38",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The new URI provided by the proxy MUST satisfy the same constraints on URIs placed in Record-Route header fields in requests (see Step 4 of Section 16.6) with the following modifications:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Ensure new Record-Route URI satisfies constraints from Section 16.6 Step 4"
+      ],
+      "modality": "must",
+      "id": "N-S108-038"
+    },
+    {
+      "statement_id": "N-S108-39",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The URI SHOULD NOT contain the transport parameter unless the proxy has knowledge that the next upstream (as opposed to downstream) element that will be in the path of subsequent requests supports that transport.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "proxy.upstream_element_transport_support_known = false",
+      "post_cond": "record_route_uri.transport_parameter_present = false",
+      "actions": [
+        "Omit transport parameter from Record-Route URI unless upstream element transport support is known"
+      ],
+      "modality": "should",
+      "id": "N-S108-039"
+    },
+    {
+      "statement_id": "N-S108-40",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A RECOMMENDED mechanism to achieve this is for the proxy to append a unique identifier for the proxy instance to the user portion of the URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S108-040"
+    },
+    {
+      "statement_id": "N-S108-41",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "After performing the processing described in steps \"Aggregate Authorization Header Field Values\" through \"Record-Route\", the proxy MAY perform any feature specific manipulations on the selected response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "aggregate_auth_and_record_route_processing_complete",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Optionally perform feature-specific manipulations on selected response"
+      ],
+      "modality": "may",
+      "id": "N-S108-041"
+    },
+    {
+      "statement_id": "N-S108-42",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy MUST NOT add to, modify, or remove the message body.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_forwarding",
+      "pre_cond": null,
+      "post_cond": "response.body_modified = false & response.body_added = false & response.body_removed = false",
+      "actions": [
+        "Do not add to, modify, or remove the message body"
+      ],
+      "modality": "must",
+      "id": "N-S108-042"
+    },
+    {
+      "statement_id": "N-S108-43",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Unless otherwise specified, the proxy MUST NOT remove any header field values other than the Via header field value discussed in Section 16.7 Item 3.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_forwarding",
+      "pre_cond": null,
+      "post_cond": "response.removed_headers = via_topmost_only",
+      "actions": [
+        "Do not remove any header field values other than the topmost Via header field value"
+      ],
+      "modality": "must",
+      "id": "N-S108-043"
+    },
+    {
+      "statement_id": "N-S108-44",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "In particular, the proxy MUST NOT remove any \"received\" parameter it may have added to the next Via header field value while processing the request associated with this response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_forwarding",
+      "pre_cond": null,
+      "post_cond": "next_via.received_parameter_removed = false",
+      "actions": [
+        "Do not remove 'received' parameter from next Via header field value"
+      ],
+      "modality": "must",
+      "id": "N-S108-044"
+    },
+    {
+      "statement_id": "N-S108-45",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy MUST pass the response to the server transaction associated with the response context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_processing_complete",
+      "pre_cond": null,
+      "post_cond": "response.passed_to_server_transaction = true",
+      "actions": [
+        "Pass response to server transaction associated with response context"
+      ],
+      "modality": "must",
+      "id": "N-S108-045"
+    },
+    {
+      "statement_id": "N-S108-46",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "sip_fsm",
+      "description": "If the server transaction is no longer available to handle the transmission, the element MUST forward the response statelessly by sending it to the server transport.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_transaction_unavailable",
+      "pre_cond": "server_transaction.available = false",
+      "post_cond": "response.forwarded_statelessly = true",
+      "actions": [
+        "Forward response statelessly by sending to server transport"
+      ],
+      "modality": "must",
+      "id": "N-S108-046"
+    },
+    {
+      "statement_id": "N-S108-47",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy MUST maintain the response context until all of its associated transactions have been terminated, even after forwarding a final response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "final_response_forwarded",
+      "pre_cond": null,
+      "post_cond": "response_context.maintained = true",
+      "actions": [
+        "Maintain response context until all associated transactions are terminated"
+      ],
+      "modality": "must",
+      "id": "N-S108-047"
+    },
+    {
+      "statement_id": "N-S108-48",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the forwarded response was a final response, the proxy MUST generate a CANCEL request for all pending client transactions associated with this response context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "final_response_forwarded",
+      "pre_cond": "response.forwarded = true & response.is_final = true",
+      "post_cond": "pending_client_transactions.cancel_generated = true",
+      "actions": [
+        "Generate CANCEL request for all pending client transactions in response context"
+      ],
+      "modality": "must",
+      "id": "N-S108-048"
+    },
+    {
+      "statement_id": "N-S108-49",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A proxy SHOULD also generate a CANCEL request for all pending client transactions associated with this response context when it receives a 6xx response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S108",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "6xx_response_received",
+      "pre_cond": "response.status_class = 6xx",
+      "post_cond": "pending_client_transactions.cancel_generated = true",
+      "actions": [
+        "Generate CANCEL request for all pending client transactions in response context"
+      ],
+      "modality": "should",
+      "id": "N-S108-049"
+    }
+  ]
+}

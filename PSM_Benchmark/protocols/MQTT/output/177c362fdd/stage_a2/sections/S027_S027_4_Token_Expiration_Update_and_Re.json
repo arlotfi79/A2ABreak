@@ -1,0 +1,277 @@
+{
+  "section_id": "S027",
+  "title": "S027 4. Token Expiration, Update, and Reauthentication",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S027 4. Token Expiration, Update, and Reauthentication"
+  ],
+  "url_anchor": "#s027-4-token-expiration-update-and-reauthentication",
+  "word_count": 355,
+  "statement_count": 11,
+  "elapsed_seconds": 102.09,
+  "statements": [
+    {
+      "statement_id": "N-S027-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST check for token expiration whenever a CONNECT, PUBLISH, or SUBSCRIBE packet is received or sent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT_received | PUBLISH_received | SUBSCRIBE_received | CONNECT_sent | PUBLISH_sent | SUBSCRIBE_sent",
+      "pre_cond": null,
+      "post_cond": "token_expiration_checked = true",
+      "actions": [
+        "check_token_expiration"
+      ],
+      "modality": "must",
+      "id": "N-S027-001"
+    },
+    {
+      "statement_id": "N-S027-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker SHOULD check for token expiration on receiving a PINGREQ packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PINGREQ_received",
+      "pre_cond": null,
+      "post_cond": "token_expiration_checked = true",
+      "actions": [
+        "check_token_expiration"
+      ],
+      "modality": "should",
+      "id": "N-S027-002"
+    },
+    {
+      "statement_id": "N-S027-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MAY also check for token expiration periodically, e.g., every hour.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "periodic_timer_expired",
+      "pre_cond": null,
+      "post_cond": "token_expiration_checked = true",
+      "actions": [
+        "check_token_expiration"
+      ],
+      "modality": "may",
+      "id": "N-S027-003"
+    },
+    {
+      "statement_id": "N-S027-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MAY reauthenticate a response to PUBACK and SUBACK, which signal loss of authorization.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "Reauthenticating",
+      "trigger": "PUBACK_received | SUBACK_received",
+      "pre_cond": "packet.return_code = not_authorized",
+      "post_cond": null,
+      "actions": [
+        "initiate_reauthentication"
+      ],
+      "modality": "may",
+      "id": "N-S027-004"
+    },
+    {
+      "statement_id": "N-S027-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Clients MAY also proactively update their tokens, i.e., before they receive a packet with a \"Not authorized\" return code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "proactive_token_update_initiated",
+      "pre_cond": "not_authorized_packet_received = false",
+      "post_cond": null,
+      "actions": [
+        "update_token_proactively"
+      ],
+      "modality": "may",
+      "id": "N-S027-005"
+    },
+    {
+      "statement_id": "N-S027-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "To start reauthentication, the Client MUST send an AUTH packet with reason code 0x19 (Reauthentication).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "Reauthenticating",
+      "trigger": "initiate_reauthentication",
+      "pre_cond": null,
+      "post_cond": "AUTH_sent = true & AUTH.reason_code = 0x19",
+      "actions": [
+        "send AUTH packet with reason code 0x19 (Reauthentication)"
+      ],
+      "modality": "must",
+      "id": "N-S027-006"
+    },
+    {
+      "statement_id": "N-S027-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST set the Authentication Method as \"ace\" and transport the new token in the Authentication Data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S027-007"
+    },
+    {
+      "statement_id": "N-S027-8",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "If reauthenticating during the current TLS session, the Client MUST NOT use the method described in Section 2.2.4.2.1, i.e., proof of possession using a challenge from the TLS session, to avoid reusing the same challenge value from the TLS-Exporter.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Client"
+      ],
+      "from_state": "Reauthenticating",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "client.state = Reauthenticating & tls_session = current",
+      "post_cond": "pop_method != TLS_Exporter_challenge",
+      "actions": [
+        "do not use TLS-Exporter PoP method (Section 2.2.4.2.1)"
+      ],
+      "modality": "must",
+      "id": "N-S027-008"
+    },
+    {
+      "statement_id": "N-S027-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "For reauthentications in the same TLS-session, the Client MUST use the challenge-response PoP, as defined in Section 2.2.4.2.2.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Client"
+      ],
+      "from_state": "Reauthenticating",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "client.state = Reauthenticating & tls_session = same",
+      "post_cond": "pop_method = challenge_response_PoP",
+      "actions": [
+        "use challenge-response PoP as defined in Section 2.2.4.2.2"
+      ],
+      "modality": "must",
+      "id": "N-S027-009"
+    },
+    {
+      "statement_id": "N-S027-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Otherwise, the Broker MUST deny the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "Reauthenticating",
+      "to_state": null,
+      "trigger": "reauthentication_request_received",
+      "pre_cond": "!client.token_submitted_with_pop",
+      "post_cond": "reauthentication_request_denied = true",
+      "actions": [
+        "deny reauthentication request"
+      ],
+      "modality": "must",
+      "id": "N-S027-010"
+    },
+    {
+      "statement_id": "N-S027-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the reauthentication fails, the Broker MUST send a DISCONNECT packet with reason code 0x87 (Not Authorized).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "Reauthenticating",
+      "to_state": "Disconnected",
+      "trigger": "reauthentication_failed",
+      "pre_cond": "client.state = Reauthenticating & reauthentication_result = failed",
+      "post_cond": "DISCONNECT_sent = true & DISCONNECT.reason_code = 0x87",
+      "actions": [
+        "send DISCONNECT packet with reason code 0x87 (Not Authorized)"
+      ],
+      "modality": "must",
+      "id": "N-S027-011"
+    }
+  ]
+}

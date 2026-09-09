@@ -1,0 +1,175 @@
+{
+  "section_id": "S083",
+  "title": "S083 13.2.1 Creating the Initial INVITE",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S083 13.2.1 Creating the Initial INVITE"
+  ],
+  "url_anchor": "#s083-1321-creating-the-initial-invite",
+  "word_count": 958,
+  "statement_count": 7,
+  "elapsed_seconds": 58.76,
+  "statements": [
+    {
+      "statement_id": "D-S083-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the time indicated in the Expires header field is reached and no final answer for the INVITE has been received, the UAC core SHOULD generate a CANCEL request for the INVITE, as per Section 9.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S083",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Expires timer expired",
+      "pre_cond": "timer.expires_reached = true & transaction.final_answer_received = false",
+      "post_cond": null,
+      "actions": [
+        "generate CANCEL request for INVITE"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S083-002",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The initial offer MUST be in either an INVITE or, if not there, in the first reliable non-failure message from the UAS back to the UAC. In this specification, that is the final 2xx response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S083",
+      "object_name": "initial INVITE transaction",
+      "field_name": "initial offer",
+      "field_type": "message body",
+      "required": true,
+      "allowed_values": [
+        "INVITE",
+        "2xx response"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S083-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the initial offer is in an INVITE, the answer MUST be in a reliable non-failure message from UAS back to UAC which is correlated to that INVITE. For this specification, that is only the final 2xx response to that INVITE. The UAC MUST treat the first session description it receives as the answer, and MUST ignore any session descriptions in subsequent responses to the initial INVITE.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S083",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "2xx response received",
+      "pre_cond": "session.initial_offer_location = INVITE",
+      "post_cond": "session.answer_received = true",
+      "actions": [
+        "treat first session description received as answer",
+        "ignore subsequent session descriptions in subsequent responses to initial INVITE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S083-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the initial offer is in the first reliable non-failure message from the UAS back to UAC, the answer MUST be in the acknowledgement for that message (in this specification, ACK for a 2xx response).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S083",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ACK sent for 2xx response",
+      "pre_cond": "session.initial_offer_location = 2xx_response",
+      "post_cond": "session.answer_sent = true",
+      "actions": [
+        "include answer in ACK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S083-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "After having sent or received an answer to the first offer, the UAC MAY generate subsequent offers in requests based on rules specified for that method, but only if it has received answers to any previous offers, and has not sent any offers to which it hasn't gotten an answer.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S083",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "answer to first offer sent or received",
+      "pre_cond": "session.first_offer_answered = true & session.pending_unanswered_offer = false",
+      "post_cond": null,
+      "actions": [
+        "generate subsequent offer in request"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S083-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Once the UAS has sent or received an answer to the initial offer, it MUST NOT generate subsequent offers in any responses to the initial INVITE. This means that a UAS based on this specification alone can never generate subsequent offers until completion of the initial transaction.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S083",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "answer to initial offer sent or received by UAS",
+      "pre_cond": "session.initial_offer_answered = true",
+      "post_cond": "session.uas_may_generate_subsequent_offer_in_response = false",
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S083-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the INVITE has been created, the UAC follows the procedures defined for sending requests outside of a dialog. This results in the construction of a client transaction that will ultimately send the request and deliver responses to the UAC.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S083",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE created",
+      "pre_cond": null,
+      "post_cond": "transaction.client_transaction_created = true",
+      "actions": [
+        "construct client transaction",
+        "send INVITE request outside dialog",
+        "deliver responses to UAC"
+      ],
+      "modality": "must"
+    }
+  ]
+}

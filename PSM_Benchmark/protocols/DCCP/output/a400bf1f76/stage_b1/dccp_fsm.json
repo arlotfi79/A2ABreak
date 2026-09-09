@@ -1,0 +1,912 @@
+{
+  "stage": "dccp_fsm",
+  "states": [
+    {
+      "state_name": "CLOSED",
+      "semantic_type": "initial",
+      "actor": "endpoint",
+      "is_initial": true,
+      "is_final": true,
+      "invariant_cond": "protocol.state = CLOSED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-001",
+        "D-S075-001",
+        "D-S073-005"
+      ]
+    },
+    {
+      "state_name": "LISTEN",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = LISTEN",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-002",
+        "D-S075-002",
+        "D-S070-001"
+      ]
+    },
+    {
+      "state_name": "REQUEST",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = REQUEST",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-003",
+        "D-S075-003",
+        "D-S067-001"
+      ]
+    },
+    {
+      "state_name": "RESPOND",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = RESPOND",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-004",
+        "D-S075-004",
+        "D-S069-006"
+      ]
+    },
+    {
+      "state_name": "PARTOPEN",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = PARTOPEN",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-005",
+        "D-S075-005",
+        "D-S071-001"
+      ]
+    },
+    {
+      "state_name": "OPEN",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OPEN",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-006",
+        "D-S075-006",
+        "D-S072-001"
+      ]
+    },
+    {
+      "state_name": "CLOSEREQ",
+      "semantic_type": "closing",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = CLOSEREQ",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-007",
+        "D-S075-007",
+        "D-S073-002"
+      ]
+    },
+    {
+      "state_name": "CLOSING",
+      "semantic_type": "closing",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = CLOSING",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-008",
+        "D-S075-008",
+        "D-S073-003"
+      ]
+    },
+    {
+      "state_name": "TIMEWAIT",
+      "semantic_type": "closing",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TIMEWAIT",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-009",
+        "D-S075-009",
+        "D-S073-004"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "CLOSED",
+      "to_state": "LISTEN",
+      "trigger": "passive open",
+      "guard": "protocol.state = CLOSED",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S075-010"
+      ]
+    },
+    {
+      "from_state": "CLOSED",
+      "to_state": "REQUEST",
+      "trigger": "active open",
+      "guard": "protocol.state = CLOSED",
+      "actors": [
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send DCCP-Request"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-010",
+        "D-S066-007",
+        "D-S075-011"
+      ]
+    },
+    {
+      "from_state": "LISTEN",
+      "to_state": "RESPOND",
+      "trigger": "receive DCCP-Request",
+      "guard": "protocol.state = LISTEN",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send DCCP-Response"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-011",
+        "D-S066-008",
+        "D-S069-001",
+        "D-S075-012"
+      ]
+    },
+    {
+      "from_state": "LISTEN",
+      "to_state": "RESPOND",
+      "trigger": "receive valid InitCookie",
+      "guard": "protocol.state = LISTEN & P.contains_valid_init_cookie = true",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "create connection socket"
+      ],
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_ids": [
+        "D-S076-009"
+      ]
+    },
+    {
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "receive DCCP-Request InitCookie",
+      "guard": "protocol.state = LISTEN & init_cookie_mechanism = active",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "actions": [
+        "send Response with InitCookie"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S070-003"
+      ]
+    },
+    {
+      "from_state": "LISTEN",
+      "to_state": "CLOSED",
+      "trigger": "receive bad-service Request",
+      "guard": "protocol.state = LISTEN & message.service_code != server.service_codes",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DCCP-Reset"
+      ],
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_ids": [
+        "N-S068-005"
+      ]
+    },
+    {
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "receive reserved-code Request",
+      "guard": "protocol.state = LISTEN & message.service_code = 4294967295",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DCCP-Reset"
+      ],
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_ids": [
+        "N-S068-009"
+      ]
+    },
+    {
+      "from_state": "LISTEN",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive valid DCCP-Reset",
+      "guard": "protocol.state = LISTEN",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S075-022",
+        "D-S076-015"
+      ]
+    },
+    {
+      "from_state": "REQUEST",
+      "to_state": "PARTOPEN",
+      "trigger": "receive DCCP-Response",
+      "guard": "protocol.state = REQUEST",
+      "actors": [
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send DCCP-Ack"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-012",
+        "D-S066-009",
+        "D-S075-013",
+        "D-S076-012"
+      ]
+    },
+    {
+      "from_state": "REQUEST",
+      "to_state": "REQUEST",
+      "trigger": "timeout retransmission",
+      "guard": "protocol.state = REQUEST & response_received = false",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "actions": [
+        "retransmit DCCP-Request"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S067-002",
+        "N-S067-003",
+        "N-S067-004"
+      ]
+    },
+    {
+      "from_state": "REQUEST",
+      "to_state": "REQUEST",
+      "trigger": "receive DCCP-Sync",
+      "guard": "protocol.state = REQUEST",
+      "actors": [
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send DCCP-Reset"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S058-006",
+        "N-S056-008"
+      ]
+    },
+    {
+      "from_state": "REQUEST",
+      "to_state": "CLOSED",
+      "trigger": "cond client abandons",
+      "guard": "protocol.state = REQUEST & client_giving_up = true",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "actions": [
+        "send DCCP-Reset"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S067-006"
+      ]
+    },
+    {
+      "from_state": "REQUEST",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive valid DCCP-Reset",
+      "guard": "protocol.state = REQUEST",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S075-022",
+        "D-S076-015"
+      ]
+    },
+    {
+      "from_state": "RESPOND",
+      "to_state": "OPEN",
+      "trigger": "receive Ack",
+      "guard": "protocol.state = RESPOND",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S066-010",
+        "D-S069-004",
+        "D-S075-014",
+        "D-S076-011"
+      ]
+    },
+    {
+      "from_state": "RESPOND",
+      "to_state": "RESPOND",
+      "trigger": "receive DCCP-Request",
+      "guard": "protocol.state = RESPOND & P.type = Request",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DCCP-Response"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S076-010",
+        "N-S069-004"
+      ]
+    },
+    {
+      "from_state": "RESPOND",
+      "to_state": "CLOSED",
+      "trigger": "timeout 4MSL",
+      "guard": "protocol.state = RESPOND & timer.elapsed >= 4MSL",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_ids": [
+        "N-S069-009"
+      ]
+    },
+    {
+      "from_state": "RESPOND",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive valid DCCP-Reset",
+      "guard": "protocol.state = RESPOND",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S075-022",
+        "D-S076-015"
+      ]
+    },
+    {
+      "from_state": "PARTOPEN",
+      "to_state": "OPEN",
+      "trigger": "receive valid packet",
+      "guard": "protocol.state = PARTOPEN & P.type != Response & P.type != Reset & P.type != Sync",
+      "actors": [
+        "client"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S071-003",
+        "D-S075-015",
+        "D-S076-014"
+      ]
+    },
+    {
+      "from_state": "PARTOPEN",
+      "to_state": "PARTOPEN",
+      "trigger": "timeout retransmission",
+      "guard": "protocol.state = PARTOPEN",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "actions": [
+        "send DCCP-Ack",
+        "back off timer"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S071-005",
+        "N-S071-003"
+      ]
+    },
+    {
+      "from_state": "PARTOPEN",
+      "to_state": "PARTOPEN",
+      "trigger": "receive DCCP-Response",
+      "guard": "protocol.state = PARTOPEN & P.type = Response",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DCCP-Ack"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S076-013"
+      ]
+    },
+    {
+      "from_state": "PARTOPEN",
+      "to_state": "CLOSED",
+      "trigger": "timeout 4MSL",
+      "guard": "protocol.state = PARTOPEN & timer.elapsed > 4MSL",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "actions": [
+        "send DCCP-Reset"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S071-004"
+      ]
+    },
+    {
+      "from_state": "PARTOPEN",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive valid DCCP-Reset",
+      "guard": "protocol.state = PARTOPEN",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S075-022",
+        "D-S076-015"
+      ]
+    },
+    {
+      "from_state": "PARTOPEN",
+      "to_state": "CLOSING",
+      "trigger": "receive DCCP-CloseReq",
+      "guard": "protocol.state = PARTOPEN & protocol.state < CLOSEREQ",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DCCP-Close"
+      ],
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-S076-017"
+      ]
+    },
+    {
+      "from_state": "OPEN",
+      "to_state": "CLOSEREQ",
+      "trigger": "server active close",
+      "guard": "protocol.state = OPEN & endpoint.role = server",
+      "actors": [
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send DCCP-CloseReq"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S073-006",
+        "D-S075-016"
+      ]
+    },
+    {
+      "from_state": "OPEN",
+      "to_state": "CLOSING",
+      "trigger": "receive DCCP-CloseReq",
+      "guard": "protocol.state = OPEN",
+      "actors": [
+        "client"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DCCP-Close"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-016",
+        "D-S073-007",
+        "D-S075-017",
+        "N-S073-001"
+      ]
+    },
+    {
+      "from_state": "OPEN",
+      "to_state": "CLOSING",
+      "trigger": "active close",
+      "guard": "protocol.state = OPEN",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send DCCP-Close"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S073-011",
+        "D-S073-013",
+        "D-S075-017"
+      ]
+    },
+    {
+      "from_state": "OPEN",
+      "to_state": "CLOSED",
+      "trigger": "receive DCCP-Close",
+      "guard": "protocol.state = OPEN",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DCCP-Reset"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S073-012",
+        "D-S073-014",
+        "D-S075-018"
+      ]
+    },
+    {
+      "from_state": "OPEN",
+      "to_state": "CLOSED",
+      "trigger": "receive DCCP-Reset",
+      "guard": "protocol.state = OPEN",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "abort connection"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S058-007"
+      ]
+    },
+    {
+      "from_state": "OPEN",
+      "to_state": "OPEN",
+      "trigger": "receive DCCP-Sync",
+      "guard": "protocol.state = OPEN & packet.type = DCCP-Sync & packet.valid = true",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DCCP-SyncAck"
+      ],
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_ids": [
+        "N-S072-001",
+        "D-S056-007"
+      ]
+    },
+    {
+      "from_state": "OPEN",
+      "to_state": "OPEN",
+      "trigger": "receive out-of-range Request",
+      "guard": "protocol.state = OPEN & received_seqno out of sequence_window",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send DCCP-Sync"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S058-005"
+      ]
+    },
+    {
+      "from_state": "OPEN",
+      "to_state": "OPEN",
+      "trigger": "receive early data",
+      "guard": "protocol.state = OPEN & feature_negotiation.complete = false",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "should",
+      "actions": [
+        "reject received data"
+      ],
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S072-003",
+        "N-S072-003"
+      ]
+    },
+    {
+      "from_state": "OPEN",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive valid DCCP-Reset",
+      "guard": "protocol.state = OPEN",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S075-022",
+        "D-S076-015"
+      ]
+    },
+    {
+      "from_state": "CLOSEREQ",
+      "to_state": "CLOSED",
+      "trigger": "receive DCCP-Close",
+      "guard": "protocol.state = CLOSEREQ",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "send DCCP-Reset"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-017",
+        "D-S073-008",
+        "D-S075-019"
+      ]
+    },
+    {
+      "from_state": "CLOSEREQ",
+      "to_state": "CLOSEREQ",
+      "trigger": "timeout retransmission",
+      "guard": "protocol.state = CLOSEREQ",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "actions": [
+        "retransmit DCCP-CloseReq"
+      ],
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_ids": [
+        "N-S073-004"
+      ]
+    },
+    {
+      "from_state": "CLOSEREQ",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive valid DCCP-Reset",
+      "guard": "protocol.state = CLOSEREQ",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-S075-022",
+        "D-S076-015"
+      ]
+    },
+    {
+      "from_state": "CLOSING",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive DCCP-Reset",
+      "guard": "protocol.state = CLOSING",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-018",
+        "D-S073-009",
+        "D-S073-015",
+        "D-S075-020"
+      ]
+    },
+    {
+      "from_state": "CLOSING",
+      "to_state": "CLOSED",
+      "trigger": "cond teardown complete",
+      "guard": "protocol.state = CLOSING",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "can",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_ids": [
+        "D-S013-021"
+      ]
+    },
+    {
+      "from_state": "CLOSING",
+      "to_state": "CLOSING",
+      "trigger": "timeout retransmission",
+      "guard": "protocol.state = CLOSING",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "retransmit DCCP-Close"
+      ],
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_ids": [
+        "N-S073-004"
+      ]
+    },
+    {
+      "from_state": "TIMEWAIT",
+      "to_state": "CLOSED",
+      "trigger": "timeout 2MSL",
+      "guard": "protocol.state = TIMEWAIT",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S013-019",
+        "D-S073-010",
+        "D-S073-016",
+        "D-S075-021"
+      ]
+    },
+    {
+      "from_state": "TIMEWAIT",
+      "to_state": "TIMEWAIT",
+      "trigger": "receive any packet",
+      "guard": "protocol.state = TIMEWAIT",
+      "actors": [
+        "endpoint"
+      ],
+      "modality": "must",
+      "actions": [
+        "generate Reset if needed"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S076-016"
+      ]
+    }
+  ],
+  "inter_stage": {
+    "entry_from_previous": [],
+    "exit_to_next": []
+  },
+  "discarded_states": [
+    "initiation (D-S010-001): phase label, not a protocol connection state",
+    "AWAITING_CONFIRM (D-S038-006): feature negotiation condition, not connection FSM state",
+    "STABLE (D-S039-001): feature negotiation per-feature sub-FSM state",
+    "CHANGING (D-S039-002): feature negotiation per-feature sub-FSM state",
+    "UNSTABLE (D-S039-003): feature negotiation per-feature sub-FSM state",
+    "quiescent (D-S091-003): data flow activity description, not connection state",
+    "AckVector_State_0 (D-S095-001): ack vector per-packet tracking state",
+    "AckVector_State_1 (D-S095-002): ack vector per-packet tracking state",
+    "AckVector_State_3 (D-S095-003): ack vector per-packet tracking state"
+  ],
+  "unresolved": [
+    "D-S024-003: REQUEST receives unexpected packet type, sends Reset with code 4; to_state not specified, CLOSED inferred but uncertain given D-S058-006 shows REQUEST stays after some Resets",
+    "D-S073-020: General rule that sending DCCP-Reset transitions to CLOSED; from_state unspecified so cannot enumerate all per-state transitions",
+    "N-S028-001: Any active state to CLOSED on Mandatory option with unprocessable option O; from_state not specified per state",
+    "D-S046-001 through D-S046-003: Any state to CLOSED on Mandatory Change option failures; from_state not specified per state",
+    "N-S069-001: RESPOND to unspecified state when server refuses connection by sending Reset; to_state null",
+    "D-S076-017: States LISTEN, REQUEST, RESPOND to CLOSING on receive CloseReq; grounded by precondition state < CLOSEREQ but not individually confirmed for these states",
+    "D-S076-018: Receive Close from states other than OPEN and CLOSEREQ generates Reset and tears down; from_states not individually grounded"
+  ],
+  "gaps": [
+    "Feature negotiation sub-FSM (STABLE/CHANGING/UNSTABLE per-feature states with 12 transitions from S039-S044) exists as a separate state machine not integrated into the main connection FSM",
+    "AckVector state machine (State_0/State_1/State_3 with transitions from S095) operates at per-packet level, not integrated into connection FSM",
+    "Non-determinism at OPEN on receive DCCP-Reset: D-S058-007 specifies OPEN to CLOSED (crash abort scenario) while D-S075-022 specifies OPEN to TIMEWAIT (general valid Reset); both included with different trigger wording",
+    "Error transitions via Reset from arbitrary states to CLOSED (Mandatory option errors, invalid options, aggression penalty) are stated with null from_state and not enumerated per source state",
+    "Simultaneous close scenarios where both endpoints send DCCP-Close concurrently are not explicitly modeled as distinct transitions",
+    "SERVER-OPEN referenced in D-S013-015 as from_state is treated as alias for OPEN with server role guard; no separate state added"
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "section_id": "S077",
+  "title": "S077 6.4.4 SEARCH Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S077 6.4.4 SEARCH Command"
+  ],
+  "url_anchor": "#s077-644-search-command",
+  "word_count": 1760,
+  "statement_count": 7,
+  "elapsed_seconds": 70.25,
+  "statements": [
+    {
+      "statement_id": "D-S077-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: OK - search completed; OPTIONAL untagged response: ESEARCH",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S077",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH command received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send untagged ESEARCH response",
+        "send tagged OK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S077-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Any options not defined by extensions that the server supports MUST be rejected with a BAD response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S077",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH command with unsupported result option",
+      "pre_cond": "search.result_option = unsupported",
+      "post_cond": null,
+      "actions": [
+        "send tagged BAD response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S077-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server does not support the specified [CHARSET], it MUST return a tagged NO response (not a BAD). This response SHOULD contain the BADCHARSET response code, which MAY list the CHARSETs supported by the server.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S077",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH command with unsupported CHARSET",
+      "pre_cond": "search.charset = unsupported",
+      "post_cond": null,
+      "actions": [
+        "send tagged NO response",
+        "include BADCHARSET response code"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S077-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "SAVE - This option tells the server to remember the result of the SEARCH or UID SEARCH command and store it in an internal variable that we will reference as the 'search result variable'.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S077",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH command with SAVE result option",
+      "pre_cond": "search.result_options.contains(SAVE)",
+      "post_cond": "session.search_result_variable = search_results",
+      "actions": [
+        "store search results in search result variable"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S077-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The client can use the '$' marker to reference the content of this internal variable. The '$' marker can be used instead of message sequence or UID sequence in order to indicate that the server should substitute it with the list of messages from the search result variable.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S077",
+      "object_name": "session",
+      "field_name": "search_result_variable",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S077-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the SEARCH results in no matches, the server MUST NOT include the MIN result option in the ESEARCH response; however, it still MUST send the ESEARCH response. (Applies equally to MAX and ALL result options.)",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S077",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH command returns no matches",
+      "pre_cond": "search.result_count = 0",
+      "post_cond": null,
+      "actions": [
+        "send ESEARCH response",
+        "omit MIN/MAX/ALL result options from ESEARCH"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S077-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In absence of any other SEARCH result option, the SAVE result option also suppresses any ESEARCH response that would have been otherwise returned by the SEARCH command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S077",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SEARCH command with SAVE as sole result option",
+      "pre_cond": "search.result_options = {SAVE}",
+      "post_cond": "session.search_result_variable = search_results",
+      "actions": [
+        "store results in search result variable",
+        "suppress ESEARCH response"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

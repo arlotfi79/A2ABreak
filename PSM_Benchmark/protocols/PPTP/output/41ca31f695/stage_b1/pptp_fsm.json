@@ -1,0 +1,955 @@
+{
+  "stage": "pptp_fsm",
+  "states": [
+    {
+      "state_name": "idle",
+      "semantic_type": "initial",
+      "actor": "endpoint",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "connection.state = idle",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S027-001",
+        "D-S005-001",
+        "D-S028-001",
+        "D-S035-001",
+        "D-S036-001",
+        "D-S038-001",
+        "D-S039-001"
+      ]
+    },
+    {
+      "state_name": "wait_ctl_reply",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "tcp_connection.established = true & control_connection.established = false",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S027-002",
+        "D-S005-002"
+      ]
+    },
+    {
+      "state_name": "established",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "control_connection.established = true",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S027-003",
+        "D-S005-003",
+        "D-S028-002",
+        "D-S030-001",
+        "D-S034-001",
+        "D-S035-003",
+        "D-S036-003",
+        "D-S038-003",
+        "D-S039-003"
+      ]
+    },
+    {
+      "state_name": "wait_stop_reply",
+      "semantic_type": "closing",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = wait_stop_reply",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S027-004",
+        "D-S028-003"
+      ]
+    },
+    {
+      "state_name": "wait_reply",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = wait_reply",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-002",
+        "D-S039-002"
+      ]
+    },
+    {
+      "state_name": "wait_connect",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = wait_connect",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S036-002"
+      ]
+    },
+    {
+      "state_name": "wait_cs_ans",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "pac_outgoing_call.state = wait_cs_ans",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S038-002"
+      ]
+    },
+    {
+      "state_name": "wait_disconnect",
+      "semantic_type": "closing",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = wait_disconnect",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S036-004",
+        "D-S039-004"
+      ]
+    },
+    {
+      "state_name": "closed",
+      "semantic_type": "terminal",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "connection.state = closed",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "N-S030-004",
+        "D-S025-001",
+        "D-S012-002"
+      ]
+    },
+    {
+      "state_name": "known_state",
+      "semantic_type": "error",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = known_state",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-S025-004"
+      ]
+    },
+    {
+      "state_name": "collision",
+      "semantic_type": "active",
+      "actor": "endpoint",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "peer.start_request_sent = true & peer.start_request_received = true",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_ids": [
+        "D-S029-002"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "idle",
+      "to_state": "wait_ctl_reply",
+      "trigger": "cond TCP established",
+      "guard": "protocol.state = idle",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "modality": "must",
+      "actions": [
+        "send StartCtlConnRequest"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S005-004",
+        "D-S027-005"
+      ]
+    },
+    {
+      "from_state": "wait_ctl_reply",
+      "to_state": "established",
+      "trigger": "receive StartCtlReply ok",
+      "guard": "protocol.state = wait_ctl_reply & reply.version.supported = true",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "modality": "may",
+      "actions": [
+        "establish control connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S005-005",
+        "D-S027-007"
+      ]
+    },
+    {
+      "from_state": "wait_ctl_reply",
+      "to_state": "idle",
+      "trigger": "cond collision detected",
+      "guard": "protocol.state = wait_ctl_reply",
+      "actors": [
+        "originator"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "close TCP"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S027-006"
+      ]
+    },
+    {
+      "from_state": "wait_ctl_reply",
+      "to_state": "wait_stop_reply",
+      "trigger": "receive StartCtlReply unsupported",
+      "guard": "protocol.state = wait_ctl_reply & reply.version.supported = false",
+      "actors": [
+        "originator"
+      ],
+      "modality": "should",
+      "actions": [
+        "send StopCtlConnRequest"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S027-002"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "wait_stop_reply",
+      "trigger": "cond local terminate",
+      "guard": "protocol.state = established & local_termination = true",
+      "actors": [
+        "originator",
+        "receiver"
+      ],
+      "modality": "must",
+      "actions": [
+        "send StopCtlConnRequest"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S027-003",
+        "D-S028-008"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "receive StopCtlConnRequest",
+      "guard": "protocol.state = established",
+      "actors": [
+        "originator"
+      ],
+      "modality": "should",
+      "actions": [
+        "send StopCtlConnReply",
+        "close TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S027-004",
+        "N-S028-005"
+      ]
+    },
+    {
+      "from_state": "wait_stop_reply",
+      "to_state": "idle",
+      "trigger": "receive StopCtlConnReply",
+      "guard": "protocol.state = wait_stop_reply",
+      "actors": [
+        "originator",
+        "receiver"
+      ],
+      "modality": "should",
+      "actions": [
+        "close TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S027-012",
+        "N-S027-005",
+        "D-S028-009"
+      ]
+    },
+    {
+      "from_state": "idle",
+      "to_state": "idle",
+      "trigger": "receive StartCtlReq unsupported",
+      "guard": "protocol.state = idle & received.version.supported = false",
+      "actors": [
+        "receiver"
+      ],
+      "modality": "should",
+      "actions": [
+        "send StartCtlConnReply error",
+        "close TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S028-004",
+        "N-S028-002"
+      ]
+    },
+    {
+      "from_state": "idle",
+      "to_state": "established",
+      "trigger": "receive StartCtlConnReq ok",
+      "guard": "protocol.state = idle & received.version.supported = true",
+      "actors": [
+        "receiver"
+      ],
+      "modality": "should",
+      "actions": [
+        "send StartCtlConnReply"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S028-003"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "timeout echo failure",
+      "guard": "protocol.state = established",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "detect echo timeout"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S005-008"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "closed",
+      "trigger": "timeout echo reply",
+      "guard": "protocol.state = established & Echo-Request.sent = true & Echo-Reply.received = false",
+      "actors": [
+        "peer"
+      ],
+      "modality": "should",
+      "actions": [
+        "close control connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S030-004"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "established",
+      "trigger": "timeout no message",
+      "guard": "protocol.state = established & timer.no_message_elapsed >= 60",
+      "actors": [
+        "peer"
+      ],
+      "modality": "should",
+      "actions": [
+        "send EchoRequest"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S030-003"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "receive StartCtlReq duplicate",
+      "guard": "protocol.state = established",
+      "actors": [
+        "receiver"
+      ],
+      "modality": "should",
+      "actions": [
+        "send StopCtlConnReply",
+        "close TCP connection"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S028-006"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "established",
+      "trigger": "receive SetLinkInfo",
+      "guard": "protocol.state = established",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "must",
+      "actions": [
+        "update call information",
+        "perform PPP negotiation"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S023-001"
+      ]
+    },
+    {
+      "from_state": "idle",
+      "to_state": "wait_reply",
+      "trigger": "cond ring detected",
+      "guard": "protocol.state = idle",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send IncomingCallRequest"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-004"
+      ]
+    },
+    {
+      "from_state": "wait_reply",
+      "to_state": "idle",
+      "trigger": "receive InCallReply reject",
+      "guard": "protocol.state = wait_reply",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-005"
+      ]
+    },
+    {
+      "from_state": "wait_reply",
+      "to_state": "idle",
+      "trigger": "cond abort",
+      "guard": "protocol.state = wait_reply",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send CallDisconnectNotify"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-006"
+      ]
+    },
+    {
+      "from_state": "wait_reply",
+      "to_state": "established",
+      "trigger": "receive InCallReply accept",
+      "guard": "protocol.state = wait_reply",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "answer call",
+        "send IncomingCallConnected"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-007"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "receive CallClearRequest",
+      "guard": "protocol.state = established",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "modality": "should",
+      "actions": [
+        "send CallDisconnectNotify"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-008",
+        "D-S038-009",
+        "N-S038-001"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "cond telco dropped",
+      "guard": "protocol.state = established",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "should",
+      "actions": [
+        "send CallDisconnectNotify"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-008",
+        "D-S038-009",
+        "N-S038-002"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "cond local disconnect",
+      "guard": "protocol.state = established",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "may",
+      "actions": [
+        "send CallDisconnectNotify"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S035-008",
+        "N-S035-001"
+      ]
+    },
+    {
+      "from_state": "idle",
+      "to_state": "idle",
+      "trigger": "receive InCallReq rejected",
+      "guard": "protocol.state = idle & incoming_call_request.acceptable = false",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send IncomingCallReply error"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S036-005"
+      ]
+    },
+    {
+      "from_state": "idle",
+      "to_state": "wait_connect",
+      "trigger": "receive InCallReq accepted",
+      "guard": "protocol.state = idle & incoming_call_request.acceptable = true",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send IncomingCallReply ok"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S036-006"
+      ]
+    },
+    {
+      "from_state": "wait_connect",
+      "to_state": "established",
+      "trigger": "receive InCallConnected",
+      "guard": "protocol.state = wait_connect",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S036-007"
+      ]
+    },
+    {
+      "from_state": "wait_connect",
+      "to_state": "idle",
+      "trigger": "cond caller fail",
+      "guard": "protocol.state = wait_connect & incoming_caller.connected = false",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "modality": "may",
+      "actions": [
+        "send CallDisconnectNotify"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-S036-001"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "receive CallDisconnectNotify",
+      "guard": "protocol.state = established",
+      "actors": [
+        "PNS"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S036-009",
+        "D-S039-009"
+      ]
+    },
+    {
+      "from_state": "established",
+      "to_state": "wait_disconnect",
+      "trigger": "cond local terminate",
+      "guard": "protocol.state = established",
+      "actors": [
+        "PNS"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send CallClearRequest"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S036-010",
+        "D-S039-010",
+        "D-S034-007"
+      ]
+    },
+    {
+      "from_state": "wait_disconnect",
+      "to_state": "idle",
+      "trigger": "receive CallDisconnectNotify",
+      "guard": "protocol.state = wait_disconnect",
+      "actors": [
+        "PNS"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S036-011",
+        "D-S039-011"
+      ]
+    },
+    {
+      "from_state": "idle",
+      "to_state": "idle",
+      "trigger": "receive OutCallReq error",
+      "guard": "protocol.state = idle",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send OutgoingCallReply error"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S038-004"
+      ]
+    },
+    {
+      "from_state": "idle",
+      "to_state": "wait_cs_ans",
+      "trigger": "receive OutCallReq valid",
+      "guard": "protocol.state = idle",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "allocate physical channel",
+        "dial outbound call"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S038-005"
+      ]
+    },
+    {
+      "from_state": "wait_cs_ans",
+      "to_state": "idle",
+      "trigger": "cond incomplete call",
+      "guard": "protocol.state = wait_cs_ans",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send OutgoingCallReply error"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S038-006"
+      ]
+    },
+    {
+      "from_state": "wait_cs_ans",
+      "to_state": "idle",
+      "trigger": "receive CallClearRequest",
+      "guard": "protocol.state = wait_cs_ans",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send CallDisconnectNotify"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S038-007"
+      ]
+    },
+    {
+      "from_state": "wait_cs_ans",
+      "to_state": "established",
+      "trigger": "cond telco answer",
+      "guard": "protocol.state = wait_cs_ans",
+      "actors": [
+        "PAC"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send OutgoingCallReply ok"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S038-008"
+      ]
+    },
+    {
+      "from_state": "idle",
+      "to_state": "wait_reply",
+      "trigger": "cond open indication",
+      "guard": "protocol.state = idle",
+      "actors": [
+        "PNS"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send OutgoingCallRequest"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S039-005"
+      ]
+    },
+    {
+      "from_state": "wait_reply",
+      "to_state": "idle",
+      "trigger": "receive OutCallReply error",
+      "guard": "protocol.state = wait_reply",
+      "actors": [
+        "PNS"
+      ],
+      "modality": "unspecified",
+      "actions": [],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S039-006"
+      ]
+    },
+    {
+      "from_state": "wait_reply",
+      "to_state": "established",
+      "trigger": "receive OutCallReply ok",
+      "guard": "protocol.state = wait_reply",
+      "actors": [
+        "PNS"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "connect telco call"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S039-007"
+      ]
+    },
+    {
+      "from_state": "wait_reply",
+      "to_state": "wait_disconnect",
+      "trigger": "cond abort",
+      "guard": "protocol.state = wait_reply",
+      "actors": [
+        "PNS"
+      ],
+      "modality": "unspecified",
+      "actions": [
+        "send CallClearRequest"
+      ],
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-S039-008"
+      ]
+    }
+  ],
+  "inter_stage": {
+    "entry_from_previous": [],
+    "exit_to_next": []
+  },
+  "discarded_states": [
+    "D-S003-003: null state_name, not a protocol state",
+    "D-S006-001: null state_name, not a protocol state",
+    "D-S010-001: null state_name, not a protocol state",
+    "D-S011-001: null state_name, not a protocol state",
+    "D-S020-001: null state_name, not a protocol state",
+    "D-S049-001: null state_name, not a protocol state",
+    "D-S032-001: idle duplicate merged into canonical idle",
+    "Connected (D-S016-002): alias merged into established",
+    "ESTABLISHED (N-S005-001): alias merged into established",
+    "active PPP session (N-S023-001): alias merged into established",
+    "collision_detected (N-S029-002): alias merged into collision",
+    "SESSION_INITIATED (N-S005-002): behavioral label only, not a defined FSM state",
+    "RELEASED (N-S005-004): behavioral label only, not a defined FSM state",
+    "session_created (D-S003-001): transition-only reference with null from_state, insufficiently grounded"
+  ],
+  "unresolved": [
+    {
+      "id": "D-S003-001",
+      "description": "null -> session_created on PPP connection attempted",
+      "reason": "from_state is null; session_created not grounded as a protocol FSM state"
+    },
+    {
+      "id": "D-S013-001",
+      "description": "null -> null on Echo-Request received, action send Echo-Reply",
+      "reason": "Both from_state and to_state null; likely established self-loop but not explicitly stated"
+    },
+    {
+      "id": "D-S013-002",
+      "description": "null -> null on Echo-Reply not received, action clear control connection",
+      "reason": "Both from_state and to_state null; overlaps with timeout echo transitions"
+    },
+    {
+      "id": "D-S025-001",
+      "description": "null -> closed on reply_timeout_60s",
+      "reason": "from_state null; could apply to multiple waiting states"
+    },
+    {
+      "id": "N-S025-003",
+      "description": "null -> known_state on receipt of invalid control message",
+      "reason": "from_state null; could apply to any active state"
+    },
+    {
+      "id": "D-S029-002",
+      "description": "null -> collision on SCCR received while SCCR already sent",
+      "reason": "from_state null; logically wait_ctl_reply but not explicitly stated"
+    },
+    {
+      "id": "D-S029-003",
+      "description": "collision -> null on loser resolution (lower IP)",
+      "reason": "to_state null; loser closes TCP and sends reply but target state unspecified"
+    },
+    {
+      "id": "D-S029-004",
+      "description": "collision -> null on winner resolution (higher IP)",
+      "reason": "to_state null; winner waits for reply but target state unspecified"
+    },
+    {
+      "id": "N-S030-002",
+      "description": "null -> closed on 60s timer expired awaiting SCCR or reply",
+      "reason": "from_state null; applies to non-established states"
+    },
+    {
+      "id": "N-S032-004",
+      "description": "null -> closed on state_transition_timeout",
+      "reason": "from_state null; applies to any non-idle non-established state"
+    },
+    {
+      "id": "D-S034-006",
+      "description": "established -> null on dialed-in client hangs up",
+      "reason": "to_state null; likely idle but not explicitly stated"
+    },
+    {
+      "id": "N-S005-003",
+      "description": "established -> null on session characteristics changed, action send SetLinkInfo",
+      "reason": "to_state null; likely established self-loop but not explicitly stated"
+    },
+    {
+      "id": "D-S012-002",
+      "description": "null -> closed on StopCtlConnReply with Result Code 1",
+      "reason": "from_state null; logically wait_stop_reply but conflicts with wait_stop_reply -> idle in S027/S028"
+    }
+  ],
+  "gaps": [
+    "Six sub-FSMs (control connection originator/receiver, PAC/PNS incoming call, PAC/PNS outgoing call) are combined; same from_state and trigger may reach different to_states (non-determinism at cond local terminate, cond abort)",
+    "No outgoing transitions defined from closed state; spec implies restart is possible but no explicit transition to idle",
+    "No outgoing transitions defined from known_state; spec actions mention restart but no explicit target state",
+    "Collision state has no complete transition path; entry and exit states are unresolved",
+    "Echo-Request reception and Echo-Reply response lack explicit state context in input",
+    "Timeout-based transitions to closed from waiting states have null from_states; applicable source states undetermined",
+    "Result-code-specific behaviors for OutgoingCallReply (codes 2-7) and StartCtlConnReply (codes 2-5) not modeled as separate transitions"
+  ]
+}

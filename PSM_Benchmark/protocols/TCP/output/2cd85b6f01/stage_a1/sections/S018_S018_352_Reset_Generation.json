@@ -1,0 +1,132 @@
+{
+  "section_id": "S018",
+  "title": "S018 3.5.2 Reset Generation",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S018 3.5.2 Reset Generation"
+  ],
+  "url_anchor": "#s018-352-reset-generation",
+  "word_count": 429,
+  "statement_count": 5,
+  "elapsed_seconds": 83.4,
+  "statements": [
+    {
+      "statement_id": "D-S018-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "The side of a connection issuing a reset should enter the TIME-WAIT state, as this generally helps to reduce the load on busy servers.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S018",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "TIME-WAIT",
+      "trigger": "reset issued",
+      "pre_cond": null,
+      "post_cond": "protocol.state = TIME-WAIT",
+      "actions": [
+        "send RST",
+        "enter TIME-WAIT"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S018-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the connection does not exist (CLOSED), then a reset is sent in response to any incoming segment except another reset. The connection remains in the CLOSED state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S018",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CLOSED",
+      "to_state": "CLOSED",
+      "trigger": "incoming segment received",
+      "pre_cond": "protocol.state = CLOSED & segment.RST = 0",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "send RST"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S018-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the connection is in any non-synchronized state (LISTEN, SYN-SENT, SYN-RECEIVED), and the incoming segment acknowledges something not yet sent (unacceptable ACK), or has a mismatched security level or compartment, a reset is sent. The connection remains in the same state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S018",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "LISTEN | SYN-SENT | SYN-RECEIVED",
+      "to_state": null,
+      "trigger": "unacceptable ACK received | security mismatch",
+      "pre_cond": "(protocol.state = LISTEN | protocol.state = SYN-SENT | protocol.state = SYN-RECEIVED) & (segment.ACK = unacceptable | segment.security != connection.security)",
+      "post_cond": null,
+      "actions": [
+        "send RST"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S018-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the connection is in a synchronized state (ESTABLISHED, FIN-WAIT-1, FIN-WAIT-2, CLOSE-WAIT, CLOSING, LAST-ACK, TIME-WAIT), any unacceptable segment must be responded to with an empty acknowledgment segment containing the current send sequence number and the next sequence number expected to be received, and the connection remains in the same state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S018",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "ESTABLISHED | FIN-WAIT-1 | FIN-WAIT-2 | CLOSE-WAIT | CLOSING | LAST-ACK | TIME-WAIT",
+      "to_state": null,
+      "trigger": "unacceptable segment received",
+      "pre_cond": "(protocol.state = ESTABLISHED | protocol.state = FIN-WAIT-1 | protocol.state = FIN-WAIT-2 | protocol.state = CLOSE-WAIT | protocol.state = CLOSING | protocol.state = LAST-ACK | protocol.state = TIME-WAIT) & segment.unacceptable = 1",
+      "post_cond": null,
+      "actions": [
+        "send empty ACK with current SND.NXT and RCV.NXT"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S018-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the connection is in a synchronized state (ESTABLISHED, FIN-WAIT-1, FIN-WAIT-2, CLOSE-WAIT, CLOSING, LAST-ACK, TIME-WAIT) and an incoming segment has a security level or compartment that does not exactly match the level and compartment requested for the connection, a reset is sent and the connection goes to the CLOSED state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S018",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "ESTABLISHED | FIN-WAIT-1 | FIN-WAIT-2 | CLOSE-WAIT | CLOSING | LAST-ACK | TIME-WAIT",
+      "to_state": "CLOSED",
+      "trigger": "security mismatch on incoming segment",
+      "pre_cond": "(protocol.state = ESTABLISHED | protocol.state = FIN-WAIT-1 | protocol.state = FIN-WAIT-2 | protocol.state = CLOSE-WAIT | protocol.state = CLOSING | protocol.state = LAST-ACK | protocol.state = TIME-WAIT) & segment.security != connection.security",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "send RST with SEQ from incoming segment ACK field",
+        "enter CLOSED"
+      ],
+      "modality": "must"
+    }
+  ]
+}

@@ -1,0 +1,605 @@
+{
+ "proto": "MQTT",
+ "system": "ours",
+ "gt_states": 12,
+ "gt_transitions": 17,
+ "cand_states": 37,
+ "cand_transitions": 57,
+ "states_matched": 10,
+ "states_P": 0.2703,
+ "states_R": 0.8333,
+ "states_F1": 0.4082,
+ "trans_matched": 8,
+ "trans_P": 0.1404,
+ "trans_R": 0.4706,
+ "trans_F1": 0.2162,
+ "unmatched_classes": {
+  "real_behavior_not_in_gt": 38,
+  "duplicate_or_alias": 10
+ },
+ "tokens_in": 4963,
+ "tokens_out": 4721,
+ "cost": 0.14284000000000002,
+ "seconds": 70.8,
+ "raw": {
+  "state_matches": [
+   {
+    "gt": "Disconnected",
+    "candidate": "NewSession",
+    "confidence": 0.7,
+    "reason": "Both are the initial state before any connection/token activity"
+   },
+   {
+    "gt": "Waiting for Token",
+    "candidate": null,
+    "confidence": 0.9,
+    "reason": "No candidate state clearly represents waiting for token request"
+   },
+   {
+    "gt": "Token Requested",
+    "candidate": null,
+    "confidence": 0.9,
+    "reason": "No candidate state represents the pending token request phase"
+   },
+   {
+    "gt": "Token Received",
+    "candidate": "TokenObtained",
+    "confidence": 0.95,
+    "reason": "Both represent having received/obtained the access token from AS"
+   },
+   {
+    "gt": "Awaiting CONNACK",
+    "candidate": "WaitingForConnack",
+    "confidence": 0.9,
+    "reason": "Both represent waiting for CONNACK from broker"
+   },
+   {
+    "gt": "Authenticating",
+    "candidate": "Connecting",
+    "confidence": 0.6,
+    "reason": "Both represent the phase where connection request with token is being processed"
+   },
+   {
+    "gt": "Token Validating",
+    "candidate": "TokenValidation",
+    "confidence": 0.95,
+    "reason": "Both represent broker validating the token"
+   },
+   {
+    "gt": "Connected",
+    "candidate": "Connected",
+    "confidence": 1.0,
+    "reason": "Same name and meaning - active MQTT session"
+   },
+   {
+    "gt": "Session Resumed",
+    "candidate": "ExistingSessionContinued",
+    "confidence": 0.85,
+    "reason": "Both represent a resumed/continued prior session"
+   },
+   {
+    "gt": "Unauthorized",
+    "candidate": "ValidationFailed",
+    "confidence": 0.85,
+    "reason": "Both represent failed token validation / unauthorized state"
+   },
+   {
+    "gt": "Reauthenticating",
+    "candidate": "Reauthenticating",
+    "confidence": 1.0,
+    "reason": "Same name and meaning - reauthentication in progress"
+   },
+   {
+    "gt": "Session Terminated",
+    "candidate": "Disconnected",
+    "confidence": 0.75,
+    "reason": "Candidate's Disconnected is a final state representing session end"
+   }
+  ],
+  "transition_matches": [
+   {
+    "gt_index": 0,
+    "gt": {
+     "from": "Disconnected",
+     "to": "Waiting for Token",
+     "event": "Client initiates connection",
+     "action": "Start TLS handshake"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.8,
+    "reason": "No candidate transition from NewSession involves TLS handshake to a waiting-for-token state"
+   },
+   {
+    "gt_index": 1,
+    "gt": {
+     "from": "Waiting for Token",
+     "to": "Token Requested",
+     "event": "Request token from AS",
+     "action": "Send token request"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.9,
+    "reason": "No matching states for Waiting for Token or Token Requested"
+   },
+   {
+    "gt_index": 2,
+    "gt": {
+     "from": "Token Requested",
+     "to": "Token Received",
+     "event": "Token received from AS",
+     "action": "Store JWT/CWT token"
+    },
+    "candidate_index": 0,
+    "candidate": {
+     "from": "NewSession",
+     "event": "receive access token",
+     "action": "receive access token from AS",
+     "to": "TokenObtained"
+    },
+    "confidence": 0.7,
+    "reason": "Both represent receiving token from AS, though source states differ due to GT having intermediate states"
+   },
+   {
+    "gt_index": 3,
+    "gt": {
+     "from": "Token Requested",
+     "to": "Disconnected",
+     "event": "Token request timeout/error",
+     "action": "Retry or terminate"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.9,
+    "reason": "No candidate transition represents token request failure"
+   },
+   {
+    "gt_index": 4,
+    "gt": {
+     "from": "Token Received",
+     "to": "Authenticating",
+     "event": "Send CONNECT/AUTH packet",
+     "action": "Include token in authz-info topic"
+    },
+    "candidate_index": 2,
+    "candidate": {
+     "from": "TokenObtained",
+     "event": "send connection request",
+     "action": "send connection request with token",
+     "to": "Connecting"
+    },
+    "confidence": 0.8,
+    "reason": "Both send connection request with token from token-received state to authenticating/connecting state"
+   },
+   {
+    "gt_index": 5,
+    "gt": {
+     "from": "Authenticating",
+     "to": "Awaiting CONNACK",
+     "event": "Token uploaded",
+     "action": "Wait for broker response"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.5,
+    "reason": "Candidate's Connecting\u2192Connected skips the awaiting CONNACK phase; no direct match"
+   },
+   {
+    "gt_index": 6,
+    "gt": {
+     "from": "Awaiting CONNACK",
+     "to": "Token Validating",
+     "event": "Broker processes token",
+     "action": "Validate token (introspection)"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.5,
+    "reason": "Candidate has introspection from Connecting state, not from WaitingForConnack to TokenValidation"
+   },
+   {
+    "gt_index": 7,
+    "gt": {
+     "from": "Token Validating",
+     "to": "Connected",
+     "event": "Token valid",
+     "action": "Send CONNACK(Success)"
+    },
+    "candidate_index": 23,
+    "candidate": {
+     "from": "TokenValidation",
+     "event": "cond token valid",
+     "action": "send CONNACK reason_code 0x00",
+     "to": "Connected"
+    },
+    "confidence": 0.95,
+    "reason": "Both: token valid \u2192 send CONNACK success \u2192 Connected"
+   },
+   {
+    "gt_index": 8,
+    "gt": {
+     "from": "Token Validating",
+     "to": "Unauthorized",
+     "event": "Token invalid/expired",
+     "action": "Send CONNACK(Not Authorized)"
+    },
+    "candidate_index": 26,
+    "candidate": {
+     "from": "TokenValidation",
+     "event": "cond token expired or invalid",
+     "action": "check token expiry; check token audience; check issuer authorization",
+     "to": "ValidationFailed"
+    },
+    "confidence": 0.8,
+    "reason": "Both: invalid/expired token from validation state to unauthorized/failed state"
+   },
+   {
+    "gt_index": 9,
+    "gt": {
+     "from": "Connected",
+     "to": "Session Resumed",
+     "event": "CONNECT(CleanSession=0)",
+     "action": "Resume prior session"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.5,
+    "reason": "Candidate has CurrentSession\u2192ExistingSessionContinued but Connected is not matched to CurrentSession"
+   },
+   {
+    "gt_index": 10,
+    "gt": {
+     "from": "Session Resumed",
+     "to": "Connected",
+     "event": "Session validated",
+     "action": "Send CONNACK(Session Present=1)"
+    },
+    "candidate_index": 51,
+    "candidate": {
+     "from": "ExistingSessionContinued",
+     "event": "cond session resumed",
+     "action": "send CONNACK SessionPresent 1",
+     "to": "Connected"
+    },
+    "confidence": 0.85,
+    "reason": "Both: resumed session validated \u2192 CONNACK SessionPresent=1 \u2192 Connected"
+   },
+   {
+    "gt_index": 11,
+    "gt": {
+     "from": "Session Resumed",
+     "to": "Session Terminated",
+     "event": "Session invalid",
+     "action": "Send DISCONNECT"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.9,
+    "reason": "No candidate transition from ExistingSessionContinued to a terminated/disconnected state"
+   },
+   {
+    "gt_index": 12,
+    "gt": {
+     "from": "Connected",
+     "to": "Reauthenticating",
+     "event": "Token expired",
+     "action": "Send AUTH packet"
+    },
+    "candidate_index": 40,
+    "candidate": {
+     "from": "Connected",
+     "event": "send AUTH reauth",
+     "action": "send AUTH 0x19 Reauthentication; set auth method ace; transport new token",
+     "to": "Reauthenticating"
+    },
+    "confidence": 0.85,
+    "reason": "Both: Connected \u2192 send AUTH \u2192 Reauthenticating"
+   },
+   {
+    "gt_index": 13,
+    "gt": {
+     "from": "Reauthenticating",
+     "to": "Token Validating",
+     "event": "Broker validates new token",
+     "action": "Process AUTH/CONNACK"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.8,
+    "reason": "No candidate transition from Reauthenticating to TokenValidation"
+   },
+   {
+    "gt_index": 14,
+    "gt": {
+     "from": "Reauthenticating",
+     "to": "Unauthorized",
+     "event": "Reauthentication failed",
+     "action": "Send DISCONNECT"
+    },
+    "candidate_index": 48,
+    "candidate": {
+     "from": "Reauthenticating",
+     "event": "cond reauth failed",
+     "action": "send DISCONNECT 0x87",
+     "to": "Disconnected"
+    },
+    "confidence": 0.8,
+    "reason": "Both: reauth failed \u2192 DISCONNECT. Destination states differ in name but both represent session end"
+   },
+   {
+    "gt_index": 15,
+    "gt": {
+     "from": "Connected",
+     "to": "Session Terminated",
+     "event": "DISCONNECT received/sent",
+     "action": "Cleanup session"
+    },
+    "candidate_index": 46,
+    "candidate": {
+     "from": "Connected",
+     "event": "send CLIENT DISCONNECT",
+     "action": "discard Session State; keep retained messages",
+     "to": "Disconnected"
+    },
+    "confidence": 0.8,
+    "reason": "Both: Connected \u2192 DISCONNECT \u2192 session terminated/disconnected"
+   },
+   {
+    "gt_index": 16,
+    "gt": {
+     "from": "Unauthorized",
+     "to": "Session Terminated",
+     "event": "DISCONNECT sent",
+     "action": "Close connection"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.6,
+    "reason": "No explicit transition from ValidationFailed to Disconnected/Closed in candidate"
+   }
+  ],
+  "unmatched_candidate_transitions": [
+   {
+    "candidate_index": 1,
+    "class": "real_behavior_not_in_gt",
+    "reason": "TLS anonymous connection flow - valid protocol behavior for anonymous TLS per RFC"
+   },
+   {
+    "candidate_index": 3,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Introspection request from broker to AS during connection - valid protocol step"
+   },
+   {
+    "candidate_index": 4,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Receiving introspection response - valid protocol step"
+   },
+   {
+    "candidate_index": 5,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Connection response sent to client after processing - valid protocol behavior"
+   },
+   {
+    "candidate_index": 6,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Unsupported protocol version rejection with CONNACK 0x84 - valid MQTT behavior"
+   },
+   {
+    "candidate_index": 7,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Pre-authentication to authenticated transition - valid protocol step"
+   },
+   {
+    "candidate_index": 8,
+    "class": "real_behavior_not_in_gt",
+    "reason": "TLS handshake completion for broker authentication - valid protocol step"
+   },
+   {
+    "candidate_index": 9,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Publishing token to authz-info topic via anonymous TLS - valid ACE-MQTT flow"
+   },
+   {
+    "candidate_index": 10,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Reconnect using TLS with known credentials after token upload - valid protocol flow"
+   },
+   {
+    "candidate_index": 11,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Token upload initiating handshake - valid protocol step"
+   },
+   {
+    "candidate_index": 12,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Sending CONNECT from Disconnected state - valid but uses different state mapping"
+   },
+   {
+    "candidate_index": 13,
+    "class": "real_behavior_not_in_gt",
+    "reason": "CONNECT sent transitioning to waiting for CONNACK - valid protocol step"
+   },
+   {
+    "candidate_index": 14,
+    "class": "real_behavior_not_in_gt",
+    "reason": "AUTH exchange during CONNACK wait - valid enhanced authentication"
+   },
+   {
+    "candidate_index": 15,
+    "class": "real_behavior_not_in_gt",
+    "reason": "CleanStart=1 accepted, new session with SessionPresent=0 - valid MQTT behavior"
+   },
+   {
+    "candidate_index": 16,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Will topic unauthorized rejection - valid ACE-MQTT authorization check"
+   },
+   {
+    "candidate_index": 17,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Resume session from ConnectReceived - valid MQTT session resumption"
+   },
+   {
+    "candidate_index": 18,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Duplicate clientId handling - valid MQTT behavior"
+   },
+   {
+    "candidate_index": 19,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Stored token found, send challenge - valid ACE challenge-response"
+   },
+   {
+    "candidate_index": 20,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Token-only CONNECT triggering challenge - valid ACE flow"
+   },
+   {
+    "candidate_index": 21,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Client responding to broker challenge - valid enhanced auth"
+   },
+   {
+    "candidate_index": 22,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Challenge response received, validate token - valid protocol step"
+   },
+   {
+    "candidate_index": 24,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Token claims verified, client authenticated - valid but more granular than GT"
+   },
+   {
+    "candidate_index": 25,
+    "class": "duplicate_or_alias",
+    "reason": "Signature failed is another form of token validation failure, similar to GT index 8"
+   },
+   {
+    "candidate_index": 27,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Validation result obtained, send CONNACK - valid protocol step"
+   },
+   {
+    "candidate_index": 28,
+    "class": "duplicate_or_alias",
+    "reason": "Auth success new session to Connected - alias of token valid \u2192 Connected"
+   },
+   {
+    "candidate_index": 29,
+    "class": "duplicate_or_alias",
+    "reason": "Auth success resume session - alias of session resumed \u2192 Connected with SessionPresent=1"
+   },
+   {
+    "candidate_index": 30,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Store access token after connection accepted - valid protocol behavior"
+   },
+   {
+    "candidate_index": 31,
+    "class": "real_behavior_not_in_gt",
+    "reason": "PUBLISH operation while connected - valid MQTT behavior"
+   },
+   {
+    "candidate_index": 32,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Forward authorized PUBLISH - valid MQTT broker behavior"
+   },
+   {
+    "candidate_index": 33,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Cache introspection result - valid optimization behavior"
+   },
+   {
+    "candidate_index": 34,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Invalid authz-info QoS0 disconnect - valid ACE-MQTT error handling"
+   },
+   {
+    "candidate_index": 35,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Parse error disconnect - valid MQTT error handling"
+   },
+   {
+    "candidate_index": 36,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Unauthorized PUBLISH QoS0 disconnect - valid authorization enforcement"
+   },
+   {
+    "candidate_index": 37,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Unauthorized subscriber connection close - valid authorization enforcement"
+   },
+   {
+    "candidate_index": 38,
+    "class": "duplicate_or_alias",
+    "reason": "Same as 37 but with DISCONNECT first - alias of unauthorized disconnect"
+   },
+   {
+    "candidate_index": 39,
+    "class": "duplicate_or_alias",
+    "reason": "Initiate reauth from Connected - duplicate/alias of transition matched at GT index 12"
+   },
+   {
+    "candidate_index": 41,
+    "class": "duplicate_or_alias",
+    "reason": "Reauthenticate on 0x87 acknowledgment - another trigger for same Connected\u2192Reauthenticating"
+   },
+   {
+    "candidate_index": 42,
+    "class": "duplicate_or_alias",
+    "reason": "PUBACK/SUBACK not authorized triggering reauth - another trigger for Connected\u2192Reauthenticating"
+   },
+   {
+    "candidate_index": 43,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Token expired, disconnect with not authorized - valid but GT has reauth path instead"
+   },
+   {
+    "candidate_index": 44,
+    "class": "duplicate_or_alias",
+    "reason": "PUBLISH authz failure disconnect - alias of general disconnect from Connected"
+   },
+   {
+    "candidate_index": 45,
+    "class": "duplicate_or_alias",
+    "reason": "Token expiration disconnect - alias of disconnect/token expired transitions"
+   },
+   {
+    "candidate_index": 47,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Token validated, cache and authorize for ongoing session - valid protocol behavior"
+   },
+   {
+    "candidate_index": 49,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Disconnect with long expiry maintaining session - valid MQTT v5 behavior"
+   },
+   {
+    "candidate_index": 50,
+    "class": "real_behavior_not_in_gt",
+    "reason": "MQTT v3.1.1 disconnect storing session indefinitely - valid protocol behavior"
+   },
+   {
+    "candidate_index": 52,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Network/protocol error triggering Will Message - valid MQTT behavior"
+   },
+   {
+    "candidate_index": 53,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Session expiry timeout discarding state - valid MQTT v5 behavior"
+   },
+   {
+    "candidate_index": 54,
+    "class": "real_behavior_not_in_gt",
+    "reason": "CONNECT without token rejected - valid ACE-MQTT authorization check"
+   },
+   {
+    "candidate_index": 55,
+    "class": "duplicate_or_alias",
+    "reason": "Subscriber token expired disconnect - alias of token expiration disconnect"
+   }
+  ]
+ }
+}

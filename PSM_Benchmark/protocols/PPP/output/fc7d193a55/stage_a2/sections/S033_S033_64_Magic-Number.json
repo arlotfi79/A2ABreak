@@ -1,0 +1,400 @@
+{
+  "section_id": "S033",
+  "title": "S033 6.4 Magic-Number",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S033 6.4 Magic-Number"
+  ],
+  "url_anchor": "#s033-64-magic-number",
+  "word_count": 983,
+  "statement_count": 16,
+  "elapsed_seconds": 267.26,
+  "statements": [
+    {
+      "statement_id": "N-S033-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "ppp",
+      "stage": "ppp_fsm",
+      "description": "This Configuration Option MAY be required by some other Configuration Options such as the Quality-Protocol Configuration Option.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S033-001"
+    },
+    {
+      "statement_id": "N-S033-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "Before this Configuration Option is requested, an implementation MUST choose its Magic-Number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Magic-Number Configuration Option about to be requested",
+      "pre_cond": "magic_number_option.about_to_be_requested = true",
+      "post_cond": "magic_number.chosen = true",
+      "actions": [
+        "choose Magic-Number before sending Configure-Request with Magic-Number option"
+      ],
+      "modality": "must",
+      "id": "N-S033-002"
+    },
+    {
+      "statement_id": "N-S033-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If the two Magic-Numbers are different, then the link is not looped-back, and the Magic-Number SHOULD be acknowledged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Configure-Request received with Magic-Number different from last Configure-Request sent",
+      "pre_cond": "received_configure_request.magic_number != last_configure_request_sent.magic_number",
+      "post_cond": null,
+      "actions": [
+        "send Configure-Ack acknowledging Magic-Number Configuration Option"
+      ],
+      "modality": "should",
+      "id": "N-S033-003"
+    },
+    {
+      "statement_id": "N-S033-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "To determine this, a Configure-Nak MUST be sent specifying a different Magic-Number value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Configure-Request received with Magic-Number equal to last Configure-Request sent",
+      "pre_cond": "received_configure_request.magic_number = last_configure_request_sent.magic_number",
+      "post_cond": null,
+      "actions": [
+        "send Configure-Nak specifying a different Magic-Number value"
+      ],
+      "modality": "must",
+      "id": "N-S033-004"
+    },
+    {
+      "statement_id": "N-S033-5",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "A new Configure-Request SHOULD NOT be sent to the peer until normal processing would cause it to be sent (that is, until a Configure-Nak is received or the Restart timer runs out).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "configure_nak.received = false & restart_timer.expired = false",
+      "post_cond": null,
+      "actions": [
+        "suppress new Configure-Request transmission until Configure-Nak received or Restart timer expires"
+      ],
+      "modality": "should",
+      "id": "N-S033-005"
+    },
+    {
+      "statement_id": "N-S033-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If the Magic-Number is equal to the one sent in the last Configure-Nak, the possibility of a looped-back link is increased, and a new Magic-Number MUST be chosen.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Configure-Nak received with Magic-Number equal to last Configure-Nak sent",
+      "pre_cond": "received_configure_nak.magic_number = last_configure_nak_sent.magic_number",
+      "post_cond": "magic_number.value = new_value",
+      "actions": [
+        "choose new Magic-Number"
+      ],
+      "modality": "must",
+      "id": "N-S033-006"
+    },
+    {
+      "statement_id": "N-S033-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "In either case, a new Configure-Request SHOULD be sent with the new Magic-Number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Configure-Nak received for Magic-Number option",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send new Configure-Request containing new Magic-Number"
+      ],
+      "modality": "should",
+      "id": "N-S033-007"
+    },
+    {
+      "statement_id": "N-S033-8",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "Configure-Requests with the option SHOULD NOT be transmitted and any Magic-Number Configuration Options which the peer sends SHOULD be either acknowledged or rejected.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "unique_magic_number_source.available = false",
+      "post_cond": null,
+      "actions": [
+        "do not transmit Configure-Request with Magic-Number Configuration Option"
+      ],
+      "modality": "should",
+      "id": "N-S033-008"
+    },
+    {
+      "statement_id": "N-S033-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "Configure-Requests with the option SHOULD NOT be transmitted and any Magic-Number Configuration Options which the peer sends SHOULD be either acknowledged or rejected.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Configure-Request with Magic-Number Configuration Option received from peer",
+      "pre_cond": "unique_magic_number_source.available = false",
+      "post_cond": null,
+      "actions": [
+        "send Configure-Ack or Configure-Reject in response to peer's Magic-Number Configuration Option"
+      ],
+      "modality": "should",
+      "id": "N-S033-009"
+    },
+    {
+      "statement_id": "N-S033-10",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If an implementation does transmit a Configure-Request with a Magic-Number Configuration Option, then it MUST NOT respond with a Configure-Reject when it receives a Configure-Request with a Magic-Number Configuration Option.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Configure-Request with Magic-Number Configuration Option received",
+      "pre_cond": "implementation.transmitted_configure_request_with_magic_number_option = true",
+      "post_cond": null,
+      "actions": [
+        "do not send Configure-Reject in response to received Configure-Request with Magic-Number option"
+      ],
+      "modality": "must",
+      "id": "N-S033-010"
+    },
+    {
+      "statement_id": "N-S033-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "That is, if an implementation desires to use Magic Numbers, then it MUST also allow its peer to do so.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Configure-Request with Magic-Number Configuration Option received from peer",
+      "pre_cond": "implementation.magic_number_enabled = true",
+      "post_cond": null,
+      "actions": [
+        "allow peer's Magic-Number Configuration Option (do not respond with Configure-Reject)"
+      ],
+      "modality": "must",
+      "id": "N-S033-011"
+    },
+    {
+      "statement_id": "N-S033-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "In this case, an implementation SHOULD act as if the negotiation had been successful (as if it had instead received a Configure-Ack).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Configure-Reject received in response to Configure-Request with Magic-Number option",
+      "pre_cond": "received_configure_reject.in_response_to_configure_request_with_magic_number = true",
+      "post_cond": "magic_number_negotiation.result = success",
+      "actions": [
+        "process event as if Configure-Ack received for Magic-Number negotiation",
+        "proceed with link establishment without peer Magic-Number"
+      ],
+      "modality": "should",
+      "id": "N-S033-012"
+    },
+    {
+      "statement_id": "N-S033-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If Magic-Number has been successfully negotiated, an implementation MUST transmit these packets with the Magic-Number field set to its negotiated Magic-Number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transmit LCP Echo-Request, Echo-Reply, or Discard-Request",
+      "pre_cond": "magic_number.negotiated = true",
+      "post_cond": "packet.magic_number_field = negotiated_magic_number",
+      "actions": [
+        "set Magic-Number field to locally negotiated Magic-Number in all LCP Echo-Request, Echo-Reply, and Discard-Request packets"
+      ],
+      "modality": "must",
+      "id": "N-S033-013"
+    },
+    {
+      "statement_id": "N-S033-14",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "The Magic-Number field of these packets SHOULD be inspected on reception.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Echo-Request, Echo-Reply, or Discard-Request received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "inspect Magic-Number field in received LCP Echo-Request, Echo-Reply, and Discard-Request packets"
+      ],
+      "modality": "should",
+      "id": "N-S033-014"
+    },
+    {
+      "statement_id": "N-S033-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "ppp_fsm",
+      "description": "All received Magic-Number fields MUST be equal to either zero or the peer's unique Magic-Number, depending on whether or not the peer negotiated a Magic-Number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Echo-Request, Echo-Reply, or Discard-Request received",
+      "pre_cond": null,
+      "post_cond": "received_packet.magic_number = 0 | received_packet.magic_number = peer.negotiated_magic_number",
+      "actions": [
+        "verify received Magic-Number field equals zero or peer's negotiated Magic-Number"
+      ],
+      "modality": "must",
+      "id": "N-S033-015"
+    },
+    {
+      "statement_id": "N-S033-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "A Magic-Number of zero is illegal and MUST always be Nak'd, if it is not Rejected outright.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S033",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Configure-Request with zero Magic-Number received",
+      "pre_cond": "received_configure_request.magic_number = 0",
+      "post_cond": null,
+      "actions": [
+        "send Configure-Nak for zero Magic-Number option, or send Configure-Reject"
+      ],
+      "modality": "must",
+      "id": "N-S033-016"
+    }
+  ]
+}

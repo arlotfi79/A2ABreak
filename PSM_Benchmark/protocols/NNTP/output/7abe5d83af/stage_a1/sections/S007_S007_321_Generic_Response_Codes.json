@@ -1,0 +1,200 @@
+{
+  "section_id": "S007",
+  "title": "S007 3.2.1 Generic Response Codes",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S007 3.2.1 Generic Response Codes"
+  ],
+  "url_anchor": "#s007-321-generic-response-codes",
+  "word_count": 644,
+  "statement_count": 8,
+  "elapsed_seconds": 55.87,
+  "statements": [
+    {
+      "statement_id": "D-S007-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server has to terminate the connection for some reason, it MUST give a 400 response code to the next command and then immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S007",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "ConnectionClosed",
+      "trigger": "server_needs_to_terminate",
+      "pre_cond": null,
+      "post_cond": "connection.state = ConnectionClosed",
+      "actions": [
+        "send 400 response",
+        "close connection immediately"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S007-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "502: It is necessary to terminate the connection and to start a new one with the appropriate authority before the command can be used. The server MUST NOT close the connection immediately after a 502 response except at the initial connection.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S007",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Initial",
+      "to_state": "ConnectionClosed",
+      "trigger": "502_response_at_initial_connection",
+      "pre_cond": "connection.state = Initial",
+      "post_cond": "connection.state = ConnectionClosed",
+      "actions": [
+        "send 502 response",
+        "close connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S007-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "502: It is necessary to terminate the connection and to start a new one with the appropriate authority before the command can be used. Server MUST NOT close the connection immediately after a 502 response (except at initial connection).",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S007",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "ConnectionClosed",
+      "trigger": "502_response_received",
+      "pre_cond": "connection.state != Initial",
+      "post_cond": "connection.state = ConnectionClosed",
+      "actions": [
+        "send 502 response",
+        "client terminates connection",
+        "client starts new connection with appropriate authority"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S007-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "480: The client must authenticate itself to the server before the facility can be used on this connection. This will involve the use of an authentication extension.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S007",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_received_when_unauthenticated",
+      "pre_cond": "connection.authenticated = false",
+      "post_cond": null,
+      "actions": [
+        "send 480 response",
+        "client must authenticate via authentication extension"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S007-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "483: The client must negotiate appropriate privacy protection on the connection. This will involve the use of a privacy extension such as [NNTP-TLS].",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S007",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_received_without_privacy_protection",
+      "pre_cond": "connection.privacy_established = false",
+      "post_cond": null,
+      "actions": [
+        "send 483 response",
+        "client must negotiate privacy protection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S007-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "401: The client must change the state of the connection in some other manner. The first argument of the response MUST be the capability label of the facility that provides the necessary mechanism.",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S007",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_received_requiring_connection_state_change",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 401 response with capability label",
+        "client changes connection state via named capability"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S007-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "If the server has to terminate the connection for some reason, it MUST give a 400 response code to the next command and then immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S007",
+      "state_name": "ConnectionClosed",
+      "enum_name": "ConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "connection.state = ConnectionClosed"
+    },
+    {
+      "statement_id": "D-S007-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "401: The first argument of the response MUST be the capability label (see Section 5.2) of the facility that provides the necessary mechanism.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S007",
+      "object_name": "401_response",
+      "field_name": "capability_label",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

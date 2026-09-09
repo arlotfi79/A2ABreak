@@ -1,0 +1,140 @@
+{
+  "section_id": "S049",
+  "title": "S049 9.1 Decision Process",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S049 9.1 Decision Process"
+  ],
+  "url_anchor": "#s049-91-decision-process",
+  "word_count": 381,
+  "statement_count": 6,
+  "elapsed_seconds": 47.92,
+  "statements": [
+    {
+      "statement_id": "D-S049-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "Phase 1 is responsible for calculating the degree of preference for each route received from a peer.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S049",
+      "state_name": "Phase 1",
+      "enum_name": "DecisionProcess",
+      "semantic_type": "active",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S049-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "Phase 2 is invoked on completion of phase 1. It is responsible for choosing the best route out of all those available for each distinct destination, and for installing each chosen route into the Loc-RIB.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S049",
+      "state_name": "Phase 2",
+      "enum_name": "DecisionProcess",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S049-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "Phase 3 is invoked after the Loc-RIB has been modified. It is responsible for disseminating routes in the Loc-RIB to each peer, according to the policies contained in the PIB. Route aggregation and information reduction can optionally be performed within this phase.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S049",
+      "state_name": "Phase 3",
+      "enum_name": "DecisionProcess",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S049-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "Phase 1 is triggered by a route being received from a peer; it calculates the degree of preference for that route.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S049",
+      "actors": [
+        "peer",
+        "session"
+      ],
+      "from_state": null,
+      "to_state": "Phase 1",
+      "trigger": "route received from peer",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "apply degree-of-preference function to received route",
+        "mark route eligible or ineligible for Loc-RIB installation"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S049-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "Phase 2 is invoked on completion of phase 1; it selects the best route for each distinct destination and installs it into the Loc-RIB.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S049",
+      "actors": [
+        "session"
+      ],
+      "from_state": "Phase 1",
+      "to_state": "Phase 2",
+      "trigger": "completion of Phase 1",
+      "pre_cond": null,
+      "post_cond": "session.Loc-RIB = updated",
+      "actions": [
+        "choose best route for each distinct destination",
+        "install chosen route into Loc-RIB"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S049-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "Phase 3 is invoked after the Loc-RIB has been modified; it disseminates routes in the Loc-RIB to each peer according to PIB policies, with optional route aggregation.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S049",
+      "actors": [
+        "session",
+        "peer"
+      ],
+      "from_state": "Phase 2",
+      "to_state": "Phase 3",
+      "trigger": "Loc-RIB modified",
+      "pre_cond": "session.Loc-RIB = modified",
+      "post_cond": "session.Adj-RIBs-Out = updated",
+      "actions": [
+        "disseminate Loc-RIB routes to each peer per PIB policy",
+        "optionally perform route aggregation and information reduction"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

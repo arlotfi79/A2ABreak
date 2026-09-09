@@ -1,0 +1,123 @@
+{
+  "section_id": "S054",
+  "title": "S054 9.2 Server Behavior",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S054 9.2 Server Behavior"
+  ],
+  "url_anchor": "#s054-92-server-behavior",
+  "word_count": 407,
+  "statement_count": 5,
+  "elapsed_seconds": 22.63,
+  "statements": [
+    {
+      "statement_id": "D-S054-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the UAS did not find a matching transaction for the CANCEL according to the procedure above, it SHOULD respond to the CANCEL with a 481 (Call Leg/Transaction Does Not Exist).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S054",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CANCEL received, no matching transaction found",
+      "pre_cond": "transaction.matching = false",
+      "post_cond": null,
+      "actions": [
+        "send 481 (Call Leg/Transaction Does Not Exist)"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S054-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the transaction for the original request still exists and the UAS has already sent a final response for the original request, the CANCEL request has no effect on the processing of the original request, no effect on any session state, and no effect on the responses generated for the original request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S054",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CANCEL received",
+      "pre_cond": "transaction.matching = true & transaction.final_response_sent = true",
+      "post_cond": "transaction.state = unchanged & session.state = unchanged",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S054-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the UAS has not issued a final response for the original request and the original request was an INVITE, the UAS SHOULD immediately respond to the INVITE with a 487 (Request Terminated).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S054",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CANCEL received",
+      "pre_cond": "transaction.matching = true & transaction.final_response_sent = false & transaction.method = INVITE",
+      "post_cond": null,
+      "actions": [
+        "send 487 (Request Terminated) to INVITE"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S054-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Regardless of the method of the original request, as long as the CANCEL matched an existing transaction, the UAS answers the CANCEL request itself with a 200 (OK) response. The response to CANCEL is passed to the server transaction for transmission.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S054",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CANCEL received, matching transaction exists",
+      "pre_cond": "transaction.matching = true",
+      "post_cond": null,
+      "actions": [
+        "send 200 OK to CANCEL",
+        "pass 200 OK to server transaction for transmission"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S054-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The To tag of the response to the CANCEL and the To tag in the response to the original request SHOULD be the same.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S054",
+      "object_name": "CANCEL response",
+      "field_name": "To tag",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "must equal To tag of original request response"
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "section_id": "S003",
+  "title": "S003 3. DATA TRANSFER FUNCTIONS",
+  "depth": 3,
+  "parent_path": [
+    "FTP",
+    "S003 3. DATA TRANSFER FUNCTIONS"
+  ],
+  "url_anchor": "#s003-3-data-transfer-functions",
+  "word_count": 4573,
+  "statement_count": 12,
+  "elapsed_seconds": 179.45,
+  "statements": [
+    {
+      "statement_id": "D-S003-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The passive data transfer process shall 'listen' on the data port prior to sending a transfer request command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S003",
+      "state_name": "listen",
+      "enum_name": "DataConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S003-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "When the connection is established, the data transfer begins between DTP's.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S003",
+      "state_name": "data transfer",
+      "enum_name": "DataConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.data_connection = established"
+    },
+    {
+      "statement_id": "D-S003-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The server MUST close the data connection under specified conditions; otherwise the close is a server option indicated by a 250 or 226 reply.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S003",
+      "state_name": "data connection closed",
+      "enum_name": "DataConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "connection.data_connection = closed"
+    },
+    {
+      "statement_id": "D-S003-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The passive data transfer process (this may be a user-DTP or a second server-DTP) shall 'listen' on the data port prior to sending a transfer request command.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S003",
+      "actors": [
+        "user-DTP",
+        "server-DTP"
+      ],
+      "from_state": null,
+      "to_state": "listen",
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "connection.passive_dtp = listening",
+      "actions": [
+        "passive DTP listens on data port"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S003-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The server, upon receiving the transfer request, will initiate the data connection to the port. When the connection is established, the data transfer begins between DTP's, and the server-PI sends a confirming reply to the user-PI.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S003",
+      "actors": [
+        "server",
+        "server-PI",
+        "user-PI"
+      ],
+      "from_state": "listen",
+      "to_state": "data transfer",
+      "trigger": "transfer request received",
+      "pre_cond": "connection.passive_dtp = listening",
+      "post_cond": "connection.data_connection = established",
+      "actions": [
+        "server initiates data connection to port",
+        "data transfer begins between DTPs",
+        "server-PI sends confirming reply to user-PI"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S003-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "The server has completed sending data in a transfer mode that requires a close to indicate EOF.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": "data transfer",
+      "to_state": "data connection closed",
+      "trigger": "sending completed in close-to-indicate-EOF mode",
+      "pre_cond": null,
+      "post_cond": "connection.data_connection = closed",
+      "actions": [
+        "server closes data connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S003-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "The server receives an ABORT command from the user.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S003",
+      "actors": [
+        "server",
+        "user"
+      ],
+      "from_state": "data transfer",
+      "to_state": "data connection closed",
+      "trigger": "ABORT command received",
+      "pre_cond": null,
+      "post_cond": "connection.data_connection = closed",
+      "actions": [
+        "server closes data connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S003-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "The port specification is changed by a command from the user.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S003",
+      "actors": [
+        "server",
+        "user"
+      ],
+      "from_state": "data transfer",
+      "to_state": "data connection closed",
+      "trigger": "port specification changed by user command",
+      "pre_cond": null,
+      "post_cond": "connection.data_connection = closed",
+      "actions": [
+        "server closes data connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S003-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "The control connection is closed legally or otherwise.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": "data transfer",
+      "to_state": "data connection closed",
+      "trigger": "control connection closed",
+      "pre_cond": "session.control_connection = closed",
+      "post_cond": "connection.data_connection = closed",
+      "actions": [
+        "server closes data connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S003-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "An irrecoverable error condition occurs.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": "data transfer",
+      "to_state": "data connection closed",
+      "trigger": "irrecoverable error",
+      "pre_cond": null,
+      "post_cond": "connection.data_connection = closed",
+      "actions": [
+        "server closes data connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S003-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "Otherwise the close is a server option, the exercise of which the server must indicate to the user-process by either a 250 or 226 reply only.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": "data transfer",
+      "to_state": "data connection closed",
+      "trigger": "server elects to close data connection",
+      "pre_cond": null,
+      "post_cond": "connection.data_connection = closed",
+      "actions": [
+        "server closes data connection",
+        "server sends 250 or 226 reply to user-process"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S003-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "ftp_fsm",
+      "description": "The user or controller process restarts the server at the last server marker by sending a restart command with server's marker code as its argument. The restart command is transmitted over the control connection and is immediately followed by the command (such as RETR, STOR or LIST) which was being executed when the system failure occurred.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S003",
+      "actors": [
+        "user",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "data transfer",
+      "trigger": "REST command followed by RETR, STOR, or LIST",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send REST command with server marker code over control connection",
+        "send transfer command (RETR, STOR, or LIST)"
+      ],
+      "modality": "can"
+    }
+  ]
+}

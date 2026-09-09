@@ -1,0 +1,325 @@
+{
+  "section_id": "S097",
+  "title": "S097 4.5.4.1 Sending Strategy",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S097 4.5.4.1 Sending Strategy"
+  ],
+  "url_anchor": "#s097-4541-sending-strategy",
+  "word_count": 599,
+  "statement_count": 13,
+  "elapsed_seconds": 110.75,
+  "statements": [
+    {
+      "statement_id": "N-S097-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "mail that cannot be transmitted immediately MUST be queued and periodically retried by the sender.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client",
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": "queued",
+      "trigger": "immediate_transmission_failed",
+      "pre_cond": "message.immediate_transmission = false",
+      "post_cond": "message.state = queued",
+      "actions": [
+        "queue_message",
+        "schedule_periodic_retry"
+      ],
+      "modality": "must",
+      "id": "N-S097-001"
+    },
+    {
+      "statement_id": "N-S097-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "The sender MUST delay retrying a particular destination after one attempt has failed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "delivery_attempt_failed",
+      "pre_cond": "delivery_attempt.result = failed",
+      "post_cond": null,
+      "actions": [
+        "delay_retry_for_destination"
+      ],
+      "modality": "must",
+      "id": "N-S097-002"
+    },
+    {
+      "statement_id": "N-S097-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "smtp_fsm",
+      "description": "In general, the retry interval SHOULD be at least 30 minutes; however, more sophisticated and variable strategies will be beneficial when the SMTP client can determine the reason for non-delivery.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "retry_interval >= 30_minutes",
+      "actions": [],
+      "modality": "should",
+      "id": "N-S097-003"
+    },
+    {
+      "statement_id": "N-S097-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "It MAY be appropriate to set a shorter maximum number of retries for non-delivery notifications and equivalent error messages than for standard messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client",
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S097-004"
+    },
+    {
+      "statement_id": "N-S097-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "The parameters to the retry algorithm MUST be configurable.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client",
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S097-005"
+    },
+    {
+      "statement_id": "N-S097-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "A client SHOULD keep a list of hosts it cannot reach and corresponding connection timeouts, rather than just retrying queued mail items.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_attempt_failed",
+      "pre_cond": "connection.result = failed",
+      "post_cond": null,
+      "actions": [
+        "record_unreachable_host",
+        "record_connection_timeout"
+      ],
+      "modality": "should",
+      "id": "N-S097-006"
+    },
+    {
+      "statement_id": "N-S097-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "At the same time, SMTP clients SHOULD use great care in caching negative responses from servers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S097-007"
+    },
+    {
+      "statement_id": "N-S097-8",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "More significantly, 5yz responses to the MAIL command MUST NOT be cached.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_5yz_response_to_MAIL",
+      "pre_cond": "command = MAIL & response.code >= 500 & response.code <= 599",
+      "post_cond": "response.cached = false",
+      "actions": [
+        "do_not_cache_5yz_MAIL_response"
+      ],
+      "modality": "must",
+      "id": "N-S097-008"
+    },
+    {
+      "statement_id": "N-S097-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "When a mail message is to be delivered to multiple recipients, and the SMTP server to which a copy of the message is to be sent is the same for multiple recipients, then only one copy of the message SHOULD be transmitted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "message.recipients.count > 1 & recipients.target_server = same",
+      "post_cond": "message.copies_transmitted = 1",
+      "actions": [
+        "send_single_copy_to_shared_server"
+      ],
+      "modality": "should",
+      "id": "N-S097-009"
+    },
+    {
+      "statement_id": "N-S097-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "That is, the SMTP client SHOULD use the command sequence: MAIL, RCPT, RCPT, ..., RCPT, DATA instead of the sequence: MAIL, RCPT, DATA, ..., MAIL, RCPT, DATA.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_to_multiple_recipients_same_server",
+      "pre_cond": "message.recipients.count > 1 & recipients.target_server = same",
+      "post_cond": null,
+      "actions": [
+        "issue_MAIL",
+        "issue_RCPT_per_recipient",
+        "issue_DATA"
+      ],
+      "modality": "should",
+      "id": "N-S097-010"
+    },
+    {
+      "statement_id": "N-S097-11",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "However, if there are very many addresses, a limit on the number of RCPT commands per MAIL command MAY be imposed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "impose_RCPT_count_limit_per_MAIL"
+      ],
+      "modality": "may",
+      "id": "N-S097-011"
+    },
+    {
+      "statement_id": "N-S097-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "This efficiency feature SHOULD be implemented.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S097-012"
+    },
+    {
+      "statement_id": "N-S097-13",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Similarly, to achieve timely delivery, the SMTP client MAY support multiple concurrent outgoing mail transactions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "support_concurrent_outgoing_transactions"
+      ],
+      "modality": "may",
+      "id": "N-S097-013"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "section_id": "S229",
+  "title": "S229 21.4.16 421 Extension Required",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S229 21.4.16 421 Extension Required"
+  ],
+  "url_anchor": "#s229-21416-421-extension-required",
+  "word_count": 90,
+  "statement_count": 3,
+  "elapsed_seconds": 22.05,
+  "statements": [
+    {
+      "statement_id": "N-S229-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "Responses with this status code MUST contain a Require header field listing the required extensions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S229",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_421_response",
+      "pre_cond": "response.status_code = 421",
+      "post_cond": "response.Require_header_present = true & response.Require_header_lists_required_extensions = true",
+      "actions": [
+        "Include Require header field listing all required extensions in 421 response"
+      ],
+      "modality": "must",
+      "id": "N-S229-001"
+    },
+    {
+      "statement_id": "N-S229-2",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS SHOULD NOT use this response unless it truly cannot provide any useful service to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S229",
+      "actors": [
+        "UAS",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_421_response",
+      "pre_cond": "uas.can_provide_useful_service = true",
+      "post_cond": null,
+      "actions": [
+        "Refrain from sending 421 response when any useful service can be provided to the client"
+      ],
+      "modality": "should",
+      "id": "N-S229-002"
+    },
+    {
+      "statement_id": "N-S229-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Instead, if a desirable extension is not listed in the Supported header field, servers SHOULD process the request using baseline SIP capabilities and any extensions supported by the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S229",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "desirable_extension_absent_from_Supported_header",
+      "pre_cond": "request.Supported_header.contains(desirable_extension) = false",
+      "post_cond": "server.processing_mode = baseline_SIP | server.processing_mode = client_supported_extensions",
+      "actions": [
+        "Process request using baseline SIP capabilities",
+        "Apply any extensions listed in client Supported header field"
+      ],
+      "modality": "should",
+      "id": "N-S229-003"
+    }
+  ]
+}

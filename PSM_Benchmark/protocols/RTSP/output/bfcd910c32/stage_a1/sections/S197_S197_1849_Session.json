@@ -1,0 +1,218 @@
+{
+  "section_id": "S197",
+  "title": "S197 18.49 Session",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S197 18.49 Session"
+  ],
+  "url_anchor": "#s197-1849-session",
+  "word_count": 449,
+  "statement_count": 10,
+  "elapsed_seconds": 41.43,
+  "statements": [
+    {
+      "statement_id": "D-S197-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "An RTSP session is created by the server as a result of a successful SETUP request, and in the response, the session identifier is given to the client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S197",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Session Established",
+      "trigger": "successful SETUP response",
+      "pre_cond": null,
+      "post_cond": "session.identifier != null",
+      "actions": [
+        "server assigns session identifier",
+        "server returns session identifier in SETUP response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S197-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The RTSP session exists until destroyed by a TEARDOWN.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S197",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Session Established",
+      "to_state": "Session Terminated",
+      "trigger": "TEARDOWN",
+      "pre_cond": "session.state = Session Established",
+      "post_cond": "session.state = Session Terminated",
+      "actions": [
+        "session destroyed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S197-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The RTSP session exists until destroyed by a REDIRECT.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S197",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Session Established",
+      "to_state": "Session Terminated",
+      "trigger": "REDIRECT",
+      "pre_cond": "session.state = Session Established",
+      "post_cond": "session.state = Session Terminated",
+      "actions": [
+        "session destroyed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S197-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The RTSP session exists until timed out by the server.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S197",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Session Established",
+      "to_state": "Session Terminated",
+      "trigger": "session timeout",
+      "pre_cond": "session.state = Session Established & session.elapsed_time >= session.timeout_period",
+      "post_cond": "session.state = Session Terminated",
+      "actions": [
+        "session destroyed by server"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S197-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The response 454 (Session Not Found) MUST be returned if the session identifier is invalid.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S197",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Session Established",
+      "to_state": null,
+      "trigger": "request with invalid session identifier",
+      "pre_cond": "request.session_id != session.identifier",
+      "post_cond": null,
+      "actions": [
+        "send 454 Session Not Found"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S197-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "An RTSP session is created by the server as a result of a successful SETUP request; the session identifier is given to the client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S197",
+      "state_name": "Session Established",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.identifier != null"
+    },
+    {
+      "statement_id": "D-S197-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The RTSP session exists until destroyed by a TEARDOWN or a REDIRECT or is timed out by the server.",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S197",
+      "state_name": "Session Terminated",
+      "enum_name": "SessionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S197-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The Session header MUST be included in a request, using the following methods: PLAY, PAUSE, PLAY_NOTIFY and TEARDOWN.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S197",
+      "object_name": "request",
+      "field_name": "Session",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "method = PLAY | method = PAUSE | method = PLAY_NOTIFY | method = TEARDOWN"
+    },
+    {
+      "statement_id": "D-S197-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The Session header MUST NOT be included in DESCRIBE requests.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S197",
+      "object_name": "request",
+      "field_name": "Session",
+      "field_type": "header",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "method = DESCRIBE"
+    },
+    {
+      "statement_id": "D-S197-010",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The session identifier MUST be returned in the SETUP response.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S197",
+      "object_name": "SETUP response",
+      "field_name": "Session",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "method = SETUP & response.status = 2xx"
+    }
+  ]
+}

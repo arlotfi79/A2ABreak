@@ -1,0 +1,114 @@
+{
+  "section_id": "S052",
+  "title": "S052 3.9.2.1 Source Routing",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S052 3.9.2.1 Source Routing"
+  ],
+  "url_anchor": "#s052-3921-source-routing",
+  "word_count": 158,
+  "statement_count": 4,
+  "elapsed_seconds": 44.04,
+  "statements": [
+    {
+      "statement_id": "N-S052-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "tcp_fsm",
+      "description": "An application MUST be able to specify a source route when it actively opens a TCP connection (MUST-51), and this MUST take precedence over a source route received in a datagram (MUST-52).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "application",
+        "tcp"
+      ],
+      "from_state": "CLOSED",
+      "to_state": null,
+      "trigger": "active_open",
+      "pre_cond": null,
+      "post_cond": "connection.application_source_route_accepted = true",
+      "actions": [
+        "accept source route specification from application on active open"
+      ],
+      "modality": "must",
+      "id": "N-S052-001"
+    },
+    {
+      "statement_id": "N-S052-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An application MUST be able to specify a source route when it actively opens a TCP connection (MUST-51), and this MUST take precedence over a source route received in a datagram (MUST-52).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "application",
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "source_route_conflict",
+      "pre_cond": "connection.application_source_route != null & datagram.source_route != null",
+      "post_cond": "connection.active_source_route = connection.application_source_route",
+      "actions": [
+        "override received datagram source route with application-specified source route"
+      ],
+      "modality": "must",
+      "id": "N-S052-002"
+    },
+    {
+      "statement_id": "N-S052-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "When a TCP connection is OPENed passively and a packet arrives with a completed IP Source Route Option (containing a return route), TCP implementations MUST save the return route and use it for all segments sent on this connection (MUST-53).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "packet_received_with_completed_ip_source_route_option",
+      "pre_cond": "connection.open_type = passive & packet.ip_source_route_option.complete = true",
+      "post_cond": "connection.return_route_saved = true",
+      "actions": [
+        "save return route from completed IP Source Route Option",
+        "use saved return route for all segments on this connection"
+      ],
+      "modality": "must",
+      "id": "N-S052-003"
+    },
+    {
+      "statement_id": "N-S052-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If a different source route arrives in a later segment, the later definition SHOULD override the earlier one (SHLD-24).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "segment_received_with_different_source_route",
+      "pre_cond": "connection.source_route != null & segment.source_route != connection.source_route",
+      "post_cond": "connection.source_route = segment.source_route",
+      "actions": [
+        "replace existing connection source route with source route from later arriving segment"
+      ],
+      "modality": "should",
+      "id": "N-S052-004"
+    }
+  ]
+}

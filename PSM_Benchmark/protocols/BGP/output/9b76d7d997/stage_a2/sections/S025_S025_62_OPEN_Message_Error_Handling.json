@@ -1,0 +1,256 @@
+{
+  "section_id": "S025",
+  "title": "S025 6.2 OPEN Message Error Handling",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S025 6.2 OPEN Message Error Handling"
+  ],
+  "url_anchor": "#s025-62-open-message-error-handling",
+  "word_count": 301,
+  "statement_count": 10,
+  "elapsed_seconds": 63.48,
+  "statements": [
+    {
+      "statement_id": "N-S025-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "All errors detected while processing the OPEN message MUST be indicated by sending the NOTIFICATION message with the Error Code OPEN Message Error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_message_error_detected",
+      "pre_cond": "OPEN.processing_error = true",
+      "post_cond": "NOTIFICATION.sent = true & NOTIFICATION.error_code = OPEN_Message_Error",
+      "actions": [
+        "send NOTIFICATION with Error Code = OPEN Message Error"
+      ],
+      "modality": "must",
+      "id": "N-S025-001"
+    },
+    {
+      "statement_id": "N-S025-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the version number in the Version field of the received OPEN message is not supported, then the Error Subcode MUST be set to Unsupported Version Number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received",
+      "pre_cond": "OPEN.version_field.supported = false",
+      "post_cond": "NOTIFICATION.error_subcode = Unsupported_Version_Number",
+      "actions": [
+        "set NOTIFICATION Error Subcode = Unsupported Version Number"
+      ],
+      "modality": "must",
+      "id": "N-S025-002"
+    },
+    {
+      "statement_id": "N-S025-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the Autonomous System field of the OPEN message is unacceptable, then the Error Subcode MUST be set to Bad Peer AS.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received",
+      "pre_cond": "OPEN.autonomous_system_field.acceptable = false",
+      "post_cond": "NOTIFICATION.error_subcode = Bad_Peer_AS",
+      "actions": [
+        "set NOTIFICATION Error Subcode = Bad Peer AS"
+      ],
+      "modality": "must",
+      "id": "N-S025-003"
+    },
+    {
+      "statement_id": "N-S025-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the Hold Time field of the OPEN message is unacceptable, then the Error Subcode MUST be set to Unacceptable Hold Time.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received",
+      "pre_cond": "OPEN.hold_time_field.acceptable = false",
+      "post_cond": "NOTIFICATION.error_subcode = Unacceptable_Hold_Time",
+      "actions": [
+        "set NOTIFICATION Error Subcode = Unacceptable Hold Time"
+      ],
+      "modality": "must",
+      "id": "N-S025-004"
+    },
+    {
+      "statement_id": "N-S025-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "An implementation MUST reject Hold Time values of one or two seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received",
+      "pre_cond": "OPEN.hold_time = 1 | OPEN.hold_time = 2",
+      "post_cond": "OPEN.hold_time.accepted = false",
+      "actions": [
+        "reject the proposed Hold Time",
+        "set NOTIFICATION Error Subcode = Unacceptable Hold Time"
+      ],
+      "modality": "must",
+      "id": "N-S025-005"
+    },
+    {
+      "statement_id": "N-S025-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "An implementation MAY reject any proposed Hold Time.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received",
+      "pre_cond": null,
+      "post_cond": "OPEN.hold_time.accepted = false",
+      "actions": [
+        "reject the proposed Hold Time"
+      ],
+      "modality": "may",
+      "id": "N-S025-006"
+    },
+    {
+      "statement_id": "N-S025-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "bgp_fsm",
+      "description": "An implementation that accepts a Hold Time MUST use the negotiated value for the Hold Time.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "hold_time_accepted",
+      "pre_cond": "OPEN.hold_time.accepted = true",
+      "post_cond": "hold_timer.negotiated_value = OPEN.hold_time",
+      "actions": [
+        "set Hold Time to the negotiated value from the OPEN message"
+      ],
+      "modality": "must",
+      "id": "N-S025-007"
+    },
+    {
+      "statement_id": "N-S025-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the BGP Identifier field of the OPEN message is syntactically incorrect, then the Error Subcode MUST be set to Bad BGP Identifier.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received",
+      "pre_cond": "OPEN.bgp_identifier.syntactically_correct = false",
+      "post_cond": "NOTIFICATION.error_subcode = Bad_BGP_Identifier",
+      "actions": [
+        "set NOTIFICATION Error Subcode = Bad BGP Identifier"
+      ],
+      "modality": "must",
+      "id": "N-S025-008"
+    },
+    {
+      "statement_id": "N-S025-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If one of the Optional Parameters in the OPEN message is not recognized, then the Error Subcode MUST be set to Unsupported Optional Parameters.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received",
+      "pre_cond": "OPEN.optional_parameter.recognized = false",
+      "post_cond": "NOTIFICATION.error_subcode = Unsupported_Optional_Parameters",
+      "actions": [
+        "set NOTIFICATION Error Subcode = Unsupported Optional Parameters"
+      ],
+      "modality": "must",
+      "id": "N-S025-009"
+    },
+    {
+      "statement_id": "N-S025-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If one of the Optional Parameters in the OPEN message is recognized, but is malformed, then the Error Subcode MUST be set to 0 (Unspecific).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "bgp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPEN_received",
+      "pre_cond": "OPEN.optional_parameter.recognized = true & OPEN.optional_parameter.malformed = true",
+      "post_cond": "NOTIFICATION.error_subcode = 0",
+      "actions": [
+        "set NOTIFICATION Error Subcode = 0 (Unspecific)"
+      ],
+      "modality": "must",
+      "id": "N-S025-010"
+    }
+  ]
+}

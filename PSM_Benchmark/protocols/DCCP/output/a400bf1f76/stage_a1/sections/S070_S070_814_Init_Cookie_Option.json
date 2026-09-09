@@ -1,0 +1,177 @@
+{
+  "section_id": "S070",
+  "title": "S070 8.1.4 Init Cookie Option",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S070 8.1.4 Init Cookie Option"
+  ],
+  "url_anchor": "#s070-814-init-cookie-option",
+  "word_count": 425,
+  "statement_count": 8,
+  "elapsed_seconds": 33.7,
+  "statements": [
+    {
+      "statement_id": "D-S070-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The Init Cookie option lets a DCCP server avoid having to hold any state until the three-way connection setup handshake has completed. In the meantime, it need not move from the LISTEN state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "state_name": "LISTEN",
+      "enum_name": "DCCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = LISTEN"
+    },
+    {
+      "statement_id": "D-S070-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "Any Init Cookie options received ... after the connection has been established (when the connection's state is >= OPEN), MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "state_name": "OPEN",
+      "enum_name": "DCCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = OPEN"
+    },
+    {
+      "statement_id": "D-S070-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "It need not move from the LISTEN state [while using Init Cookie to avoid holding state until the three-way connection setup handshake has completed].",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S070",
+      "actors": [
+        "server"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "DCCP-Request received with Init Cookie mechanism active",
+      "pre_cond": "protocol.state = LISTEN",
+      "post_cond": "protocol.state = LISTEN",
+      "actions": [
+        "send DCCP-Response with Init Cookie option",
+        "retain no per-connection state"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S070-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "Any Init Cookie options received on DCCP-Request or DCCP-Data packets, or after the connection has been established (when the connection's state is >= OPEN), MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S070",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "OPEN",
+      "to_state": "OPEN",
+      "trigger": "Init Cookie option received",
+      "pre_cond": "protocol.state >= OPEN",
+      "post_cond": "protocol.state >= OPEN",
+      "actions": [
+        "ignore Init Cookie option"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S070-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server SHOULD respond to a tampered Init Cookie option by resetting the connection with Reset Code 10, 'Bad Init Cookie'.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S070",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tampered Init Cookie option received",
+      "pre_cond": "protocol.state < OPEN",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset with Reset Code 10 (Bad Init Cookie)",
+        "reset connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S070-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "The client MUST echo the same Init Cookie options, in the same order, in each succeeding DCCP packet until one of those packets is acknowledged (showing that the three-way handshake has completed) or the connection is reset.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S070",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "OPEN",
+      "trigger": "DCCP packet acknowledged (three-way handshake complete)",
+      "pre_cond": "protocol.state < OPEN & init_cookie_received = true",
+      "post_cond": "handshake.complete = true",
+      "actions": [
+        "echo Init Cookie options in every outgoing packet until acknowledged"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S070-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "The client MUST NOT use DCCP-Data packets until the three-way handshake completes or the connection is reset.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "object_name": "DCCP-Data",
+      "field_name": "Init Cookie echo pending",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "DCCP-Data packets prohibited while three-way handshake incomplete and Init Cookie in use"
+    },
+    {
+      "statement_id": "D-S070-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "The Init Cookie option MUST NOT be sent on DCCP-Request or DCCP-Data packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S070",
+      "object_name": "Init Cookie option",
+      "field_name": "packet type",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "Init Cookie option forbidden on DCCP-Request and DCCP-Data packet types"
+    }
+  ]
+}

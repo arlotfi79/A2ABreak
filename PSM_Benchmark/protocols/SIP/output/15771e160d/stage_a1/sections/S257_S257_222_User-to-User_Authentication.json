@@ -1,0 +1,127 @@
+{
+  "section_id": "S257",
+  "title": "S257 22.2 User-to-User Authentication",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S257 22.2 User-to-User Authentication"
+  ],
+  "url_anchor": "#s257-222-user-to-user-authentication",
+  "word_count": 352,
+  "statement_count": 5,
+  "elapsed_seconds": 21.67,
+  "statements": [
+    {
+      "statement_id": "D-S257-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If no credentials (in the Authorization header field) are provided in the request, the UAS can challenge the originator to provide credentials by rejecting the request with a 401 (Unauthorized) status code.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S257",
+      "actors": [
+        "UAS",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_without_credentials",
+      "pre_cond": "request.Authorization = null",
+      "post_cond": "response.status_code = 401",
+      "actions": [
+        "send 401 Unauthorized",
+        "include WWW-Authenticate header with challenge"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S257-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The WWW-Authenticate response-header field MUST be included in 401 (Unauthorized) response messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S257",
+      "object_name": "401 Unauthorized response",
+      "field_name": "WWW-Authenticate",
+      "field_type": "header field",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S257-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When the originating UAC receives the 401 (Unauthorized), it SHOULD, if it is able, re-originate the request with the proper credentials.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S257",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "401_unauthorized_received",
+      "pre_cond": "response.status_code = 401",
+      "post_cond": "request.Authorization != null",
+      "actions": [
+        "re-originate request with credentials"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S257-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When a UAC resubmits a request with its credentials after receiving a 401 (Unauthorized) or 407 (Proxy Authentication Required) response, it MUST increment the CSeq header field value as it would normally when sending an updated request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S257",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "resubmit_request_after_auth_challenge",
+      "pre_cond": "response.status_code = 401 | response.status_code = 407",
+      "post_cond": "request.CSeq = prior_request.CSeq + 1",
+      "actions": [
+        "increment CSeq header field value",
+        "include Authorization header with credentials"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S257-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If no credentials for a realm can be located, UACs MAY attempt to retry the request with a username of 'anonymous' and no password.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S257",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "no_credentials_located_for_realm",
+      "pre_cond": "credentials.realm = null",
+      "post_cond": "request.Authorization.username = 'anonymous' & request.Authorization.password = ''",
+      "actions": [
+        "retry request with username=anonymous and empty password"
+      ],
+      "modality": "may"
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "section_id": "S115",
+  "title": "S115 16.12.1.1 Basic SIP Trapezoid",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S115 16.12.1.1 Basic SIP Trapezoid"
+  ],
+  "url_anchor": "#s115-161211-basic-sip-trapezoid",
+  "word_count": 355,
+  "statement_count": 7,
+  "elapsed_seconds": 91.03,
+  "statements": [
+    {
+      "statement_id": "D-S115-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The callee at u2.domain.com gets this and responds with a 200 OK. The callee at u2 also sets its dialog state's remote target URI to sip:caller@u1.example.com and its route set to (<sip:p2.domain.com;lr>,<sip:p1.example.com;lr>).",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S115",
+      "actors": [
+        "callee",
+        "U2"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send 200 OK",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "set dialog.remote_target_uri from Contact header of received INVITE",
+        "set dialog.route_set from Record-Route headers of received INVITE"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S115-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The callee at u2 sets its dialog state's remote target URI to sip:caller@u1.example.com and its route set to (<sip:p2.domain.com;lr>,<sip:p1.example.com;lr>).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S115",
+      "object_name": "dialog state",
+      "field_name": "remote target URI",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S115-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The callee at u2 sets its dialog state's route set to (<sip:p2.domain.com;lr>,<sip:p1.example.com;lr>).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S115",
+      "object_name": "dialog state",
+      "field_name": "route set",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S115-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The 200 OK is forwarded by P2 to P1 to U1 as normal. Now, U1 sets its dialog state's remote target URI to sip:callee@u2.domain.com and its route set to (<sip:p1.example.com;lr>,<sip:p2.domain.com;lr>).",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S115",
+      "actors": [
+        "U1"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive 200 OK",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "set dialog.remote_target_uri from Contact header of received 200 OK",
+        "set dialog.route_set from Record-Route headers of received 200 OK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S115-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Since all the route set elements contain the lr parameter, U1 constructs the following BYE request with Request-URI = dialog.remote_target_uri and Route set from dialog.route_set.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S115",
+      "actors": [
+        "U1"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "initiate session termination",
+      "pre_cond": "dialog.route_set.all_elements_contain_lr = true",
+      "post_cond": null,
+      "actions": [
+        "set BYE Request-URI = dialog.remote_target_uri",
+        "set BYE Route header from dialog.route_set",
+        "resolve topmost Route entry via DNS to determine next hop"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S115-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "P1 notices that it is not responsible for the resource indicated in the Request-URI so it doesn't change it. It does see that it is the first value in the Route header field, so it removes that value, and forwards the request to P2.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S115",
+      "actors": [
+        "P1"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive BYE with self as topmost Route value",
+      "pre_cond": "proxy.responsible_for_request_uri = false & proxy.is_topmost_route_value = true",
+      "post_cond": null,
+      "actions": [
+        "preserve Request-URI unchanged",
+        "remove self from topmost Route header field value",
+        "forward request to next Route entry"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S115-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "P2 also notices it is not responsible for the resource indicated by the Request-URI, so it doesn't change it. It does see itself in the first Route header field value, so it removes it and forwards to u2.domain.com based on a DNS lookup against the Request-URI.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S115",
+      "actors": [
+        "P2"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive BYE with self as topmost Route value",
+      "pre_cond": "proxy.responsible_for_request_uri = false & proxy.is_topmost_route_value = true",
+      "post_cond": null,
+      "actions": [
+        "preserve Request-URI unchanged",
+        "remove self from topmost Route header field value",
+        "resolve Request-URI via DNS",
+        "forward request to destination resolved from Request-URI"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

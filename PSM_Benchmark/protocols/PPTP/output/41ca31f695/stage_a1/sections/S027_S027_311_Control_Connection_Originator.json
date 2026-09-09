@@ -1,0 +1,267 @@
+{
+  "section_id": "S027",
+  "title": "S027 3.1.1 Control Connection Originator (may be PAC or PNS)",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S027 3.1.1 Control Connection Originator (may be PAC or PNS)"
+  ],
+  "url_anchor": "#s027-311-control-connection-originator-may-be-pac-or-pns",
+  "word_count": 330,
+  "statement_count": 12,
+  "elapsed_seconds": 131.35,
+  "statements": [
+    {
+      "statement_id": "D-S027-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "idle - The control connection originator attempts to open a TCP connection to the peer during idle state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "state_name": "idle",
+      "enum_name": "control_connection_originator_state",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": true,
+      "invariant_cond": "connection.state = idle"
+    },
+    {
+      "statement_id": "D-S027-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "wait_ctl_reply - The originator checks to see if another TCP connection has been requested from the same peer, and if so, handles the collision situation described in section 3.1.3.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "state_name": "wait_ctl_reply",
+      "enum_name": "control_connection_originator_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = wait_ctl_reply"
+    },
+    {
+      "statement_id": "D-S027-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "established - An established connection may be terminated by either a local condition or the receipt of a Stop-Control-Connection-Request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "state_name": "established",
+      "enum_name": "control_connection_originator_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = established"
+    },
+    {
+      "statement_id": "D-S027-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "wait_stop_reply - If a Stop-Control-Connection-Reply is received, the TCP connection SHOULD be closed and the control connection becomes idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "state_name": "wait_stop_reply",
+      "enum_name": "control_connection_originator_state",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = wait_stop_reply"
+    },
+    {
+      "statement_id": "D-S027-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "TCP Open Indication / Send Start Control Connection Request: when the TCP connection is open, the originator transmits a Start-Control-Connection-Request and then enters the wait_ctl_reply state.",
+      "is_inferred": false,
+      "confidence": 0.99,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "idle",
+      "to_state": "wait_ctl_reply",
+      "trigger": "TCP Open Indication",
+      "pre_cond": "connection.state = idle",
+      "post_cond": "connection.state = wait_ctl_reply",
+      "actions": [
+        "Send Start-Control-Connection-Request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S027-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Collision/See (4.1.3) Close TCP: originator moves from wait_ctl_reply back to idle when a collision is detected.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "wait_ctl_reply",
+      "to_state": "idle",
+      "trigger": "Collision detected",
+      "pre_cond": "connection.state = wait_ctl_reply",
+      "post_cond": "connection.state = idle",
+      "actions": [
+        "Close TCP"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S027-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Receive Start-Control-Connection-Reply, Version OK: if the version in the reply is earlier and supported, the originator moves to the established state.",
+      "is_inferred": false,
+      "confidence": 0.99,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "wait_ctl_reply",
+      "to_state": "established",
+      "trigger": "Receive Start-Control-Connection-Reply",
+      "pre_cond": "connection.state = wait_ctl_reply & reply.version.supported = true",
+      "post_cond": "connection.state = established",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S027-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Receive Start-Control-Connection-Reply, Version Not OK: if the version is earlier and not supported, a Stop-Control-Connection-Request SHOULD be sent to the peer and the originator moves into the wait_stop_reply state.",
+      "is_inferred": false,
+      "confidence": 0.99,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "wait_ctl_reply",
+      "to_state": "wait_stop_reply",
+      "trigger": "Receive Start-Control-Connection-Reply",
+      "pre_cond": "connection.state = wait_ctl_reply & reply.version.supported = false",
+      "post_cond": "connection.state = wait_stop_reply",
+      "actions": [
+        "Send Stop-Control-Connection-Request"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S027-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Local Terminate: in the event of a local termination, the originator MUST send a Stop-Control-Connection-Request and enter the wait_stop_reply state.",
+      "is_inferred": false,
+      "confidence": 0.99,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "established",
+      "to_state": "wait_stop_reply",
+      "trigger": "Local Terminate",
+      "pre_cond": "connection.state = established",
+      "post_cond": "connection.state = wait_stop_reply",
+      "actions": [
+        "Send Stop-Control-Connection-Request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S027-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If the originator receives a Stop-Control-Connection-Request it SHOULD send a Stop-Control-Connection-Reply and close the TCP connection making sure that the final TCP information has been pushed properly.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "Receive Stop-Control-Connection-Request",
+      "pre_cond": "connection.state = established",
+      "post_cond": "connection.state = idle",
+      "actions": [
+        "Send Stop-Control-Connection-Reply",
+        "Close TCP"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S027-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If a Stop-Control-Connection-Reply is received in wait_stop_reply, the TCP connection SHOULD be closed and the control connection becomes idle.",
+      "is_inferred": false,
+      "confidence": 0.99,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "wait_stop_reply",
+      "to_state": "idle",
+      "trigger": "Receive Stop-Control-Connection-Reply",
+      "pre_cond": "connection.state = wait_stop_reply",
+      "post_cond": "connection.state = idle",
+      "actions": [
+        "Close TCP"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S027-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "Receive Stop Control Connection Request / Send Stop Control Reply, Close TCP: originator moves from wait_stop_reply to idle.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S027",
+      "actors": [
+        "originator"
+      ],
+      "from_state": "wait_stop_reply",
+      "to_state": "idle",
+      "trigger": "Receive Stop-Control-Connection-Request",
+      "pre_cond": "connection.state = wait_stop_reply",
+      "post_cond": "connection.state = idle",
+      "actions": [
+        "Send Stop-Control-Connection-Reply",
+        "Close TCP"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

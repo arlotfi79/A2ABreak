@@ -1,0 +1,390 @@
+{
+  "pipeline_stage": "stage_c1",
+  "protocol_phase": "c1_retry_v2",
+  "turn": 1,
+  "status": "complete",
+  "finish_reason": "stop",
+  "web_search": {
+    "executed": true,
+    "mode": "server_side_single_request",
+    "queries": [],
+    "tool_use_blocks": 0,
+    "result_blocks": 0,
+    "requests_billed": 9
+  },
+  "web_searches": [],
+  "raw_text_len": 30671,
+  "raw_text": "Based on my comprehensive analysis of the A2A specification and the excluded findings, I've identified several new vulnerability candidates in areas not previously covered. Let me verify one more detail about the specification before finalizing.```json\n{\n  \"candidates\": [\n    {\n      \"candidate_id\": \"C-001\",\n      \"title\": \"Agent Card Skill Claims Are Self-Declared With No Attestation or Verification Mechanism, Enabling Capability-Based Task Misdirection\",\n      \"protocol_phase\": \"discovery\",\n      \"attack_scenario\": \"A malicious or misconfigured agent publishes an Agent Card at /.well-known/agent-card.json with an AgentSkill array containing false skill claims (e.g., claiming id:'financial-analysis', description:'SEC filing analysis with regulatory compliance' when the agent has no such capability). In multi-agent systems where client agents select downstream agents via registry queries or skill-based discovery, the falsely advertised agent attracts tasks it cannot properly execute. The agent accepts the task (transitioning to WORKING), then either produces incorrect output (COMPLETED with wrong artifacts), wastes resources before FAILING, or extracts sensitive data from the task message before REJECTING. The protocol provides no skill attestation primitive, no skill verification challenge-response, and no binding between declared skills and demonstrated capability. The Agent Card's skill fields (id, name, description, tags, examples, inputModes, outputModes) are purely self-asserted strings with no protocol mechanism for verification. Even if the Agent Card's JWS signature is valid (establishing 'this card was issued by entity X'), it does not establish 'entity X actually has the skills claimed' — authentication of identity and attestation of capability are fundamentally different. The GitHub roadmap confirms this gap: 'Investigate a QuerySkill() method for dynamically checking unsupported or unanticipated skills' — a feature not yet specified.\",\n      \"preliminary_trace\": [\n        {\n          \"step\": 1,\n          \"stage\": \"discovery\",\n          \"state\": \"AGENT_CARD_RECEIVED\",\n          \"transition\": \"(initial state)\",\n          \"actor\": \"client\",\n          \"note\": \"Client agent queries a registry or fetches /.well-known/agent-card.json. Receives an Agent Card with falsely declared skills. The AgentSkill objects (id, name, description, tags) are self-asserted strings — no protocol mechanism validates their truthfulness.\"\n        },\n        {\n          \"step\": 2,\n          \"stage\": \"discovery\",\n          \"state\": \"TRANSPORT_SELECTED\",\n          \"transition\": \"supportedInterfaces_parsed\",\n          \"actor\": \"client\",\n          \"note\": \"Client selects transport based on the false Agent Card. The client trusts the skill claims because the protocol provides no verification mechanism. Skill matching is based purely on string comparison of self-declared fields.\"\n        },\n        {\n          \"step\": 3,\n          \"stage\": \"authentication\",\n          \"state\": \"REQUEST_AUTHORIZED\",\n          \"transition\": \"A2A_protocol_operations_request\",\n          \"actor\": \"server\",\n          \"note\": \"Client authenticates to the malicious agent. All auth MUSTs satisfied. The authentication verifies the client's identity to the server, but the client has no protocol mechanism to verify the server's claimed capabilities.\"\n        },\n        {\n          \"step\": 4,\n          \"stage\": \"initiation\",\n          \"state\": \"TASK_STATE_NONEXISTENT\",\n          \"transition\": \"send_message_requested\",\n          \"actor\": \"client\",\n          \"note\": \"Client sends a task message targeting the falsely claimed skill. The message may contain sensitive domain-specific data (financial records, medical data) appropriate for the claimed skill but now exposed to an agent that cannot legitimately process it.\"\n        },\n        {\n          \"step\": 5,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_WORKING\",\n          \"transition\": \"agent_begins_processing\",\n          \"actor\": \"server\",\n          \"note\": \"Malicious agent accepts the task and transitions to WORKING. The agent now has access to all message data. It can extract sensitive information, produce fabricated results, or hold resources. No protocol mechanism allows the client to verify capability before or during execution.\"\n        },\n        {\n          \"step\": 6,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_COMPLETED\",\n          \"transition\": \"message_send\",\n          \"actor\": \"server\",\n          \"note\": \"Agent produces artifacts with incorrect or fabricated results. Client receives plausible-looking but wrong output. In multi-agent chains, these fabricated artifacts propagate downstream, potentially causing cascading failures in dependent tasks.\"\n        }\n      ],\n      \"involved_states\": [\n        {\n          \"stage\": \"discovery\",\n          \"state_name\": \"AGENT_CARD_RECEIVED\",\n          \"actor\": \"shared\",\n          \"relevance\": \"Agent Card is the sole source of skill information. Skills are self-declared with no attestation primitive. Client must make trust decisions based on unverified claims.\"\n        },\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"TASK_STATE_WORKING\",\n          \"actor\": \"server\",\n          \"relevance\": \"Once the task reaches WORKING, the agent has access to all message data regardless of actual capability. Damage occurs before any capability mismatch can be detected.\"\n        }\n      ],\n      \"involved_transitions\": [\n        {\n          \"from_stage\": \"discovery\",\n          \"from_state\": \"AGENT_CARD_RECEIVED\",\n          \"to_stage\": \"discovery\",\n          \"to_state\": \"TRANSPORT_SELECTED\",\n          \"trigger\": \"supportedInterfaces_parsed\",\n          \"relevance\": \"This transition commits the client to interacting with the agent based on unverified skill claims. No skill verification gate exists in the protocol at this or any subsequent transition.\"\n        }\n      ],\n      \"missing_primitive\": \"A protocol-level skill attestation or verification mechanism. This could take the form of: (1) A QuerySkill() challenge-response method (already identified on the A2A roadmap but not yet specified) that allows clients to test an agent's claimed capabilities before committing tasks; (2) A skill attestation field in AgentSkill linking to a third-party verification (e.g., a signed attestation from a trusted registry); (3) A protocol-defined skill verification handshake during the discovery phase that gates the transition from AGENT_CARD_RECEIVED to TRANSPORT_SELECTED. Currently, the AgentSkill data model contains only self-asserted strings (id, name, description, tags, examples) with no integrity or authenticity binding to actual capability.\",\n      \"why_compliance_does_not_prevent\": \"Full compliance with all spec MUSTs ensures authentic delivery of Agent Cards, proper authentication, and valid state transitions. However, no MUST, SHOULD, or MAY anywhere in the specification requires skill claims to be verified, attested, or validated against demonstrated capability. The specification treats skill declarations as informational metadata with no trust requirement. The MUST for input validation (servers MUST rigorously validate all RPC parameters) applies to data format, not to the truthfulness of capability claims in Agent Cards. A fully compliant malicious agent satisfies every normative rule while advertising skills it cannot perform.\",\n      \"spec_sections_searched\": [\"4.4 (AgentCard)\", \"4.4.5 (AgentSkill)\", \"8.3 (Agent Discovery)\", \"8.6 (Agent Card Caching)\", \"8.7 (Agent Card Signing)\", \"13.1 (Security)\", \"7.5 (Authorization)\"],\n      \"preliminary_confidence\": \"HIGH\"\n    },\n    {\n      \"candidate_id\": \"C-002\",\n      \"title\": \"referenceTaskIds Field Processed Without Authorization Scoping Enables Cross-Client Information Extraction via Agent Internal State\",\n      \"protocol_phase\": \"task_execution\",\n      \"attack_scenario\": \"The Message object includes an optional referenceTaskIds field ('A list of other task IDs that this message references for additional context'). The spec states that 'The serving agent infers the relevant artifact from a referenced task or from the contextId.' When Client B sends a message/send with referenceTaskIds containing task IDs belonging to Client A, the agent internally accesses Client A's tasks to inform its processing of Client B's task. The protocol's authorization MUSTs (section 13.1) scope task OPERATIONS (GetTask, ListTasks, CancelTask) to the authenticated caller, but referenceTaskIds is not a task operation — it is a field within a message that causes the agent to internally access the referenced tasks. No authorization check is defined for the referenceTaskIds processing path. The agent's response to Client B's task may contain information derived from Client A's referenced tasks (artifacts, context, status), creating an information leakage channel that operates below the task operation authorization layer. Unlike the excluded contextId finding, this attack uses explicit task ID references rather than shared conversational context, and targets specific task artifacts rather than general agent state.\",\n      \"preliminary_trace\": [\n        {\n          \"step\": 1,\n          \"stage\": \"authentication\",\n          \"state\": \"REQUEST_AUTHORIZED\",\n          \"transition\": \"A2A_protocol_operations_request\",\n          \"actor\": \"server\",\n          \"note\": \"Client A authenticates and is authorized. Creates Task T1 which produces sensitive artifacts (e.g., financial analysis, medical report).\"\n        },\n        {\n          \"step\": 2,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_COMPLETED\",\n          \"transition\": \"message_send\",\n          \"actor\": \"server\",\n          \"note\": \"Client A's Task T1 completes with sensitive artifacts. Task T1's ID is known or discoverable by Client B (through shared environment, referenceTaskIds in other messages, sequential ID patterns, or legitimate collaboration context).\"\n        },\n        {\n          \"step\": 3,\n          \"stage\": \"authentication\",\n          \"state\": \"REQUEST_AUTHORIZED\",\n          \"transition\": \"A2A_protocol_operations_request\",\n          \"actor\": \"server\",\n          \"note\": \"Client B authenticates with its own valid credentials. Client B is a legitimate, authorized client of the same agent — not compromised, simply a different principal.\"\n        },\n        {\n          \"step\": 4,\n          \"stage\": \"initiation\",\n          \"state\": \"TASK_STATE_NONEXISTENT\",\n          \"transition\": \"send_message_requested\",\n          \"actor\": \"client\",\n          \"note\": \"Client B sends message/send with referenceTaskIds: [T1's ID]. The message asks the agent to build upon or reference T1's work. Per spec, the agent 'infers the relevant artifact from a referenced task.' No protocol mechanism validates that Client B is authorized to reference T1.\"\n        },\n        {\n          \"step\": 5,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_WORKING\",\n          \"transition\": \"agent_begins_processing\",\n          \"actor\": \"server\",\n          \"note\": \"Agent internally accesses Task T1's artifacts and context to process Client B's request. This internal access is not a GetTask operation — it bypasses the MUST for task-operation-level authorization scoping. The agent has internal access to all tasks (it's the server). The referenceTaskIds field directs this access without an authorization gate.\"\n        },\n        {\n          \"step\": 6,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_COMPLETED\",\n          \"transition\": \"message_send\",\n          \"actor\": \"server\",\n          \"note\": \"Agent produces artifacts for Client B's task that are informed by Client A's Task T1. Client B receives output containing information derived from Client A's sensitive data. All task-operation-level MUSTs are satisfied — Client B only accesses its own Task T2. The leakage occurs through the agent's internal processing path, not through task operations.\"\n        }\n      ],\n      \"involved_states\": [\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"TASK_STATE_WORKING\",\n          \"actor\": \"server\",\n          \"relevance\": \"During WORKING state, the agent processes the message including referenceTaskIds. The agent accesses referenced tasks internally without protocol-mandated authorization checks on the references.\"\n        }\n      ],\n      \"involved_transitions\": [\n        {\n          \"from_stage\": \"initiation\",\n          \"from_state\": \"TASK_STATE_NONEXISTENT\",\n          \"to_stage\": \"initiation\",\n          \"to_state\": \"TASK_STATE_WORKING\",\n          \"trigger\": \"send_message_requested\",\n          \"relevance\": \"The initial message carries referenceTaskIds. At this transition point, the agent commits to processing the message with the references, but no authorization gate for the referenced tasks exists in the protocol.\"\n        }\n      ],\n      \"missing_primitive\": \"A protocol-level authorization check for referenceTaskIds. The specification should mandate that agents MUST verify the requesting client's authorization for each task ID in referenceTaskIds before using those tasks to inform processing. This is analogous to the existing MUST for GetTask ('Servers MUST only return tasks visible to caller') but applied to the internal reference resolution path. Without this, the referenceTaskIds field creates a side channel that bypasses the task-operation authorization layer.\",\n      \"why_compliance_does_not_prevent\": \"The spec's authorization MUSTs (section 13.1) apply to task operations: GetTask MUST only return tasks visible to the caller, ListTasks MUST scope results. But referenceTaskIds processing is not a task operation — it's an internal processing hint within message/send. A fully compliant server satisfies all task-operation authorization MUSTs while internally accessing unrestricted tasks referenced by referenceTaskIds, because no MUST, SHOULD, or MAY in the specification requires authorization checking for referenceTaskIds. The spec defines referenceTaskIds as a message field with semantic guidance ('infers the relevant artifact') but no security constraint.\",\n      \"spec_sections_searched\": [\"3.4 (Multi-Turn Conversations)\", \"3.7 (Messages and Artifacts)\", \"4.1 (Task)\", \"4.1.1 (Message)\", \"7.5 (Authorization)\", \"13.1 (Security Considerations)\", \"life-of-a-task topics\"],\n      \"preliminary_confidence\": \"MEDIUM\"\n    },\n    {\n      \"candidate_id\": \"C-003\",\n      \"title\": \"Absent Task State Versioning Enables Stale-State Decision-Making Under Protocol-Enabled Concurrent Access\",\n      \"protocol_phase\": \"task_execution\",\n      \"attack_scenario\": \"The protocol explicitly enables concurrent access: 'An agent MAY serve multiple concurrent streams to one or more clients for the same task.' Multiple authorized clients can read task state (GetTask) and write to the task (message/send, CancelTask) concurrently. However, no task state version number, ETag, or conditional operation mechanism exists. This creates a protocol-level TOCTOU (time-of-check-to-time-of-use) vulnerability. Client A reads task state (TASK_STATE_INPUT_REQUIRED with specific status.message describing what input is needed), prepares a security-relevant response (e.g., authorizing a payment based on displayed information), and sends input. Between Client A's read and write, Client B concurrently modifies the task (sending different input that changes the agent's processing context, or canceling the task). Client A's authorization decision was based on stale task state. The protocol provides no conditional write ('send this input only if task state version = X') and no conflict detection mechanism. The message/send and CancelTask operations accept taskId but no state version, meaning every write is unconditional regardless of whether the task state has changed since the client's last read.\",\n      \"preliminary_trace\": [\n        {\n          \"step\": 1,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"transition\": \"agent_requests_input\",\n          \"actor\": \"server\",\n          \"note\": \"Agent transitions task to INPUT_REQUIRED, requesting specific input (e.g., 'Please authorize payment of $500 to Vendor X'). Multiple clients have concurrent stream access to this task.\"\n        },\n        {\n          \"step\": 2,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"transition\": \"subscribe_to_task_requested\",\n          \"actor\": \"client\",\n          \"note\": \"Client A reads task state via GetTask or active stream. Sees INPUT_REQUIRED with status.message describing '$500 payment to Vendor X'. Client A begins preparing authorization response. No state version number exists in the Task object for conditional write.\"\n        },\n        {\n          \"step\": 3,\n          \"stage\": \"interruption\",\n          \"state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"transition\": \"client_sends_input\",\n          \"actor\": \"client\",\n          \"note\": \"Client B concurrently sends a message to the same task (message/send with taskId). Client B's message changes the context — e.g., providing input that causes the agent to recalculate, now requesting '$5000 payment to Vendor Y'. The transition INPUT_REQUIRED → WORKING → INPUT_REQUIRED occurs before Client A's response arrives.\"\n        },\n        {\n          \"step\": 4,\n          \"stage\": \"interruption\",\n          \"state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"transition\": \"client_sends_input\",\n          \"actor\": \"client\",\n          \"note\": \"Client A sends its authorization (approving the $500 payment to Vendor X it saw earlier). The message/send operation has no conditional guard — no field for expected state version, no ETag. The server receives Client A's message for a task whose context has been modified by Client B.\"\n        },\n        {\n          \"step\": 5,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_WORKING\",\n          \"transition\": \"message_received\",\n          \"actor\": \"server\",\n          \"note\": \"Agent processes Client A's authorization in the NEW context (Agent Y/$5000). Client A approved based on stale state. The protocol provides no mechanism for the server to detect that Client A's response was based on an outdated state, and no mechanism for Client A to condition its response on a specific state version.\"\n        }\n      ],\n      \"involved_states\": [\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"actor\": \"shared\",\n          \"relevance\": \"The interrupted state where clients make decisions based on displayed task information. Concurrent access without state versioning means the displayed information may become stale before the client's response is processed.\"\n        },\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"TASK_STATE_WORKING\",\n          \"actor\": \"server\",\n          \"relevance\": \"The state where the agent processes the stale-state-based input. The agent cannot distinguish between a response to the current context and a response to a previous context.\"\n        }\n      ],\n      \"involved_transitions\": [\n        {\n          \"from_stage\": \"task_execution\",\n          \"from_state\": \"TASK_STATE_INPUT_REQUIRED\",\n          \"to_stage\": \"task_execution\",\n          \"to_state\": \"TASK_STATE_WORKING\",\n          \"trigger\": \"message_received\",\n          \"relevance\": \"This transition accepts client input unconditionally — no guard checks whether the client's input corresponds to the current task state version. The guard only checks task.state and message identifiers, not state freshness.\"\n        }\n      ],\n      \"missing_primitive\": \"A task state versioning mechanism for optimistic concurrency control. The Task object should include a state version number (monotonically incrementing on every state change) or ETag, and write operations (message/send, CancelTask) should support a conditional field (e.g., expectedVersion or If-Match) that causes the server to reject the operation if the task state has changed since the client's last read. This is a standard pattern in concurrent systems (HTTP ETags, database optimistic locking) that the protocol omits despite explicitly enabling concurrent multi-client access to the same task.\",\n      \"why_compliance_does_not_prevent\": \"The protocol's MUST NOT transition to an invalid state prevents structural FSM violations but does not address semantic correctness of client decisions under concurrent access. No normative rule requires state versioning, conditional writes, or conflict detection. The protocol enables concurrent access (MAY serve multiple concurrent streams) and concurrent writes (any authorized client can message/send to any authorized task) but provides no mechanism to ensure that write operations are based on current state. A fully compliant server processes all valid messages in arrival order, but the protocol gives clients no tool to express 'only if unchanged since my last read.'\",\n      \"spec_sections_searched\": [\"3.2 (Task Lifecycle)\", \"3.4 (Multi-Turn Conversations)\", \"3.5 (Streaming)\", \"4.1 (Task)\", \"3.1.4 (SendMessage)\", \"3.1.5 (SendStreamingMessage)\", \"13.1 (Security)\"],\n      \"preliminary_confidence\": \"MEDIUM\"\n    },\n    {\n      \"candidate_id\": \"C-004\",\n      \"title\": \"Push Notification Payloads Lack Per-Delivery Integrity Protection, Enabling Replay Attacks Even With Authentication Configured\",\n      \"protocol_phase\": \"task_execution\",\n      \"attack_scenario\": \"When push notification authentication IS configured (PushNotificationConfig.authentication present with Bearer token), the server includes the same static credentials in every HTTP POST to the webhook. Push notification payloads (StreamResponse containing TaskStatusUpdateEvent or TaskArtifactUpdateEvent) carry taskId and contextId but no per-notification unique identifier (nonce/jti), no sequence number, no timestamp with freshness requirement, and no HMAC/signature over the payload content. An attacker who captures a legitimate push notification (via network interception, compromised log, or intermediary) can replay it to the client's webhook at an arbitrary later time. The webhook receives the replayed notification with correct static authentication credentials and has no protocol-defined mechanism to detect the replay. This enables: (1) Replaying TASK_STATE_COMPLETED notifications for tasks that subsequently failed, causing the client to act on stale completion; (2) Replaying TASK_STATE_AUTH_REQUIRED notifications directing the client to provide credentials that were already provided; (3) Duplicating artifact delivery causing data corruption in clients that process artifacts idempotently based on taskId alone. This is distinct from excluded finding #10 (authentication optionality enabling forgery) and #5 (URL ownership verification) — this attack succeeds even when authentication IS properly configured because the authentication mechanism uses static credentials with no replay protection.\",\n      \"preliminary_trace\": [\n        {\n          \"step\": 1,\n          \"stage\": \"task_execution\",\n          \"state\": \"PUSH_NOTIFICATION_CONFIG_NONEXISTENT\",\n          \"transition\": \"create_push_notification_config_requested\",\n          \"actor\": \"client\",\n          \"note\": \"Client creates push notification config WITH authentication (PushNotificationConfig.authentication with Bearer token scheme and static credentials). The config is properly secured per the spec's MUST requirements.\"\n        },\n        {\n          \"step\": 2,\n          \"stage\": \"task_execution\",\n          \"state\": \"PUSH_NOTIFICATION_CONFIG_ACTIVE\",\n          \"transition\": \"task state change triggers notification\",\n          \"actor\": \"server\",\n          \"note\": \"Server sends HTTP POST to webhook with StreamResponse payload. The POST includes the static Bearer token in the Authorization header. The payload contains TaskStatusUpdateEvent with taskId, contextId, status (e.g., TASK_STATE_COMPLETED). No per-notification nonce, sequence number, payload signature, or timestamp with freshness bound is included.\"\n        },\n        {\n          \"step\": 3,\n          \"stage\": \"task_execution\",\n          \"state\": \"PUSH_NOTIFICATION_RECEIVED\",\n          \"transition\": \"webhook_request_received\",\n          \"actor\": \"client\",\n          \"note\": \"Client webhook receives and processes the notification. Client verifies the Bearer token (correct). Attacker captures this notification (network interception, compromised log, or intermediary in the delivery chain).\"\n        },\n        {\n          \"step\": 4,\n          \"stage\": \"task_execution\",\n          \"state\": \"PUSH_NOTIFICATION_ACKNOWLEDGED\",\n          \"transition\": \"webhook_request_received\",\n          \"actor\": \"client\",\n          \"note\": \"Client acknowledges with HTTP 2xx. The original notification is processed correctly.\"\n        },\n        {\n          \"step\": 5,\n          \"stage\": \"task_execution\",\n          \"state\": \"PUSH_NOTIFICATION_RECEIVED\",\n          \"transition\": \"webhook_request_received (replayed)\",\n          \"actor\": \"client\",\n          \"note\": \"Attacker replays the captured notification (identical HTTP POST with same Bearer token and payload) at a later time — potentially after the task state has changed (e.g., task was canceled after being completed, or a new task with the same taskId was created in a new context). The webhook receives the replay with correct Bearer token. No per-notification nonce exists to detect replay. No sequence number exists to detect out-of-order delivery. No timestamp freshness check is mandated. Client processes the replayed notification as legitimate.\"\n        }\n      ],\n      \"involved_states\": [\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"PUSH_NOTIFICATION_CONFIG_ACTIVE\",\n          \"actor\": \"shared\",\n          \"relevance\": \"The active config contains static authentication credentials that are reused for every notification delivery. No per-delivery entropy (nonce, sequence number) is added by the protocol.\"\n        },\n        {\n          \"stage\": \"task_execution\",\n          \"state_name\": \"PUSH_NOTIFICATION_RECEIVED\",\n          \"actor\": \"shared\",\n          \"relevance\": \"The receiving state has no protocol-defined mechanism to distinguish a fresh notification from a replayed one. The guard checks only 'authentication credentials present,' not freshness or uniqueness.\"\n        }\n      ],\n      \"involved_transitions\": [\n        {\n          \"from_stage\": \"task_execution\",\n          \"from_state\": \"PUSH_NOTIFICATION_RECEIVED\",\n          \"to_stage\": \"task_execution\",\n          \"to_state\": \"PUSH_NOTIFICATION_ACKNOWLEDGED\",\n          \"trigger\": \"webhook_request_received\",\n          \"relevance\": \"This transition accepts the notification based on authentication credentials only. The guard 'webhook_request received with authentication credentials present' is satisfied by the replayed notification's static credentials. No replay detection guard exists.\"\n        }\n      ],\n      \"missing_primitive\": \"Per-notification integrity and freshness protection for push notification delivery. The protocol should define either: (1) A mandatory per-notification unique identifier (nonce/jti) that the webhook can track for duplicate detection; (2) A mandatory notification sequence number per task that enables the webhook to detect replayed or out-of-order notifications; (3) A payload HMAC/signature using a key derived from the PushNotificationConfig.token (which is currently optional with no defined verification semantics); or (4) A mandatory timestamp with a protocol-defined freshness window (e.g., reject notifications older than N seconds). Standard webhook security practices (Stripe, GitHub) include per-delivery signatures; the A2A protocol's push notification mechanism omits this.\",\n      \"why_compliance_does_not_prevent\": \"Full compliance ensures the server includes authentication credentials per the MUST ('The agent MUST include authentication credentials in the request headers as specified in PushNotificationConfig.authentication field'). But authentication credentials are static — the same Bearer token is used for every delivery. No MUST, SHOULD, or MAY in the specification requires per-notification uniqueness tokens, sequence numbers, payload signatures, or freshness checks. The PushNotificationConfig.token field is optional and has no normative verification semantics defined. A fully compliant deployment with authentication configured remains vulnerable to replay because the protocol provides no anti-replay mechanism at the notification level.\",\n      \"spec_sections_searched\": [\"3.1.7 (CreateTaskPushNotificationConfig)\", \"4.3 (Push Notification Payload)\", \"13.2 (Push Notification Security)\", \"streaming-and-async topics\"],\n      \"preliminary_confidence\": \"HIGH\"\n    }\n  ],\n  \"structural_observations\": [\n    \"The protocol's authorization model (section 13.1) draws a clear boundary around task OPERATIONS (GetTask, ListTasks, CancelTask) but does not extend authorization scoping to task REFERENCES (referenceTaskIds) or task-internal processing paths. This creates a class of vulnerabilities where authorization is enforced at the API boundary but bypassed through agent-internal data access triggered by protocol-defined fields.\",\n    \"The protocol explicitly enables concurrent multi-client access (MAY serve multiple concurrent streams) but provides no concurrency control primitives (state versioning, conditional operations, conflict detection). This is a systemic gap — the protocol defines a stateful system with concurrent access but omits the standard mechanisms that stateful concurrent systems use to ensure consistency.\",\n    \"Agent capability claims (skills, supported input/output modes, capabilities) form the basis for client trust decisions in multi-agent systems, but the protocol treats all capability metadata as self-asserted with no verification layer. The GitHub roadmap's mention of a QuerySkill() method confirms this is a recognized but unaddressed gap, not an intentional design choice.\",\n    \"Push notification security has been addressed incrementally across findings (#5: URL ownership, #10: auth optionality, this analysis: replay protection), revealing that the push notification mechanism was designed primarily for functionality with security layered on optionally rather than being designed with a comprehensive threat model. Each security property (authentication, URL verification, anti-replay, anti-forgery) is independently optional or absent.\"\n  ]\n}\n```",
+  "fsm": {
+    "candidates": [
+      {
+        "candidate_id": "C-001",
+        "title": "Agent Card Skill Claims Are Self-Declared With No Attestation or Verification Mechanism, Enabling Capability-Based Task Misdirection",
+        "protocol_phase": "discovery",
+        "attack_scenario": "A malicious or misconfigured agent publishes an Agent Card at /.well-known/agent-card.json with an AgentSkill array containing false skill claims (e.g., claiming id:'financial-analysis', description:'SEC filing analysis with regulatory compliance' when the agent has no such capability). In multi-agent systems where client agents select downstream agents via registry queries or skill-based discovery, the falsely advertised agent attracts tasks it cannot properly execute. The agent accepts the task (transitioning to WORKING), then either produces incorrect output (COMPLETED with wrong artifacts), wastes resources before FAILING, or extracts sensitive data from the task message before REJECTING. The protocol provides no skill attestation primitive, no skill verification challenge-response, and no binding between declared skills and demonstrated capability. The Agent Card's skill fields (id, name, description, tags, examples, inputModes, outputModes) are purely self-asserted strings with no protocol mechanism for verification. Even if the Agent Card's JWS signature is valid (establishing 'this card was issued by entity X'), it does not establish 'entity X actually has the skills claimed' — authentication of identity and attestation of capability are fundamentally different. The GitHub roadmap confirms this gap: 'Investigate a QuerySkill() method for dynamically checking unsupported or unanticipated skills' — a feature not yet specified.",
+        "preliminary_trace": [
+          {
+            "step": 1,
+            "stage": "discovery",
+            "state": "AGENT_CARD_RECEIVED",
+            "transition": "(initial state)",
+            "actor": "client",
+            "note": "Client agent queries a registry or fetches /.well-known/agent-card.json. Receives an Agent Card with falsely declared skills. The AgentSkill objects (id, name, description, tags) are self-asserted strings — no protocol mechanism validates their truthfulness."
+          },
+          {
+            "step": 2,
+            "stage": "discovery",
+            "state": "TRANSPORT_SELECTED",
+            "transition": "supportedInterfaces_parsed",
+            "actor": "client",
+            "note": "Client selects transport based on the false Agent Card. The client trusts the skill claims because the protocol provides no verification mechanism. Skill matching is based purely on string comparison of self-declared fields."
+          },
+          {
+            "step": 3,
+            "stage": "authentication",
+            "state": "REQUEST_AUTHORIZED",
+            "transition": "A2A_protocol_operations_request",
+            "actor": "server",
+            "note": "Client authenticates to the malicious agent. All auth MUSTs satisfied. The authentication verifies the client's identity to the server, but the client has no protocol mechanism to verify the server's claimed capabilities."
+          },
+          {
+            "step": 4,
+            "stage": "initiation",
+            "state": "TASK_STATE_NONEXISTENT",
+            "transition": "send_message_requested",
+            "actor": "client",
+            "note": "Client sends a task message targeting the falsely claimed skill. The message may contain sensitive domain-specific data (financial records, medical data) appropriate for the claimed skill but now exposed to an agent that cannot legitimately process it."
+          },
+          {
+            "step": 5,
+            "stage": "task_execution",
+            "state": "TASK_STATE_WORKING",
+            "transition": "agent_begins_processing",
+            "actor": "server",
+            "note": "Malicious agent accepts the task and transitions to WORKING. The agent now has access to all message data. It can extract sensitive information, produce fabricated results, or hold resources. No protocol mechanism allows the client to verify capability before or during execution."
+          },
+          {
+            "step": 6,
+            "stage": "task_execution",
+            "state": "TASK_STATE_COMPLETED",
+            "transition": "message_send",
+            "actor": "server",
+            "note": "Agent produces artifacts with incorrect or fabricated results. Client receives plausible-looking but wrong output. In multi-agent chains, these fabricated artifacts propagate downstream, potentially causing cascading failures in dependent tasks."
+          }
+        ],
+        "involved_states": [
+          {
+            "stage": "discovery",
+            "state_name": "AGENT_CARD_RECEIVED",
+            "actor": "shared",
+            "relevance": "Agent Card is the sole source of skill information. Skills are self-declared with no attestation primitive. Client must make trust decisions based on unverified claims."
+          },
+          {
+            "stage": "task_execution",
+            "state_name": "TASK_STATE_WORKING",
+            "actor": "server",
+            "relevance": "Once the task reaches WORKING, the agent has access to all message data regardless of actual capability. Damage occurs before any capability mismatch can be detected."
+          }
+        ],
+        "involved_transitions": [
+          {
+            "from_stage": "discovery",
+            "from_state": "AGENT_CARD_RECEIVED",
+            "to_stage": "discovery",
+            "to_state": "TRANSPORT_SELECTED",
+            "trigger": "supportedInterfaces_parsed",
+            "relevance": "This transition commits the client to interacting with the agent based on unverified skill claims. No skill verification gate exists in the protocol at this or any subsequent transition."
+          }
+        ],
+        "missing_primitive": "A protocol-level skill attestation or verification mechanism. This could take the form of: (1) A QuerySkill() challenge-response method (already identified on the A2A roadmap but not yet specified) that allows clients to test an agent's claimed capabilities before committing tasks; (2) A skill attestation field in AgentSkill linking to a third-party verification (e.g., a signed attestation from a trusted registry); (3) A protocol-defined skill verification handshake during the discovery phase that gates the transition from AGENT_CARD_RECEIVED to TRANSPORT_SELECTED. Currently, the AgentSkill data model contains only self-asserted strings (id, name, description, tags, examples) with no integrity or authenticity binding to actual capability.",
+        "why_compliance_does_not_prevent": "Full compliance with all spec MUSTs ensures authentic delivery of Agent Cards, proper authentication, and valid state transitions. However, no MUST, SHOULD, or MAY anywhere in the specification requires skill claims to be verified, attested, or validated against demonstrated capability. The specification treats skill declarations as informational metadata with no trust requirement. The MUST for input validation (servers MUST rigorously validate all RPC parameters) applies to data format, not to the truthfulness of capability claims in Agent Cards. A fully compliant malicious agent satisfies every normative rule while advertising skills it cannot perform.",
+        "spec_sections_searched": [
+          "4.4 (AgentCard)",
+          "4.4.5 (AgentSkill)",
+          "8.3 (Agent Discovery)",
+          "8.6 (Agent Card Caching)",
+          "8.7 (Agent Card Signing)",
+          "13.1 (Security)",
+          "7.5 (Authorization)"
+        ],
+        "preliminary_confidence": "HIGH"
+      },
+      {
+        "candidate_id": "C-002",
+        "title": "referenceTaskIds Field Processed Without Authorization Scoping Enables Cross-Client Information Extraction via Agent Internal State",
+        "protocol_phase": "task_execution",
+        "attack_scenario": "The Message object includes an optional referenceTaskIds field ('A list of other task IDs that this message references for additional context'). The spec states that 'The serving agent infers the relevant artifact from a referenced task or from the contextId.' When Client B sends a message/send with referenceTaskIds containing task IDs belonging to Client A, the agent internally accesses Client A's tasks to inform its processing of Client B's task. The protocol's authorization MUSTs (section 13.1) scope task OPERATIONS (GetTask, ListTasks, CancelTask) to the authenticated caller, but referenceTaskIds is not a task operation — it is a field within a message that causes the agent to internally access the referenced tasks. No authorization check is defined for the referenceTaskIds processing path. The agent's response to Client B's task may contain information derived from Client A's referenced tasks (artifacts, context, status), creating an information leakage channel that operates below the task operation authorization layer. Unlike the excluded contextId finding, this attack uses explicit task ID references rather than shared conversational context, and targets specific task artifacts rather than general agent state.",
+        "preliminary_trace": [
+          {
+            "step": 1,
+            "stage": "authentication",
+            "state": "REQUEST_AUTHORIZED",
+            "transition": "A2A_protocol_operations_request",
+            "actor": "server",
+            "note": "Client A authenticates and is authorized. Creates Task T1 which produces sensitive artifacts (e.g., financial analysis, medical report)."
+          },
+          {
+            "step": 2,
+            "stage": "task_execution",
+            "state": "TASK_STATE_COMPLETED",
+            "transition": "message_send",
+            "actor": "server",
+            "note": "Client A's Task T1 completes with sensitive artifacts. Task T1's ID is known or discoverable by Client B (through shared environment, referenceTaskIds in other messages, sequential ID patterns, or legitimate collaboration context)."
+          },
+          {
+            "step": 3,
+            "stage": "authentication",
+            "state": "REQUEST_AUTHORIZED",
+            "transition": "A2A_protocol_operations_request",
+            "actor": "server",
+            "note": "Client B authenticates with its own valid credentials. Client B is a legitimate, authorized client of the same agent — not compromised, simply a different principal."
+          },
+          {
+            "step": 4,
+            "stage": "initiation",
+            "state": "TASK_STATE_NONEXISTENT",
+            "transition": "send_message_requested",
+            "actor": "client",
+            "note": "Client B sends message/send with referenceTaskIds: [T1's ID]. The message asks the agent to build upon or reference T1's work. Per spec, the agent 'infers the relevant artifact from a referenced task.' No protocol mechanism validates that Client B is authorized to reference T1."
+          },
+          {
+            "step": 5,
+            "stage": "task_execution",
+            "state": "TASK_STATE_WORKING",
+            "transition": "agent_begins_processing",
+            "actor": "server",
+            "note": "Agent internally accesses Task T1's artifacts and context to process Client B's request. This internal access is not a GetTask operation — it bypasses the MUST for task-operation-level authorization scoping. The agent has internal access to all tasks (it's the server). The referenceTaskIds field directs this access without an authorization gate."
+          },
+          {
+            "step": 6,
+            "stage": "task_execution",
+            "state": "TASK_STATE_COMPLETED",
+            "transition": "message_send",
+            "actor": "server",
+            "note": "Agent produces artifacts for Client B's task that are informed by Client A's Task T1. Client B receives output containing information derived from Client A's sensitive data. All task-operation-level MUSTs are satisfied — Client B only accesses its own Task T2. The leakage occurs through the agent's internal processing path, not through task operations."
+          }
+        ],
+        "involved_states": [
+          {
+            "stage": "task_execution",
+            "state_name": "TASK_STATE_WORKING",
+            "actor": "server",
+            "relevance": "During WORKING state, the agent processes the message including referenceTaskIds. The agent accesses referenced tasks internally without protocol-mandated authorization checks on the references."
+          }
+        ],
+        "involved_transitions": [
+          {
+            "from_stage": "initiation",
+            "from_state": "TASK_STATE_NONEXISTENT",
+            "to_stage": "initiation",
+            "to_state": "TASK_STATE_WORKING",
+            "trigger": "send_message_requested",
+            "relevance": "The initial message carries referenceTaskIds. At this transition point, the agent commits to processing the message with the references, but no authorization gate for the referenced tasks exists in the protocol."
+          }
+        ],
+        "missing_primitive": "A protocol-level authorization check for referenceTaskIds. The specification should mandate that agents MUST verify the requesting client's authorization for each task ID in referenceTaskIds before using those tasks to inform processing. This is analogous to the existing MUST for GetTask ('Servers MUST only return tasks visible to caller') but applied to the internal reference resolution path. Without this, the referenceTaskIds field creates a side channel that bypasses the task-operation authorization layer.",
+        "why_compliance_does_not_prevent": "The spec's authorization MUSTs (section 13.1) apply to task operations: GetTask MUST only return tasks visible to the caller, ListTasks MUST scope results. But referenceTaskIds processing is not a task operation — it's an internal processing hint within message/send. A fully compliant server satisfies all task-operation authorization MUSTs while internally accessing unrestricted tasks referenced by referenceTaskIds, because no MUST, SHOULD, or MAY in the specification requires authorization checking for referenceTaskIds. The spec defines referenceTaskIds as a message field with semantic guidance ('infers the relevant artifact') but no security constraint.",
+        "spec_sections_searched": [
+          "3.4 (Multi-Turn Conversations)",
+          "3.7 (Messages and Artifacts)",
+          "4.1 (Task)",
+          "4.1.1 (Message)",
+          "7.5 (Authorization)",
+          "13.1 (Security Considerations)",
+          "life-of-a-task topics"
+        ],
+        "preliminary_confidence": "MEDIUM"
+      },
+      {
+        "candidate_id": "C-003",
+        "title": "Absent Task State Versioning Enables Stale-State Decision-Making Under Protocol-Enabled Concurrent Access",
+        "protocol_phase": "task_execution",
+        "attack_scenario": "The protocol explicitly enables concurrent access: 'An agent MAY serve multiple concurrent streams to one or more clients for the same task.' Multiple authorized clients can read task state (GetTask) and write to the task (message/send, CancelTask) concurrently. However, no task state version number, ETag, or conditional operation mechanism exists. This creates a protocol-level TOCTOU (time-of-check-to-time-of-use) vulnerability. Client A reads task state (TASK_STATE_INPUT_REQUIRED with specific status.message describing what input is needed), prepares a security-relevant response (e.g., authorizing a payment based on displayed information), and sends input. Between Client A's read and write, Client B concurrently modifies the task (sending different input that changes the agent's processing context, or canceling the task). Client A's authorization decision was based on stale task state. The protocol provides no conditional write ('send this input only if task state version = X') and no conflict detection mechanism. The message/send and CancelTask operations accept taskId but no state version, meaning every write is unconditional regardless of whether the task state has changed since the client's last read.",
+        "preliminary_trace": [
+          {
+            "step": 1,
+            "stage": "task_execution",
+            "state": "TASK_STATE_INPUT_REQUIRED",
+            "transition": "agent_requests_input",
+            "actor": "server",
+            "note": "Agent transitions task to INPUT_REQUIRED, requesting specific input (e.g., 'Please authorize payment of $500 to Vendor X'). Multiple clients have concurrent stream access to this task."
+          },
+          {
+            "step": 2,
+            "stage": "task_execution",
+            "state": "TASK_STATE_INPUT_REQUIRED",
+            "transition": "subscribe_to_task_requested",
+            "actor": "client",
+            "note": "Client A reads task state via GetTask or active stream. Sees INPUT_REQUIRED with status.message describing '$500 payment to Vendor X'. Client A begins preparing authorization response. No state version number exists in the Task object for conditional write."
+          },
+          {
+            "step": 3,
+            "stage": "interruption",
+            "state": "TASK_STATE_INPUT_REQUIRED",
+            "transition": "client_sends_input",
+            "actor": "client",
+            "note": "Client B concurrently sends a message to the same task (message/send with taskId). Client B's message changes the context — e.g., providing input that causes the agent to recalculate, now requesting '$5000 payment to Vendor Y'. The transition INPUT_REQUIRED → WORKING → INPUT_REQUIRED occurs before Client A's response arrives."
+          },
+          {
+            "step": 4,
+            "stage": "interruption",
+            "state": "TASK_STATE_INPUT_REQUIRED",
+            "transition": "client_sends_input",
+            "actor": "client",
+            "note": "Client A sends its authorization (approving the $500 payment to Vendor X it saw earlier). The message/send operation has no conditional guard — no field for expected state version, no ETag. The server receives Client A's message for a task whose context has been modified by Client B."
+          },
+          {
+            "step": 5,
+            "stage": "task_execution",
+            "state": "TASK_STATE_WORKING",
+            "transition": "message_received",
+            "actor": "server",
+            "note": "Agent processes Client A's authorization in the NEW context (Agent Y/$5000). Client A approved based on stale state. The protocol provides no mechanism for the server to detect that Client A's response was based on an outdated state, and no mechanism for Client A to condition its response on a specific state version."
+          }
+        ],
+        "involved_states": [
+          {
+            "stage": "task_execution",
+            "state_name": "TASK_STATE_INPUT_REQUIRED",
+            "actor": "shared",
+            "relevance": "The interrupted state where clients make decisions based on displayed task information. Concurrent access without state versioning means the displayed information may become stale before the client's response is processed."
+          },
+          {
+            "stage": "task_execution",
+            "state_name": "TASK_STATE_WORKING",
+            "actor": "server",
+            "relevance": "The state where the agent processes the stale-state-based input. The agent cannot distinguish between a response to the current context and a response to a previous context."
+          }
+        ],
+        "involved_transitions": [
+          {
+            "from_stage": "task_execution",
+            "from_state": "TASK_STATE_INPUT_REQUIRED",
+            "to_stage": "task_execution",
+            "to_state": "TASK_STATE_WORKING",
+            "trigger": "message_received",
+            "relevance": "This transition accepts client input unconditionally — no guard checks whether the client's input corresponds to the current task state version. The guard only checks task.state and message identifiers, not state freshness."
+          }
+        ],
+        "missing_primitive": "A task state versioning mechanism for optimistic concurrency control. The Task object should include a state version number (monotonically incrementing on every state change) or ETag, and write operations (message/send, CancelTask) should support a conditional field (e.g., expectedVersion or If-Match) that causes the server to reject the operation if the task state has changed since the client's last read. This is a standard pattern in concurrent systems (HTTP ETags, database optimistic locking) that the protocol omits despite explicitly enabling concurrent multi-client access to the same task.",
+        "why_compliance_does_not_prevent": "The protocol's MUST NOT transition to an invalid state prevents structural FSM violations but does not address semantic correctness of client decisions under concurrent access. No normative rule requires state versioning, conditional writes, or conflict detection. The protocol enables concurrent access (MAY serve multiple concurrent streams) and concurrent writes (any authorized client can message/send to any authorized task) but provides no mechanism to ensure that write operations are based on current state. A fully compliant server processes all valid messages in arrival order, but the protocol gives clients no tool to express 'only if unchanged since my last read.'",
+        "spec_sections_searched": [
+          "3.2 (Task Lifecycle)",
+          "3.4 (Multi-Turn Conversations)",
+          "3.5 (Streaming)",
+          "4.1 (Task)",
+          "3.1.4 (SendMessage)",
+          "3.1.5 (SendStreamingMessage)",
+          "13.1 (Security)"
+        ],
+        "preliminary_confidence": "MEDIUM"
+      },
+      {
+        "candidate_id": "C-004",
+        "title": "Push Notification Payloads Lack Per-Delivery Integrity Protection, Enabling Replay Attacks Even With Authentication Configured",
+        "protocol_phase": "task_execution",
+        "attack_scenario": "When push notification authentication IS configured (PushNotificationConfig.authentication present with Bearer token), the server includes the same static credentials in every HTTP POST to the webhook. Push notification payloads (StreamResponse containing TaskStatusUpdateEvent or TaskArtifactUpdateEvent) carry taskId and contextId but no per-notification unique identifier (nonce/jti), no sequence number, no timestamp with freshness requirement, and no HMAC/signature over the payload content. An attacker who captures a legitimate push notification (via network interception, compromised log, or intermediary) can replay it to the client's webhook at an arbitrary later time. The webhook receives the replayed notification with correct static authentication credentials and has no protocol-defined mechanism to detect the replay. This enables: (1) Replaying TASK_STATE_COMPLETED notifications for tasks that subsequently failed, causing the client to act on stale completion; (2) Replaying TASK_STATE_AUTH_REQUIRED notifications directing the client to provide credentials that were already provided; (3) Duplicating artifact delivery causing data corruption in clients that process artifacts idempotently based on taskId alone. This is distinct from excluded finding #10 (authentication optionality enabling forgery) and #5 (URL ownership verification) — this attack succeeds even when authentication IS properly configured because the authentication mechanism uses static credentials with no replay protection.",
+        "preliminary_trace": [
+          {
+            "step": 1,
+            "stage": "task_execution",
+            "state": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+            "transition": "create_push_notification_config_requested",
+            "actor": "client",
+            "note": "Client creates push notification config WITH authentication (PushNotificationConfig.authentication with Bearer token scheme and static credentials). The config is properly secured per the spec's MUST requirements."
+          },
+          {
+            "step": 2,
+            "stage": "task_execution",
+            "state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+            "transition": "task state change triggers notification",
+            "actor": "server",
+            "note": "Server sends HTTP POST to webhook with StreamResponse payload. The POST includes the static Bearer token in the Authorization header. The payload contains TaskStatusUpdateEvent with taskId, contextId, status (e.g., TASK_STATE_COMPLETED). No per-notification nonce, sequence number, payload signature, or timestamp with freshness bound is included."
+          },
+          {
+            "step": 3,
+            "stage": "task_execution",
+            "state": "PUSH_NOTIFICATION_RECEIVED",
+            "transition": "webhook_request_received",
+            "actor": "client",
+            "note": "Client webhook receives and processes the notification. Client verifies the Bearer token (correct). Attacker captures this notification (network interception, compromised log, or intermediary in the delivery chain)."
+          },
+          {
+            "step": 4,
+            "stage": "task_execution",
+            "state": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+            "transition": "webhook_request_received",
+            "actor": "client",
+            "note": "Client acknowledges with HTTP 2xx. The original notification is processed correctly."
+          },
+          {
+            "step": 5,
+            "stage": "task_execution",
+            "state": "PUSH_NOTIFICATION_RECEIVED",
+            "transition": "webhook_request_received (replayed)",
+            "actor": "client",
+            "note": "Attacker replays the captured notification (identical HTTP POST with same Bearer token and payload) at a later time — potentially after the task state has changed (e.g., task was canceled after being completed, or a new task with the same taskId was created in a new context). The webhook receives the replay with correct Bearer token. No per-notification nonce exists to detect replay. No sequence number exists to detect out-of-order delivery. No timestamp freshness check is mandated. Client processes the replayed notification as legitimate."
+          }
+        ],
+        "involved_states": [
+          {
+            "stage": "task_execution",
+            "state_name": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+            "actor": "shared",
+            "relevance": "The active config contains static authentication credentials that are reused for every notification delivery. No per-delivery entropy (nonce, sequence number) is added by the protocol."
+          },
+          {
+            "stage": "task_execution",
+            "state_name": "PUSH_NOTIFICATION_RECEIVED",
+            "actor": "shared",
+            "relevance": "The receiving state has no protocol-defined mechanism to distinguish a fresh notification from a replayed one. The guard checks only 'authentication credentials present,' not freshness or uniqueness."
+          }
+        ],
+        "involved_transitions": [
+          {
+            "from_stage": "task_execution",
+            "from_state": "PUSH_NOTIFICATION_RECEIVED",
+            "to_stage": "task_execution",
+            "to_state": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+            "trigger": "webhook_request_received",
+            "relevance": "This transition accepts the notification based on authentication credentials only. The guard 'webhook_request received with authentication credentials present' is satisfied by the replayed notification's static credentials. No replay detection guard exists."
+          }
+        ],
+        "missing_primitive": "Per-notification integrity and freshness protection for push notification delivery. The protocol should define either: (1) A mandatory per-notification unique identifier (nonce/jti) that the webhook can track for duplicate detection; (2) A mandatory notification sequence number per task that enables the webhook to detect replayed or out-of-order notifications; (3) A payload HMAC/signature using a key derived from the PushNotificationConfig.token (which is currently optional with no defined verification semantics); or (4) A mandatory timestamp with a protocol-defined freshness window (e.g., reject notifications older than N seconds). Standard webhook security practices (Stripe, GitHub) include per-delivery signatures; the A2A protocol's push notification mechanism omits this.",
+        "why_compliance_does_not_prevent": "Full compliance ensures the server includes authentication credentials per the MUST ('The agent MUST include authentication credentials in the request headers as specified in PushNotificationConfig.authentication field'). But authentication credentials are static — the same Bearer token is used for every delivery. No MUST, SHOULD, or MAY in the specification requires per-notification uniqueness tokens, sequence numbers, payload signatures, or freshness checks. The PushNotificationConfig.token field is optional and has no normative verification semantics defined. A fully compliant deployment with authentication configured remains vulnerable to replay because the protocol provides no anti-replay mechanism at the notification level.",
+        "spec_sections_searched": [
+          "3.1.7 (CreateTaskPushNotificationConfig)",
+          "4.3 (Push Notification Payload)",
+          "13.2 (Push Notification Security)",
+          "streaming-and-async topics"
+        ],
+        "preliminary_confidence": "HIGH"
+      }
+    ],
+    "structural_observations": [
+      "The protocol's authorization model (section 13.1) draws a clear boundary around task OPERATIONS (GetTask, ListTasks, CancelTask) but does not extend authorization scoping to task REFERENCES (referenceTaskIds) or task-internal processing paths. This creates a class of vulnerabilities where authorization is enforced at the API boundary but bypassed through agent-internal data access triggered by protocol-defined fields.",
+      "The protocol explicitly enables concurrent multi-client access (MAY serve multiple concurrent streams) but provides no concurrency control primitives (state versioning, conditional operations, conflict detection). This is a systemic gap — the protocol defines a stateful system with concurrent access but omits the standard mechanisms that stateful concurrent systems use to ensure consistency.",
+      "Agent capability claims (skills, supported input/output modes, capabilities) form the basis for client trust decisions in multi-agent systems, but the protocol treats all capability metadata as self-asserted with no verification layer. The GitHub roadmap's mention of a QuerySkill() method confirms this is a recognized but unaddressed gap, not an intentional design choice.",
+      "Push notification security has been addressed incrementally across findings (#5: URL ownership, #10: auth optionality, this analysis: replay protection), revealing that the push notification mechanism was designed primarily for functionality with security layered on optionally rather than being designed with a comprehensive threat model. Each security property (authentication, URL verification, anti-replay, anti-forgery) is independently optional or absent."
+    ]
+  },
+  "cost": {
+    "pipeline_stage": "stage_c1",
+    "protocol_phase": "c1_retry_v2",
+    "model": "anthropic/claude-opus-4-6",
+    "turn": 1,
+    "input_tokens": 573911,
+    "output_tokens": 21283,
+    "total_tokens": 595194,
+    "cumulative_input_tokens": 573911,
+    "cumulative_output_tokens": 21283,
+    "cumulative_total_tokens": 595194,
+    "elapsed_seconds": 544.08,
+    "timestamp": "2026-05-20T16:27:59Z",
+    "cost_usd": 3.49163,
+    "web_search_requests": 9,
+    "web_search_executed": true,
+    "web_search_queries": []
+  },
+  "timestamp": "2026-05-20T16:27:59Z"
+}

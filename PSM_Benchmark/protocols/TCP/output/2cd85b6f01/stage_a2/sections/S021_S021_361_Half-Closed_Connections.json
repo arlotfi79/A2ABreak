@@ -1,0 +1,143 @@
+{
+  "section_id": "S021",
+  "title": "S021 3.6.1 Half-Closed Connections",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S021 3.6.1 Half-Closed Connections"
+  ],
+  "url_anchor": "#s021-361-half-closed-connections",
+  "word_count": 273,
+  "statement_count": 5,
+  "elapsed_seconds": 116.85,
+  "statements": [
+    {
+      "statement_id": "1-S021-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "A host MAY implement a \"half-duplex\" TCP close sequence, so that an application that has called CLOSE cannot continue to read data from the connection (MAY-1).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "actors": [
+        "host",
+        "application"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "implement half-duplex TCP close sequence"
+      ],
+      "modality": "may",
+      "id": "N-S021-001"
+    },
+    {
+      "statement_id": "2-S021-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "If such a host issues a CLOSE call while received data is still pending in the TCP connection, or if new data is received after CLOSE is called, its TCP implementation SHOULD send a RST to show that data was lost (SHLD-3).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "actors": [
+        "host",
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CLOSE_called_with_pending_received_data | new_data_received_after_CLOSE",
+      "pre_cond": "host.half_duplex_close = true & (connection.received_data_pending = true | new_data_received_after_CLOSE = true)",
+      "post_cond": "RST.sent = true",
+      "actions": [
+        "send RST to indicate data was lost"
+      ],
+      "modality": "should",
+      "id": "N-S021-002"
+    },
+    {
+      "statement_id": "3-S021-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "When a connection is closed actively, it MUST linger in the TIME-WAIT state for a time 2xMSL (Maximum Segment Lifetime) (MUST-13).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "actors": [
+        "connection"
+      ],
+      "from_state": null,
+      "to_state": "TIME-WAIT",
+      "trigger": "active_close",
+      "pre_cond": "connection.close_type = active",
+      "post_cond": "connection.state = TIME-WAIT & timer.duration = 2xMSL",
+      "actions": [
+        "enter TIME-WAIT state",
+        "linger in TIME-WAIT for 2xMSL duration"
+      ],
+      "modality": "must",
+      "id": "N-S021-003"
+    },
+    {
+      "statement_id": "4-S021-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "However, it MAY accept a new SYN from the remote TCP endpoint to reopen the connection directly from TIME-WAIT state (MAY-2), if it: (1) assigns its initial sequence number for the new connection to be larger than the largest sequence number it used on the previous connection incarnation, and (2) returns to TIME-WAIT state if the SYN turns out to be an old duplicate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "actors": [
+        "connection",
+        "remote TCP endpoint"
+      ],
+      "from_state": "TIME-WAIT",
+      "to_state": null,
+      "trigger": "new_SYN_received_from_remote_endpoint",
+      "pre_cond": "connection.state = TIME-WAIT & new_connection.ISN > prev_connection.max_ISN",
+      "post_cond": "connection.reopened = true | (SYN.is_old_duplicate = true -> connection.state = TIME-WAIT)",
+      "actions": [
+        "accept new SYN",
+        "assign ISN greater than previous connection maximum sequence number",
+        "reopen connection from TIME-WAIT",
+        "return to TIME-WAIT state if SYN is identified as old duplicate"
+      ],
+      "modality": "may",
+      "id": "N-S021-004"
+    },
+    {
+      "statement_id": "5-S021-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "This algorithm for reducing TIME-WAIT is a Best Current Practice that SHOULD be implemented since Timestamp Options are commonly used, and using them to reduce TIME-WAIT provides benefits for busy Internet servers (SHLD-4).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "actors": [
+        "TCP implementation",
+        "Internet servers"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "implement Timestamp Options-based TIME-WAIT reduction algorithm"
+      ],
+      "modality": "should",
+      "id": "N-S021-005"
+    }
+  ]
+}

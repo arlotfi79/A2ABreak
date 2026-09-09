@@ -1,0 +1,203 @@
+{
+  "section_id": "S102",
+  "title": "S102 6.1 Reliable Delivery and Replies by Email",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S102 6.1 Reliable Delivery and Replies by Email"
+  ],
+  "url_anchor": "#s102-61-reliable-delivery-and-replies-by-email",
+  "word_count": 336,
+  "statement_count": 8,
+  "elapsed_seconds": 115.43,
+  "statements": [
+    {
+      "statement_id": "N-S102-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "It MUST NOT lose the message for frivolous reasons, such as because the host later crashes or because of a predictable resource shortage.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": "ACCEPTED",
+      "to_state": null,
+      "trigger": "host_crash | predictable_resource_shortage",
+      "pre_cond": "receiver_smtp.state = ACCEPTED",
+      "post_cond": "!message.lost",
+      "actions": [
+        "preserve accepted message",
+        "do not discard message due to host crash",
+        "do not discard message due to predictable resource shortage"
+      ],
+      "modality": "must",
+      "id": "N-S102-001"
+    },
+    {
+      "statement_id": "N-S102-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If there is a delivery failure after acceptance of a message, the receiver-SMTP MUST formulate and mail a notification message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": "ACCEPTED",
+      "to_state": null,
+      "trigger": "delivery_failure",
+      "pre_cond": "receiver_smtp.state = ACCEPTED & delivery.failed = true",
+      "post_cond": "notification.formulated = true & notification.mailed = true",
+      "actions": [
+        "formulate delivery failure notification message",
+        "mail notification message"
+      ],
+      "modality": "must",
+      "id": "N-S102-002"
+    },
+    {
+      "statement_id": "N-S102-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "This notification MUST be sent using a null (\"<>\") reverse-path in the envelope.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S102-003"
+    },
+    {
+      "statement_id": "N-S102-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "The recipient of this notification MUST be the address from the envelope return path (or the Return-Path: line).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S102-004"
+    },
+    {
+      "statement_id": "N-S102-5",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "However, if this address is null (\"<>\"), the receiver-SMTP MUST NOT send a notification.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": "ACCEPTED",
+      "to_state": null,
+      "trigger": "delivery_failure",
+      "pre_cond": "delivery.failed = true & envelope.return_path = '<>'",
+      "post_cond": "!notification.sent",
+      "actions": [
+        "suppress delivery failure notification"
+      ],
+      "modality": "must",
+      "id": "N-S102-005"
+    },
+    {
+      "statement_id": "N-S102-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If the address is an explicit source route, it MUST be stripped down to its final hop.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S102-006"
+    },
+    {
+      "statement_id": "N-S102-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "The notification message MUST be sent using: RCPT TO:<user@d>",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S102-007"
+    },
+    {
+      "statement_id": "N-S102-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "To avoid receiving duplicate messages as the result of timeouts, a receiver-SMTP MUST seek to minimize the time required to respond to the final <CRLF>.<CRLF> end of data indicator.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S102",
+      "actors": [
+        "receiver-SMTP"
+      ],
+      "from_state": "DATA_RECEIVING",
+      "to_state": "ACCEPTED",
+      "trigger": "end_of_data_indicator",
+      "pre_cond": null,
+      "post_cond": "response_time.minimized = true",
+      "actions": [
+        "minimize processing time before responding to end-of-data indicator",
+        "send 250 OK promptly after receiving end-of-data sequence to prevent sender timeout and retransmission"
+      ],
+      "modality": "must",
+      "id": "N-S102-008"
+    }
+  ]
+}

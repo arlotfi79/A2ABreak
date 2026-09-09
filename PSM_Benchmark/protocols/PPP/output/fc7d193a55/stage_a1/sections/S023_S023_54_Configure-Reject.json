@@ -1,0 +1,118 @@
+{
+  "section_id": "S023",
+  "title": "S023 5.4 Configure-Reject",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S023 5.4 Configure-Reject"
+  ],
+  "url_anchor": "#s023-54-configure-reject",
+  "word_count": 259,
+  "statement_count": 5,
+  "elapsed_seconds": 31.66,
+  "statements": [
+    {
+      "statement_id": "D-S023-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If some Configuration Options received in a Configure-Request are not recognizable or are not acceptable for negotiation, then the implementation MUST transmit a Configure-Reject.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S023",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Receive-Configure-Request with unrecognizable or unacceptable options",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Transmit Configure-Reject containing only the unacceptable Configuration Options from the Configure-Request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S023-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "On reception of a Configure-Reject, the Identifier field MUST match that of the last transmitted Configure-Request. Additionally, the Configuration Options in a Configure-Reject MUST be a proper subset of those in the last transmitted Configure-Request. Invalid packets are silently discarded.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S023",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Receive-Configure-Reject (invalid)",
+      "pre_cond": "message.identifier != last_sent_configure_request.identifier | message.options NOT_SUBSET_OF last_sent_configure_request.options",
+      "post_cond": null,
+      "actions": [
+        "Silently discard packet"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S023-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "Reception of a valid Configure-Reject indicates that when a new Configure-Request is sent, it MUST NOT include any of the Configuration Options listed in the Configure-Reject.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S023",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Receive-Configure-Reject (valid)",
+      "pre_cond": "message.identifier = last_sent_configure_request.identifier & message.options SUBSET_OF last_sent_configure_request.options",
+      "post_cond": null,
+      "actions": [
+        "Exclude all Configure-Reject listed options from next Configure-Request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S023-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "ppp_fsm",
+      "description": "On reception of a Configure-Reject, the Identifier field MUST match that of the last transmitted Configure-Request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S023",
+      "object_name": "Configure-Reject",
+      "field_name": "Identifier",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": "last_transmitted_configure_request.identifier",
+      "guard_semantics": "Validity guard for Configure-Reject reception; mismatch causes silent discard"
+    },
+    {
+      "statement_id": "D-S023-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "ppp_fsm",
+      "description": "The Configuration Options in a Configure-Reject MUST be a proper subset of those in the last transmitted Configure-Request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S023",
+      "object_name": "Configure-Reject",
+      "field_name": "Options",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": "proper subset of last_transmitted_configure_request.options",
+      "guard_semantics": "Validity guard for Configure-Reject reception; violation causes silent discard"
+    }
+  ]
+}

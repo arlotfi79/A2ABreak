@@ -1,0 +1,164 @@
+{
+  "section_id": "S035",
+  "title": "S035 5.3.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S035 5.3.2 Description"
+  ],
+  "url_anchor": "#s035-532-description",
+  "word_count": 194,
+  "statement_count": 7,
+  "elapsed_seconds": 58.12,
+  "statements": [
+    {
+      "statement_id": "D-S035-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server is mode-switching, it switches from its transit mode to its reader mode",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "state_name": "transit mode",
+      "enum_name": "server_mode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S035-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server is mode-switching, it switches from its transit mode to its reader mode",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "state_name": "reader mode",
+      "enum_name": "server_mode",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S035-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server is mode-switching, it switches from its transit mode to its reader mode, indicating this by changing the capability list accordingly. It MUST then return a 200 or 201 response with the same meaning as for the initial greeting.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S035",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "transit mode",
+      "to_state": "reader mode",
+      "trigger": "MODE READER",
+      "pre_cond": "server.mode_switching = true",
+      "post_cond": "server.capability_list = reader_mode_capabilities",
+      "actions": [
+        "change capability list to reader mode",
+        "send 200 or 201 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S035-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "When the MODE READER command is issued, the server MAY reset its state to that immediately after the initial connection before switching mode.",
+      "is_inferred": false,
+      "confidence": 0.82,
+      "source_section": "S035",
+      "actors": [
+        "server"
+      ],
+      "from_state": "transit mode",
+      "to_state": "reader mode",
+      "trigger": "MODE READER",
+      "pre_cond": "server.mode_switching = true",
+      "post_cond": "server.state = state_after_initial_connection",
+      "actions": [
+        "reset state to immediately after initial connection",
+        "switch to reader mode"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S035-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If it advertises the READER capability, it MUST return a 200 or 201 response with the same meaning as for the initial greeting; in this case, the command MUST NOT affect the server state in any way.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S035",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "MODE READER",
+      "pre_cond": "server.mode_switching = false & server.reader_capability = true",
+      "post_cond": null,
+      "actions": [
+        "send 200 or 201 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S035-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If it does not advertise the READER capability, it MUST return a 502 response and then immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S035",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "connection closed",
+      "trigger": "MODE READER",
+      "pre_cond": "server.mode_switching = false & server.reader_capability = false",
+      "post_cond": null,
+      "actions": [
+        "send 502 response",
+        "close connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S035-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "The client MUST NOT issue MODE READER more than once in a session or after any security or privacy commands are issued.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S035",
+      "object_name": "session",
+      "field_name": "MODE READER",
+      "field_type": "command",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "session.mode_reader_issued = false & session.security_or_privacy_command_issued = false"
+    }
+  ]
+}

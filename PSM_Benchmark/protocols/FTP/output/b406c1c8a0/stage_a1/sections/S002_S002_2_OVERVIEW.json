@@ -1,0 +1,190 @@
+{
+  "section_id": "S002",
+  "title": "S002 2. OVERVIEW",
+  "depth": 3,
+  "parent_path": [
+    "FTP",
+    "S002 2. OVERVIEW"
+  ],
+  "url_anchor": "#s002-2-overview",
+  "word_count": 2079,
+  "statement_count": 8,
+  "elapsed_seconds": 112.49,
+  "statements": [
+    {
+      "statement_id": "D-S002-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "The data transfer process, in its normal 'active' state, establishes the data connection with the 'listening' data port. It sets up parameters for transfer and storage, and transfers data on command from its PI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S002",
+      "state_name": "active",
+      "enum_name": "DTP_STATE",
+      "semantic_type": "active",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "server_dtp.state = active"
+    },
+    {
+      "statement_id": "D-S002-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "The DTP can be placed in a 'passive' state to listen for, rather than initiate a connection on the data port.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S002",
+      "state_name": "passive",
+      "enum_name": "DTP_STATE",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "server_dtp.state = passive"
+    },
+    {
+      "statement_id": "D-S002-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "The DTP can be placed in a 'passive' state to listen for, rather than initiate a connection on the data port.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S002",
+      "actors": [
+        "server-PI",
+        "server-DTP"
+      ],
+      "from_state": "active",
+      "to_state": "passive",
+      "trigger": "PI commands DTP to passive",
+      "pre_cond": "server_dtp.state = active",
+      "post_cond": "server_dtp.state = passive",
+      "actions": [
+        "server-DTP listens on data port rather than initiating connection"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S002-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The user-protocol interpreter initiates the control connection. The control connection follows the Telnet protocol.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S002",
+      "actors": [
+        "user-PI",
+        "server-PI"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "user-PI initiates control connection",
+      "pre_cond": null,
+      "post_cond": "connection.control = open",
+      "actions": [
+        "user-PI connects to server-PI on Port L",
+        "control connection established via Telnet protocol"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S002-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The user-DTP or its designate should 'listen' on the specified data port, and the server initiate the data connection and data transfer in accordance with the specified parameters.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S002",
+      "actors": [
+        "server-DTP",
+        "user-DTP"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "FTP commands specify data connection parameters",
+      "pre_cond": "connection.control = open",
+      "post_cond": "connection.data = open",
+      "actions": [
+        "user-DTP listens on specified data port",
+        "server initiates data connection",
+        "data transfer proceeds per specified parameters"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S002-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "The protocol requires that the control connections be open while data transfer is in progress.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S002",
+      "object_name": "control connection",
+      "field_name": "state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "open"
+      ],
+      "guard_semantics": "data_transfer.in_progress = true"
+    },
+    {
+      "statement_id": "D-S002-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ftp_fsm",
+      "description": "It is the responsibility of the user to request the closing of the control connections when finished using the FTP service, while it is the server who takes the action.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S002",
+      "actors": [
+        "user",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "user requests closing of control connections",
+      "pre_cond": "connection.control = open",
+      "post_cond": "connection.control = closed",
+      "actions": [
+        "server closes control connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S002-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "ftp_fsm",
+      "description": "The server may abort data transfer if the control connections are closed without command.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S002",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "control connection closed without command",
+      "pre_cond": "connection.control = closed & data_transfer.in_progress = true",
+      "post_cond": "data_transfer.in_progress = false",
+      "actions": [
+        "server aborts data transfer"
+      ],
+      "modality": "may"
+    }
+  ]
+}

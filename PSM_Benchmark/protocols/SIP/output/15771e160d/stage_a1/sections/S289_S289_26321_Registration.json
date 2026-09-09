@@ -1,0 +1,342 @@
+{
+  "section_id": "S289",
+  "title": "S289 26.3.2.1 Registration",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S289 26.3.2.1 Registration"
+  ],
+  "url_anchor": "#s289-26321-registration",
+  "word_count": 471,
+  "statement_count": 16,
+  "elapsed_seconds": 62.9,
+  "statements": [
+    {
+      "statement_id": "D-S289-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When a UA comes online and registers with its local administrative domain, it SHOULD establish a TLS connection with its registrar.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S289",
+      "state_name": "TLS_CONNECTING",
+      "enum_name": "RegistrationState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S289-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The registrar SHOULD offer a certificate to the UA; when it receives the TLS Certificate message, the UA SHOULD verify the certificate and inspect the site identified by the certificate.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S289",
+      "state_name": "CERTIFICATE_VERIFICATION",
+      "enum_name": "RegistrationState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = TLS_CONNECTING"
+    },
+    {
+      "statement_id": "D-S289-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the certificate is invalid, revoked, or if it does not identify the appropriate party, the UA MUST NOT send the REGISTER message and otherwise proceed with the registration.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S289",
+      "state_name": "CERTIFICATE_INVALID",
+      "enum_name": "RegistrationState",
+      "semantic_type": "error",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "transaction.state = CERTIFICATE_VERIFICATION & certificate.valid = false"
+    },
+    {
+      "statement_id": "D-S289-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The UA then creates a REGISTER request that SHOULD be addressed to a Request-URI corresponding to the site certificate received from the registrar. When the UA sends the REGISTER request over the existing TLS connection...",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S289",
+      "state_name": "REGISTER_SENT",
+      "enum_name": "RegistrationState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = CERTIFICATE_VERIFICATION & certificate.valid = true"
+    },
+    {
+      "statement_id": "D-S289-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The registrar SHOULD challenge the request with a 401 (Proxy Authentication Required) response. When the UAC receives the challenge, it SHOULD either prompt the user for credentials or take an appropriate credential from a keyring.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S289",
+      "state_name": "CHALLENGED",
+      "enum_name": "RegistrationState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = REGISTER_SENT"
+    },
+    {
+      "statement_id": "D-S289-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the Digest credentials have been inserted into an appropriate Proxy-Authorization header field, the REGISTER should be resubmitted to the registrar.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S289",
+      "state_name": "REGISTER_RESUBMITTED",
+      "enum_name": "RegistrationState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = CHALLENGED"
+    },
+    {
+      "statement_id": "D-S289-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the registration has been accepted by the registrar, the UA SHOULD leave this TLS connection open.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S289",
+      "state_name": "REGISTERED",
+      "enum_name": "RegistrationState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "transaction.state = REGISTER_RESUBMITTED"
+    },
+    {
+      "statement_id": "D-S289-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When a UA comes online and registers with its local administrative domain, it SHOULD establish a TLS connection with its registrar.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S289",
+      "actors": [
+        "UA",
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": "TLS_CONNECTING",
+      "trigger": "UA comes online and initiates registration",
+      "pre_cond": null,
+      "post_cond": "connection.protocol = TLS",
+      "actions": [
+        "establish TLS connection with registrar"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S289-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When it receives the TLS Certificate message, the UA SHOULD verify the certificate and inspect the site identified by the certificate.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S289",
+      "actors": [
+        "UA",
+        "registrar"
+      ],
+      "from_state": "TLS_CONNECTING",
+      "to_state": "CERTIFICATE_VERIFICATION",
+      "trigger": "receives TLS Certificate message",
+      "pre_cond": "connection.protocol = TLS",
+      "post_cond": null,
+      "actions": [
+        "verify certificate",
+        "inspect site identified by certificate"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S289-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the certificate is invalid, revoked, or if it does not identify the appropriate party, the UA MUST NOT send the REGISTER message and otherwise proceed with the registration.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S289",
+      "actors": [
+        "UA"
+      ],
+      "from_state": "CERTIFICATE_VERIFICATION",
+      "to_state": "CERTIFICATE_INVALID",
+      "trigger": "certificate invalid, revoked, or identifies wrong party",
+      "pre_cond": "certificate.valid = false | certificate.revoked = true | certificate.party_match = false",
+      "post_cond": "registration.proceed = false",
+      "actions": [
+        "abort registration",
+        "do not send REGISTER"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S289-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When a valid certificate has been provided by the registrar, the UA creates a REGISTER request and sends it over the existing TLS connection.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S289",
+      "actors": [
+        "UA",
+        "registrar"
+      ],
+      "from_state": "CERTIFICATE_VERIFICATION",
+      "to_state": "REGISTER_SENT",
+      "trigger": "valid certificate received",
+      "pre_cond": "certificate.valid = true & certificate.party_match = true",
+      "post_cond": "message.method = REGISTER & connection.protocol = TLS",
+      "actions": [
+        "create REGISTER request",
+        "address Request-URI to site certificate domain",
+        "send REGISTER over TLS connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S289-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The registrar SHOULD challenge the request with a 401 (Proxy Authentication Required) response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S289",
+      "actors": [
+        "registrar",
+        "UA"
+      ],
+      "from_state": "REGISTER_SENT",
+      "to_state": "CHALLENGED",
+      "trigger": "registrar sends 401 Proxy Authentication Required",
+      "pre_cond": "transaction.state = REGISTER_SENT",
+      "post_cond": "response.code = 401",
+      "actions": [
+        "receive 401 Proxy Authentication Required",
+        "inspect realm parameter in Proxy-Authenticate header"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S289-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the Digest credentials have been inserted into an appropriate Proxy-Authorization header field, the REGISTER should be resubmitted to the registrar.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S289",
+      "actors": [
+        "UA",
+        "registrar"
+      ],
+      "from_state": "CHALLENGED",
+      "to_state": "REGISTER_RESUBMITTED",
+      "trigger": "Digest credentials inserted into Proxy-Authorization",
+      "pre_cond": "transaction.state = CHALLENGED",
+      "post_cond": "message.method = REGISTER & message.header.Proxy-Authorization != null",
+      "actions": [
+        "prompt user for credentials or retrieve from keyring",
+        "insert Digest credentials into Proxy-Authorization header",
+        "resubmit REGISTER to registrar"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S289-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the registration has been accepted by the registrar, the UA SHOULD leave this TLS connection open.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S289",
+      "actors": [
+        "UA",
+        "registrar"
+      ],
+      "from_state": "REGISTER_RESUBMITTED",
+      "to_state": "REGISTERED",
+      "trigger": "registration accepted by registrar",
+      "pre_cond": "transaction.state = REGISTER_RESUBMITTED",
+      "post_cond": "connection.tls_open = true",
+      "actions": [
+        "leave TLS connection open for incoming requests"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S289-015",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The 'realm' parameter within the Proxy-Authenticate header field of the response SHOULD correspond to the domain previously given by the site certificate.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S289",
+      "object_name": "401 response",
+      "field_name": "realm",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "realm must match domain from site certificate"
+    },
+    {
+      "statement_id": "D-S289-016",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "Once the Digest credentials have been inserted into an appropriate Proxy-Authorization header field, the REGISTER should be resubmitted.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S289",
+      "object_name": "REGISTER request",
+      "field_name": "Proxy-Authorization",
+      "field_type": "header field",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "Proxy-Authorization with Digest credentials required for resubmitted REGISTER"
+    }
+  ]
+}

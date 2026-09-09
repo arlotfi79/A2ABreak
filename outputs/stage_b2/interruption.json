@@ -1,0 +1,310 @@
+{
+  "stage": "interruption",
+  "states": [
+    {
+      "state_name": "TASK_STATE_INPUT_REQUIRED",
+      "semantic_type": "interrupted",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "task.state = TASK_STATE_INPUT_REQUIRED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-4-001",
+        "D-4-1-007"
+      ]
+    },
+    {
+      "state_name": "TASK_STATE_AUTH_REQUIRED",
+      "semantic_type": "interrupted",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-7-6-001"
+      ]
+    },
+    {
+      "state_name": "TASK_STATE_WORKING",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "task.state = TASK_STATE_WORKING",
+      "is_inferred": true,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-4-007",
+        "N-7-6-003",
+        "N-7-6-006"
+      ]
+    },
+    {
+      "state_name": "TASK_STATE_CANCELED",
+      "semantic_type": "terminal",
+      "actor": "shared",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "task.state = TASK_STATE_CANCELED",
+      "is_inferred": true,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-3-1-041",
+        "D-9-4-013"
+      ]
+    },
+    {
+      "state_name": "STREAM_STATE_OPEN",
+      "semantic_type": "active",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "stream.open = true",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-11-7-009"
+      ]
+    },
+    {
+      "state_name": "STREAM_STATE_CLOSED",
+      "semantic_type": "terminal",
+      "actor": "server",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "stream.open = false",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_ids": [
+        "D-11-7-009"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_INPUT_REQUIRED",
+      "trigger": "agent_requests_input",
+      "guard": "task.state = TASK_STATE_WORKING",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-4-007"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_required",
+      "guard": "!(authorization.negotiated_out_of_band = true | authorization.negotiated_via_extension = true)",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-7-6-003",
+        "D-7-6-002",
+        "N-7-6-002"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_INPUT_REQUIRED",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "client_sends_input",
+      "guard": "task.state = TASK_STATE_INPUT_REQUIRED & message.taskId = task.id & message.contextId = task.contextId",
+      "actors": [],
+      "modality": "unspecified",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-4-007",
+        "D-3-4-001"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "credential_received",
+      "guard": "task.state = TASK_STATE_AUTH_REQUIRED & credential_received_out_of_band = true",
+      "actors": [
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_ids": [
+        "N-7-6-006"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "message_received",
+      "guard": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "actors": [
+        "server"
+      ],
+      "modality": "should",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "N-7-6-007"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_INPUT_REQUIRED",
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "cancel_task_requested",
+      "guard": "!task.state.is_terminal",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-1-041",
+        "D-9-4-013",
+        "D-10-3-018"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": "TASK_STATE_CANCELED",
+      "trigger": "cancel_task_requested",
+      "guard": "!task.state.is_terminal",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_ids": [
+        "D-3-1-041",
+        "D-9-4-013",
+        "D-10-3-018"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_delegation",
+      "guard": "client.is_a2a_agent = true & client.is_actively_processing_task = true & received_task.state = TASK_STATE_AUTH_REQUIRED",
+      "actors": [
+        "client"
+      ],
+      "modality": "may",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_ids": [
+        "D-7-6-005"
+      ]
+    },
+    {
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_delegation_required",
+      "guard": "client.is_a2a_agent = true & client.task.is_actively_being_processed = true",
+      "actors": [
+        "client"
+      ],
+      "modality": "should",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_ids": [
+        "N-7-6-008"
+      ]
+    },
+    {
+      "from_state": "STREAM_STATE_OPEN",
+      "to_state": "STREAM_STATE_CLOSED",
+      "trigger": "task_reached_terminal_or_interrupted_state",
+      "guard": "stream.open = true & (task.state = terminal | task.state = interrupted)",
+      "actors": [
+        "server"
+      ],
+      "modality": "must",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_ids": [
+        "D-11-7-009"
+      ]
+    }
+  ],
+  "inter_stage": {
+    "entry_from_previous": [
+      "TASK_STATE_WORKING"
+    ],
+    "exit_to_next": [
+      {
+        "from_state": "TASK_STATE_WORKING",
+        "to_stage": "task_execution",
+        "reason": "After interruption is resolved (client provides input or credentials), the task transitions back to TASK_STATE_WORKING and resumes active processing in the task_execution phase. This is the bidirectional link between task_execution and interruption."
+      },
+      {
+        "from_state": "TASK_STATE_CANCELED",
+        "to_stage": "termination",
+        "reason": "Task canceled during interruption enters the terminal TASK_STATE_CANCELED state, which belongs to the termination phase. No further processing occurs."
+      }
+    ]
+  },
+  "discarded_states": [
+    {
+      "state_name": null,
+      "reason": "D-12-5-002: null state_name from section 12.5 — not identifiable as a protocol session state, no state_name provided"
+    },
+    {
+      "state_name": "LEGACY_NAME_DEPRECATED",
+      "reason": "D-Appendix A- Migratio-002: deprecation lifecycle marker from Appendix A migration guidance, not a protocol session state"
+    },
+    {
+      "state_name": "LEGACY_NAME_INTRODUCED",
+      "reason": "Referenced only in D-Appendix A- Migratio-006 transition — deprecation lifecycle marker, not a protocol session state"
+    }
+  ],
+  "unresolved": [
+    {
+      "source_id": "N-7-6-004",
+      "issue": "Both from_state and to_state are null. Describes a behavioral constraint that credentials must be received out-of-band when not negotiated via extension, not a task state transition. Searched section 7.6.1; this is a modality constraint on the AUTH_REQUIRED state, not a discrete state change.",
+      "reason_type": "both_null",
+      "confidence": 0.4
+    },
+    {
+      "source_id": "N-7-6-005",
+      "issue": "from_state is null. Describes server stream-maintenance behavior when task enters TASK_STATE_AUTH_REQUIRED with out-of-band credential reception (post_cond: stream.active = true). This is a behavioral requirement on the server during the AUTH_REQUIRED state, not an independent task state transition. Searched section 7.6.1; confirmed as a constraint on stream management, not a from_state derivation.",
+      "reason_type": "null_from_state",
+      "confidence": 0.5
+    },
+    {
+      "source_id": "N-7-6-009",
+      "issue": "to_state is null. Describes client-side behavior upon receiving TASK_STATE_AUTH_REQUIRED when no active response stream is open. Client is expected to poll or subscribe but no task state change occurs. Searched section 7.6.2; the client's actions (polling, subscribing, fulfilling auth) do not directly define a single target task state.",
+      "reason_type": "null_to_state",
+      "confidence": 0.5
+    },
+    {
+      "source_id": "D-12-5-004",
+      "issue": "All fields are null (from_state, to_state, trigger, pre_cond, post_cond). Source section 12.5 yielded no resolvable state transition. Entry is structurally empty and cannot be mapped to any FSM transition.",
+      "reason_type": "both_null",
+      "confidence": 0.0
+    }
+  ],
+  "gaps": [
+    {
+      "state_name": "STREAM_STATE_OPEN",
+      "issue": "No incoming transition within the interruption phase — unreachable. Streams are opened during task_execution or initiation phases (e.g., via message/stream or tasks/resubscribe). Searched section 11.7; stream creation is defined in streaming setup, not within the interruption lifecycle. STREAM_STATE_OPEN serves as a cross-cutting infrastructure state.",
+      "type": "unreachable_state"
+    }
+  ]
+}

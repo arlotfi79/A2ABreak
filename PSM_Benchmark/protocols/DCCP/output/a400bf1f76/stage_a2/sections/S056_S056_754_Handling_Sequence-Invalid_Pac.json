@@ -1,0 +1,378 @@
+{
+  "section_id": "S056",
+  "title": "S056 7.5.4 Handling Sequence-Invalid Packets",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S056 7.5.4 Handling Sequence-Invalid Packets"
+  ],
+  "url_anchor": "#s056-754-handling-sequence-invalid-packets",
+  "word_count": 445,
+  "statement_count": 15,
+  "elapsed_seconds": 155.73,
+  "statements": [
+    {
+      "statement_id": "N-S056-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Any sequence-invalid DCCP-Sync or DCCP-SyncAck packet MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_sequence_invalid_DCCP_Sync_or_SyncAck",
+      "pre_cond": "packet.sequence_valid = false & (packet.type = DCCP_Sync | packet.type = DCCP_SyncAck)",
+      "post_cond": null,
+      "actions": [
+        "ignore packet"
+      ],
+      "modality": "must",
+      "id": "N-S056-001"
+    },
+    {
+      "statement_id": "N-S056-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A sequence-invalid DCCP-Reset packet MUST elicit a DCCP-Sync packet in response (subject to a possible rate limit).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_sequence_invalid_DCCP_Reset",
+      "pre_cond": "packet.sequence_valid = false & packet.type = DCCP_Reset",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Sync"
+      ],
+      "modality": "must",
+      "id": "N-S056-002"
+    },
+    {
+      "statement_id": "N-S056-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "This response packet MUST use a new Sequence Number, and thus will increase GSS; GSR will not change, however, since the received packet was sequence-invalid.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DCCP_Sync_response_to_sequence_invalid_DCCP_Reset",
+      "pre_cond": "packet.sequence_valid = false & packet.type = DCCP_Reset",
+      "post_cond": "connection.GSS = connection.GSS_prev + 1 & connection.GSR = connection.GSR_prev",
+      "actions": [
+        "assign new Sequence Number to DCCP-Sync response",
+        "increment GSS"
+      ],
+      "modality": "must",
+      "id": "N-S056-003"
+    },
+    {
+      "statement_id": "N-S056-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "The response packet's Acknowledgement Number MUST equal GSR.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DCCP_Sync_response_to_sequence_invalid_DCCP_Reset",
+      "pre_cond": "packet.sequence_valid = false & packet.type = DCCP_Reset",
+      "post_cond": "response.Acknowledgement_Number = connection.GSR",
+      "actions": [
+        "set DCCP-Sync response Acknowledgement_Number = GSR"
+      ],
+      "modality": "must",
+      "id": "N-S056-004"
+    },
+    {
+      "statement_id": "N-S056-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Any other sequence-invalid packet MUST elicit a similar DCCP-Sync packet, except that the response packet's Acknowledgement Number MUST equal the sequence-invalid packet's Sequence Number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_sequence_invalid_packet_non_Sync_SyncAck_Reset",
+      "pre_cond": "packet.sequence_valid = false & packet.type != DCCP_Sync & packet.type != DCCP_SyncAck & packet.type != DCCP_Reset",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Sync"
+      ],
+      "modality": "must",
+      "id": "N-S056-005"
+    },
+    {
+      "statement_id": "N-S056-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "Any other sequence-invalid packet MUST elicit a similar DCCP-Sync packet, except that the response packet's Acknowledgement Number MUST equal the sequence-invalid packet's Sequence Number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DCCP_Sync_response_to_sequence_invalid_non_Reset_packet",
+      "pre_cond": "packet.sequence_valid = false & packet.type != DCCP_Sync & packet.type != DCCP_SyncAck & packet.type != DCCP_Reset",
+      "post_cond": "response.Acknowledgement_Number = packet.Sequence_Number",
+      "actions": [
+        "set DCCP-Sync response Acknowledgement_Number = sequence_invalid_packet.Sequence_Number"
+      ],
+      "modality": "must",
+      "id": "N-S056-006"
+    },
+    {
+      "statement_id": "N-S056-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "On receiving a sequence-valid DCCP-Sync packet, the peer endpoint (say, DCCP B) MUST update its GSR variable and reply with a DCCP-SyncAck packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "DCCP B",
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_sequence_valid_DCCP_Sync",
+      "pre_cond": "packet.sequence_valid = true & packet.type = DCCP_Sync & connection.state != REQUEST",
+      "post_cond": "connection.GSR = packet.Sequence_Number",
+      "actions": [
+        "update GSR to received DCCP-Sync Sequence Number",
+        "send DCCP-SyncAck"
+      ],
+      "modality": "must",
+      "id": "N-S056-007"
+    },
+    {
+      "statement_id": "N-S056-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "As an exception, if the peer endpoint is in the REQUEST state, it MUST respond with a DCCP-Reset instead of a DCCP-SyncAck.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "receive_sequence_valid_DCCP_Sync",
+      "pre_cond": "connection.state = REQUEST & packet.sequence_valid = true & packet.type = DCCP_Sync",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset instead of DCCP-SyncAck"
+      ],
+      "modality": "must",
+      "id": "N-S056-008"
+    },
+    {
+      "statement_id": "N-S056-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "dccp",
+      "stage": "dccp_fsm",
+      "description": "To protect against denial-of-service attacks, DCCP implementations SHOULD impose a rate limit on DCCP-Syncs sent in response to sequence-invalid packets, such as not more than eight DCCP-Syncs per second.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DCCP_Sync_response_to_sequence_invalid_packet",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "rate-limit DCCP-Sync responses to sequence-invalid packets (e.g. at most 8 per second)"
+      ],
+      "modality": "should",
+      "id": "N-S056-009"
+    },
+    {
+      "statement_id": "N-S056-10",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "DCCP endpoints MUST NOT process sequence-invalid packets except, perhaps, by generating a DCCP-Sync.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_sequence_invalid_packet",
+      "pre_cond": "packet.sequence_valid = false",
+      "post_cond": null,
+      "actions": [
+        "do not process packet beyond optionally generating DCCP-Sync"
+      ],
+      "modality": "must",
+      "id": "N-S056-010"
+    },
+    {
+      "statement_id": "N-S056-11",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "For instance, options MUST NOT be processed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_sequence_invalid_packet",
+      "pre_cond": "packet.sequence_valid = false",
+      "post_cond": null,
+      "actions": [
+        "do not process options carried in sequence-invalid packet"
+      ],
+      "modality": "must",
+      "id": "N-S056-011"
+    },
+    {
+      "statement_id": "N-S056-12",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "An endpoint MAY temporarily preserve sequence-invalid packets in case they become valid later, however; this can reduce the impact of bursts of loss by delivering more packets to the application.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_sequence_invalid_packet",
+      "pre_cond": "packet.sequence_valid = false",
+      "post_cond": null,
+      "actions": [
+        "optionally buffer sequence-invalid packet for potential later processing"
+      ],
+      "modality": "may",
+      "id": "N-S056-012"
+    },
+    {
+      "statement_id": "N-S056-13",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "In particular, an endpoint MAY preserve sequence-invalid packets for up to 2 round-trip times.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_sequence_invalid_packet",
+      "pre_cond": "packet.sequence_valid = false",
+      "post_cond": null,
+      "actions": [
+        "buffer sequence-invalid packet for at most 2 round-trip times"
+      ],
+      "modality": "may",
+      "id": "N-S056-013"
+    },
+    {
+      "statement_id": "N-S056-14",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "If, within that time, the relevant sequence windows change so that the packets become sequence-valid, the endpoint MAY process them again.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "sequence_windows_updated_making_buffered_packet_sequence_valid",
+      "pre_cond": "packet.buffered = true & packet.sequence_valid = true",
+      "post_cond": null,
+      "actions": [
+        "process previously buffered packet now that it is sequence-valid"
+      ],
+      "modality": "may",
+      "id": "N-S056-014"
+    },
+    {
+      "statement_id": "N-S056-15",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The endpoint SHOULD use information from the original DCCP-Reset when possible.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "use information from original DCCP-Reset when constructing new DCCP-Reset"
+      ],
+      "modality": "should",
+      "id": "N-S056-015"
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "section_id": "S103",
+  "title": "S103 6.2 Unwanted, Unsolicited, and \"Attack\" Messages",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S103 6.2 Unwanted, Unsolicited, and \"Attack\" Messages"
+  ],
+  "url_anchor": "#s103-62-unwanted-unsolicited-and-attack-messages",
+  "word_count": 385,
+  "statement_count": 6,
+  "elapsed_seconds": 84.61,
+  "statements": [
+    {
+      "statement_id": "N-S103-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Utility and predictability of the Internet mail system requires that messages that can be delivered should be delivered, regardless of any syntax or other faults associated with those messages and regardless of their content.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "message.deliverable = true",
+      "post_cond": "message.delivered = true",
+      "actions": [
+        "deliver_message_regardless_of_syntax_faults_or_content"
+      ],
+      "modality": "should",
+      "id": "N-S103-001"
+    },
+    {
+      "statement_id": "N-S103-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If they cannot be delivered, and cannot be rejected by the SMTP server during the SMTP transaction, they should be \"bounced\" (returned with non-delivery notification messages) as described above.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "delivery_failed & rejection_during_smtp_transaction_not_possible",
+      "pre_cond": "message.deliverable = false & message.rejected_during_transaction = false",
+      "post_cond": "message.bounced = true",
+      "actions": [
+        "send_non_delivery_notification_to_sender"
+      ],
+      "modality": "should",
+      "id": "N-S103-002"
+    },
+    {
+      "statement_id": "N-S103-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "So silent dropping of messages should be considered only in those cases where there is very high confidence that the messages are seriously fraudulent or otherwise inappropriate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "message.fraudulent_confidence = very_high | message.inappropriate_confidence = very_high",
+      "post_cond": null,
+      "actions": [
+        "consider_silent_drop_only_when_high_confidence_of_fraud_or_abuse"
+      ],
+      "modality": "should",
+      "id": "N-S103-003"
+    },
+    {
+      "statement_id": "N-S103-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "To stretch the principle of delivery if possible even further, it may be a rational policy to not deliver mail that has an invalid return address, although the history of the network is that users are typically better served by delivering any message that can be delivered.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "message.return_address.valid = false",
+      "post_cond": null,
+      "actions": [
+        "adopt_policy_to_not_deliver_mail_with_invalid_return_address"
+      ],
+      "modality": "may",
+      "id": "N-S103-004"
+    },
+    {
+      "statement_id": "N-S103-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Reliably determining that a return address is invalid can be a difficult and time-consuming process, especially if the putative sending system is not directly accessible or does not fully and accurately support VRFY and, even if a \"drop messages with invalid return addresses\" policy is adopted, it SHOULD be applied only when there is near-certainty that the return addresses are, in fact, invalid.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "policy.drop_invalid_return_address = adopted & message.return_address.invalid_confidence = near_certain",
+      "post_cond": null,
+      "actions": [
+        "apply_drop_invalid_return_address_policy_only_when_near_certain"
+      ],
+      "modality": "should",
+      "id": "N-S103-005"
+    },
+    {
+      "statement_id": "N-S103-6",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Conversely, if a message is rejected because it is found to contain hostile content (a decision that is outside the scope of an SMTP server as defined in this document), rejection (\"bounce\") messages SHOULD NOT be sent unless the receiving site is confident that those messages will be usefully delivered.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "SMTP server",
+        "receiving site"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_rejected_due_to_hostile_content",
+      "pre_cond": "message.rejected_reason = hostile_content & receiving_site.confident_bounce_will_be_delivered = false",
+      "post_cond": "bounce_message.sent = false",
+      "actions": [
+        "suppress_rejection_bounce_notification"
+      ],
+      "modality": "should",
+      "id": "N-S103-006"
+    }
+  ]
+}

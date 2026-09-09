@@ -1,0 +1,163 @@
+{
+  "section_id": "S081",
+  "title": "S081 9.3 Data Checksum Option",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S081 9.3 Data Checksum Option"
+  ],
+  "url_anchor": "#s081-93-data-checksum-option",
+  "word_count": 365,
+  "statement_count": 6,
+  "elapsed_seconds": 100.4,
+  "statements": [
+    {
+      "statement_id": "N-S081-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A DCCP endpoint receiving a packet with a Data Checksum option either MUST or MAY check the Data Checksum; the choice depends on the value of the Check Data Checksum feature described below.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S081",
+      "actors": [
+        "DCCP endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "packet_with_Data_Checksum_option_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "check Data Checksum according to Check Data Checksum feature value (MUST or MAY)"
+      ],
+      "modality": "must",
+      "id": "N-S081-001"
+    },
+    {
+      "statement_id": "N-S081-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "In this case, the packet's data MUST be delivered to the application, with a note that it is known to be corrupt.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S081",
+      "actors": [
+        "receiving endpoint",
+        "application"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Data_Checksum_CRC_mismatch",
+      "pre_cond": "CRC.differs = true & application.requested_corrupt_delivery = true",
+      "post_cond": null,
+      "actions": [
+        "deliver packet data to application",
+        "annotate delivery as known-corrupt"
+      ],
+      "modality": "must",
+      "id": "N-S081-002"
+    },
+    {
+      "statement_id": "N-S081-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Furthermore, the receiving endpoint MUST report the packet as delivered corrupt using a Data Dropped option (Drop Code 7, Delivered Corrupt).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S081",
+      "actors": [
+        "receiving endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Data_Checksum_CRC_mismatch_corrupt_delivery_requested",
+      "pre_cond": "CRC.differs = true & application.requested_corrupt_delivery = true",
+      "post_cond": null,
+      "actions": [
+        "send Data Dropped option with Drop Code 7 (Delivered Corrupt)"
+      ],
+      "modality": "must",
+      "id": "N-S081-003"
+    },
+    {
+      "statement_id": "N-S081-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Otherwise, the receiving endpoint MUST drop the application data and report that data as dropped due to corruption using a Data Dropped option (Drop Code 3, Corrupt).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S081",
+      "actors": [
+        "receiving endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Data_Checksum_CRC_mismatch_no_corrupt_delivery_requested",
+      "pre_cond": "CRC.differs = true & application.requested_corrupt_delivery = false",
+      "post_cond": null,
+      "actions": [
+        "drop application data",
+        "send Data Dropped option with Drop Code 3 (Corrupt)"
+      ],
+      "modality": "must",
+      "id": "N-S081-004"
+    },
+    {
+      "statement_id": "N-S081-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The receiver SHOULD calculate the application data area's CRC-32c on such packets, just as it does for DCCP-Data and similar packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S081",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "packet_with_Data_Checksum_option_received",
+      "pre_cond": "packet.type = DCCP-Ack | packet.type = DCCP-Sync | packet.type = DCCP-SyncAck",
+      "post_cond": null,
+      "actions": [
+        "calculate CRC-32c of application data area",
+        "compare with Data Checksum option value"
+      ],
+      "modality": "should",
+      "id": "N-S081-005"
+    },
+    {
+      "statement_id": "N-S081-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "If the CRCs differ, the packets similarly MUST be reported using Data Dropped options (Drop Code 3), although their application data areas would not be delivered to the application in any case.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S081",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Data_Checksum_CRC_mismatch_on_non_data_packet",
+      "pre_cond": "CRC.differs = true & (packet.type = DCCP-Ack | packet.type = DCCP-Sync | packet.type = DCCP-SyncAck)",
+      "post_cond": null,
+      "actions": [
+        "send Data Dropped option with Drop Code 3"
+      ],
+      "modality": "must",
+      "id": "N-S081-006"
+    }
+  ]
+}

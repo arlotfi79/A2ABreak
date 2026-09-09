@@ -1,0 +1,105 @@
+{
+  "section_id": "S045",
+  "title": "S045 3.9.1.4 Close",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S045 3.9.1.4 Close"
+  ],
+  "url_anchor": "#s045-3914-close",
+  "word_count": 258,
+  "statement_count": 4,
+  "elapsed_seconds": 25.4,
+  "statements": [
+    {
+      "statement_id": "D-S045-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Because closing a connection requires communication with the remote TCP peer, connections may remain in the closing state for a short time.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S045",
+      "state_name": "closing",
+      "enum_name": "TCP_STATE",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = closing"
+    },
+    {
+      "statement_id": "D-S045-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "This command causes the connection specified to be closed. The user may CLOSE the connection at any time on their own initiative, or in response to various prompts from the TCP implementation.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S045",
+      "actors": [
+        "user",
+        "tcp"
+      ],
+      "from_state": null,
+      "to_state": "closing",
+      "trigger": "CLOSE",
+      "pre_cond": "connection.state = open & user.authorized = true",
+      "post_cond": "connection.state = closing",
+      "actions": [
+        "transmit outstanding SENDs",
+        "initiate graceful close with remote peer"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S045-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "It may happen that the closing side is unable to get rid of all its data before timing out. In this event, CLOSE turns into ABORT, and the closing TCP peer gives up.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S045",
+      "actors": [
+        "tcp"
+      ],
+      "from_state": "closing",
+      "to_state": null,
+      "trigger": "transmission timeout exceeded",
+      "pre_cond": "connection.state = closing & connection.data_flushed = false",
+      "post_cond": "connection.aborted = true",
+      "actions": [
+        "convert CLOSE to ABORT",
+        "give up connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S045-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Attempts to reopen the connection before the TCP peer replies to the CLOSE command will result in error responses.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S045",
+      "actors": [
+        "user",
+        "tcp"
+      ],
+      "from_state": "closing",
+      "to_state": "closing",
+      "trigger": "OPEN",
+      "pre_cond": "connection.state = closing & peer.close_reply_received = false",
+      "post_cond": null,
+      "actions": [
+        "return error response"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

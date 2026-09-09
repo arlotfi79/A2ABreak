@@ -1,0 +1,103 @@
+{
+  "section_id": "S078",
+  "title": "S078 13.8 GET_PARAMETER",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S078 13.8 GET_PARAMETER"
+  ],
+  "url_anchor": "#s078-138-get_parameter",
+  "word_count": 492,
+  "statement_count": 4,
+  "elapsed_seconds": 29.47,
+  "statements": [
+    {
+      "statement_id": "D-S078-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The keep-alive timer has been updated for any request that is successful, i.e., a 200 OK response is received.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S078",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "GET_PARAMETER 200 OK received",
+      "pre_cond": null,
+      "post_cond": "session.keepalive_timer = reset",
+      "actions": [
+        "update keep-alive timer"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S078-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "If the Session header is present in a request, the value of a parameter MUST be retrieved in the specified session context.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S078",
+      "object_name": "GET_PARAMETER request",
+      "field_name": "Session",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "When Session header is present, parameter retrieval must occur within the identified session context"
+    },
+    {
+      "statement_id": "D-S078-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "rtsp_fsm",
+      "description": "If the receiver of the request does not support the media type used for the message body, it SHALL respond using the error code 415 (Unsupported Media Type).",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S078",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "GET_PARAMETER received with unsupported message body media type",
+      "pre_cond": "server.supports_media_type(request.content_type) = false",
+      "post_cond": null,
+      "actions": [
+        "send 415 Unsupported Media Type"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S078-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "rtsp_fsm",
+      "description": "If one or more parameters are not understood a 451 (Parameter Not Understood) MUST be sent including a body listing the parameters that weren't understood.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S078",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "GET_PARAMETER received with unknown parameter(s)",
+      "pre_cond": "request.unknown_parameters != null",
+      "post_cond": null,
+      "actions": [
+        "send 451 Parameter Not Understood",
+        "include body listing unknown parameters"
+      ],
+      "modality": "must"
+    }
+  ]
+}

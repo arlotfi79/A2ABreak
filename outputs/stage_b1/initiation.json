@@ -1,0 +1,1580 @@
+{
+  "stage": "initiation",
+  "fsm_input": {
+    "states": [
+      {
+        "id": "D-6-4-001",
+        "state_name": "VERSION_NEGOTIATION_ERROR",
+        "semantic_type": "error",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "response.status = 400 & response.error_type = version_not_supported",
+        "stage": "initiation",
+        "source_section": "6.4"
+      },
+      {
+        "id": "D-6-6-001",
+        "state_name": "submitted",
+        "semantic_type": "initial",
+        "is_initial": true,
+        "is_final": false,
+        "invariant_cond": "task.status.state = submitted",
+        "stage": "initiation",
+        "source_section": "6.6"
+      },
+      {
+        "id": "D-Appendix A- Migratio-001",
+        "state_name": "LEGACY_NAME_INTRODUCED",
+        "semantic_type": "initial",
+        "is_initial": true,
+        "is_final": false,
+        "invariant_cond": "legacy_name.documented = true & legacy_name.alias_present = true",
+        "stage": "initiation",
+        "source_section": "Appendix A"
+      }
+    ],
+    "transitions": [
+      {
+        "id": "D-3-1-044",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "send_message_requested",
+        "pre_cond": null,
+        "post_cond": "task.exists = true | message.returned = true",
+        "modality": "may",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.1.1"
+      },
+      {
+        "id": "D-3-1-037",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "STREAM_OPEN",
+        "to_state": "STREAM_CLOSED",
+        "trigger": "message_delivered",
+        "pre_cond": "stream.open = true & stream.mode = MESSAGE_ONLY",
+        "post_cond": "stream.open = false",
+        "modality": "must",
+        "actors": [
+          "server",
+          "client"
+        ],
+        "source_section": "3.1.2"
+      },
+      {
+        "id": "D-3-2-015",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message_request_received",
+        "pre_cond": "configuration.returnImmediately = true",
+        "post_cond": "task.created = true & task.state = in_progress",
+        "modality": "must",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.2.2"
+      },
+      {
+        "id": "N-3-3-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-4-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_message",
+        "pre_cond": "message does not include a contextId field",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_response",
+        "pre_cond": "agent.contextId_generated = true",
+        "post_cond": "response.contextId != null",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_message",
+        "pre_cond": "message.contextId != null",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_message",
+        "pre_cond": "message.contextId != null & agent.can_accept_contextId = false",
+        "post_cond": "response.type = error & response.contextId = null",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message",
+        "pre_cond": "client.understands_server_contextId_processing = false",
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-012",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_creation",
+        "pre_cond": null,
+        "post_cond": "task.taskId != null & task.taskId.is_unique = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-013",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_response",
+        "pre_cond": "task.created = true",
+        "post_cond": "task.taskId != null",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-018",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message",
+        "pre_cond": "message.contextId != null & message.taskId = null",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-6-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_request",
+        "pre_cond": null,
+        "post_cond": "request.A2A-Version_header.present = true",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.6.1"
+      },
+      {
+        "id": "N-3-6-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_request",
+        "pre_cond": null,
+        "post_cond": "request.A2A-Version_param.present = true",
+        "modality": "may",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.6"
+      },
+      {
+        "id": "N-3-6-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_request",
+        "pre_cond": "server.version_supported = false",
+        "post_cond": "response.error = VersionNotSupportedError",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.6"
+      },
+      {
+        "id": "N-3-6-007",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_request",
+        "pre_cond": "request.A2A-Version = empty",
+        "post_cond": "server.interpreted_version = 0.3",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.6"
+      },
+      {
+        "id": "N-3-6-009",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_request",
+        "pre_cond": "client.requires_latest_features = true",
+        "post_cond": "client.version_specific_request = true & client.version_fallback_automatic = false",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.6.3"
+      },
+      {
+        "id": "D-3-6-006",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "request_received",
+        "pre_cond": "!server.version_supported",
+        "post_cond": "response.error_type = VersionNotSupportedError",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.6.2"
+      },
+      {
+        "id": "D-3-7-002",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "client_sends_message",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "agent"
+        ],
+        "source_section": "3.7"
+      },
+      {
+        "id": "D-3-7-003",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_sends_clarification_message",
+        "pre_cond": "task.created = false",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "agent",
+          "client"
+        ],
+        "source_section": "3.7"
+      },
+      {
+        "id": "D-4-1-044",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TASK_STATE_SUBMITTED",
+        "to_state": "TASK_STATE_REJECTED",
+        "trigger": "agent_rejects_task",
+        "pre_cond": "task.state = TASK_STATE_SUBMITTED",
+        "post_cond": "task.state = TASK_STATE_REJECTED",
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "4.1.3"
+      },
+      {
+        "id": "D-6-2-009",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "POST /message:stream",
+        "pre_cond": null,
+        "post_cond": "task.state = TASK_STATE_WORKING & stream.open = true",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "6.2"
+      },
+      {
+        "id": "D-6-4-002",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "VERSION_NEGOTIATION_ERROR",
+        "trigger": "message_send_request_received",
+        "pre_cond": "request.A2A_Version != null & server.version_supported = false",
+        "post_cond": "response.status = 400 & response.content_type = application_problem_json & response.supportedVersions != null",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "6.4"
+      },
+      {
+        "id": "D-6-6-011",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "submitted",
+        "trigger": "message_send",
+        "pre_cond": "configuration.pushNotificationConfig != null & configuration.pushNotificationConfig.url != null",
+        "post_cond": "task.status.state = submitted",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "6.6"
+      },
+      {
+        "id": "N-9-3-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "json_rpc_request_sent",
+        "pre_cond": null,
+        "post_cond": "request.jsonrpc = \"2.0\" & request.id != null & request.method != null & request.params != null",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "9.3"
+      },
+      {
+        "id": "D-9-4-011",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "SendMessage",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "9.4.1"
+      },
+      {
+        "id": "N-10-2-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_grpc_request",
+        "pre_cond": "request.transport = gRPC",
+        "post_cond": "request.grpc_metadata contains service_parameters",
+        "modality": "must",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "10.2"
+      },
+      {
+        "id": "N-10-2-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_grpc_request",
+        "pre_cond": "request.transport = gRPC",
+        "post_cond": "service_parameter.name = grpc_metadata_key",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "10.2"
+      },
+      {
+        "id": "N-10-2-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_grpc_request",
+        "pre_cond": "request.transport = gRPC & service_parameter.value_count > 1",
+        "post_cond": "service_parameter.grpc_metadata_entry = comma_separated_values",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "10.2"
+      },
+      {
+        "id": "N-10-4-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message_request",
+        "pre_cond": null,
+        "post_cond": "(response.task != null & response.message = null) | (response.task = null & response.message != null)",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "10.4"
+      },
+      {
+        "id": "D-11-7-007",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "STREAM_STATE_OPEN",
+        "trigger": "POST_message_stream",
+        "pre_cond": null,
+        "post_cond": "stream.open = true",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "11.7"
+      },
+      {
+        "id": "N-14-2-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_request",
+        "pre_cond": "request.transport = HTTP",
+        "post_cond": "A2A-Version.value.format = Major.Minor",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "14.2"
+      },
+      {
+        "id": "D-14-2-003",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": null,
+        "pre_cond": "agent.supported_versions.contains(request.headers[A2A-Version]) = false",
+        "post_cond": "response.error = VersionNotSupportedError",
+        "modality": "unspecified",
+        "actors": [
+          "server"
+        ],
+        "source_section": "14.2.1"
+      },
+      {
+        "id": "D-Appendix A- Migratio-005",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "LEGACY_NAME_INTRODUCED",
+        "trigger": "version_0_3_x_release",
+        "pre_cond": null,
+        "post_cond": "legacy_name.documented = true & legacy_name.alias_present = true",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "Appendix A"
+      },
+      {
+        "id": "N-5-6-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "timestamp_json_serialization",
+        "pre_cond": "timestamp.serialization_format = JSON",
+        "post_cond": "timestamp.format = ISO_8601 & timestamp.timezone = UTC",
+        "modality": "must",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "5.6"
+      },
+      {
+        "id": "N-5-6-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "timestamp_json_serialization",
+        "pre_cond": "timestamp.millisecond_precision.available = false",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "5.6"
+      },
+      {
+        "id": "N-5-7-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "message_received",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "5.7"
+      },
+      {
+        "id": "N-12-2-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "custom_binding_definition",
+        "pre_cond": null,
+        "post_cond": "extension.type_mappings.protobuf_types_defined = true & extension.type_mappings.timestamps_defined = true & extension.type_mappings.binary_data_encoding_defined = true & extension.type_mappings.enumerations_defined = true",
+        "modality": "must",
+        "actors": [
+          "extension"
+        ],
+        "source_section": "12.2"
+      }
+    ]
+  },
+  "statements": [
+    {
+      "statement_id": "D-3-1-044",
+      "normative_level": "BEHAVIOR",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "The agent MAY create a new Task to process the provided message asynchronously or MAY return a direct Message response for simple interactions. The operation MUST return immediately with either task information or response message. Task processing MAY continue asynchronously after the response when a Task is returned.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "3.1.1",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TASK_STATE_NONEXISTENT",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "send_message_requested",
+      "pre_cond": null,
+      "post_cond": "task.exists = true | message.returned = true",
+      "actions": [
+        "new Task created for asynchronous message processing OR direct Message returned",
+        "operation returns immediately with task info or response message",
+        "task processing may continue asynchronously after response"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-3-1-037",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "initiation",
+      "description": "Message-only stream: If the agent returns a Message, the stream MUST contain exactly one Message object and then close immediately. No task tracking or updates are provided.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "3.1.2",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "STREAM_OPEN",
+      "to_state": "STREAM_CLOSED",
+      "trigger": "message_delivered",
+      "pre_cond": "stream.open = true & stream.mode = MESSAGE_ONLY",
+      "post_cond": "stream.open = false",
+      "actions": [
+        "stream contains exactly one Message object",
+        "stream closes immediately after Message delivery"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-2-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "Non-Blocking (return_immediately: true): The operation MUST return immediately after creating the task, even if processing is still in progress. The returned task will have an in-progress state (e.g., working, input_required). It is the caller's responsibility to poll for updates using Get Task, subscribe via Subscribe to Task, or receive updates via push notifications.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "3.2.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message_request_received",
+      "pre_cond": "configuration.returnImmediately = true",
+      "post_cond": "task.created = true & task.state = in_progress",
+      "actions": [
+        "Create task",
+        "Return immediately with task in an in-progress state (e.g., working, input_required) without waiting for completion"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "N-3-3-001",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "initiation",
+      "description": "Send Message operations MAY be idempotent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Treat duplicate Send Message operations as idempotent, optionally using messageId to detect duplicates"
+      ],
+      "modality": "may",
+      "id": "N-3-3-001"
+    },
+    {
+      "statement_id": "N-3-4-001",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "initiation",
+      "description": "Agents MAY generate a new contextId when processing a Message that does not include a contextId field",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_message",
+      "pre_cond": "message does not include a contextId field",
+      "post_cond": null,
+      "actions": [
+        "Generate a new contextId"
+      ],
+      "modality": "may",
+      "id": "N-3-4-001"
+    },
+    {
+      "statement_id": "N-3-4-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "context",
+      "stage": "initiation",
+      "description": "If an agent generates a new contextId, it MUST be included in the response (either Task or Message)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response",
+      "pre_cond": "agent.contextId_generated = true",
+      "post_cond": "response.contextId != null",
+      "actions": [
+        "Include generated contextId in response (Task or Message)"
+      ],
+      "modality": "must",
+      "id": "N-3-4-002"
+    },
+    {
+      "statement_id": "N-3-4-003",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "context",
+      "stage": "initiation",
+      "description": "Agents MAY accept and preserve client-provided contextId values",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_message",
+      "pre_cond": "message.contextId != null",
+      "post_cond": null,
+      "actions": [
+        "Accept client-provided contextId",
+        "Preserve client-provided contextId value"
+      ],
+      "modality": "may",
+      "id": "N-3-4-003"
+    },
+    {
+      "statement_id": "N-3-4-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "context",
+      "stage": "initiation",
+      "description": "If an agent cannot accept a client-provided contextId, it MUST reject the request with an error and MUST NOT generate a new contextId for the response",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_message",
+      "pre_cond": "message.contextId != null & agent.can_accept_contextId = false",
+      "post_cond": "response.type = error & response.contextId = null",
+      "actions": [
+        "Reject the request with an error",
+        "MUST NOT generate a new contextId for the response"
+      ],
+      "modality": "must",
+      "id": "N-3-4-004"
+    },
+    {
+      "statement_id": "N-3-4-006",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "context",
+      "stage": "initiation",
+      "description": "Clients SHOULD NOT provide a client-generated contextId to a server unless they understand how the server will process that contextId",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message",
+      "pre_cond": "client.understands_server_contextId_processing = false",
+      "post_cond": null,
+      "actions": [
+        "Do not provide a client-generated contextId to a server when server contextId processing behavior is not understood"
+      ],
+      "modality": "should",
+      "id": "N-3-4-006"
+    },
+    {
+      "statement_id": "N-3-4-012",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "Agents MUST generate a unique taskId for each new task they create",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_creation",
+      "pre_cond": null,
+      "post_cond": "task.taskId != null & task.taskId.is_unique = true",
+      "actions": [
+        "Generate a unique taskId for each new task created"
+      ],
+      "modality": "must",
+      "id": "N-3-4-012"
+    },
+    {
+      "statement_id": "N-3-4-013",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "The generated taskId MUST be included in the Task object returned to the client",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response",
+      "pre_cond": "task.created = true",
+      "post_cond": "task.taskId != null",
+      "actions": [
+        "Include generated taskId in the Task object returned to the client"
+      ],
+      "modality": "must",
+      "id": "N-3-4-013"
+    },
+    {
+      "statement_id": "N-3-4-018",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Clients MAY use contextId without taskId to start a new task within an existing conversation context",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message",
+      "pre_cond": "message.contextId != null & message.taskId = null",
+      "post_cond": null,
+      "actions": [
+        "Use contextId without taskId to start a new task within an existing conversation context"
+      ],
+      "modality": "may",
+      "id": "N-3-4-018"
+    },
+    {
+      "statement_id": "N-3-6-003",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Clients MUST send the A2A-Version header with each request to maintain compatibility after an agent upgrades to a new version of the protocol (except for 0.3 Clients - 0.3 will be assumed for empty header).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6.1",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": null,
+      "post_cond": "request.A2A-Version_header.present = true",
+      "actions": [
+        "Include A2A-Version header in each request sent to the agent"
+      ],
+      "modality": "must",
+      "id": "N-3-6-003"
+    },
+    {
+      "statement_id": "N-3-6-004",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Clients MAY provide the A2A-Version as a request parameter instead of a header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": null,
+      "post_cond": "request.A2A-Version_param.present = true",
+      "actions": [
+        "Include A2A-Version as a query/request parameter instead of an HTTP header"
+      ],
+      "modality": "may",
+      "id": "N-3-6-004"
+    },
+    {
+      "statement_id": "N-3-6-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "If the version is not supported by the interface, agents MUST return a VersionNotSupportedError.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request",
+      "pre_cond": "server.version_supported = false",
+      "post_cond": "response.error = VersionNotSupportedError",
+      "actions": [
+        "Return a VersionNotSupportedError response to the client"
+      ],
+      "modality": "must",
+      "id": "N-3-6-006"
+    },
+    {
+      "statement_id": "N-3-6-007",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "Agents MUST interpret empty value as 0.3 version.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request",
+      "pre_cond": "request.A2A-Version = empty",
+      "post_cond": "server.interpreted_version = 0.3",
+      "actions": [
+        "Interpret an empty A2A-Version header value as protocol version 0.3"
+      ],
+      "modality": "must",
+      "id": "N-3-6-007"
+    },
+    {
+      "statement_id": "N-3-6-009",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Client Agents that require the latest features of the protocol should be configured to request specific versions and avoid automatic fallback to older versions, to prevent silently losing functionality.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": "client.requires_latest_features = true",
+      "post_cond": "client.version_specific_request = true & client.version_fallback_automatic = false",
+      "actions": [
+        "Configure client to request specific protocol versions",
+        "Disable automatic fallback to older protocol versions"
+      ],
+      "modality": "should",
+      "id": "N-3-6-009"
+    },
+    {
+      "statement_id": "D-3-6-006",
+      "normative_level": "REQUIREMENT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "Agents MUST process requests using the semantics of the requested A2A-Version (matching Major.Minor). If the version is not supported by the interface, agents MUST return a VersionNotSupportedError.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.6.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "!server.version_supported",
+      "post_cond": "response.error_type = VersionNotSupportedError",
+      "actions": [
+        "Reject request by returning VersionNotSupportedError"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-7-002",
+      "normative_level": "unspecified",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "Clients send Messages to agents to initiate new tasks.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.7",
+      "actors": [
+        "client",
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_sends_message",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "client sends Message to agent",
+        "new task is initiated"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-3-7-003",
+      "normative_level": "MAY",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "Agents may send Messages back to the client to request clarification prior to initiating a task.",
+      "is_inferred": true,
+      "confidence": 0.55,
+      "source_section": "3.7",
+      "actors": [
+        "agent",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_sends_clarification_message",
+      "pre_cond": "task.created = false",
+      "post_cond": null,
+      "actions": [
+        "agent sends clarification Message to client requesting clarification before task initiation"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-4-1-044",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "Indicates that the agent has decided to not perform the task. This may be done during initial task creation...",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "4.1.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_SUBMITTED",
+      "to_state": "TASK_STATE_REJECTED",
+      "trigger": "agent_rejects_task",
+      "pre_cond": "task.state = TASK_STATE_SUBMITTED",
+      "post_cond": "task.state = TASK_STATE_REJECTED",
+      "actions": [
+        "Agent decides not to perform the task during initial task creation"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-6-2-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "Client POSTs to /message:stream; server opens SSE stream and emits initial task event with state TASK_STATE_WORKING",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "6.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "POST /message:stream",
+      "pre_cond": null,
+      "post_cond": "task.state = TASK_STATE_WORKING & stream.open = true",
+      "actions": [
+        "client sends POST /message:stream with message payload containing role, parts, and messageId",
+        "server returns HTTP 200 with Content-Type: text/event-stream",
+        "server emits SSE task event with task id and status.state = TASK_STATE_WORKING"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-6-4-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "Server has received a request bearing an unsupported A2A protocol version and returns a 400 error; the interaction terminates with a version-not-supported condition.",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "6.4",
+      "state_name": "VERSION_NEGOTIATION_ERROR",
+      "enum_name": null,
+      "semantic_type": "error",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "response.status = 400 & response.error_type = version_not_supported"
+    },
+    {
+      "statement_id": "D-6-4-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "Scenario: Client requests an unsupported protocol version. Server responds with HTTP 400 Bad Request and application/problem+json body including supportedVersions.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "6.4",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "VERSION_NEGOTIATION_ERROR",
+      "trigger": "message_send_request_received",
+      "pre_cond": "request.A2A_Version != null & server.version_supported = false",
+      "post_cond": "response.status = 400 & response.content_type = application_problem_json & response.supportedVersions != null",
+      "actions": [
+        "Server receives POST /message:send with A2A-Version header value 0.5",
+        "Server determines requested version 0.5 is not in its supported versions list",
+        "Server returns HTTP 400 Bad Request with Content-Type: application/problem+json",
+        "Response body includes type, title, status, detail, and supportedVersions fields"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-6-6-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "\"state\": \"submitted\" — task status state returned in the server response immediately after a push-notification-enabled task is submitted via message:send",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "6.6",
+      "state_name": "submitted",
+      "enum_name": "TaskState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "task.status.state = submitted"
+    },
+    {
+      "statement_id": "D-6-6-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "Client sends POST /message:send with configuration.pushNotificationConfig; server responds HTTP 200 with task object whose status.state is 'submitted'",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "6.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "submitted",
+      "trigger": "message_send",
+      "pre_cond": "configuration.pushNotificationConfig != null & configuration.pushNotificationConfig.url != null",
+      "post_cond": "task.status.state = submitted",
+      "actions": [
+        "Server receives POST /message:send with pushNotificationConfig in configuration",
+        "Server registers pushNotificationConfig.url and pushNotificationConfig.token for the new task",
+        "Server responds HTTP 200 with task object containing id, contextId, and status.state = submitted"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-9-3-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "All JSON-RPC requests MUST follow the standard JSON-RPC 2.0 format:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "9.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "json_rpc_request_sent",
+      "pre_cond": null,
+      "post_cond": "request.jsonrpc = \"2.0\" & request.id != null & request.method != null & request.params != null",
+      "actions": [
+        "Set jsonrpc field to '2.0'",
+        "Include a unique request id field",
+        "Include a method field in 'category/action' format",
+        "Include a params field with method-specific parameters"
+      ],
+      "modality": "must",
+      "id": "N-9-3-001"
+    },
+    {
+      "statement_id": "D-9-4-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "initiation",
+      "description": "Sends a message to initiate or continue a task.",
+      "is_inferred": true,
+      "confidence": 0.6,
+      "source_section": "9.4.1",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SendMessage",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "client sends SendMessageRequest to server",
+        "server processes message and returns SendMessageResponse containing either a Task or Message object"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-10-2-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "A2A service parameters defined in Section 3.2.6 MUST be transmitted using gRPC metadata (headers).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_grpc_request",
+      "pre_cond": "request.transport = gRPC",
+      "post_cond": "request.grpc_metadata contains service_parameters",
+      "actions": [
+        "Encode all A2A service parameters as gRPC metadata (headers) in the outgoing request"
+      ],
+      "modality": "must",
+      "id": "N-10-2-001"
+    },
+    {
+      "statement_id": "N-10-2-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Service parameter names MUST be transmitted as gRPC metadata keys",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_grpc_request",
+      "pre_cond": "request.transport = gRPC",
+      "post_cond": "service_parameter.name = grpc_metadata_key",
+      "actions": [
+        "Map each A2A service parameter name to a gRPC metadata key in the outgoing request"
+      ],
+      "modality": "must",
+      "id": "N-10-2-002"
+    },
+    {
+      "statement_id": "N-10-2-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "Multiple values for the same service parameter (e.g., A2A-Extensions) SHOULD be comma-separated in a single metadata entry",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_grpc_request",
+      "pre_cond": "request.transport = gRPC & service_parameter.value_count > 1",
+      "post_cond": "service_parameter.grpc_metadata_entry = comma_separated_values",
+      "actions": [
+        "Concatenate multiple values for the same service parameter into a single comma-separated metadata entry"
+      ],
+      "modality": "should",
+      "id": "N-10-2-003"
+    },
+    {
+      "statement_id": "N-10-4-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "initiation",
+      "description": "Note: A SendMessageResponse MUST contain exactly one of the following: task, message",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message_request",
+      "pre_cond": null,
+      "post_cond": "(response.task != null & response.message = null) | (response.task = null & response.message != null)",
+      "actions": [
+        "Include exactly one of the task or message fields in the SendMessageResponse — never both, never neither"
+      ],
+      "modality": "must",
+      "id": "N-10-4-001"
+    },
+    {
+      "statement_id": "D-11-7-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "initiation",
+      "description": "REST streaming uses Server-Sent Events with the data field containing JSON serializations of the protocol data objects: POST /message:stream",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "11.7",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "STREAM_STATE_OPEN",
+      "trigger": "POST_message_stream",
+      "pre_cond": null,
+      "post_cond": "stream.open = true",
+      "actions": [
+        "Client sends POST /message:stream with Content-Type: application/json and SendMessageRequest body",
+        "Server responds HTTP 200 OK with Content-Type: text/event-stream",
+        "Server sends first SSE event containing Task or single Message"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-14-2-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "initiation",
+      "description": "The value MUST be in the format Major.Minor (e.g., \"0.3\").",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "14.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": "request.transport = HTTP",
+      "post_cond": "A2A-Version.value.format = Major.Minor",
+      "actions": [
+        "Format the A2A-Version header value as Major.Minor (e.g., \"0.3\")"
+      ],
+      "modality": "must",
+      "id": "N-14-2-001"
+    },
+    {
+      "statement_id": "D-14-2-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "If the version is not supported by the agent, the agent returns a VersionNotSupportedError.",
+      "is_inferred": true,
+      "confidence": 0.6,
+      "source_section": "14.2.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "agent.supported_versions.contains(request.headers[A2A-Version]) = false",
+      "post_cond": "response.error = VersionNotSupportedError",
+      "actions": [
+        "agent returns VersionNotSupportedError"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-Appendix A- Migratio-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "initiation",
+      "description": "0.3.x: New names introduced; legacy names documented; aliases added.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "Appendix A",
+      "state_name": "LEGACY_NAME_INTRODUCED",
+      "enum_name": "LegacyNameLifecycle",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "legacy_name.documented = true & legacy_name.alias_present = true"
+    },
+    {
+      "statement_id": "D-Appendix A- Migratio-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "initiation",
+      "description": "0.3.x: New names introduced; legacy names documented; aliases added.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "Appendix A",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "LEGACY_NAME_INTRODUCED",
+      "trigger": "version_0_3_x_release",
+      "pre_cond": null,
+      "post_cond": "legacy_name.documented = true & legacy_name.alias_present = true",
+      "actions": [
+        "New protocol names introduced",
+        "Legacy names documented",
+        "Aliases added for legacy names"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-5-6-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "initiation",
+      "description": "When serialized to JSON (in JSON-RPC, HTTP/REST, or other JSON-based bindings), these timestamps MUST be represented as ISO 8601 formatted strings in UTC timezone.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "5.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "timestamp_json_serialization",
+      "pre_cond": "timestamp.serialization_format = JSON",
+      "post_cond": "timestamp.format = ISO_8601 & timestamp.timezone = UTC",
+      "actions": [
+        "Represent timestamps as ISO 8601 formatted strings in UTC timezone"
+      ],
+      "modality": "must",
+      "id": "N-5-6-001",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-5-6-004",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "initiation",
+      "description": "When millisecond precision is not available, the fractional seconds portion MAY be omitted or zero-filled",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "5.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "timestamp_json_serialization",
+      "pre_cond": "timestamp.millisecond_precision.available = false",
+      "post_cond": null,
+      "actions": [
+        "Omit or zero-fill the fractional seconds portion of the timestamp"
+      ],
+      "modality": "may",
+      "id": "N-5-6-004"
+    },
+    {
+      "statement_id": "N-5-7-002",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "initiation",
+      "description": "Implementations SHOULD validate these requirements and reject messages with missing required fields.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "5.7",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Validate that all required fields are present in the received message",
+        "Reject messages that have missing required fields"
+      ],
+      "modality": "should",
+      "id": "N-5-7-002"
+    },
+    {
+      "statement_id": "N-12-2-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "extension",
+      "stage": "initiation",
+      "description": "Custom bindings MUST provide clear mappings for: Protocol Buffer Types: Define how each Protocol Buffer message type is represented; Timestamps: Follow the conventions in Section 5.6.1 (Timestamps); Binary Data: Specify encoding for binary content (e.g., base64 for text-based protocols); Enumerations: Define representation of enum values (e.g., strings, integers)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "12.2",
+      "actors": [
+        "extension"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "custom_binding_definition",
+      "pre_cond": null,
+      "post_cond": "extension.type_mappings.protobuf_types_defined = true & extension.type_mappings.timestamps_defined = true & extension.type_mappings.binary_data_encoding_defined = true & extension.type_mappings.enumerations_defined = true",
+      "actions": [
+        "Define how each Protocol Buffer message type is represented",
+        "Follow timestamp conventions from Section 5.6.1",
+        "Specify encoding for binary content",
+        "Define representation of enum values"
+      ],
+      "modality": "must",
+      "id": "N-12-2-001"
+    }
+  ]
+}

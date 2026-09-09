@@ -1,0 +1,75 @@
+{
+  "section_id": "S092",
+  "title": "S092 4.5.3.2.4 DATA Initiation: 2 Minutes",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S092 4.5.3.2.4 DATA Initiation: 2 Minutes"
+  ],
+  "url_anchor": "#s092-45324-data-initiation-2-minutes",
+  "word_count": 18,
+  "statement_count": 3,
+  "elapsed_seconds": 16.62,
+  "statements": [
+    {
+      "statement_id": "D-S092-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "This is while awaiting the '354 Start Input' reply to a DATA command.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S092",
+      "state_name": "Awaiting DATA Reply",
+      "enum_name": "SMTP_CLIENT_STATES",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.last_command_sent = DATA & session.reply_received = false"
+    },
+    {
+      "statement_id": "D-S092-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "smtp_fsm",
+      "description": "DATA Initiation: 2 Minutes \u2014 timer applies while awaiting the '354 Start Input' reply to a DATA command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S092",
+      "object_name": "DATA Initiation Timer",
+      "field_name": "duration",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": [
+        "2 minutes"
+      ],
+      "guard_semantics": "session.state = Awaiting DATA Reply"
+    },
+    {
+      "statement_id": "D-S092-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "While awaiting the '354 Start Input' reply to a DATA command, the DATA Initiation timer of 2 minutes governs the wait.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S092",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Awaiting DATA Reply",
+      "to_state": null,
+      "trigger": "DATA Initiation Timer Expired",
+      "pre_cond": "session.state = Awaiting DATA Reply & timer.data_initiation.elapsed >= 2min",
+      "post_cond": null,
+      "actions": [
+        "abort DATA initiation wait"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

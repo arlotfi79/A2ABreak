@@ -1,0 +1,95 @@
+{
+  "section_id": "S049",
+  "title": "S049 8.2.6.2 Headers and Tags",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S049 8.2.6.2 Headers and Tags"
+  ],
+  "url_anchor": "#s049-8262-headers-and-tags",
+  "word_count": 210,
+  "statement_count": 4,
+  "elapsed_seconds": 31.14,
+  "statements": [
+    {
+      "statement_id": "D-S049-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the To header field in the request did not contain a tag, the UAS MUST add a tag to the To header field in the response (with the exception of the 100 (Trying) response, in which a tag MAY be present).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "object_name": "response",
+      "field_name": "To-tag",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "required when request.To-tag = null & response.status != 100"
+    },
+    {
+      "statement_id": "D-S049-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The same tag MUST be used for all responses to that request, both final and provisional (again excepting the 100 (Trying)).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "object_name": "response",
+      "field_name": "To-tag",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "response.To-tag = initial_response.To-tag for all responses where response.status != 100"
+    },
+    {
+      "statement_id": "D-S049-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the To header field in the request did not contain a tag, the UAS MUST add a tag to the To header field in the response (with the exception of the 100 (Trying) response, in which a tag MAY be present). This serves to identify the UAS that is responding, possibly resulting in a component of a dialog ID.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S049",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send non-100 response when request.To-tag absent",
+      "pre_cond": "request.To-tag = null & response.status != 100",
+      "post_cond": "response.To-tag != null",
+      "actions": [
+        "add To-tag to response To header field"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S049-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a request contained a To tag in the request, the To header field in the response MUST equal that of the request.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S049",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send response when request.To-tag present",
+      "pre_cond": "request.To-tag != null",
+      "post_cond": "response.To-tag = request.To-tag",
+      "actions": [
+        "copy To header field from request to response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

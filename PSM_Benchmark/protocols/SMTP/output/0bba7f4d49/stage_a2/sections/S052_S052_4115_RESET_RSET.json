@@ -1,0 +1,162 @@
+{
+  "section_id": "S052",
+  "title": "S052 4.1.1.5 RESET (RSET)",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S052 4.1.1.5 RESET (RSET)"
+  ],
+  "url_anchor": "#s052-4115-reset-rset",
+  "word_count": 216,
+  "statement_count": 6,
+  "elapsed_seconds": 130.3,
+  "statements": [
+    {
+      "statement_id": "1-S052-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Any stored sender, recipients, and mail data MUST be discarded, and all buffers and state tables cleared.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RSET_received",
+      "pre_cond": null,
+      "post_cond": "transaction.sender = null & transaction.recipients = [] & transaction.mail_data = null & session.buffers.cleared = true & session.state_tables.cleared = true",
+      "actions": [
+        "discard stored sender",
+        "discard stored recipients",
+        "discard stored mail data",
+        "clear all buffers",
+        "clear all state tables"
+      ],
+      "modality": "must",
+      "id": "N-S052-001"
+    },
+    {
+      "statement_id": "2-S052-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "The receiver MUST send a \"250 OK\" reply to a RSET command with no arguments.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "server",
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RSET_received",
+      "pre_cond": "RSET.arguments = none",
+      "post_cond": "reply.code = 250",
+      "actions": [
+        "send 250 OK reply"
+      ],
+      "modality": "must",
+      "id": "N-S052-002"
+    },
+    {
+      "statement_id": "3-S052-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "A reset command may be issued by the client at any time.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S052",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S052-003"
+    },
+    {
+      "statement_id": "4-S052-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "An SMTP server MUST NOT close the connection as the result of receiving a RSET; that action is reserved for QUIT (see Section 4.1.1.10).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RSET_received",
+      "pre_cond": null,
+      "post_cond": "connection.state != CLOSED",
+      "actions": [
+        "maintain connection open"
+      ],
+      "modality": "must",
+      "id": "N-S052-004"
+    },
+    {
+      "statement_id": "5-S052-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "SMTP servers SHOULD be prepared for this condition and SHOULD treat it as if a QUIT had been received before the connection disappeared.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TCP_connection_closed_or_reset_unexpectedly",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "be prepared to handle unexpected TCP connection closure or reset"
+      ],
+      "modality": "should",
+      "id": "N-S052-005"
+    },
+    {
+      "statement_id": "6-S052-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "SMTP servers SHOULD be prepared for this condition and SHOULD treat it as if a QUIT had been received before the connection disappeared.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S052",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TCP_connection_closed_or_reset_unexpectedly",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "treat unexpected TCP connection closure as if QUIT had been received before connection disappeared"
+      ],
+      "modality": "should",
+      "id": "N-S052-006"
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "section_id": "S195",
+  "title": "S195 18.47 Seek-Style",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S195 18.47 Seek-Style"
+  ],
+  "url_anchor": "#s195-1847-seek-style",
+  "word_count": 742,
+  "statement_count": 6,
+  "elapsed_seconds": 45.78,
+  "statements": [
+    {
+      "statement_id": "D-S195-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MUST always include the Seek-Style header in any PLAY response for media with random access properties to indicate what policy was applied.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S195",
+      "object_name": "PLAY response",
+      "field_name": "Seek-Style",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "media has random access properties"
+    },
+    {
+      "statement_id": "D-S195-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the server searched to a random access point (CoRAP condition fulfilled: RAP is closer to requested start point than to current pause point), the server MUST return the CoRAP policy in the Seek-Style header and adjust the Range header to reflect the position of the selected RAP.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S195",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY request with CoRAP seek style received, CoRAP condition fulfilled",
+      "pre_cond": "session.seek_style = CoRAP & distance(RAP, requested_start) < distance(RAP, current_pause_point)",
+      "post_cond": "response.Seek-Style = CoRAP & response.Range reflects RAP position",
+      "actions": [
+        "set Seek-Style to CoRAP in PLAY response",
+        "adjust Range header to RAP position"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S195-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In case the random access point is farther away and the server chooses to continue from the current pause point, it MUST include the 'Next' policy in the Seek-Style header and adjust the Range header start point to the current pause point.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S195",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY request with CoRAP seek style received, CoRAP condition not fulfilled",
+      "pre_cond": "session.seek_style = CoRAP & distance(RAP, requested_start) >= distance(RAP, current_pause_point)",
+      "post_cond": "response.Seek-Style = Next & response.Range.start = current_pause_point",
+      "actions": [
+        "set Seek-Style to Next in PLAY response",
+        "adjust Range start to current pause point"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S195-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server that receives an unknown Seek-Style policy MUST ignore it and select the server default policy.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S195",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY request with unknown Seek-Style policy received",
+      "pre_cond": "request.Seek-Style = unknown_policy",
+      "post_cond": "server.seek_policy = server_default",
+      "actions": [
+        "ignore unknown Seek-Style policy",
+        "apply server default seek policy"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S195-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A client receiving an unknown [Seek-Style] policy MUST ignore it and use the Range header and any media synchronization information as basis to determine what the server did.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S195",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY response with unknown Seek-Style policy received",
+      "pre_cond": "response.Seek-Style = unknown_policy",
+      "post_cond": "client uses Range header and media synchronization information to determine server action",
+      "actions": [
+        "ignore unknown Seek-Style policy in response",
+        "use Range header and media synchronization to determine server action"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S195-006",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The 'Next' policy MUST only be used on the client's explicit request.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S195",
+      "object_name": "Seek-Style",
+      "field_name": "Next",
+      "field_type": "policy value",
+      "required": false,
+      "allowed_values": [
+        "Next"
+      ],
+      "guard_semantics": "client has explicitly requested Next policy in PLAY request Seek-Style header"
+    }
+  ]
+}

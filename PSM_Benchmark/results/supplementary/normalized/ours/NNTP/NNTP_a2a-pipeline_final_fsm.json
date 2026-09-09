@@ -1,0 +1,400 @@
+{
+ "states": [
+  "Initial_Connection",
+  "CommandExchange",
+  "Posting_Allowed",
+  "Posting_Prohibited",
+  "TransitMode",
+  "ReadingMode",
+  "ReaderModePostAllowed",
+  "ReaderModePostProhibited",
+  "NoGroupSelected",
+  "Group_Selected",
+  "AwaitingData",
+  "Posting_Article",
+  "IhaveWaitingInitial",
+  "IhaveSendingArticle",
+  "IhaveTransfer",
+  "IhaveComplete",
+  "TransferSuccess",
+  "TransferRejected",
+  "TransferFailedRetry",
+  "ContinuationRequired",
+  "AwaitingResponse",
+  "CommandPipeline",
+  "WaitingForResponse",
+  "EncryptedLink",
+  "Ihave335Continuation",
+  "Post340Continuation",
+  "Connection_Closed"
+ ],
+ "initial_state": "Initial_Connection",
+ "final_states": [
+  "Connection_Closed",
+  "TransferFailedRetry",
+  "TransferRejected",
+  "TransferSuccess"
+ ],
+ "transitions": [
+  {
+   "from": "Initial_Connection",
+   "event": "Receive 200",
+   "action": "Set service available",
+   "to": "Posting_Allowed"
+  },
+  {
+   "from": "Initial_Connection",
+   "event": "Receive 201",
+   "action": "Set posting prohibited",
+   "to": "Posting_Prohibited"
+  },
+  {
+   "from": "Initial_Connection",
+   "event": "Receive 502",
+   "action": "Close connection",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "Initial_Connection",
+   "event": "Receive 400",
+   "action": "Close connection",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "Initial_Connection",
+   "event": "send greeting",
+   "action": "send greeting",
+   "to": "CommandExchange"
+  },
+  {
+   "from": "Initial_Connection",
+   "event": "receive XENCRYPT success",
+   "action": "negotiate encryption; send 283 response",
+   "to": "EncryptedLink"
+  },
+  {
+   "from": "Initial_Connection",
+   "event": "receive XSECRET denied",
+   "action": "send 483 response",
+   "to": "Initial_Connection"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "receive 3xx response",
+   "action": "request further data from client",
+   "to": "AwaitingData"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "connection closed",
+   "action": "close connection",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "timeout autologout",
+   "action": "close connection",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "receive QUIT",
+   "action": "send 205 response; close connection",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "receive command",
+   "action": "reset autologout timer",
+   "to": "CommandExchange"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "send 400 shutdown",
+   "action": "send 400 response; close connection",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "cond fault or disconnect",
+   "action": "cease servicing client",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "AwaitingData",
+   "event": "receive multiline data",
+   "action": "reset autologout timer",
+   "to": "AwaitingData"
+  },
+  {
+   "from": "Posting_Allowed",
+   "event": "receive QUIT",
+   "action": "send 205 response; close connection",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "Posting_Prohibited",
+   "event": "receive QUIT",
+   "action": "send 205 response; close connection",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "TransitMode",
+   "event": "receive MODE READER",
+   "action": "enter reading mode; advertise READER capability",
+   "to": "ReadingMode"
+  },
+  {
+   "from": "TransitMode",
+   "event": "receive MODE READER 200",
+   "action": "send 200 response; switch capabilities to reader mode",
+   "to": "ReaderModePostAllowed"
+  },
+  {
+   "from": "TransitMode",
+   "event": "receive MODE READER 201",
+   "action": "send 201 response",
+   "to": "ReaderModePostProhibited"
+  },
+  {
+   "from": "TransitMode",
+   "event": "receive MODE READER 502",
+   "action": "send 502 response; close connection",
+   "to": "Connection_Closed"
+  },
+  {
+   "from": "ReadingMode",
+   "event": "receive IHAVE denied",
+   "action": "send 500 response",
+   "to": "ReadingMode"
+  },
+  {
+   "from": "ReaderModePostAllowed",
+   "event": "receive IHAVE command",
+   "action": "send 500 response",
+   "to": "ReaderModePostAllowed"
+  },
+  {
+   "from": "NoGroupSelected",
+   "event": "receive GROUP success",
+   "action": "send 211 response; set selected newsgroup",
+   "to": "Group_Selected"
+  },
+  {
+   "from": "Group_Selected",
+   "event": "receive GROUP success",
+   "action": "send 211 response; update selected newsgroup",
+   "to": "Group_Selected"
+  },
+  {
+   "from": "Group_Selected",
+   "event": "receive LISTGROUP",
+   "action": "send 211 response; return article number list",
+   "to": "Group_Selected"
+  },
+  {
+   "from": "NoGroupSelected",
+   "event": "receive LISTGROUP with group",
+   "action": "send 211 response; set current article number",
+   "to": "Group_Selected"
+  },
+  {
+   "from": "NoGroupSelected",
+   "event": "receive LISTGROUP no arg",
+   "action": "send 412 response",
+   "to": "NoGroupSelected"
+  },
+  {
+   "from": "Group_Selected",
+   "event": "receive LAST success",
+   "action": "send 223 response; set article to previous",
+   "to": "Group_Selected"
+  },
+  {
+   "from": "NoGroupSelected",
+   "event": "receive LAST no group",
+   "action": "send 412 response",
+   "to": "NoGroupSelected"
+  },
+  {
+   "from": "Group_Selected",
+   "event": "receive LAST no prev",
+   "action": "send 422 response",
+   "to": "Group_Selected"
+  },
+  {
+   "from": "Group_Selected",
+   "event": "receive LAST no article",
+   "action": "send 420 response",
+   "to": "Group_Selected"
+  },
+  {
+   "from": "Group_Selected",
+   "event": "receive NEXT success",
+   "action": "send 223 response; advance article pointer",
+   "to": "Group_Selected"
+  },
+  {
+   "from": "NoGroupSelected",
+   "event": "receive NEXT no group",
+   "action": "send 412 response",
+   "to": "NoGroupSelected"
+  },
+  {
+   "from": "Group_Selected",
+   "event": "receive NEXT no next",
+   "action": "send 421 response",
+   "to": "Group_Selected"
+  },
+  {
+   "from": "Posting_Allowed",
+   "event": "receive POST command",
+   "action": "send 340 response",
+   "to": "Posting_Article"
+  },
+  {
+   "from": "Posting_Article",
+   "event": "receive article success",
+   "action": "send 240 response",
+   "to": "Posting_Allowed"
+  },
+  {
+   "from": "Posting_Article",
+   "event": "Receive 240",
+   "action": "Article posted successfully",
+   "to": "Posting_Allowed"
+  },
+  {
+   "from": "Posting_Prohibited",
+   "event": "Receive 441",
+   "action": "Posting failed",
+   "to": "Posting_Prohibited"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "receive POST allowed",
+   "action": "send 340 response",
+   "to": "Posting_Article"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "receive POST denied",
+   "action": "send 440 response",
+   "to": "CommandExchange"
+  },
+  {
+   "from": "Posting_Article",
+   "event": "receive article terminated",
+   "action": "send transfer result response",
+   "to": "CommandExchange"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "send IHAVE",
+   "action": "send IHAVE message-id",
+   "to": "IhaveWaitingInitial"
+  },
+  {
+   "from": "IhaveWaitingInitial",
+   "event": "receive 335 response",
+   "action": "send article body",
+   "to": "IhaveSendingArticle"
+  },
+  {
+   "from": "IhaveWaitingInitial",
+   "event": "receive 435 response",
+   "action": "send 435 response",
+   "to": "IhaveComplete"
+  },
+  {
+   "from": "IhaveWaitingInitial",
+   "event": "receive 436 initial",
+   "action": "send 436 response",
+   "to": "IhaveComplete"
+  },
+  {
+   "from": "IhaveSendingArticle",
+   "event": "receive 235 response",
+   "action": "send 235 response",
+   "to": "TransferSuccess"
+  },
+  {
+   "from": "IhaveSendingArticle",
+   "event": "receive 436 transfer",
+   "action": "send 436 response",
+   "to": "TransferFailedRetry"
+  },
+  {
+   "from": "IhaveSendingArticle",
+   "event": "receive 437 response",
+   "action": "send 437 response",
+   "to": "TransferRejected"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "receive IHAVE 335",
+   "action": "send 335 response",
+   "to": "IhaveTransfer"
+  },
+  {
+   "from": "IhaveTransfer",
+   "event": "receive article 235",
+   "action": "send 235 response",
+   "to": "CommandExchange"
+  },
+  {
+   "from": "IhaveTransfer",
+   "event": "receive article 437",
+   "action": "send 437 response",
+   "to": "CommandExchange"
+  },
+  {
+   "from": "IhaveTransfer",
+   "event": "receive article 436",
+   "action": "send 436 response",
+   "to": "CommandExchange"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "receive IHAVE 435",
+   "action": "send 435 response",
+   "to": "CommandExchange"
+  },
+  {
+   "from": "CommandExchange",
+   "event": "receive IHAVE 436",
+   "action": "send 436 response",
+   "to": "CommandExchange"
+  },
+  {
+   "from": "CommandPipeline",
+   "event": "send non pipeline cmd",
+   "action": "send non-pipelineable command; suspend further sending",
+   "to": "WaitingForResponse"
+  },
+  {
+   "from": "AwaitingResponse",
+   "event": "receive 3xx continuation",
+   "action": "receive 3xx response",
+   "to": "ContinuationRequired"
+  },
+  {
+   "from": "ContinuationRequired",
+   "event": "send continuation data",
+   "action": "send command-continuation",
+   "to": "AwaitingResponse"
+  },
+  {
+   "from": "NoGroupSelected",
+   "event": "receive OVER no group",
+   "action": "send 412 response",
+   "to": "NoGroupSelected"
+  },
+  {
+   "from": "Group_Selected",
+   "event": "receive OVER success",
+   "action": "send 224 response; send overview data",
+   "to": "Group_Selected"
+  }
+ ]
+}

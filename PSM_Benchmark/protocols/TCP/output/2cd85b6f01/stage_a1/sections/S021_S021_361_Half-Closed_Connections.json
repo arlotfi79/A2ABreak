@@ -1,0 +1,126 @@
+{
+  "section_id": "S021",
+  "title": "S021 3.6.1 Half-Closed Connections",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S021 3.6.1 Half-Closed Connections"
+  ],
+  "url_anchor": "#s021-361-half-closed-connections",
+  "word_count": 273,
+  "statement_count": 5,
+  "elapsed_seconds": 23.49,
+  "statements": [
+    {
+      "statement_id": "D-S021-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "When a connection is closed actively, it MUST linger in the TIME-WAIT state for a time 2xMSL (Maximum Segment Lifetime).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S021",
+      "state_name": "TIME-WAIT",
+      "enum_name": "TCPState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TIME-WAIT"
+    },
+    {
+      "statement_id": "D-S021-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "When a connection is closed actively, it MUST linger in the TIME-WAIT state for a time 2xMSL (Maximum Segment Lifetime) (MUST-13).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S021",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "TIME-WAIT",
+      "trigger": "active close",
+      "pre_cond": null,
+      "post_cond": "timer.duration = 2xMSL",
+      "actions": [
+        "linger in TIME-WAIT for 2xMSL"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S021-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "It MAY accept a new SYN from the remote TCP endpoint to reopen the connection directly from TIME-WAIT state (MAY-2), if it assigns its initial sequence number for the new connection to be larger than the largest sequence number it used on the previous connection incarnation.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S021",
+      "actors": [
+        "endpoint",
+        "remote TCP endpoint"
+      ],
+      "from_state": "TIME-WAIT",
+      "to_state": null,
+      "trigger": "receive new SYN from remote TCP endpoint",
+      "pre_cond": "segment.SYN = 1 & segment.SEQ > connection.prev_max_seq",
+      "post_cond": "connection.ISN > connection.prev_max_seq",
+      "actions": [
+        "assign new ISN larger than previous max sequence number",
+        "reopen connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S021-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Returns to TIME-WAIT state if the SYN turns out to be an old duplicate.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S021",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "TIME-WAIT",
+      "to_state": "TIME-WAIT",
+      "trigger": "received SYN is old duplicate",
+      "pre_cond": "segment.SYN = 1 & segment.is_old_duplicate = true",
+      "post_cond": "protocol.state = TIME-WAIT",
+      "actions": [
+        "return to TIME-WAIT"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S021-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If such a host issues a CLOSE call while received data is still pending in the TCP connection, or if new data is received after CLOSE is called, its TCP implementation SHOULD send a RST to show that data was lost (SHLD-3).",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S021",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CLOSE called with pending received data | data received after CLOSE",
+      "pre_cond": "connection.half_duplex_close = true & (connection.recv_pending = true | segment.data_received = true)",
+      "post_cond": null,
+      "actions": [
+        "send RST"
+      ],
+      "modality": "should"
+    }
+  ]
+}

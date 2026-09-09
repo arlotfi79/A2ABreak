@@ -1,0 +1,210 @@
+{
+  "section_id": "S085",
+  "title": "S085 6.4.7 COPY Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S085 6.4.7 COPY Command"
+  ],
+  "url_anchor": "#s085-647-copy-command",
+  "word_count": 284,
+  "statement_count": 8,
+  "elapsed_seconds": 107.94,
+  "statements": [
+    {
+      "statement_id": "N-S085-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The flags and internal date of the message(s) SHOULD be preserved in the copy.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "actors": [
+        "server"
+      ],
+      "from_state": "SELECTED",
+      "to_state": null,
+      "trigger": "COPY command received",
+      "pre_cond": "protocol.state = SELECTED",
+      "post_cond": "copy.flags = original_message.flags & copy.internal_date = original_message.internal_date",
+      "actions": [
+        "preserve flags of copied message(s)",
+        "preserve internal date of copied message(s)"
+      ],
+      "modality": "should",
+      "id": "N-S085-001"
+    },
+    {
+      "statement_id": "N-S085-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the destination mailbox does not exist, a server MUST return an error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "actors": [
+        "server"
+      ],
+      "from_state": "SELECTED",
+      "to_state": null,
+      "trigger": "COPY command received & destination mailbox does not exist",
+      "pre_cond": "protocol.state = SELECTED & destination_mailbox.exists = false",
+      "post_cond": "response.type = NO",
+      "actions": [
+        "return tagged NO response indicating copy error"
+      ],
+      "modality": "must",
+      "id": "N-S085-002"
+    },
+    {
+      "statement_id": "N-S085-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "It MUST NOT automatically create the mailbox.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "actors": [
+        "server"
+      ],
+      "from_state": "SELECTED",
+      "to_state": null,
+      "trigger": "COPY command received & destination mailbox does not exist",
+      "pre_cond": "protocol.state = SELECTED & destination_mailbox.exists = false",
+      "post_cond": "destination_mailbox.auto_created = false",
+      "actions": [
+        "do not automatically create the destination mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S085-003"
+    },
+    {
+      "statement_id": "N-S085-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Unless it is certain that the destination mailbox can not be created, the server MUST send the response code \"[TRYCREATE]\" as the prefix of the text of the tagged NO response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "SELECTED",
+      "to_state": null,
+      "trigger": "COPY command failed & destination mailbox nonexistent & destination mailbox creation not impossible",
+      "pre_cond": "protocol.state = SELECTED & destination_mailbox.exists = false & !destination_mailbox.creation_impossible",
+      "post_cond": "response.type = NO & response.code = TRYCREATE",
+      "actions": [
+        "include [TRYCREATE] response code as prefix of tagged NO response text"
+      ],
+      "modality": "must",
+      "id": "N-S085-004"
+    },
+    {
+      "statement_id": "N-S085-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the COPY command is unsuccessful for any reason, server implementations MUST restore the destination mailbox to its state before the COPY attempt (other than possibly incrementing UIDNEXT), i.e., partial copy MUST NOT be done.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "actors": [
+        "server"
+      ],
+      "from_state": "SELECTED",
+      "to_state": "SELECTED",
+      "trigger": "COPY command unsuccessful",
+      "pre_cond": "protocol.state = SELECTED & copy_attempt.successful = false",
+      "post_cond": "destination_mailbox.state = pre_copy_state",
+      "actions": [
+        "restore destination mailbox to its state before the COPY attempt"
+      ],
+      "modality": "must",
+      "id": "N-S085-005"
+    },
+    {
+      "statement_id": "N-S085-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the COPY command is unsuccessful for any reason, server implementations MUST restore the destination mailbox to its state before the COPY attempt (other than possibly incrementing UIDNEXT), i.e., partial copy MUST NOT be done.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "actors": [
+        "server"
+      ],
+      "from_state": "SELECTED",
+      "to_state": "SELECTED",
+      "trigger": "COPY command unsuccessful",
+      "pre_cond": "protocol.state = SELECTED & copy_attempt.successful = false",
+      "post_cond": "destination_mailbox.partial_copy_retained = false",
+      "actions": [
+        "ensure no partial copy is retained in destination mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S085-006"
+    },
+    {
+      "statement_id": "N-S085-7",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In the case of a mailbox that has permissions set so that the client can COPY to the mailbox, but not SELECT or EXAMINE it, the server MUST NOT send a COPYUID response code as it would disclose information about the mailbox.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "SELECTED",
+      "to_state": null,
+      "trigger": "COPY command successful & client lacks SELECT or EXAMINE permission on destination",
+      "pre_cond": "protocol.state = SELECTED & copy_attempt.successful = true & destination_mailbox.client_can_select = false & destination_mailbox.client_can_examine = false",
+      "post_cond": "response.contains_COPYUID = false",
+      "actions": [
+        "omit COPYUID response code from tagged OK response"
+      ],
+      "modality": "must",
+      "id": "N-S085-007"
+    },
+    {
+      "statement_id": "N-S085-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In the case of a mailbox that has UIDNOTSTICKY status (see Section 7.1), the server MAY omit the COPYUID response code as it is not meaningful.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S085",
+      "actors": [
+        "server"
+      ],
+      "from_state": "SELECTED",
+      "to_state": null,
+      "trigger": "COPY command successful & destination mailbox has UIDNOTSTICKY status",
+      "pre_cond": "protocol.state = SELECTED & copy_attempt.successful = true & destination_mailbox.uidnotsticky = true",
+      "post_cond": null,
+      "actions": [
+        "optionally omit COPYUID response code from tagged OK response"
+      ],
+      "modality": "may",
+      "id": "N-S085-008"
+    }
+  ]
+}

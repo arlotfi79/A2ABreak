@@ -1,0 +1,211 @@
+{
+  "section_id": "S050",
+  "title": "S050 8.2.7 Stateless UAS Behavior",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S050 8.2.7 Stateless UAS Behavior"
+  ],
+  "url_anchor": "#s050-827-stateless-uas-behavior",
+  "word_count": 297,
+  "statement_count": 9,
+  "elapsed_seconds": 69.78,
+  "statements": [
+    {
+      "statement_id": "D-S050-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless UAS is a UAS that does not maintain transaction state. It replies to requests normally, but discards any state that would ordinarily be retained by a UAS after a response has been sent.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S050",
+      "state_name": "STATELESS",
+      "enum_name": "UAS_OPERATING_MODE",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "server.transaction_state = null"
+    },
+    {
+      "statement_id": "D-S050-002",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS can operate in either a stateful or stateless mode for each new request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S050",
+      "object_name": "UAS",
+      "field_name": "operating_mode",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "stateful",
+        "stateless"
+      ],
+      "guard_semantics": "selected independently per new request"
+    },
+    {
+      "statement_id": "D-S050-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Stateless UASs do not use a transaction layer; they receive requests directly from the transport layer and send responses directly to the transport layer.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S050",
+      "actors": [
+        "UAS",
+        "transport_layer"
+      ],
+      "from_state": "STATELESS",
+      "to_state": "STATELESS",
+      "trigger": "receive_request_from_transport",
+      "pre_cond": "server.operating_mode = STATELESS",
+      "post_cond": "server.transaction_state = null",
+      "actions": [
+        "generate_response",
+        "send_response_to_transport",
+        "discard_state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S050-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a stateless UAS receives a retransmission of a request, it regenerates the response and resends it, just as if it were replying to the first instance of the request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S050",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "STATELESS",
+      "to_state": "STATELESS",
+      "trigger": "receive_request_retransmission",
+      "pre_cond": "server.operating_mode = STATELESS",
+      "post_cond": "server.transaction_state = null",
+      "actions": [
+        "regenerate_response",
+        "send_response_to_transport"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S050-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless UAS MUST NOT send provisional (1xx) responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S050",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "STATELESS",
+      "to_state": null,
+      "trigger": "send_1xx_response",
+      "pre_cond": "server.operating_mode = STATELESS",
+      "post_cond": null,
+      "actions": [
+        "prohibited_send_provisional"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S050-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless UAS MUST NOT retransmit responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S050",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "STATELESS",
+      "to_state": null,
+      "trigger": "retransmit_response",
+      "pre_cond": "server.operating_mode = STATELESS",
+      "post_cond": null,
+      "actions": [
+        "prohibited_retransmit_response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S050-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless UAS MUST ignore ACK requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S050",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "STATELESS",
+      "to_state": "STATELESS",
+      "trigger": "receive_ACK",
+      "pre_cond": "server.operating_mode = STATELESS",
+      "post_cond": "server.operating_mode = STATELESS",
+      "actions": [
+        "discard_ACK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S050-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless UAS MUST ignore CANCEL requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S050",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "STATELESS",
+      "to_state": "STATELESS",
+      "trigger": "receive_CANCEL",
+      "pre_cond": "server.operating_mode = STATELESS",
+      "post_cond": "server.operating_mode = STATELESS",
+      "actions": [
+        "discard_CANCEL"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S050-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "To header tags MUST be generated for responses in a stateless manner - in a manner that will generate the same tag for the same request consistently.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S050",
+      "object_name": "SIP_response",
+      "field_name": "To_tag",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "server.operating_mode = STATELESS & deterministic_tag_generation(request) = To_tag"
+    }
+  ]
+}

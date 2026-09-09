@@ -1,0 +1,321 @@
+{
+  "pipeline_stage": "stage_c2",
+  "protocol_phase": "c2",
+  "turn": 1,
+  "status": "complete",
+  "finish_reason": "stop",
+  "web_search": {
+    "executed": true,
+    "mode": "server_side_single_request",
+    "queries": [],
+    "tool_use_blocks": 0,
+    "result_blocks": 0,
+    "requests_billed": 7
+  },
+  "web_searches": [],
+  "raw_text_len": 19245,
+  "raw_text": "I'll systematically verify each candidate through the five-step process. Let me start by searching the spec for the key mechanisms referenced in each candidate.Now let me search for more specific details needed for verification.Let me search for the remaining critical details.Now I have sufficient information to complete the five-step verification for all three candidates. Let me compile the analysis.\n\n```json\n{\n  \"findings\": [\n    {\n      \"finding_id\": \"F-001\",\n      \"candidate_id\": \"retry:C-001\",\n      \"title\": \"Streamed Artifact Chunks Lack Sequence Numbers and Integrity Metadata, Enabling Silent Data Corruption After Resubscription\",\n      \"severity\": \"HIGH\",\n      \"description\": \"The A2A protocol defines incremental artifact delivery via TaskArtifactUpdateEvent with 'append' and 'lastChunk' fields but no chunk sequence number, chunk index, total expected count, or content hash. The TaskArtifactUpdateEvent data model (taskId, contextId, kind, artifact, append, lastChunk, metadata) contains no integrity primitives. When a client's SSE connection drops during artifact streaming and the client resubscribes via SubscribeToTask, the spec explicitly states that missed events handling is 'implementation-dependent.' While v1.0 mandates that SubscribeToTask return a Task object as the first event (providing a state snapshot), this is a general state-retrieval mechanism — not an artifact integrity mechanism — and the protocol defines no mandatory reconciliation step, no content hash for comparison, and no mechanism to detect gaps during active streaming. A fully compliant server that only sends new events from the resubscription point, combined with a fully compliant client that assembles chunks in order, produces an artifact missing intermediate chunks with no protocol-level detection possible. In multi-agent chains, the corrupted artifact propagates downstream undetected.\",\n      \"fsm_trace\": [\n        {\n          \"step\": 1,\n          \"stage\": \"initiation\",\n          \"state\": \"TASK_STATE_NONEXISTENT\",\n          \"transition\": \"POST_message_stream\",\n          \"actor\": \"client\",\n          \"note\": \"Client initiates a streaming task that will produce a large artifact delivered in multiple chunks.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 2,\n          \"stage\": \"initiation\",\n          \"state\": \"STREAM_STATE_OPEN\",\n          \"transition\": \"task_lifecycle_stream_established (inter-stage to task_execution:STREAM_STATE_OPEN)\",\n          \"actor\": \"shared\",\n          \"note\": \"Stream connection established and crosses to task_execution phase.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 3,\n          \"stage\": \"task_execution\",\n          \"state\": \"STREAM_STATE_OPEN\",\n          \"transition\": \"stream_open\",\n          \"actor\": \"shared\",\n          \"note\": \"Stream becomes active. Server begins generating artifact chunks.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 4,\n          \"stage\": \"task_execution\",\n          \"state\": \"STREAM_ACTIVE\",\n          \"transition\": \"task_event_generated (self-loop)\",\n          \"actor\": \"server\",\n          \"note\": \"Server sends artifact chunks via TaskArtifactUpdateEvent with append: true. Each chunk carries no sequence number, no running hash, no chunk index — only artifact content. Multiple iterations of this self-loop deliver chunks 1-3.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 5,\n          \"stage\": \"task_execution\",\n          \"state\": \"SUBSCRIBE_TO_TASK_REQUESTED\",\n          \"transition\": \"subscribe_to_task_requested\",\n          \"actor\": \"client\",\n          \"note\": \"After network disruption (implicit environmental event, not an FSM transition), client resubscribes via SubscribeToTask. The FSM state SUBSCRIBE_TO_TASK_REQUESTED is entered as a new protocol operation. Chunks 4-5 generated during disconnection are lost. The protocol explicitly says missed events handling is implementation-dependent.\",\n          \"is_reconstructed\": true\n        },\n        {\n          \"step\": 6,\n          \"stage\": \"task_execution\",\n          \"state\": \"STREAM_STATE_OPEN\",\n          \"transition\": \"stream_open → STREAM_ACTIVE → task_event_generated (self-loop)\",\n          \"actor\": \"server\",\n          \"note\": \"Server sends remaining chunks (6-7) including lastChunk: true. Client has no protocol mechanism to detect the gap between chunk 3 and chunk 6 — no sequence numbers, content hash, or total chunk count exists in TaskArtifactUpdateEvent.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 7,\n          \"stage\": \"task_execution\",\n          \"state\": \"STREAM_CLOSED\",\n          \"transition\": \"task_reaches_terminal_or_interrupted_state\",\n          \"actor\": \"server\",\n          \"note\": \"Stream closes on task completion. Client assembles artifact from chunks 1-3 and 6-7, missing chunks 4-5. The artifact appears complete (lastChunk was received) but content is silently corrupted. No protocol mechanism detects this.\",\n          \"is_reconstructed\": false\n        }\n      ],\n      \"missing_primitive\": \"Protocol-level artifact chunk integrity metadata: sequence numbers or chunk indices on TaskArtifactUpdateEvent, a total expected chunk count declared at artifact start or in the lastChunk event, and/or a content hash of the complete artifact enabling clients to detect missing chunks and trigger reconciliation via GetTask. Additionally, a mandatory reconciliation step after resubscription that requires clients to compare streamed artifact state against the Task snapshot returned by SubscribeToTask.\",\n      \"confirmed_absent\": true,\n      \"confirmed_not_by_design\": true,\n      \"spec_sections_checked\": [\"3.2\", \"3.5\", \"4.2.2\", \"3.1.6\", \"streaming-and-async topics\"],\n      \"preventing_rule_checked_and_absent\": true,\n      \"source_ids\": [\"D-3-5-001\", \"D-3-5-005\", \"D-3-1-039\", \"N-3-5-006\"]\n    },\n    {\n      \"finding_id\": \"F-002\",\n      \"candidate_id\": \"retry:C-002\",\n      \"title\": \"Agent Card JWS Signing Defines No Trust Model for Key Verification, Rendering Signature Verification Unachievable in Federated Deployments\",\n      \"severity\": \"MEDIUM\",\n      \"description\": \"The A2A protocol defines optional JWS signing for Agent Cards (MAY) and states clients SHOULD verify signatures when present. The spec requires 'alg', 'typ', and 'kid' in the JWS protected header and allows optional 'jku'. However, the protocol defines no trust model for resolving 'kid' to a trusted key, no mandatory key distribution mechanism, no required certificate authority model, and no binding between the signing key and the claimed provider identity. By contrast, TLS server identity verification has a well-defined trust model via certificate authorities. This asymmetry means the JWS mechanism provides cryptographic integrity without verifiable authenticity in open/federated deployments. A malicious actor can create an Agent Card claiming any provider.organization, sign it with their own key, and serve it via a registry or well-known endpoint. A compliant client receiving this card sees a mathematically valid JWS signature but has no protocol-defined mechanism to verify the signing key belongs to the claimed provider. The client either trusts the unverifiable signature, ignores it, or cannot proceed — all outcomes leave the client unable to distinguish authentic from forged cards when obtained through intermediaries.\",\n      \"fsm_trace\": [\n        {\n          \"step\": 1,\n          \"stage\": \"discovery\",\n          \"state\": \"AGENT_CARD_RECEIVED\",\n          \"transition\": \"(initial state)\",\n          \"actor\": \"client\",\n          \"note\": \"Client fetches an agent card from a registry or .well-known endpoint. The card claims a provider identity and includes a JWS signature. No protocol mechanism exists to verify the signing key belongs to the claimed provider.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 2,\n          \"stage\": \"discovery\",\n          \"state\": \"AGENT_CARD_RECEIVED\",\n          \"transition\": \"supportedInterfaces_parsed\",\n          \"actor\": \"client\",\n          \"note\": \"Client parses supportedInterfaces. Client sees JWS signature and attempts verification per SHOULD. The spec provides kid (required) but no mechanism to resolve kid to a trusted key for the claimed provider. Verification is impossible without out-of-band trust establishment.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 3,\n          \"stage\": \"discovery\",\n          \"state\": \"TRANSPORT_SELECTED\",\n          \"transition\": \"transport_url_resolved\",\n          \"actor\": \"client\",\n          \"note\": \"Client selects transport and resolves URL from the unverified card. URL may point to an attacker-controlled server.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 4,\n          \"stage\": \"discovery\",\n          \"state\": \"TRANSPORT_CONNECTED\",\n          \"transition\": \"auth_discovery_initiated\",\n          \"actor\": \"client\",\n          \"note\": \"Client connects to the endpoint from the unverified card. TLS verifies the domain certificate but not the card's claimed provider identity.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 5,\n          \"stage\": \"discovery\",\n          \"state\": \"CLIENT_AUTH_DISCOVERY\",\n          \"transition\": \"security_scheme_parsed\",\n          \"actor\": \"client\",\n          \"note\": \"Client discovers auth requirements from the potentially malicious card's security schemes.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 6,\n          \"stage\": \"discovery\",\n          \"state\": \"CLIENT_CREDENTIAL_ACQUISITION\",\n          \"transition\": \"transport_security_initiated (inter-stage to authentication:TLS_HANDSHAKE_INITIATED)\",\n          \"actor\": \"client\",\n          \"note\": \"Client initiates authentication with the attacker's server, potentially sending credentials (OAuth tokens, API keys) to the attacker.\",\n          \"is_reconstructed\": false\n        }\n      ],\n      \"missing_primitive\": \"A protocol-level trust model for agent card signature verification: either a mandatory key discovery mechanism (e.g., required JWK Set URL at a well-known path on the provider's domain, required x5c chain to a recognized CA), a protocol-defined trust anchor for agent identity binding provider claims to verifiable domains, or mandatory binding between the card-serving origin and the card's service endpoint URL. The current spec defines the JWS cryptographic format and requires kid but provides no mechanism to establish trust in the corresponding key.\",\n      \"confirmed_absent\": true,\n      \"confirmed_not_by_design\": true,\n      \"spec_sections_checked\": [\"4.4.7\", \"8.7\", \"7.2\", \"7.3\", \"8.3\", \"8.6\", \"agent-discovery topics\"],\n      \"preventing_rule_checked_and_absent\": true,\n      \"source_ids\": [\"D-8-3-004\", \"N-8-3-005\", \"N-7-2-001\", \"D-7-3-001\"]\n    },\n    {\n      \"finding_id\": \"F-003\",\n      \"candidate_id\": \"retry:C-003\",\n      \"title\": \"Client-Provided contextId Accepted Without Ownership Verification Enables Cross-Client Context Injection and Information Leakage\",\n      \"severity\": \"MEDIUM\",\n      \"description\": \"The A2A protocol allows agents to accept client-provided contextId values (MAY) and permits clients to use a contextId without a taskId to start a new task within an existing conversation context. The only contextId validation mandated is contextId-taskId consistency. No context ownership model exists: no context-to-identity binding, no context creator field, no context access token, and no server-side requirement to verify that a client providing a contextId is authorized to create tasks within that context. When an agent accepts client-provided contextIds and uses contextId to maintain internal state or LLM context (as the spec allows via MAY), a second authenticated client that knows or guesses a contextId can inject a new task into another client's context. The agent may process this task using the shared conversational state, leaking information from prior interactions. The spec mandates 'appropriate authorization scoping' (MUST) for task operations but defines authorization boundaries as 'not prescribed by the protocol' and provides no context-level authorization mechanism in the data model. This is a MUST mandating an outcome without defining the mechanism — a missing primitive per protocol analysis criteria.\",\n      \"fsm_trace\": [\n        {\n          \"step\": 1,\n          \"stage\": \"authentication\",\n          \"state\": \"authenticated\",\n          \"transition\": \"A2A_protocol_operations_request\",\n          \"actor\": \"server\",\n          \"note\": \"Client A authenticates to the agent server with valid credentials. Server transitions to REQUEST_AUTHORIZED.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 2,\n          \"stage\": \"initiation\",\n          \"state\": \"TASK_STATE_NONEXISTENT\",\n          \"transition\": \"task_creation\",\n          \"actor\": \"server\",\n          \"note\": \"Client A sends a message without contextId. Server generates contextId X and creates Task 1 in context X. Agent stores conversational context keyed by contextId X.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 3,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_SUBMITTED\",\n          \"transition\": \"agent_begins_processing\",\n          \"actor\": \"server\",\n          \"note\": \"Client A's task proceeds. Agent accumulates state under contextId X (e.g., user preferences, sensitive data discussed). This transition goes through initiation:TASK_STATE_SUBMITTED → (inter-stage) → task_execution:TASK_STATE_SUBMITTED → TASK_STATE_WORKING.\",\n          \"is_reconstructed\": true\n        },\n        {\n          \"step\": 4,\n          \"stage\": \"authentication\",\n          \"state\": \"authenticated\",\n          \"transition\": \"A2A_protocol_operations_request\",\n          \"actor\": \"server\",\n          \"note\": \"Client B (separate principal) authenticates with its own valid credentials. Client B has learned contextId X through legitimate means (shared environment, referenceTaskIds, leaked logs).\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 5,\n          \"stage\": \"initiation\",\n          \"state\": \"TASK_STATE_NONEXISTENT\",\n          \"transition\": \"task_creation\",\n          \"actor\": \"server\",\n          \"note\": \"Client B sends a message with contextId = X and no taskId. Server validates: contextId doesn't conflict with any provided taskId (none provided). No ownership check exists in the protocol. Per spec, agents MAY accept client-provided contextIds. Server creates Task 2 in context X.\",\n          \"is_reconstructed\": false\n        },\n        {\n          \"step\": 6,\n          \"stage\": \"task_execution\",\n          \"state\": \"TASK_STATE_WORKING\",\n          \"transition\": \"agent_begins_processing\",\n          \"actor\": \"server\",\n          \"note\": \"Agent processes Client B's task using the shared conversational context from contextId X (per MAY rule for maintaining conversational history). Agent's response may contain information derived from Client A's prior interactions — information leakage through shared agent state.\",\n          \"is_reconstructed\": true\n        }\n      ],\n      \"missing_primitive\": \"A protocol-level context ownership model: either a context-to-identity binding (context creator identity recorded when contextId is first generated), a context access token returned on context creation and required for subsequent context access by other clients, or a mandatory server-side validation that the client providing a contextId is authorized to create tasks within that context. The current spec mandates authorization scoping (MUST) but provides no context-level authorization mechanism in the data model — only contextId-taskId consistency validation.\",\n      \"confirmed_absent\": true,\n      \"confirmed_not_by_design\": true,\n      \"spec_sections_checked\": [\"3.4\", \"3.7\", \"4.1\", \"7.5\", \"13.1\", \"3.1.4\"],\n      \"preventing_rule_checked_and_absent\": true,\n      \"source_ids\": [\"D-3-1-044\", \"D-3-7-003\", \"N-3-4-012\", \"D-4-1-044\"]\n    }\n  ],\n  \"discarded\": [],\n  \"verified_properties\": [\n    {\n      \"property\": \"Transport Layer Security Enforcement\",\n      \"evidence\": \"FSM states TLS_HANDSHAKE_INITIATED and SERVER_IDENTITY_VERIFIED with transition tls_certificate_validated enforce transport security. Spec mandates: 'Production deployments MUST use encrypted communication (HTTPS for HTTP-based bindings, TLS for gRPC)' and clients 'SHOULD verify the A2A Server's identity by validating its TLS certificate against trusted certificate authorities (CAs).' Unlike JWS signing, TLS has a complete trust model (CAs) defined by the protocol.\"\n    },\n    {\n      \"property\": \"Per-Request Authentication Enforcement\",\n      \"evidence\": \"FSM states SERVER_VALIDATING_REQUEST → authenticated and → AUTHENTICATION_FAILED with guard conditions on credential validity. Spec mandates: servers 'MUST authenticate every incoming request based on the provided credentials and its declared authentication requirements.' FSM correctly models both success and failure paths with appropriate error responses (401, 403).\"\n    },\n    {\n      \"property\": \"Stream Termination on Terminal State\",\n      \"evidence\": \"FSM transitions STREAM_ACTIVE → STREAM_CLOSED and STREAM_STATE_OPEN → STREAM_STATE_CLOSED are guarded by terminal/interrupted task states with modality 'must'. Spec mandates: 'The stream MUST terminate when the task reaches a terminal state (completed, failed, canceled, or rejected).' No finding challenges stream lifecycle correctness.\"\n    },\n    {\n      \"property\": \"Task State Machine Terminal State Integrity\",\n      \"evidence\": \"FSM models terminal states (TASK_STATE_COMPLETED, TASK_STATE_FAILED, TASK_STATE_CANCELED, TASK_STATE_REJECTED) as is_final: true across task_execution and termination phases. The self-loop at termination:TASK_STATE_TERMINAL correctly models that cancel operations on already-terminal tasks do not change state. Spec defines a clear lifecycle with these terminal states and idempotent cancellation.\"\n    },\n    {\n      \"property\": \"contextId-taskId Consistency Validation\",\n      \"evidence\": \"Spec mandates: 'Agents MUST reject messages containing mismatching contextId and taskId (i.e., the provided contextId is different from that of the referenced Task)' and 'Agents MUST infer contextId from the task if only taskId is provided.' This prevents cross-context task manipulation when a taskId is provided, though it does not prevent context injection when no taskId is provided (see F-003).\"\n    },\n    {\n      \"property\": \"Task Visibility Scoping for List Operations\",\n      \"evidence\": \"Spec mandates: 'The operation MUST return only tasks visible to the authenticated client' and 'Implementations MUST implement appropriate authorization scoping to ensure clients can only access authorized tasks.' FSM state authentication:REQUEST_AUTHORIZED with guard 'client.permissions.sufficient = true' gates access to task operations. While the authorization mechanism itself is not prescribed, the visibility constraint on List/Get operations is normatively required.\"\n    }\n  ],\n  \"inconclusive\": []\n}\n```",
+  "fsm": {
+    "findings": [
+      {
+        "finding_id": "F-001",
+        "candidate_id": "retry:C-001",
+        "title": "Streamed Artifact Chunks Lack Sequence Numbers and Integrity Metadata, Enabling Silent Data Corruption After Resubscription",
+        "severity": "HIGH",
+        "description": "The A2A protocol defines incremental artifact delivery via TaskArtifactUpdateEvent with 'append' and 'lastChunk' fields but no chunk sequence number, chunk index, total expected count, or content hash. The TaskArtifactUpdateEvent data model (taskId, contextId, kind, artifact, append, lastChunk, metadata) contains no integrity primitives. When a client's SSE connection drops during artifact streaming and the client resubscribes via SubscribeToTask, the spec explicitly states that missed events handling is 'implementation-dependent.' While v1.0 mandates that SubscribeToTask return a Task object as the first event (providing a state snapshot), this is a general state-retrieval mechanism — not an artifact integrity mechanism — and the protocol defines no mandatory reconciliation step, no content hash for comparison, and no mechanism to detect gaps during active streaming. A fully compliant server that only sends new events from the resubscription point, combined with a fully compliant client that assembles chunks in order, produces an artifact missing intermediate chunks with no protocol-level detection possible. In multi-agent chains, the corrupted artifact propagates downstream undetected.",
+        "fsm_trace": [
+          {
+            "step": 1,
+            "stage": "initiation",
+            "state": "TASK_STATE_NONEXISTENT",
+            "transition": "POST_message_stream",
+            "actor": "client",
+            "note": "Client initiates a streaming task that will produce a large artifact delivered in multiple chunks.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 2,
+            "stage": "initiation",
+            "state": "STREAM_STATE_OPEN",
+            "transition": "task_lifecycle_stream_established (inter-stage to task_execution:STREAM_STATE_OPEN)",
+            "actor": "shared",
+            "note": "Stream connection established and crosses to task_execution phase.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 3,
+            "stage": "task_execution",
+            "state": "STREAM_STATE_OPEN",
+            "transition": "stream_open",
+            "actor": "shared",
+            "note": "Stream becomes active. Server begins generating artifact chunks.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 4,
+            "stage": "task_execution",
+            "state": "STREAM_ACTIVE",
+            "transition": "task_event_generated (self-loop)",
+            "actor": "server",
+            "note": "Server sends artifact chunks via TaskArtifactUpdateEvent with append: true. Each chunk carries no sequence number, no running hash, no chunk index — only artifact content. Multiple iterations of this self-loop deliver chunks 1-3.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 5,
+            "stage": "task_execution",
+            "state": "SUBSCRIBE_TO_TASK_REQUESTED",
+            "transition": "subscribe_to_task_requested",
+            "actor": "client",
+            "note": "After network disruption (implicit environmental event, not an FSM transition), client resubscribes via SubscribeToTask. The FSM state SUBSCRIBE_TO_TASK_REQUESTED is entered as a new protocol operation. Chunks 4-5 generated during disconnection are lost. The protocol explicitly says missed events handling is implementation-dependent.",
+            "is_reconstructed": true
+          },
+          {
+            "step": 6,
+            "stage": "task_execution",
+            "state": "STREAM_STATE_OPEN",
+            "transition": "stream_open → STREAM_ACTIVE → task_event_generated (self-loop)",
+            "actor": "server",
+            "note": "Server sends remaining chunks (6-7) including lastChunk: true. Client has no protocol mechanism to detect the gap between chunk 3 and chunk 6 — no sequence numbers, content hash, or total chunk count exists in TaskArtifactUpdateEvent.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 7,
+            "stage": "task_execution",
+            "state": "STREAM_CLOSED",
+            "transition": "task_reaches_terminal_or_interrupted_state",
+            "actor": "server",
+            "note": "Stream closes on task completion. Client assembles artifact from chunks 1-3 and 6-7, missing chunks 4-5. The artifact appears complete (lastChunk was received) but content is silently corrupted. No protocol mechanism detects this.",
+            "is_reconstructed": false
+          }
+        ],
+        "missing_primitive": "Protocol-level artifact chunk integrity metadata: sequence numbers or chunk indices on TaskArtifactUpdateEvent, a total expected chunk count declared at artifact start or in the lastChunk event, and/or a content hash of the complete artifact enabling clients to detect missing chunks and trigger reconciliation via GetTask. Additionally, a mandatory reconciliation step after resubscription that requires clients to compare streamed artifact state against the Task snapshot returned by SubscribeToTask.",
+        "confirmed_absent": true,
+        "confirmed_not_by_design": true,
+        "spec_sections_checked": [
+          "3.2",
+          "3.5",
+          "4.2.2",
+          "3.1.6",
+          "streaming-and-async topics"
+        ],
+        "preventing_rule_checked_and_absent": true,
+        "source_ids": [
+          "D-3-5-001",
+          "D-3-5-005",
+          "D-3-1-039",
+          "N-3-5-006"
+        ]
+      },
+      {
+        "finding_id": "F-002",
+        "candidate_id": "retry:C-002",
+        "title": "Agent Card JWS Signing Defines No Trust Model for Key Verification, Rendering Signature Verification Unachievable in Federated Deployments",
+        "severity": "MEDIUM",
+        "description": "The A2A protocol defines optional JWS signing for Agent Cards (MAY) and states clients SHOULD verify signatures when present. The spec requires 'alg', 'typ', and 'kid' in the JWS protected header and allows optional 'jku'. However, the protocol defines no trust model for resolving 'kid' to a trusted key, no mandatory key distribution mechanism, no required certificate authority model, and no binding between the signing key and the claimed provider identity. By contrast, TLS server identity verification has a well-defined trust model via certificate authorities. This asymmetry means the JWS mechanism provides cryptographic integrity without verifiable authenticity in open/federated deployments. A malicious actor can create an Agent Card claiming any provider.organization, sign it with their own key, and serve it via a registry or well-known endpoint. A compliant client receiving this card sees a mathematically valid JWS signature but has no protocol-defined mechanism to verify the signing key belongs to the claimed provider. The client either trusts the unverifiable signature, ignores it, or cannot proceed — all outcomes leave the client unable to distinguish authentic from forged cards when obtained through intermediaries.",
+        "fsm_trace": [
+          {
+            "step": 1,
+            "stage": "discovery",
+            "state": "AGENT_CARD_RECEIVED",
+            "transition": "(initial state)",
+            "actor": "client",
+            "note": "Client fetches an agent card from a registry or .well-known endpoint. The card claims a provider identity and includes a JWS signature. No protocol mechanism exists to verify the signing key belongs to the claimed provider.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 2,
+            "stage": "discovery",
+            "state": "AGENT_CARD_RECEIVED",
+            "transition": "supportedInterfaces_parsed",
+            "actor": "client",
+            "note": "Client parses supportedInterfaces. Client sees JWS signature and attempts verification per SHOULD. The spec provides kid (required) but no mechanism to resolve kid to a trusted key for the claimed provider. Verification is impossible without out-of-band trust establishment.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 3,
+            "stage": "discovery",
+            "state": "TRANSPORT_SELECTED",
+            "transition": "transport_url_resolved",
+            "actor": "client",
+            "note": "Client selects transport and resolves URL from the unverified card. URL may point to an attacker-controlled server.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 4,
+            "stage": "discovery",
+            "state": "TRANSPORT_CONNECTED",
+            "transition": "auth_discovery_initiated",
+            "actor": "client",
+            "note": "Client connects to the endpoint from the unverified card. TLS verifies the domain certificate but not the card's claimed provider identity.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 5,
+            "stage": "discovery",
+            "state": "CLIENT_AUTH_DISCOVERY",
+            "transition": "security_scheme_parsed",
+            "actor": "client",
+            "note": "Client discovers auth requirements from the potentially malicious card's security schemes.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 6,
+            "stage": "discovery",
+            "state": "CLIENT_CREDENTIAL_ACQUISITION",
+            "transition": "transport_security_initiated (inter-stage to authentication:TLS_HANDSHAKE_INITIATED)",
+            "actor": "client",
+            "note": "Client initiates authentication with the attacker's server, potentially sending credentials (OAuth tokens, API keys) to the attacker.",
+            "is_reconstructed": false
+          }
+        ],
+        "missing_primitive": "A protocol-level trust model for agent card signature verification: either a mandatory key discovery mechanism (e.g., required JWK Set URL at a well-known path on the provider's domain, required x5c chain to a recognized CA), a protocol-defined trust anchor for agent identity binding provider claims to verifiable domains, or mandatory binding between the card-serving origin and the card's service endpoint URL. The current spec defines the JWS cryptographic format and requires kid but provides no mechanism to establish trust in the corresponding key.",
+        "confirmed_absent": true,
+        "confirmed_not_by_design": true,
+        "spec_sections_checked": [
+          "4.4.7",
+          "8.7",
+          "7.2",
+          "7.3",
+          "8.3",
+          "8.6",
+          "agent-discovery topics"
+        ],
+        "preventing_rule_checked_and_absent": true,
+        "source_ids": [
+          "D-8-3-004",
+          "N-8-3-005",
+          "N-7-2-001",
+          "D-7-3-001"
+        ]
+      },
+      {
+        "finding_id": "F-003",
+        "candidate_id": "retry:C-003",
+        "title": "Client-Provided contextId Accepted Without Ownership Verification Enables Cross-Client Context Injection and Information Leakage",
+        "severity": "MEDIUM",
+        "description": "The A2A protocol allows agents to accept client-provided contextId values (MAY) and permits clients to use a contextId without a taskId to start a new task within an existing conversation context. The only contextId validation mandated is contextId-taskId consistency. No context ownership model exists: no context-to-identity binding, no context creator field, no context access token, and no server-side requirement to verify that a client providing a contextId is authorized to create tasks within that context. When an agent accepts client-provided contextIds and uses contextId to maintain internal state or LLM context (as the spec allows via MAY), a second authenticated client that knows or guesses a contextId can inject a new task into another client's context. The agent may process this task using the shared conversational state, leaking information from prior interactions. The spec mandates 'appropriate authorization scoping' (MUST) for task operations but defines authorization boundaries as 'not prescribed by the protocol' and provides no context-level authorization mechanism in the data model. This is a MUST mandating an outcome without defining the mechanism — a missing primitive per protocol analysis criteria.",
+        "fsm_trace": [
+          {
+            "step": 1,
+            "stage": "authentication",
+            "state": "authenticated",
+            "transition": "A2A_protocol_operations_request",
+            "actor": "server",
+            "note": "Client A authenticates to the agent server with valid credentials. Server transitions to REQUEST_AUTHORIZED.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 2,
+            "stage": "initiation",
+            "state": "TASK_STATE_NONEXISTENT",
+            "transition": "task_creation",
+            "actor": "server",
+            "note": "Client A sends a message without contextId. Server generates contextId X and creates Task 1 in context X. Agent stores conversational context keyed by contextId X.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 3,
+            "stage": "task_execution",
+            "state": "TASK_STATE_SUBMITTED",
+            "transition": "agent_begins_processing",
+            "actor": "server",
+            "note": "Client A's task proceeds. Agent accumulates state under contextId X (e.g., user preferences, sensitive data discussed). This transition goes through initiation:TASK_STATE_SUBMITTED → (inter-stage) → task_execution:TASK_STATE_SUBMITTED → TASK_STATE_WORKING.",
+            "is_reconstructed": true
+          },
+          {
+            "step": 4,
+            "stage": "authentication",
+            "state": "authenticated",
+            "transition": "A2A_protocol_operations_request",
+            "actor": "server",
+            "note": "Client B (separate principal) authenticates with its own valid credentials. Client B has learned contextId X through legitimate means (shared environment, referenceTaskIds, leaked logs).",
+            "is_reconstructed": false
+          },
+          {
+            "step": 5,
+            "stage": "initiation",
+            "state": "TASK_STATE_NONEXISTENT",
+            "transition": "task_creation",
+            "actor": "server",
+            "note": "Client B sends a message with contextId = X and no taskId. Server validates: contextId doesn't conflict with any provided taskId (none provided). No ownership check exists in the protocol. Per spec, agents MAY accept client-provided contextIds. Server creates Task 2 in context X.",
+            "is_reconstructed": false
+          },
+          {
+            "step": 6,
+            "stage": "task_execution",
+            "state": "TASK_STATE_WORKING",
+            "transition": "agent_begins_processing",
+            "actor": "server",
+            "note": "Agent processes Client B's task using the shared conversational context from contextId X (per MAY rule for maintaining conversational history). Agent's response may contain information derived from Client A's prior interactions — information leakage through shared agent state.",
+            "is_reconstructed": true
+          }
+        ],
+        "missing_primitive": "A protocol-level context ownership model: either a context-to-identity binding (context creator identity recorded when contextId is first generated), a context access token returned on context creation and required for subsequent context access by other clients, or a mandatory server-side validation that the client providing a contextId is authorized to create tasks within that context. The current spec mandates authorization scoping (MUST) but provides no context-level authorization mechanism in the data model — only contextId-taskId consistency validation.",
+        "confirmed_absent": true,
+        "confirmed_not_by_design": true,
+        "spec_sections_checked": [
+          "3.4",
+          "3.7",
+          "4.1",
+          "7.5",
+          "13.1",
+          "3.1.4"
+        ],
+        "preventing_rule_checked_and_absent": true,
+        "source_ids": [
+          "D-3-1-044",
+          "D-3-7-003",
+          "N-3-4-012",
+          "D-4-1-044"
+        ]
+      }
+    ],
+    "discarded": [],
+    "verified_properties": [
+      {
+        "property": "Transport Layer Security Enforcement",
+        "evidence": "FSM states TLS_HANDSHAKE_INITIATED and SERVER_IDENTITY_VERIFIED with transition tls_certificate_validated enforce transport security. Spec mandates: 'Production deployments MUST use encrypted communication (HTTPS for HTTP-based bindings, TLS for gRPC)' and clients 'SHOULD verify the A2A Server's identity by validating its TLS certificate against trusted certificate authorities (CAs).' Unlike JWS signing, TLS has a complete trust model (CAs) defined by the protocol."
+      },
+      {
+        "property": "Per-Request Authentication Enforcement",
+        "evidence": "FSM states SERVER_VALIDATING_REQUEST → authenticated and → AUTHENTICATION_FAILED with guard conditions on credential validity. Spec mandates: servers 'MUST authenticate every incoming request based on the provided credentials and its declared authentication requirements.' FSM correctly models both success and failure paths with appropriate error responses (401, 403)."
+      },
+      {
+        "property": "Stream Termination on Terminal State",
+        "evidence": "FSM transitions STREAM_ACTIVE → STREAM_CLOSED and STREAM_STATE_OPEN → STREAM_STATE_CLOSED are guarded by terminal/interrupted task states with modality 'must'. Spec mandates: 'The stream MUST terminate when the task reaches a terminal state (completed, failed, canceled, or rejected).' No finding challenges stream lifecycle correctness."
+      },
+      {
+        "property": "Task State Machine Terminal State Integrity",
+        "evidence": "FSM models terminal states (TASK_STATE_COMPLETED, TASK_STATE_FAILED, TASK_STATE_CANCELED, TASK_STATE_REJECTED) as is_final: true across task_execution and termination phases. The self-loop at termination:TASK_STATE_TERMINAL correctly models that cancel operations on already-terminal tasks do not change state. Spec defines a clear lifecycle with these terminal states and idempotent cancellation."
+      },
+      {
+        "property": "contextId-taskId Consistency Validation",
+        "evidence": "Spec mandates: 'Agents MUST reject messages containing mismatching contextId and taskId (i.e., the provided contextId is different from that of the referenced Task)' and 'Agents MUST infer contextId from the task if only taskId is provided.' This prevents cross-context task manipulation when a taskId is provided, though it does not prevent context injection when no taskId is provided (see F-003)."
+      },
+      {
+        "property": "Task Visibility Scoping for List Operations",
+        "evidence": "Spec mandates: 'The operation MUST return only tasks visible to the authenticated client' and 'Implementations MUST implement appropriate authorization scoping to ensure clients can only access authorized tasks.' FSM state authentication:REQUEST_AUTHORIZED with guard 'client.permissions.sufficient = true' gates access to task operations. While the authorization mechanism itself is not prescribed, the visibility constraint on List/Get operations is normatively required."
+      }
+    ],
+    "inconclusive": []
+  },
+  "cost": {
+    "pipeline_stage": "stage_c2",
+    "protocol_phase": "c2",
+    "model": "anthropic/claude-opus-4-6",
+    "turn": 1,
+    "input_tokens": 335373,
+    "output_tokens": 13890,
+    "total_tokens": 349263,
+    "cumulative_input_tokens": 335373,
+    "cumulative_output_tokens": 13890,
+    "cumulative_total_tokens": 349263,
+    "elapsed_seconds": 315.36,
+    "timestamp": "2026-05-19T21:13:02Z",
+    "cost_usd": 2.094115,
+    "web_search_requests": 7,
+    "web_search_executed": true,
+    "web_search_queries": []
+  },
+  "timestamp": "2026-05-19T21:13:02Z"
+}

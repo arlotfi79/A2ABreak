@@ -1,0 +1,175 @@
+{
+  "section_id": "S034",
+  "title": "S034 3.2.3 Incoming Calls",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S034 3.2.3 Incoming Calls"
+  ],
+  "url_anchor": "#s034-323-incoming-calls",
+  "word_count": 253,
+  "statement_count": 7,
+  "elapsed_seconds": 44.76,
+  "statements": [
+    {
+      "statement_id": "D-S034-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "A final call connected message from the PAC to the PNS indicates that the call states for both the PAC and the PNS should enter the established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "state_name": "established",
+      "enum_name": "CallState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.call_state = established"
+    },
+    {
+      "statement_id": "D-S034-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pptp_fsm",
+      "description": "Once the PAC sends the Incoming-Call-Request, it waits for a response from the PNS but does not answer the call from the telephone network.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S034",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": null,
+      "to_state": "wait-reply",
+      "trigger": "send Incoming-Call-Request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Incoming-Call-Request",
+        "hold call unanswered"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S034-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "peer",
+      "stage": "pptp_fsm",
+      "description": "If the PNS chooses to accept the call, it responds with an Incoming-Call-Reply which also indicates window sizes.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S034",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "accept incoming call",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Incoming-Call-Reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S034-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pptp_fsm",
+      "description": "When the PAC receives the Outgoing-Call-Reply, it attempts to connect the call, assuming the calling party has not hung up.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S034",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "wait-reply",
+      "to_state": null,
+      "trigger": "receive Incoming-Call-Reply",
+      "pre_cond": "calling_party.connected = true",
+      "post_cond": null,
+      "actions": [
+        "attempt to connect call"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S034-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "A final call connected message from the PAC to the PNS indicates that the call states for both the PAC and the PNS should enter the established state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S034",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "from_state": null,
+      "to_state": "established",
+      "trigger": "receive Incoming-Call-Connected",
+      "pre_cond": null,
+      "post_cond": "session.call_state = established",
+      "actions": [
+        "send Incoming-Call-Connected",
+        "set call state to established on both PAC and PNS"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S034-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "When the dialed-in client hangs up, the call is cleared normally and the PAC sends a Call-Disconnect-Notify message.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S034",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "established",
+      "to_state": null,
+      "trigger": "dialed-in client hangs up",
+      "pre_cond": "session.call_state = established",
+      "post_cond": null,
+      "actions": [
+        "clear call",
+        "send Call-Disconnect-Notify"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S034-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "peer",
+      "stage": "pptp_fsm",
+      "description": "If the PNS wishes to clear a call, it sends a Call-Clear-Request message and then waits for a Call-Disconnect-Notify.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S034",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": "established",
+      "to_state": "wait-disconnect",
+      "trigger": "PNS initiates call clear",
+      "pre_cond": "session.call_state = established",
+      "post_cond": null,
+      "actions": [
+        "send Call-Clear-Request",
+        "wait for Call-Disconnect-Notify"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "section_id": "S037",
+  "title": "S037 5.2 Mailbox Size and Message Status Updates",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S037 5.2 Mailbox Size and Message Status Updates"
+  ],
+  "url_anchor": "#s037-52-mailbox-size-and-message-status-updates",
+  "word_count": 211,
+  "statement_count": 4,
+  "elapsed_seconds": 28.76,
+  "statements": [
+    {
+      "statement_id": "N-S037-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server MUST send mailbox size updates automatically if a mailbox size change is observed during the processing of a command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S037",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "mailbox_size_change_observed_during_command_processing",
+      "pre_cond": "server.state = \"Selected\" & mailbox.size_changed = true & server.processing_command = true",
+      "post_cond": "server.mailbox_size_update_sent = true",
+      "actions": [
+        "send mailbox size update response to client"
+      ],
+      "modality": "must",
+      "id": "N-S037-001"
+    },
+    {
+      "statement_id": "N-S037-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server SHOULD send message flag updates automatically, without requiring the client to request such updates explicitly.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S037",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "message_flag_change_observed",
+      "pre_cond": "server.state = \"Selected\" & message.flags_changed = true",
+      "post_cond": "server.flag_update_sent = true",
+      "actions": [
+        "send message flag update to client without awaiting explicit client request"
+      ],
+      "modality": "should",
+      "id": "N-S037-002"
+    },
+    {
+      "statement_id": "N-S037-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "a client implementation MUST remember mailbox size updates.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S037",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "mailbox_size_update_received",
+      "pre_cond": "protocol.state = \"Selected\"",
+      "post_cond": "client.mailbox_size_remembered = true",
+      "actions": [
+        "persist received mailbox size update in client state"
+      ],
+      "modality": "must",
+      "id": "N-S037-003"
+    },
+    {
+      "statement_id": "N-S037-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "It MUST NOT assume that any command after the initial mailbox selection will return the size of the mailbox.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S037",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "command_sent_after_mailbox_selection",
+      "pre_cond": "protocol.state = \"Selected\" & client.initial_selection_complete = true",
+      "post_cond": null,
+      "actions": [
+        "rely solely on unsolicited mailbox size updates rather than inferring mailbox size from command responses"
+      ],
+      "modality": "must",
+      "id": "N-S037-004"
+    }
+  ]
+}

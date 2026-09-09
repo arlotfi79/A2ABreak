@@ -1,0 +1,187 @@
+{
+  "section_id": "S028",
+  "title": "S028 5. Handling Disconnections and Retained Messages",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S028 5. Handling Disconnections and Retained Messages"
+  ],
+  "url_anchor": "#s028-5-handling-disconnections-and-retained-messages",
+  "word_count": 401,
+  "statement_count": 7,
+  "elapsed_seconds": 71.69,
+  "statements": [
+    {
+      "statement_id": "N-S028-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "In the case of a Client DISCONNECT, if the Session Expiry Interval is set to 0, the Broker doesn't store the Session State but MUST keep the retained messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "CONNECTED",
+      "to_state": "DISCONNECTED",
+      "trigger": "CLIENT_DISCONNECT",
+      "pre_cond": "session.expiry_interval = 0",
+      "post_cond": "broker.session_state.stored = false & broker.retained_messages.kept = true",
+      "actions": [
+        "discard Session State",
+        "keep retained messages"
+      ],
+      "modality": "must",
+      "id": "N-S028-001"
+    },
+    {
+      "statement_id": "N-S028-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If the Broker stores the Session State, the state MAY include the token and its introspection result (for reference tokens) in addition to the MQTT Session State.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "broker.session_state.stored = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S028-002"
+    },
+    {
+      "statement_id": "N-S028-3",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The token/introspection state is not part of the MQTT Session State, and PoP validation is required for each new connection, regardless of whether existing MQTT Sessions are continued.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "CONNECTED",
+      "trigger": "new_connection_attempt",
+      "pre_cond": null,
+      "post_cond": "pop_validation.performed = true",
+      "actions": [
+        "perform PoP validation before completing connection establishment"
+      ],
+      "modality": "must",
+      "id": "N-S028-003"
+    },
+    {
+      "statement_id": "N-S028-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST continue publishing the retained messages as long as the associated tokens are valid.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "token.valid = true",
+      "post_cond": "broker.retained_messages.publishing = true",
+      "actions": [
+        "continue publishing retained messages while token is valid"
+      ],
+      "modality": "must",
+      "id": "N-S028-004"
+    },
+    {
+      "statement_id": "N-S028-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "mqtt_fsm",
+      "description": "Therefore, the Broker MUST use the minimum of the token expiry and message expiry interval to discard a retained message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "retained",
+      "to_state": "discarded",
+      "trigger": "min(token_expiry_interval, message_expiry_interval)_elapsed",
+      "pre_cond": null,
+      "post_cond": "retained_message.discarded = true",
+      "actions": [
+        "set discard timer to min(token_expiry_interval, message_expiry_interval)",
+        "discard retained message on timer expiry"
+      ],
+      "modality": "must",
+      "id": "N-S028-005"
+    },
+    {
+      "statement_id": "N-S028-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client's token scope array MUST include the Will Topic.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "client.will.provided = true",
+      "post_cond": "client.token.scope.contains(will_topic) = true",
+      "actions": [
+        "validate that token scope includes Will Topic"
+      ],
+      "modality": "must",
+      "id": "N-S028-006"
+    },
+    {
+      "statement_id": "N-S028-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "The Will Message MUST be published to the Will Topic, regardless of whether the corresponding token has expired (as it has been validated and accepted during CONNECT).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S028",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "DISCONNECTED",
+      "to_state": null,
+      "trigger": "disconnection_with_will",
+      "pre_cond": "client.will.provided = true & (network_error = true | protocol_error = true)",
+      "post_cond": "will_message.published = true",
+      "actions": [
+        "publish Will Message to Will Topic irrespective of token expiry state"
+      ],
+      "modality": "must",
+      "id": "N-S028-007"
+    }
+  ]
+}

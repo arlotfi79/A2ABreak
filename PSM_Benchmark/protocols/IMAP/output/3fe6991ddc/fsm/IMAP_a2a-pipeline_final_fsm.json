@@ -1,0 +1,337 @@
+{
+  "states": [
+    "ConnectionEstablished",
+    "ServerGreeting",
+    "NotAuthenticated",
+    "Authenticated",
+    "Selected",
+    "Logout",
+    "ConnectionClosed",
+    "IDLE",
+    "ContinuationPending"
+  ],
+  "initial_state": "ConnectionEstablished",
+  "final_states": [
+    "ConnectionClosed"
+  ],
+  "transitions": [
+    {
+      "from": "ConnectionEstablished",
+      "event": "connection established",
+      "action": "server sends greeting",
+      "to": "ServerGreeting"
+    },
+    {
+      "from": "ServerGreeting",
+      "event": "receive OK greeting",
+      "action": "send OK greeting",
+      "to": "NotAuthenticated"
+    },
+    {
+      "from": "ServerGreeting",
+      "event": "receive PREAUTH greeting",
+      "action": "send PREAUTH greeting",
+      "to": "Authenticated"
+    },
+    {
+      "from": "ServerGreeting",
+      "event": "receive BYE greeting",
+      "action": "send BYE greeting",
+      "to": "Logout"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "receive AUTHENTICATE OK",
+      "action": "enter Authenticated state",
+      "to": "Authenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "receive LOGIN OK",
+      "action": "enter Authenticated state",
+      "to": "Authenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "receive STARTTLS OK",
+      "action": "begin TLS negotiation; discard cached capabilities",
+      "to": "NotAuthenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "receive AUTHENTICATE BAD",
+      "action": "cancel authentication exchange",
+      "to": "NotAuthenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "receive AUTHENTICATE NO",
+      "action": "send tagged NO response",
+      "to": "NotAuthenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "send auth cancellation",
+      "action": "send tagged BAD response",
+      "to": "NotAuthenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "receive LOGIN NO",
+      "action": "send tagged NO response",
+      "to": "NotAuthenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "receive LOGIN BAD",
+      "action": "send tagged BAD response",
+      "to": "NotAuthenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "receive STARTTLS BAD",
+      "action": "send tagged BAD response",
+      "to": "NotAuthenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "receive LOGIN LOGINDISABLED",
+      "action": "send tagged NO response",
+      "to": "NotAuthenticated"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "send LOGOUT command",
+      "action": "send BYE untagged response; send tagged OK response",
+      "to": "Logout"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "server shutdown",
+      "action": "",
+      "to": "Logout"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "cond connection closed",
+      "action": "",
+      "to": "Logout"
+    },
+    {
+      "from": "NotAuthenticated",
+      "event": "timeout pre auth timer",
+      "action": "initiate autologout",
+      "to": "Logout"
+    },
+    {
+      "from": "Authenticated",
+      "event": "receive SELECT OK",
+      "action": "select mailbox for access",
+      "to": "Selected"
+    },
+    {
+      "from": "Authenticated",
+      "event": "receive EXAMINE OK",
+      "action": "open mailbox as read-only",
+      "to": "Selected"
+    },
+    {
+      "from": "Authenticated",
+      "event": "send LOGOUT command",
+      "action": "send BYE untagged response; send tagged OK response",
+      "to": "Logout"
+    },
+    {
+      "from": "Authenticated",
+      "event": "server shutdown",
+      "action": "",
+      "to": "Logout"
+    },
+    {
+      "from": "Authenticated",
+      "event": "cond connection closed",
+      "action": "",
+      "to": "Logout"
+    },
+    {
+      "from": "Authenticated",
+      "event": "timeout autologout",
+      "action": "initiate autologout",
+      "to": "Logout"
+    },
+    {
+      "from": "Authenticated",
+      "event": "receive SELECT NO",
+      "action": "send tagged NO response",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Authenticated",
+      "event": "receive EXAMINE NO",
+      "action": "send tagged NO response",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Authenticated",
+      "event": "send ENABLE command",
+      "action": "enable supported extensions; send untagged ENABLED response",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Authenticated",
+      "event": "send DELETE command",
+      "action": "remove mailbox permanently",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Authenticated",
+      "event": "send SUBSCRIBE command",
+      "action": "add mailbox to subscribed set",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Authenticated",
+      "event": "send LIST command",
+      "action": "send untagged LIST responses",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Authenticated",
+      "event": "send NAMESPACE command",
+      "action": "send untagged NAMESPACE response",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Authenticated",
+      "event": "send STATUS command",
+      "action": "send untagged STATUS response",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Authenticated",
+      "event": "send APPEND command",
+      "action": "append message to mailbox",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Selected",
+      "event": "send CLOSE command",
+      "action": "close selected mailbox; send tagged OK response",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Selected",
+      "event": "send UNSELECT command",
+      "action": "free session resources; send tagged OK response",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Selected",
+      "event": "receive SELECT NO",
+      "action": "deselect current mailbox; send tagged NO response",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Selected",
+      "event": "receive EXAMINE NO",
+      "action": "deselect current mailbox",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Selected",
+      "event": "receive unsolicited CLOSED",
+      "action": "deselect current mailbox",
+      "to": "Authenticated"
+    },
+    {
+      "from": "Selected",
+      "event": "receive SELECT OK",
+      "action": "deselect current mailbox; select new mailbox",
+      "to": "Selected"
+    },
+    {
+      "from": "Selected",
+      "event": "receive EXAMINE OK",
+      "action": "close current mailbox; select new mailbox read-only",
+      "to": "Selected"
+    },
+    {
+      "from": "Selected",
+      "event": "send LOGOUT command",
+      "action": "send BYE untagged response; send tagged OK response",
+      "to": "Logout"
+    },
+    {
+      "from": "Selected",
+      "event": "server shutdown",
+      "action": "",
+      "to": "Logout"
+    },
+    {
+      "from": "Selected",
+      "event": "cond connection closed",
+      "action": "",
+      "to": "Logout"
+    },
+    {
+      "from": "Selected",
+      "event": "timeout autologout",
+      "action": "initiate autologout",
+      "to": "Logout"
+    },
+    {
+      "from": "Selected",
+      "event": "send FETCH command",
+      "action": "send untagged FETCH responses",
+      "to": "Selected"
+    },
+    {
+      "from": "Selected",
+      "event": "send EXPUNGE command",
+      "action": "send untagged EXPUNGE responses",
+      "to": "Selected"
+    },
+    {
+      "from": "Selected",
+      "event": "send SEARCH command",
+      "action": "send untagged ESEARCH response",
+      "to": "Selected"
+    },
+    {
+      "from": "Selected",
+      "event": "send COPY command",
+      "action": "copy messages to destination",
+      "to": "Selected"
+    },
+    {
+      "from": "Selected",
+      "event": "send MOVE command",
+      "action": "move messages to destination",
+      "to": "Selected"
+    },
+    {
+      "from": "Selected",
+      "event": "send UID command",
+      "action": "process command using UIDs",
+      "to": "Selected"
+    },
+    {
+      "from": "Selected",
+      "event": "send APPEND command",
+      "action": "send untagged EXISTS response",
+      "to": "Selected"
+    },
+    {
+      "from": "Selected",
+      "event": "send STATUS command",
+      "action": "send untagged STATUS response",
+      "to": "Selected"
+    },
+    {
+      "from": "Logout",
+      "event": "cond close complete",
+      "action": "server closes connection; client closes connection",
+      "to": "ConnectionClosed"
+    }
+  ]
+}

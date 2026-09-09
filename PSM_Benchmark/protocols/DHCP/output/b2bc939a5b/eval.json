@@ -1,0 +1,1558 @@
+{
+  "protocol": "DHCP",
+  "model": "a2a-pipeline",
+  "fingerprint": {
+    "evaluator_sha256": "c302bb6e01e8e95f5fa4f1147efd289e0cba243ca3a707eeb9ae731a6a83b668",
+    "ground_truth_sha256": "e0e9070e1925e63daa6fe817d4c0c98ba804cc2afed0aa940ed4186b92bb2e11",
+    "exported_fsm_sha256": "5391d9d1ddde7a171f3aeddf25568c3a955cc1b353ab76839e0ee772255cd22f",
+    "minilm": {
+      "found": true,
+      "snapshots": [
+        "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+      ]
+    },
+    "packages": {
+      "python": "3.13.2",
+      "numpy": "2.4.2",
+      "torch": "2.12.0",
+      "sentence-transformers": "5.5.1",
+      "pandas": "3.0.3",
+      "scikit-learn": "1.8.0",
+      "litellm": "1.83.14"
+    }
+  },
+  "official": {
+    "states": {
+      "Protocol": "DHCP",
+      "Model": "a2a-pipeline",
+      "Total Extracted": 10,
+      "Total GT": 8,
+      "Matched": 8,
+      "Precision": 0.8,
+      "Recall": 1.0,
+      "F1-Score": 0.889
+    },
+    "transitions": {
+      "Protocol": "DHCP",
+      "Model": "a2a-pipeline",
+      "TotalExtracted": 30,
+      "TotalGT": 19,
+      "Matched": 14,
+      "UnmatchedGT": 5,
+      "UnmatchedExtracted": 16,
+      "Precision": 0.467,
+      "Recall": 0.737,
+      "F1-Score": 0.571
+    },
+    "call": {
+      "match_all_states": {
+        "threshold": 0.5
+      },
+      "batch_evaluate_transitions_combined": {
+        "if_partial": false,
+        "state_threshold": 0.5,
+        "trans_threshold": 0.5
+      }
+    }
+  },
+  "diagnostics": {
+    "state_matches": [
+      {
+        "gt": "INIT",
+        "extracted": "INIT",
+        "score": 1.000000238418579
+      },
+      {
+        "gt": "INIT-REBOOT",
+        "extracted": "INIT_REBOOT",
+        "score": 0.9999998807907104
+      },
+      {
+        "gt": "REBOOTING",
+        "extracted": "REBOOTING",
+        "score": 0.9999996423721313
+      },
+      {
+        "gt": "SELECTING",
+        "extracted": "SELECTING",
+        "score": 0.9999995827674866
+      },
+      {
+        "gt": "REQUESTING",
+        "extracted": "REQUESTING",
+        "score": 1.0000001192092896
+      },
+      {
+        "gt": "BOUND",
+        "extracted": "BOUND",
+        "score": 1.0000004768371582
+      },
+      {
+        "gt": "RENEWING",
+        "extracted": "RENEWING",
+        "score": 1.0000001192092896
+      },
+      {
+        "gt": "REBINDING",
+        "extracted": "REBINDING",
+        "score": 0.9999998807907104
+      }
+    ],
+    "unmatched_gt_states": [],
+    "unselected_extracted_states": [
+      "GracefulShutdown",
+      "INITIALIZED"
+    ],
+    "matched_transitions": [
+      {
+        "extracted": {
+          "from": "INIT",
+          "event": "send DHCPDISCOVER",
+          "action": "broadcast DHCPDISCOVER",
+          "to": "SELECTING"
+        },
+        "gt": {
+          "from": "INIT",
+          "event": "",
+          "action": "Send DHCPDISCOVER",
+          "to": "SELECTING"
+        }
+      },
+      {
+        "extracted": {
+          "from": "INIT_REBOOT",
+          "event": "send DHCPREQUEST",
+          "action": "send DHCPREQUEST",
+          "to": "REBOOTING"
+        },
+        "gt": {
+          "from": "INIT-REBOOT",
+          "event": "",
+          "action": "Send DHCPREQUEST",
+          "to": "REBOOTING"
+        }
+      },
+      {
+        "extracted": {
+          "from": "INIT_REBOOT",
+          "event": "receive DHCPACK",
+          "action": "record lease expiration time",
+          "to": "BOUND"
+        },
+        "gt": {
+          "from": "REBOOTING",
+          "event": "receive DHCPACK",
+          "action": "Record lease Set timers T1 T2",
+          "to": "BOUND"
+        }
+      },
+      {
+        "extracted": {
+          "from": "REBOOTING",
+          "event": "receive DHCPNAK",
+          "action": "restart",
+          "to": "INIT"
+        },
+        "gt": {
+          "from": "REBOOTING",
+          "event": "receive DHCPNAK",
+          "action": "Restart",
+          "to": "INIT"
+        }
+      },
+      {
+        "extracted": {
+          "from": "SELECTING",
+          "event": "receive DHCPOFFER",
+          "action": "collect replies",
+          "to": "SELECTING"
+        },
+        "gt": {
+          "from": "SELECTING",
+          "event": "receive DHCPOFFER",
+          "action": "Collect replies",
+          "to": "SELECTING"
+        }
+      },
+      {
+        "extracted": {
+          "from": "SELECTING",
+          "event": "select offer",
+          "action": "select server from offers; send DHCPREQUEST",
+          "to": "REQUESTING"
+        },
+        "gt": {
+          "from": "SELECTING",
+          "event": "Select offer",
+          "action": "Send DHCPREQUEST",
+          "to": "REQUESTING"
+        }
+      },
+      {
+        "extracted": {
+          "from": "REQUESTING",
+          "event": "receive DHCPOFFER",
+          "action": "discard",
+          "to": "REQUESTING"
+        },
+        "gt": {
+          "from": "REQUESTING",
+          "event": "receive DHCPOFFER",
+          "action": "Discard",
+          "to": "REQUESTING"
+        }
+      },
+      {
+        "extracted": {
+          "from": "REQUESTING",
+          "event": "receive DHCPNAK",
+          "action": "discard offer; restart configuration",
+          "to": "INIT"
+        },
+        "gt": {
+          "from": "REQUESTING",
+          "event": "receive DHCPACK (not accept)",
+          "action": "Send DHCPDECLINE",
+          "to": "INIT"
+        }
+      },
+      {
+        "extracted": {
+          "from": "REQUESTING",
+          "event": "receive DHCPACK",
+          "action": "record lease; set timer T1; set timer T2",
+          "to": "BOUND"
+        },
+        "gt": {
+          "from": "REQUESTING",
+          "event": "receive DHCPACK",
+          "action": "Record lease Set timers",
+          "to": "BOUND"
+        }
+      },
+      {
+        "extracted": {
+          "from": "BOUND",
+          "event": "timeout T1 expires",
+          "action": "send DHCPREQUEST to server",
+          "to": "RENEWING"
+        },
+        "gt": {
+          "from": "BOUND",
+          "event": "timer T1 expires",
+          "action": "Send DHCPREQUEST",
+          "to": "RENEWING"
+        }
+      },
+      {
+        "extracted": {
+          "from": "RENEWING",
+          "event": "receive DHCPACK",
+          "action": "record lease; set timer T1; set timer T2",
+          "to": "BOUND"
+        },
+        "gt": {
+          "from": "RENEWING",
+          "event": "Receive DHCPACK",
+          "action": "Record lease; Set timers T1, T2",
+          "to": "BOUND"
+        }
+      },
+      {
+        "extracted": {
+          "from": "RENEWING",
+          "event": "timeout T2 expires",
+          "action": "broadcast DHCPREQUEST",
+          "to": "REBINDING"
+        },
+        "gt": {
+          "from": "RENEWING",
+          "event": "timer T2 expires",
+          "action": "send Broadcast DHCPREQUEST",
+          "to": "REBINDING"
+        }
+      },
+      {
+        "extracted": {
+          "from": "REBINDING",
+          "event": "receive DHCPNAK",
+          "action": "halt network",
+          "to": "INIT"
+        },
+        "gt": {
+          "from": "REBINDING",
+          "event": "receive DHCPNAK",
+          "action": "Halt network",
+          "to": "INIT"
+        }
+      },
+      {
+        "extracted": {
+          "from": "REBINDING",
+          "event": "receive DHCPACK",
+          "action": "record lease; set timer T1; set timer T2",
+          "to": "BOUND"
+        },
+        "gt": {
+          "from": "REBINDING",
+          "event": "receive DHCPACK",
+          "action": "Record lease; Set timers T1, T2",
+          "to": "BOUND"
+        }
+      }
+    ],
+    "unmatched_gt_transitions": [
+      {
+        "from": "REQUESTING",
+        "event": "receive DHCPNAK",
+        "action": "Discard offer",
+        "to": "INIT"
+      },
+      {
+        "from": "BOUND",
+        "event": "receive DHCPOFFER",
+        "action": "Discard",
+        "to": "BOUND"
+      },
+      {
+        "from": "BOUND",
+        "event": "receive DHCPACK",
+        "action": "Discard",
+        "to": "BOUND"
+      },
+      {
+        "from": "BOUND",
+        "event": "receive DHCPNAK",
+        "action": "Discard",
+        "to": "BOUND"
+      },
+      {
+        "from": "RENEWING",
+        "event": "receive DHCPNAK",
+        "action": "Halt network",
+        "to": "INIT"
+      }
+    ],
+    "unmatched_extracted_transitions": [
+      {
+        "from": "INIT",
+        "event": "receive DHCPACK",
+        "action": "discard DHCPACK silently",
+        "to": "INIT"
+      },
+      {
+        "from": "INIT",
+        "event": "receive DHCPACK prev addr",
+        "action": "resume network processing",
+        "to": "BOUND"
+      },
+      {
+        "from": "INIT_REBOOT",
+        "event": "cond known address",
+        "action": "insert known address in DHCPREQUEST; broadcast DHCPREQUEST",
+        "to": "INIT_REBOOT"
+      },
+      {
+        "from": "REBOOTING",
+        "event": "receive DHCPACK",
+        "action": "record lease; set timer T1; set timer T2",
+        "to": "BOUND"
+      },
+      {
+        "from": "SELECTING",
+        "event": "receive DHCPOFFER bad xid",
+        "action": "discard DHCPOFFER silently",
+        "to": "SELECTING"
+      },
+      {
+        "from": "SELECTING",
+        "event": "timeout no DHCPOFFER",
+        "action": "retransmit DHCPDISCOVER",
+        "to": "INIT"
+      },
+      {
+        "from": "SELECTING",
+        "event": "receive DHCPACK unacceptable",
+        "action": "send DHCPDECLINE",
+        "to": "INIT"
+      },
+      {
+        "from": "REQUESTING",
+        "event": "timeout no response",
+        "action": "retransmit DHCPREQUEST",
+        "to": "REQUESTING"
+      },
+      {
+        "from": "REQUESTING",
+        "event": "timeout retransmit exhausted",
+        "action": "restart initialization; notify user of failure",
+        "to": "INIT"
+      },
+      {
+        "from": "BOUND",
+        "event": "receive unsolicited msg",
+        "action": "discard",
+        "to": "BOUND"
+      },
+      {
+        "from": "BOUND",
+        "event": "cond early renewal",
+        "action": "send DHCPREQUEST to server",
+        "to": "RENEWING"
+      },
+      {
+        "from": "BOUND",
+        "event": "cond release desired",
+        "action": "send DHCPRELEASE",
+        "to": "GracefulShutdown"
+      },
+      {
+        "from": "BOUND",
+        "event": "cond address in use",
+        "action": "send DHCPDECLINE; restart configuration",
+        "to": "INIT"
+      },
+      {
+        "from": "RENEWING",
+        "event": "timeout no response",
+        "action": "retransmit DHCPREQUEST",
+        "to": "RENEWING"
+      },
+      {
+        "from": "REBINDING",
+        "event": "timeout lease expired",
+        "action": "halt network; stop network processing",
+        "to": "INIT"
+      },
+      {
+        "from": "REBINDING",
+        "event": "timeout retransmit",
+        "action": "retransmit DHCPREQUEST",
+        "to": "REBINDING"
+      }
+    ],
+    "precision": 0.8,
+    "recall": 1.0,
+    "f1_score": 0.889
+  },
+  "supplementary": {
+    "note": "Supplementary only — the official numbers above come from the benchmark's own entry points. The official state matcher is many-to-one and the official transition matcher is greedy and order-sensitive; these one-to-one numbers bound that effect.",
+    "one_to_one": {
+      "states": {
+        "threshold": 0.5,
+        "matched": 8,
+        "total_gt": 8,
+        "total_extracted": 10,
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1": 0.8889,
+        "pairs": [
+          {
+            "gt": "INIT",
+            "extracted": "INIT",
+            "score": 1.0
+          },
+          {
+            "gt": "INIT-REBOOT",
+            "extracted": "INIT_REBOOT",
+            "score": 1.0
+          },
+          {
+            "gt": "REBOOTING",
+            "extracted": "REBOOTING",
+            "score": 1.0
+          },
+          {
+            "gt": "SELECTING",
+            "extracted": "SELECTING",
+            "score": 1.0
+          },
+          {
+            "gt": "REQUESTING",
+            "extracted": "REQUESTING",
+            "score": 1.0
+          },
+          {
+            "gt": "BOUND",
+            "extracted": "BOUND",
+            "score": 1.0
+          },
+          {
+            "gt": "RENEWING",
+            "extracted": "RENEWING",
+            "score": 1.0
+          },
+          {
+            "gt": "REBINDING",
+            "extracted": "REBINDING",
+            "score": 1.0
+          }
+        ]
+      },
+      "transitions": {
+        "threshold": 0.5,
+        "matched": 14,
+        "total_gt": 19,
+        "total_extracted": 30,
+        "precision": 0.4667,
+        "recall": 0.7368,
+        "f1": 0.5714,
+        "pairs": [
+          {
+            "extracted": {
+              "from": "INIT",
+              "event": "send DHCPDISCOVER",
+              "action": "broadcast DHCPDISCOVER",
+              "to": "SELECTING"
+            },
+            "gt": {
+              "from": "INIT",
+              "event": "",
+              "action": "Send DHCPDISCOVER",
+              "to": "SELECTING"
+            },
+            "label_score": 0.901
+          },
+          {
+            "extracted": {
+              "from": "INIT_REBOOT",
+              "event": "send DHCPREQUEST",
+              "action": "send DHCPREQUEST",
+              "to": "REBOOTING"
+            },
+            "gt": {
+              "from": "INIT-REBOOT",
+              "event": "",
+              "action": "Send DHCPREQUEST",
+              "to": "REBOOTING"
+            },
+            "label_score": 0.9471
+          },
+          {
+            "extracted": {
+              "from": "REBOOTING",
+              "event": "receive DHCPNAK",
+              "action": "restart",
+              "to": "INIT"
+            },
+            "gt": {
+              "from": "REBOOTING",
+              "event": "receive DHCPNAK",
+              "action": "Restart",
+              "to": "INIT"
+            },
+            "label_score": 1.0
+          },
+          {
+            "extracted": {
+              "from": "REBOOTING",
+              "event": "receive DHCPACK",
+              "action": "record lease; set timer T1; set timer T2",
+              "to": "BOUND"
+            },
+            "gt": {
+              "from": "REBOOTING",
+              "event": "receive DHCPACK",
+              "action": "Record lease Set timers T1 T2",
+              "to": "BOUND"
+            },
+            "label_score": 0.9694
+          },
+          {
+            "extracted": {
+              "from": "SELECTING",
+              "event": "receive DHCPOFFER",
+              "action": "collect replies",
+              "to": "SELECTING"
+            },
+            "gt": {
+              "from": "SELECTING",
+              "event": "receive DHCPOFFER",
+              "action": "Collect replies",
+              "to": "SELECTING"
+            },
+            "label_score": 1.0
+          },
+          {
+            "extracted": {
+              "from": "SELECTING",
+              "event": "select offer",
+              "action": "select server from offers; send DHCPREQUEST",
+              "to": "REQUESTING"
+            },
+            "gt": {
+              "from": "SELECTING",
+              "event": "Select offer",
+              "action": "Send DHCPREQUEST",
+              "to": "REQUESTING"
+            },
+            "label_score": 0.8544
+          },
+          {
+            "extracted": {
+              "from": "REQUESTING",
+              "event": "receive DHCPOFFER",
+              "action": "discard",
+              "to": "REQUESTING"
+            },
+            "gt": {
+              "from": "REQUESTING",
+              "event": "receive DHCPOFFER",
+              "action": "Discard",
+              "to": "REQUESTING"
+            },
+            "label_score": 1.0
+          },
+          {
+            "extracted": {
+              "from": "REQUESTING",
+              "event": "receive DHCPNAK",
+              "action": "discard offer; restart configuration",
+              "to": "INIT"
+            },
+            "gt": {
+              "from": "REQUESTING",
+              "event": "receive DHCPNAK",
+              "action": "Discard offer",
+              "to": "INIT"
+            },
+            "label_score": 0.8581
+          },
+          {
+            "extracted": {
+              "from": "REQUESTING",
+              "event": "receive DHCPACK",
+              "action": "record lease; set timer T1; set timer T2",
+              "to": "BOUND"
+            },
+            "gt": {
+              "from": "REQUESTING",
+              "event": "receive DHCPACK",
+              "action": "Record lease Set timers",
+              "to": "BOUND"
+            },
+            "label_score": 0.9047
+          },
+          {
+            "extracted": {
+              "from": "BOUND",
+              "event": "timeout T1 expires",
+              "action": "send DHCPREQUEST to server",
+              "to": "RENEWING"
+            },
+            "gt": {
+              "from": "BOUND",
+              "event": "timer T1 expires",
+              "action": "Send DHCPREQUEST",
+              "to": "RENEWING"
+            },
+            "label_score": 0.8609
+          },
+          {
+            "extracted": {
+              "from": "RENEWING",
+              "event": "receive DHCPACK",
+              "action": "record lease; set timer T1; set timer T2",
+              "to": "BOUND"
+            },
+            "gt": {
+              "from": "RENEWING",
+              "event": "Receive DHCPACK",
+              "action": "Record lease; Set timers T1, T2",
+              "to": "BOUND"
+            },
+            "label_score": 0.9867
+          },
+          {
+            "extracted": {
+              "from": "RENEWING",
+              "event": "timeout T2 expires",
+              "action": "broadcast DHCPREQUEST",
+              "to": "REBINDING"
+            },
+            "gt": {
+              "from": "RENEWING",
+              "event": "timer T2 expires",
+              "action": "send Broadcast DHCPREQUEST",
+              "to": "REBINDING"
+            },
+            "label_score": 0.8409
+          },
+          {
+            "extracted": {
+              "from": "REBINDING",
+              "event": "receive DHCPNAK",
+              "action": "halt network",
+              "to": "INIT"
+            },
+            "gt": {
+              "from": "REBINDING",
+              "event": "receive DHCPNAK",
+              "action": "Halt network",
+              "to": "INIT"
+            },
+            "label_score": 1.0
+          },
+          {
+            "extracted": {
+              "from": "REBINDING",
+              "event": "receive DHCPACK",
+              "action": "record lease; set timer T1; set timer T2",
+              "to": "BOUND"
+            },
+            "gt": {
+              "from": "REBINDING",
+              "event": "receive DHCPACK",
+              "action": "Record lease; Set timers T1, T2",
+              "to": "BOUND"
+            },
+            "label_score": 0.9867
+          }
+        ]
+      }
+    },
+    "threshold_sensitivity": {
+      "0.4": {
+        "states_official_style": {
+          "matched": 8,
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1": 0.889
+        },
+        "states_one_to_one": {
+          "threshold": 0.4,
+          "matched": 8,
+          "total_gt": 8,
+          "total_extracted": 10,
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1": 0.8889,
+          "pairs": [
+            {
+              "gt": "INIT",
+              "extracted": "INIT",
+              "score": 1.0
+            },
+            {
+              "gt": "INIT-REBOOT",
+              "extracted": "INIT_REBOOT",
+              "score": 1.0
+            },
+            {
+              "gt": "REBOOTING",
+              "extracted": "REBOOTING",
+              "score": 1.0
+            },
+            {
+              "gt": "SELECTING",
+              "extracted": "SELECTING",
+              "score": 1.0
+            },
+            {
+              "gt": "REQUESTING",
+              "extracted": "REQUESTING",
+              "score": 1.0
+            },
+            {
+              "gt": "BOUND",
+              "extracted": "BOUND",
+              "score": 1.0
+            },
+            {
+              "gt": "RENEWING",
+              "extracted": "RENEWING",
+              "score": 1.0
+            },
+            {
+              "gt": "REBINDING",
+              "extracted": "REBINDING",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.4,
+          "matched": 14,
+          "total_gt": 19,
+          "total_extracted": 30,
+          "precision": 0.4667,
+          "recall": 0.7368,
+          "f1": 0.5714,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "INIT",
+                "event": "send DHCPDISCOVER",
+                "action": "broadcast DHCPDISCOVER",
+                "to": "SELECTING"
+              },
+              "gt": {
+                "from": "INIT",
+                "event": "",
+                "action": "Send DHCPDISCOVER",
+                "to": "SELECTING"
+              },
+              "label_score": 0.901
+            },
+            {
+              "extracted": {
+                "from": "INIT_REBOOT",
+                "event": "send DHCPREQUEST",
+                "action": "send DHCPREQUEST",
+                "to": "REBOOTING"
+              },
+              "gt": {
+                "from": "INIT-REBOOT",
+                "event": "",
+                "action": "Send DHCPREQUEST",
+                "to": "REBOOTING"
+              },
+              "label_score": 0.9471
+            },
+            {
+              "extracted": {
+                "from": "REBOOTING",
+                "event": "receive DHCPNAK",
+                "action": "restart",
+                "to": "INIT"
+              },
+              "gt": {
+                "from": "REBOOTING",
+                "event": "receive DHCPNAK",
+                "action": "Restart",
+                "to": "INIT"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "REBOOTING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "REBOOTING",
+                "event": "receive DHCPACK",
+                "action": "Record lease Set timers T1 T2",
+                "to": "BOUND"
+              },
+              "label_score": 0.9694
+            },
+            {
+              "extracted": {
+                "from": "SELECTING",
+                "event": "receive DHCPOFFER",
+                "action": "collect replies",
+                "to": "SELECTING"
+              },
+              "gt": {
+                "from": "SELECTING",
+                "event": "receive DHCPOFFER",
+                "action": "Collect replies",
+                "to": "SELECTING"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "SELECTING",
+                "event": "select offer",
+                "action": "select server from offers; send DHCPREQUEST",
+                "to": "REQUESTING"
+              },
+              "gt": {
+                "from": "SELECTING",
+                "event": "Select offer",
+                "action": "Send DHCPREQUEST",
+                "to": "REQUESTING"
+              },
+              "label_score": 0.8544
+            },
+            {
+              "extracted": {
+                "from": "REQUESTING",
+                "event": "receive DHCPOFFER",
+                "action": "discard",
+                "to": "REQUESTING"
+              },
+              "gt": {
+                "from": "REQUESTING",
+                "event": "receive DHCPOFFER",
+                "action": "Discard",
+                "to": "REQUESTING"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "REQUESTING",
+                "event": "receive DHCPNAK",
+                "action": "discard offer; restart configuration",
+                "to": "INIT"
+              },
+              "gt": {
+                "from": "REQUESTING",
+                "event": "receive DHCPNAK",
+                "action": "Discard offer",
+                "to": "INIT"
+              },
+              "label_score": 0.8581
+            },
+            {
+              "extracted": {
+                "from": "REQUESTING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "REQUESTING",
+                "event": "receive DHCPACK",
+                "action": "Record lease Set timers",
+                "to": "BOUND"
+              },
+              "label_score": 0.9047
+            },
+            {
+              "extracted": {
+                "from": "BOUND",
+                "event": "timeout T1 expires",
+                "action": "send DHCPREQUEST to server",
+                "to": "RENEWING"
+              },
+              "gt": {
+                "from": "BOUND",
+                "event": "timer T1 expires",
+                "action": "Send DHCPREQUEST",
+                "to": "RENEWING"
+              },
+              "label_score": 0.8609
+            },
+            {
+              "extracted": {
+                "from": "RENEWING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "RENEWING",
+                "event": "Receive DHCPACK",
+                "action": "Record lease; Set timers T1, T2",
+                "to": "BOUND"
+              },
+              "label_score": 0.9867
+            },
+            {
+              "extracted": {
+                "from": "RENEWING",
+                "event": "timeout T2 expires",
+                "action": "broadcast DHCPREQUEST",
+                "to": "REBINDING"
+              },
+              "gt": {
+                "from": "RENEWING",
+                "event": "timer T2 expires",
+                "action": "send Broadcast DHCPREQUEST",
+                "to": "REBINDING"
+              },
+              "label_score": 0.8409
+            },
+            {
+              "extracted": {
+                "from": "REBINDING",
+                "event": "receive DHCPNAK",
+                "action": "halt network",
+                "to": "INIT"
+              },
+              "gt": {
+                "from": "REBINDING",
+                "event": "receive DHCPNAK",
+                "action": "Halt network",
+                "to": "INIT"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "REBINDING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "REBINDING",
+                "event": "receive DHCPACK",
+                "action": "Record lease; Set timers T1, T2",
+                "to": "BOUND"
+              },
+              "label_score": 0.9867
+            }
+          ]
+        }
+      },
+      "0.5": {
+        "states_official_style": {
+          "matched": 8,
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1": 0.889
+        },
+        "states_one_to_one": {
+          "threshold": 0.5,
+          "matched": 8,
+          "total_gt": 8,
+          "total_extracted": 10,
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1": 0.8889,
+          "pairs": [
+            {
+              "gt": "INIT",
+              "extracted": "INIT",
+              "score": 1.0
+            },
+            {
+              "gt": "INIT-REBOOT",
+              "extracted": "INIT_REBOOT",
+              "score": 1.0
+            },
+            {
+              "gt": "REBOOTING",
+              "extracted": "REBOOTING",
+              "score": 1.0
+            },
+            {
+              "gt": "SELECTING",
+              "extracted": "SELECTING",
+              "score": 1.0
+            },
+            {
+              "gt": "REQUESTING",
+              "extracted": "REQUESTING",
+              "score": 1.0
+            },
+            {
+              "gt": "BOUND",
+              "extracted": "BOUND",
+              "score": 1.0
+            },
+            {
+              "gt": "RENEWING",
+              "extracted": "RENEWING",
+              "score": 1.0
+            },
+            {
+              "gt": "REBINDING",
+              "extracted": "REBINDING",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.5,
+          "matched": 14,
+          "total_gt": 19,
+          "total_extracted": 30,
+          "precision": 0.4667,
+          "recall": 0.7368,
+          "f1": 0.5714,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "INIT",
+                "event": "send DHCPDISCOVER",
+                "action": "broadcast DHCPDISCOVER",
+                "to": "SELECTING"
+              },
+              "gt": {
+                "from": "INIT",
+                "event": "",
+                "action": "Send DHCPDISCOVER",
+                "to": "SELECTING"
+              },
+              "label_score": 0.901
+            },
+            {
+              "extracted": {
+                "from": "INIT_REBOOT",
+                "event": "send DHCPREQUEST",
+                "action": "send DHCPREQUEST",
+                "to": "REBOOTING"
+              },
+              "gt": {
+                "from": "INIT-REBOOT",
+                "event": "",
+                "action": "Send DHCPREQUEST",
+                "to": "REBOOTING"
+              },
+              "label_score": 0.9471
+            },
+            {
+              "extracted": {
+                "from": "REBOOTING",
+                "event": "receive DHCPNAK",
+                "action": "restart",
+                "to": "INIT"
+              },
+              "gt": {
+                "from": "REBOOTING",
+                "event": "receive DHCPNAK",
+                "action": "Restart",
+                "to": "INIT"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "REBOOTING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "REBOOTING",
+                "event": "receive DHCPACK",
+                "action": "Record lease Set timers T1 T2",
+                "to": "BOUND"
+              },
+              "label_score": 0.9694
+            },
+            {
+              "extracted": {
+                "from": "SELECTING",
+                "event": "receive DHCPOFFER",
+                "action": "collect replies",
+                "to": "SELECTING"
+              },
+              "gt": {
+                "from": "SELECTING",
+                "event": "receive DHCPOFFER",
+                "action": "Collect replies",
+                "to": "SELECTING"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "SELECTING",
+                "event": "select offer",
+                "action": "select server from offers; send DHCPREQUEST",
+                "to": "REQUESTING"
+              },
+              "gt": {
+                "from": "SELECTING",
+                "event": "Select offer",
+                "action": "Send DHCPREQUEST",
+                "to": "REQUESTING"
+              },
+              "label_score": 0.8544
+            },
+            {
+              "extracted": {
+                "from": "REQUESTING",
+                "event": "receive DHCPOFFER",
+                "action": "discard",
+                "to": "REQUESTING"
+              },
+              "gt": {
+                "from": "REQUESTING",
+                "event": "receive DHCPOFFER",
+                "action": "Discard",
+                "to": "REQUESTING"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "REQUESTING",
+                "event": "receive DHCPNAK",
+                "action": "discard offer; restart configuration",
+                "to": "INIT"
+              },
+              "gt": {
+                "from": "REQUESTING",
+                "event": "receive DHCPNAK",
+                "action": "Discard offer",
+                "to": "INIT"
+              },
+              "label_score": 0.8581
+            },
+            {
+              "extracted": {
+                "from": "REQUESTING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "REQUESTING",
+                "event": "receive DHCPACK",
+                "action": "Record lease Set timers",
+                "to": "BOUND"
+              },
+              "label_score": 0.9047
+            },
+            {
+              "extracted": {
+                "from": "BOUND",
+                "event": "timeout T1 expires",
+                "action": "send DHCPREQUEST to server",
+                "to": "RENEWING"
+              },
+              "gt": {
+                "from": "BOUND",
+                "event": "timer T1 expires",
+                "action": "Send DHCPREQUEST",
+                "to": "RENEWING"
+              },
+              "label_score": 0.8609
+            },
+            {
+              "extracted": {
+                "from": "RENEWING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "RENEWING",
+                "event": "Receive DHCPACK",
+                "action": "Record lease; Set timers T1, T2",
+                "to": "BOUND"
+              },
+              "label_score": 0.9867
+            },
+            {
+              "extracted": {
+                "from": "RENEWING",
+                "event": "timeout T2 expires",
+                "action": "broadcast DHCPREQUEST",
+                "to": "REBINDING"
+              },
+              "gt": {
+                "from": "RENEWING",
+                "event": "timer T2 expires",
+                "action": "send Broadcast DHCPREQUEST",
+                "to": "REBINDING"
+              },
+              "label_score": 0.8409
+            },
+            {
+              "extracted": {
+                "from": "REBINDING",
+                "event": "receive DHCPNAK",
+                "action": "halt network",
+                "to": "INIT"
+              },
+              "gt": {
+                "from": "REBINDING",
+                "event": "receive DHCPNAK",
+                "action": "Halt network",
+                "to": "INIT"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "REBINDING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "REBINDING",
+                "event": "receive DHCPACK",
+                "action": "Record lease; Set timers T1, T2",
+                "to": "BOUND"
+              },
+              "label_score": 0.9867
+            }
+          ]
+        }
+      },
+      "0.6": {
+        "states_official_style": {
+          "matched": 8,
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1": 0.889
+        },
+        "states_one_to_one": {
+          "threshold": 0.6,
+          "matched": 8,
+          "total_gt": 8,
+          "total_extracted": 10,
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1": 0.8889,
+          "pairs": [
+            {
+              "gt": "INIT",
+              "extracted": "INIT",
+              "score": 1.0
+            },
+            {
+              "gt": "INIT-REBOOT",
+              "extracted": "INIT_REBOOT",
+              "score": 1.0
+            },
+            {
+              "gt": "REBOOTING",
+              "extracted": "REBOOTING",
+              "score": 1.0
+            },
+            {
+              "gt": "SELECTING",
+              "extracted": "SELECTING",
+              "score": 1.0
+            },
+            {
+              "gt": "REQUESTING",
+              "extracted": "REQUESTING",
+              "score": 1.0
+            },
+            {
+              "gt": "BOUND",
+              "extracted": "BOUND",
+              "score": 1.0
+            },
+            {
+              "gt": "RENEWING",
+              "extracted": "RENEWING",
+              "score": 1.0
+            },
+            {
+              "gt": "REBINDING",
+              "extracted": "REBINDING",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.6,
+          "matched": 14,
+          "total_gt": 19,
+          "total_extracted": 30,
+          "precision": 0.4667,
+          "recall": 0.7368,
+          "f1": 0.5714,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "INIT",
+                "event": "send DHCPDISCOVER",
+                "action": "broadcast DHCPDISCOVER",
+                "to": "SELECTING"
+              },
+              "gt": {
+                "from": "INIT",
+                "event": "",
+                "action": "Send DHCPDISCOVER",
+                "to": "SELECTING"
+              },
+              "label_score": 0.901
+            },
+            {
+              "extracted": {
+                "from": "INIT_REBOOT",
+                "event": "send DHCPREQUEST",
+                "action": "send DHCPREQUEST",
+                "to": "REBOOTING"
+              },
+              "gt": {
+                "from": "INIT-REBOOT",
+                "event": "",
+                "action": "Send DHCPREQUEST",
+                "to": "REBOOTING"
+              },
+              "label_score": 0.9471
+            },
+            {
+              "extracted": {
+                "from": "REBOOTING",
+                "event": "receive DHCPNAK",
+                "action": "restart",
+                "to": "INIT"
+              },
+              "gt": {
+                "from": "REBOOTING",
+                "event": "receive DHCPNAK",
+                "action": "Restart",
+                "to": "INIT"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "REBOOTING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "REBOOTING",
+                "event": "receive DHCPACK",
+                "action": "Record lease Set timers T1 T2",
+                "to": "BOUND"
+              },
+              "label_score": 0.9694
+            },
+            {
+              "extracted": {
+                "from": "SELECTING",
+                "event": "receive DHCPOFFER",
+                "action": "collect replies",
+                "to": "SELECTING"
+              },
+              "gt": {
+                "from": "SELECTING",
+                "event": "receive DHCPOFFER",
+                "action": "Collect replies",
+                "to": "SELECTING"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "SELECTING",
+                "event": "select offer",
+                "action": "select server from offers; send DHCPREQUEST",
+                "to": "REQUESTING"
+              },
+              "gt": {
+                "from": "SELECTING",
+                "event": "Select offer",
+                "action": "Send DHCPREQUEST",
+                "to": "REQUESTING"
+              },
+              "label_score": 0.8544
+            },
+            {
+              "extracted": {
+                "from": "REQUESTING",
+                "event": "receive DHCPOFFER",
+                "action": "discard",
+                "to": "REQUESTING"
+              },
+              "gt": {
+                "from": "REQUESTING",
+                "event": "receive DHCPOFFER",
+                "action": "Discard",
+                "to": "REQUESTING"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "REQUESTING",
+                "event": "receive DHCPNAK",
+                "action": "discard offer; restart configuration",
+                "to": "INIT"
+              },
+              "gt": {
+                "from": "REQUESTING",
+                "event": "receive DHCPNAK",
+                "action": "Discard offer",
+                "to": "INIT"
+              },
+              "label_score": 0.8581
+            },
+            {
+              "extracted": {
+                "from": "REQUESTING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "REQUESTING",
+                "event": "receive DHCPACK",
+                "action": "Record lease Set timers",
+                "to": "BOUND"
+              },
+              "label_score": 0.9047
+            },
+            {
+              "extracted": {
+                "from": "BOUND",
+                "event": "timeout T1 expires",
+                "action": "send DHCPREQUEST to server",
+                "to": "RENEWING"
+              },
+              "gt": {
+                "from": "BOUND",
+                "event": "timer T1 expires",
+                "action": "Send DHCPREQUEST",
+                "to": "RENEWING"
+              },
+              "label_score": 0.8609
+            },
+            {
+              "extracted": {
+                "from": "RENEWING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "RENEWING",
+                "event": "Receive DHCPACK",
+                "action": "Record lease; Set timers T1, T2",
+                "to": "BOUND"
+              },
+              "label_score": 0.9867
+            },
+            {
+              "extracted": {
+                "from": "RENEWING",
+                "event": "timeout T2 expires",
+                "action": "broadcast DHCPREQUEST",
+                "to": "REBINDING"
+              },
+              "gt": {
+                "from": "RENEWING",
+                "event": "timer T2 expires",
+                "action": "send Broadcast DHCPREQUEST",
+                "to": "REBINDING"
+              },
+              "label_score": 0.8409
+            },
+            {
+              "extracted": {
+                "from": "REBINDING",
+                "event": "receive DHCPNAK",
+                "action": "halt network",
+                "to": "INIT"
+              },
+              "gt": {
+                "from": "REBINDING",
+                "event": "receive DHCPNAK",
+                "action": "Halt network",
+                "to": "INIT"
+              },
+              "label_score": 1.0
+            },
+            {
+              "extracted": {
+                "from": "REBINDING",
+                "event": "receive DHCPACK",
+                "action": "record lease; set timer T1; set timer T2",
+                "to": "BOUND"
+              },
+              "gt": {
+                "from": "REBINDING",
+                "event": "receive DHCPACK",
+                "action": "Record lease; Set timers T1, T2",
+                "to": "BOUND"
+              },
+              "label_score": 0.9867
+            }
+          ]
+        }
+      }
+    }
+  }
+}

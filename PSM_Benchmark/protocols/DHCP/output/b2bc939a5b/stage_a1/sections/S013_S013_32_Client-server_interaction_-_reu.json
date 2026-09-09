@@ -1,0 +1,254 @@
+{
+  "section_id": "S013",
+  "title": "S013 3.2 Client-server interaction - reusing a previously allocated network",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S013 3.2 Client-server interaction - reusing a previously allocated network"
+  ],
+  "url_anchor": "#s013-32-client-server-interaction---reusing-a-previously-allocated-network",
+  "word_count": 903,
+  "statement_count": 11,
+  "elapsed_seconds": 93.15,
+  "statements": [
+    {
+      "statement_id": "D-S013-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "This action corresponds to the client moving to the INIT state in the DHCP state diagram, which is described in section 4.4.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "state_name": "INIT",
+      "enum_name": "ClientState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S013-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "This corresponds to moving to BOUND state in the client state transition diagram shown in figure 5.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "state_name": "BOUND",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S013-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Figure 4 shows 'Initialization complete' as the state reached by the client after receiving DHCPACK when reusing a previously allocated network address.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S013",
+      "state_name": "Initialization complete",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S013-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client broadcasts a DHCPREQUEST message on its local subnet including the client's network address in the 'requested IP address' option when reusing a previously allocated network address.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S013",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "begins initialization (reusing previously allocated address)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "broadcast DHCPREQUEST with requested IP address option set to previously allocated address"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S013-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client receives the DHCPACK message with configuration parameters. The client performs a final check on the parameters and notes the duration of the lease. At this point, the client is configured.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S013",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Initialization complete",
+      "trigger": "DHCPACK received",
+      "pre_cond": null,
+      "post_cond": "client.configured = true",
+      "actions": [
+        "perform final check on parameters",
+        "note lease duration from DHCPACK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S013-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client detects that the IP address in the DHCPACK message is already in use, the client MUST send a DHCPDECLINE message to the server and restarts the configuration process by requesting a new network address. This action corresponds to the client moving to the INIT state in the DHCP state diagram.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S013",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "INIT",
+      "trigger": "IP address in DHCPACK detected already in use",
+      "pre_cond": "client.ip_already_in_use = true",
+      "post_cond": "client.state = INIT",
+      "actions": [
+        "send DHCPDECLINE to server",
+        "restart configuration process requesting new network address"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S013-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client receives a DHCPNAK message, it cannot reuse its remembered network address. It must instead request a new address by restarting the configuration process. This action also corresponds to the client moving to the INIT state in the DHCP state diagram.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S013",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "INIT",
+      "trigger": "DHCPNAK received",
+      "pre_cond": null,
+      "post_cond": "client.state = INIT",
+      "actions": [
+        "discard remembered network address",
+        "restart configuration process using full procedure"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S013-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client times out and retransmits the DHCPREQUEST message if the client receives neither a DHCPACK nor a DHCPNAK message. The client retransmits the DHCPREQUEST according to the retransmission algorithm in section 4.1.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S013",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "timeout (no DHCPACK and no DHCPNAK received)",
+      "pre_cond": "client.received_dhcpack = false & client.received_dhcpnak = false",
+      "post_cond": null,
+      "actions": [
+        "retransmit DHCPREQUEST per retransmission algorithm"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S013-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client receives neither a DHCPACK or a DHCPNAK message after employing the retransmission algorithm, the client MAY choose to use the previously allocated network address and configuration parameters for the remainder of the unexpired lease. This corresponds to moving to BOUND state in the client state transition diagram shown in figure 5.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S013",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "BOUND",
+      "trigger": "retransmission algorithm exhausted with no DHCPACK and no DHCPNAK",
+      "pre_cond": "client.received_dhcpack = false & client.received_dhcpnak = false & client.retransmission_exhausted = true & client.lease_unexpired = true",
+      "post_cond": "client.state = BOUND",
+      "actions": [
+        "use previously allocated network address and configuration parameters for remainder of unexpired lease"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S013-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client may choose to relinquish its lease on a network address by sending a DHCPRELEASE message to the server. The client identifies the lease to be released with its 'client identifier', or 'chaddr' and network address in the DHCPRELEASE message.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S013",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client chooses to relinquish lease",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send DHCPRELEASE to server with client identifier or chaddr and network address"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S013-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "If the client's request is invalid (e.g., the client has moved to a new subnet), servers SHOULD respond with a DHCPNAK message to the client.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S013",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPREQUEST received with invalid request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send DHCPNAK to client"
+      ],
+      "modality": "should"
+    }
+  ]
+}

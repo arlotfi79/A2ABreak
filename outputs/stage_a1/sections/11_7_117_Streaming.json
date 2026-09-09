@@ -1,0 +1,195 @@
+{
+  "section_id": "11.7",
+  "title": "11.7. Streaming",
+  "depth": 3,
+  "parent_path": [
+    "11. HTTP+JSON/REST Protocol Binding",
+    "11.7. Streaming"
+  ],
+  "url_anchor": "#117-streaming",
+  "word_count": 105,
+  "statement_count": 9,
+  "elapsed_seconds": 87.69,
+  "statements": [
+    {
+      "statement_id": "D-11-7-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Streaming responses are simple, linearly ordered sequences: first a Task (or single Message), then zero or more status or artifact update events until the task reaches a terminal or interrupted state, at which point the stream closes.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "11.7",
+      "state_name": "STREAM_STATE_OPEN",
+      "enum_name": "StreamState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "stream.open = true"
+    },
+    {
+      "statement_id": "D-11-7-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "streaming",
+      "stage": "termination",
+      "description": "until the task reaches a terminal or interrupted state, at which point the stream closes.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "11.7",
+      "state_name": "STREAM_STATE_CLOSED",
+      "enum_name": "StreamState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "stream.open = false"
+    },
+    {
+      "statement_id": "D-11-7-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "streaming",
+      "stage": "initiation",
+      "description": "POST /message:stream Content-Type: application/json { /* SendMessageRequest object */ }",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.7",
+      "object_name": "StreamingRequest",
+      "field_name": "Content-Type",
+      "field_type": "string",
+      "required": true,
+      "allowed_values": [
+        "application/json"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-11-7-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "streaming",
+      "stage": "initiation",
+      "description": "POST /message:stream Content-Type: application/json { /* SendMessageRequest object */ } Referenced Objects: SendMessageRequest",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.7",
+      "object_name": "StreamingRequest",
+      "field_name": "body",
+      "field_type": "SendMessageRequest",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-11-7-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "HTTP/1.1 200 OK Content-Type: text/event-stream",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.7",
+      "object_name": "StreamingResponse",
+      "field_name": "Content-Type",
+      "field_type": "string",
+      "required": true,
+      "allowed_values": [
+        "text/event-stream"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-11-7-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "data: { /* StreamResponse object */ } Referenced Objects: StreamResponse",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.7",
+      "object_name": "SSEEvent",
+      "field_name": "data",
+      "field_type": "StreamResponse",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-11-7-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "initiation",
+      "description": "REST streaming uses Server-Sent Events with the data field containing JSON serializations of the protocol data objects: POST /message:stream",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "11.7",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "STREAM_STATE_OPEN",
+      "trigger": "POST_message_stream",
+      "pre_cond": null,
+      "post_cond": "stream.open = true",
+      "actions": [
+        "Client sends POST /message:stream with Content-Type: application/json and SendMessageRequest body",
+        "Server responds HTTP 200 OK with Content-Type: text/event-stream",
+        "Server sends first SSE event containing Task or single Message"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-11-7-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "termination",
+      "description": "Streaming responses are simple, linearly ordered sequences: first a Task (or single Message), then zero or more status or artifact update events until the task reaches a terminal or interrupted state, at which point the stream closes. Implementations SHOULD avoid re-ordering events and MAY optionally resend a final Task snapshot before closing.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "11.7",
+      "actors": [
+        "server"
+      ],
+      "from_state": "STREAM_STATE_OPEN",
+      "to_state": "STREAM_STATE_CLOSED",
+      "trigger": "task_reached_terminal_state",
+      "pre_cond": "stream.open = true & task.state = terminal",
+      "post_cond": "stream.open = false",
+      "actions": [
+        "Server optionally resends final Task snapshot before closing",
+        "Server closes SSE stream"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-11-7-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "interruption",
+      "description": "until the task reaches a terminal or interrupted state, at which point the stream closes. Implementations SHOULD avoid re-ordering events and MAY optionally resend a final Task snapshot before closing.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "11.7",
+      "actors": [
+        "server"
+      ],
+      "from_state": "STREAM_STATE_OPEN",
+      "to_state": "STREAM_STATE_CLOSED",
+      "trigger": "task_reached_interrupted_state",
+      "pre_cond": "stream.open = true & task.state = interrupted",
+      "post_cond": "stream.open = false",
+      "actions": [
+        "Server optionally resends final Task snapshot before closing",
+        "Server closes SSE stream"
+      ],
+      "modality": "should"
+    }
+  ]
+}

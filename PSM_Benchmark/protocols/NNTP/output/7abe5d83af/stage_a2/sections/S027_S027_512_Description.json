@@ -1,0 +1,216 @@
+{
+  "section_id": "S027",
+  "title": "S027 5.1.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S027 5.1.2 Description"
+  ],
+  "url_anchor": "#s027-512-description",
+  "word_count": 252,
+  "statement_count": 8,
+  "elapsed_seconds": 85.2,
+  "statements": [
+    {
+      "statement_id": "N-S027-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST present an appropriate response code as a greeting to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "initial_connection",
+      "pre_cond": null,
+      "post_cond": "server.greeting_sent = true",
+      "actions": [
+        "send greeting response code to client"
+      ],
+      "modality": "must",
+      "id": "N-S027-001"
+    },
+    {
+      "statement_id": "N-S027-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server will accept further commands from the client including POST, the server MUST present a 200 greeting code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "POSTING_ALLOWED",
+      "trigger": "initial_connection",
+      "pre_cond": "server.accepts_commands = true & server.accepts_post = true",
+      "post_cond": "greeting_code = 200",
+      "actions": [
+        "send 200 greeting code"
+      ],
+      "modality": "must",
+      "id": "N-S027-002"
+    },
+    {
+      "statement_id": "N-S027-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server will accept further commands from the client, but the client is not authorized to post articles using the POST command, the server MUST present a 201 greeting code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "POSTING_NOT_ALLOWED",
+      "trigger": "initial_connection",
+      "pre_cond": "server.accepts_commands = true & client.authorized_to_post = false",
+      "post_cond": "greeting_code = 201",
+      "actions": [
+        "send 201 greeting code"
+      ],
+      "modality": "must",
+      "id": "N-S027-003"
+    },
+    {
+      "statement_id": "N-S027-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Otherwise, the server MUST present a 400 or 502 greeting code and then immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "initial_connection",
+      "pre_cond": "server.accepts_commands = false | client.permitted = false",
+      "post_cond": "connection.state = CLOSED",
+      "actions": [
+        "send 400 or 502 greeting code",
+        "immediately close connection"
+      ],
+      "modality": "must",
+      "id": "N-S027-004"
+    },
+    {
+      "statement_id": "N-S027-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "400 SHOULD be used if the issue is only temporary (for example, because of load) and the client can expect to be able to connect successfully at some point in the future without making any changes.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "initial_connection",
+      "pre_cond": "server.accepts_commands = false & issue.temporary = true",
+      "post_cond": "greeting_code = 400 & connection.state = CLOSED",
+      "actions": [
+        "send 400 greeting code",
+        "close connection"
+      ],
+      "modality": "should",
+      "id": "N-S027-005"
+    },
+    {
+      "statement_id": "N-S027-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "502 MUST be used if the client is not permitted under any circumstances to interact with the server, and MAY be used if the server has insufficient information to determine whether the issue is temporary or permanent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "initial_connection",
+      "pre_cond": "client.permitted_under_any_circumstances = false",
+      "post_cond": "greeting_code = 502 & connection.state = CLOSED",
+      "actions": [
+        "send 502 greeting code",
+        "close connection"
+      ],
+      "modality": "must",
+      "id": "N-S027-006"
+    },
+    {
+      "statement_id": "N-S027-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "502 MUST be used if the client is not permitted under any circumstances to interact with the server, and MAY be used if the server has insufficient information to determine whether the issue is temporary or permanent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "initial_connection",
+      "pre_cond": "server.insufficient_info = true",
+      "post_cond": "greeting_code = 502 & connection.state = CLOSED",
+      "actions": [
+        "optionally send 502 greeting code",
+        "close connection"
+      ],
+      "modality": "may",
+      "id": "N-S027-007"
+    },
+    {
+      "statement_id": "N-S027-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "Therefore, clients SHOULD use the CAPABILITIES command (Section 5.2) rather than rely on this response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S027",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "greeting_received",
+      "pre_cond": "greeting_code = 200 | greeting_code = 201",
+      "post_cond": null,
+      "actions": [
+        "send CAPABILITIES command"
+      ],
+      "modality": "should",
+      "id": "N-S027-008"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "section_id": "S014",
+  "title": "S014 3.3 Interpretation and representation of time values",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S014 3.3 Interpretation and representation of time values"
+  ],
+  "url_anchor": "#s014-33-interpretation-and-representation-of-time-values",
+  "word_count": 179,
+  "statement_count": 3,
+  "elapsed_seconds": 48.88,
+  "statements": [
+    {
+      "statement_id": "1-S014-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "A client acquires a lease for a network address for a fixed period of time (which may be infinite).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S014-001"
+    },
+    {
+      "statement_id": "2-S014-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "If there is drift between the two clocks, the server may consider the lease expired before the client does.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "ACTIVE",
+      "to_state": "EXPIRED",
+      "trigger": "clock_drift_detected",
+      "pre_cond": "clock_drift = true & server.lease_timer.elapsed >= server.lease_duration",
+      "post_cond": "server.lease_state = EXPIRED & client.lease_state = ACTIVE",
+      "actions": [
+        "server marks lease as expired in its local database"
+      ],
+      "modality": "may",
+      "id": "N-S014-002"
+    },
+    {
+      "statement_id": "3-S014-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "To compensate, the server may return a shorter lease duration to the client than the server commits to its local database of client information.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "lease_grant",
+      "pre_cond": "clock_drift = true",
+      "post_cond": "message.lease_duration < server.committed_lease_duration",
+      "actions": [
+        "server includes shorter lease duration value in outbound DHCP message to client",
+        "server stores longer lease duration in local client database"
+      ],
+      "modality": "may",
+      "id": "N-S014-003"
+    }
+  ]
+}

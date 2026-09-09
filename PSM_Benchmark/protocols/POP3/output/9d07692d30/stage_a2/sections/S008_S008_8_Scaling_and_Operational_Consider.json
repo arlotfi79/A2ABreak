@@ -1,0 +1,201 @@
+{
+  "section_id": "S008",
+  "title": "S008 8. Scaling and Operational Considerations",
+  "depth": 3,
+  "parent_path": [
+    "POP3",
+    "S008 8. Scaling and Operational Considerations"
+  ],
+  "url_anchor": "#s008-8-scaling-and-operational-considerations",
+  "word_count": 549,
+  "statement_count": 8,
+  "elapsed_seconds": 112.8,
+  "statements": [
+    {
+      "statement_id": "1-S008-1",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Consequently, it is recommended that operators of large-scale multi-user servers, especially ones in which the user's only access to the maildrop is via POP3, consider such options as:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server operator"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S008-001"
+    },
+    {
+      "statement_id": "2-S008-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Sites which choose this option should be sure to inform users of impending or current exhaustion of quota, perhaps by inserting an appropriate message into the user's maildrop.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server operator",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S008-002"
+    },
+    {
+      "statement_id": "3-S008-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Server operators enforcing message deletion policies should take care to make all users aware of the policies in force.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server operator",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S008-003"
+    },
+    {
+      "statement_id": "4-S008-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "Clients must not assume that a site policy will automate message deletions, and should continue to explicitly delete messages using the DELE command when appropriate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "message_deletion_needed",
+      "pre_cond": "protocol.state = TRANSACTION",
+      "post_cond": "client.dele_issued = true",
+      "actions": [
+        "do not rely on server-side policy to automate message deletions",
+        "explicitly issue DELE command for each message to be deleted"
+      ],
+      "modality": "must",
+      "id": "N-S008-004"
+    },
+    {
+      "statement_id": "5-S008-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "pop3",
+      "stage": "pop3_fsm",
+      "description": "It should be noted that enforcing site message deletion policies may be confusing to the user community, since their POP3 client may contain configuration options to leave mail on the server which will not in fact be supported by the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server operator",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S008-005"
+    },
+    {
+      "statement_id": "6-S008-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "One special case of a site policy is that messages may only be downloaded once from the server, and are deleted after this has been accomplished.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S008-006"
+    },
+    {
+      "statement_id": "7-S008-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "It is important not to delete messages in the event of abnormal connection termination (ie, if no QUIT was received from the client) because the client may not have successfully received or stored the messages.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S008",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "abnormal_connection_termination",
+      "pre_cond": "session.quit_received = false",
+      "post_cond": "session.messages_deleted = false",
+      "actions": [
+        "retain all messages downloaded via RETR during the session",
+        "do not perform UPDATE-phase deletions on abnormal termination"
+      ],
+      "modality": "may",
+      "id": "N-S008-007"
+    },
+    {
+      "statement_id": "8-S008-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Servers implementing a download-and-delete policy may also wish to disable or limit the optional TOP command, since it could be used as an alternate mechanism to download entire messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S008-008"
+    }
+  ]
+}

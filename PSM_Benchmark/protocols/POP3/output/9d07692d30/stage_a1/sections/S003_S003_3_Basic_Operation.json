@@ -1,0 +1,247 @@
+{
+  "section_id": "S003",
+  "title": "S003 3. Basic Operation",
+  "depth": 3,
+  "parent_path": [
+    "POP3",
+    "S003 3. Basic Operation"
+  ],
+  "url_anchor": "#s003-3-basic-operation",
+  "word_count": 612,
+  "statement_count": 11,
+  "elapsed_seconds": 75.29,
+  "statements": [
+    {
+      "statement_id": "D-S003-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the TCP connection has been opened and the POP3 server has sent the greeting, the session enters the AUTHORIZATION state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "state_name": "AUTHORIZATION",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.state = AUTHORIZATION"
+    },
+    {
+      "statement_id": "D-S003-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the client has successfully done this [identified itself to the POP3 server], the server acquires resources associated with the client's maildrop, and the session enters the TRANSACTION state. In this state, the client requests actions on the part of the POP3 server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "state_name": "TRANSACTION",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S003-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the client has issued the QUIT command, the session enters the UPDATE state. In this state, the POP3 server releases any resources acquired during the TRANSACTION state and says goodbye. The TCP connection is then closed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "state_name": "UPDATE",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = UPDATE"
+    },
+    {
+      "statement_id": "D-S003-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the TCP connection has been opened and the POP3 server has sent the greeting, the session enters the AUTHORIZATION state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "AUTHORIZATION",
+      "trigger": "TCP_connection_established",
+      "pre_cond": null,
+      "post_cond": "session.state = AUTHORIZATION",
+      "actions": [
+        "server sends greeting"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S003-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the client has successfully done this [identified itself], the server acquires resources associated with the client's maildrop, and the session enters the TRANSACTION state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "TRANSACTION",
+      "trigger": "client_identification_success",
+      "pre_cond": "session.state = AUTHORIZATION",
+      "post_cond": "session.state = TRANSACTION",
+      "actions": [
+        "server acquires resources associated with client's maildrop"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S003-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the client has issued the QUIT command, the session enters the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "UPDATE",
+      "trigger": "QUIT",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": "session.state = UPDATE",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S003-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "In this state [UPDATE], the POP3 server releases any resources acquired during the TRANSACTION state and says goodbye. The TCP connection is then closed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": "UPDATE",
+      "to_state": null,
+      "trigger": "update_processing_complete",
+      "pre_cond": "session.state = UPDATE",
+      "post_cond": null,
+      "actions": [
+        "server releases resources acquired during TRANSACTION state",
+        "server sends goodbye",
+        "TCP connection closed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S003-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the timer expires, the session does NOT enter the UPDATE state--the server should close the TCP connection without removing any messages or sending any response to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "inactivity_autologout_timer_expiry",
+      "pre_cond": null,
+      "post_cond": "session.state != UPDATE",
+      "actions": [
+        "server closes TCP connection without removing messages",
+        "server sends no response to client"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S003-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "A POP3 server MAY have an inactivity autologout timer. Such a timer MUST be of at least 10 minutes' duration. The receipt of any command from the client during that interval should suffice to reset the autologout timer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "object_name": "server",
+      "field_name": "inactivity_autologout_timer",
+      "field_type": "timer",
+      "required": false,
+      "allowed_values": "duration >= 10 minutes",
+      "guard_semantics": "reset on receipt of any client command"
+    },
+    {
+      "statement_id": "D-S003-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "A server MUST respond to an unrecognized, unimplemented, or syntactically invalid command by responding with a negative status indicator.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unrecognized_or_invalid_command_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "server responds with -ERR negative status indicator"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S003-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "A server MUST respond to a command issued when the session is in an incorrect state by responding with a negative status indicator.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_issued_in_incorrect_state",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "server responds with -ERR negative status indicator"
+      ],
+      "modality": "must"
+    }
+  ]
+}

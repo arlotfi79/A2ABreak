@@ -1,0 +1,191 @@
+{
+  "section_id": "S111",
+  "title": "S111 14.1 Measuring PMTU",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S111 14.1 Measuring PMTU"
+  ],
+  "url_anchor": "#s111-141-measuring-pmtu",
+  "word_count": 654,
+  "statement_count": 7,
+  "elapsed_seconds": 55.07,
+  "statements": [
+    {
+      "statement_id": "N-S111-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Each DCCP endpoint MUST keep track of the current PMTU for each connection, except that this is not required for IPv4 connections whose applications have requested fragmentation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "DCCP endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "!(connection.protocol = IPv4 & application.fragmentation_requested = true)",
+      "post_cond": "endpoint.pmtu_tracked = true",
+      "actions": [
+        "maintain current PMTU value per connection"
+      ],
+      "modality": "must",
+      "id": "N-S111-001"
+    },
+    {
+      "statement_id": "N-S111-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "The PMTU SHOULD be initialized from the interface MTU that will be used to send packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "DCCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_initialized",
+      "pre_cond": null,
+      "post_cond": "connection.pmtu = interface.mtu",
+      "actions": [
+        "initialize PMTU from outgoing interface MTU"
+      ],
+      "modality": "should",
+      "id": "N-S111-002"
+    },
+    {
+      "statement_id": "N-S111-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "dccp_fsm",
+      "description": "Such requests SHOULD be rate limited, to one per two seconds, for example.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "DCCP implementation",
+        "application"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "application_requests_pmtu_rediscovery",
+      "pre_cond": null,
+      "post_cond": "pmtu_rediscovery_request.rate <= 1_per_2_seconds",
+      "actions": [
+        "rate-limit PMTU rediscovery requests to at most one per two seconds"
+      ],
+      "modality": "should",
+      "id": "N-S111-003"
+    },
+    {
+      "statement_id": "N-S111-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A DCCP sender MAY treat the reception of an ICMP Datagram Too Big message as an indication that the packet being reported was not lost due to congestion, and so for the purposes of congestion control it MAY ignore the DCCP receiver's indication that this packet did not arrive.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "DCCP sender",
+        "DCCP receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_ICMP_Datagram_Too_Big",
+      "pre_cond": null,
+      "post_cond": "sender.congestion_loss_attributed = false",
+      "actions": [
+        "classify reported packet as not lost due to congestion",
+        "optionally ignore DCCP receiver indication that the reported packet did not arrive"
+      ],
+      "modality": "may",
+      "id": "N-S111-004"
+    },
+    {
+      "statement_id": "N-S111-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "However, if this is done, then the DCCP sender MUST check the ECN bits of the IP header echoed in the ICMP message and only perform this optimization if these ECN bits indicate that the packet did not experience congestion prior to reaching the router whose link MTU it exceeded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "DCCP sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_ICMP_Datagram_Too_Big & sender.applying_non_congestion_optimization = true",
+      "pre_cond": "sender.applying_non_congestion_optimization = true",
+      "post_cond": "sender.congestion_loss_attributed = false -> icmp.echoed_ip_header.ecn_bits.indicate_no_congestion = true",
+      "actions": [
+        "inspect ECN bits of IP header echoed in ICMP Datagram Too Big message",
+        "apply non-congestion optimization only if ECN bits indicate no congestion prior to the router"
+      ],
+      "modality": "must",
+      "id": "N-S111-005"
+    },
+    {
+      "statement_id": "N-S111-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "dccp",
+      "stage": "dccp_fsm",
+      "description": "A DCCP implementation SHOULD ensure, as far as possible, that ICMP Datagram Too Big messages were actually generated by routers, so that attackers cannot drive the PMTU down to a falsely small value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "DCCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_ICMP_Datagram_Too_Big",
+      "pre_cond": null,
+      "post_cond": "icmp.validated_as_router_generated = true",
+      "actions": [
+        "verify that the Sequence Number in the ICMP error's encapsulated header corresponds to a recently sent Sequence Number",
+        "reject or deprioritize ICMP Datagram Too Big messages with incorrect or missing Sequence Numbers"
+      ],
+      "modality": "should",
+      "id": "N-S111-006"
+    },
+    {
+      "statement_id": "N-S111-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "dccp",
+      "stage": "dccp_fsm",
+      "description": "If more than three odd Datagram Too Big messages are received and the other DCCP endpoint reports more than three lost packets, however, the DCCP implementation SHOULD assume the presence of a confused router and either obey the ICMP messages' PMTU or (on IPv4 networks) switch to allowing fragmentation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "DCCP implementation",
+        "DCCP endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_ICMP_Datagram_Too_Big",
+      "pre_cond": "odd_datagram_too_big_count > 3 & peer.reported_lost_packet_count > 3",
+      "post_cond": "endpoint.pmtu = icmp.pmtu | (connection.protocol = IPv4 & endpoint.fragmentation_allowed = true)",
+      "actions": [
+        "assume presence of a confused router",
+        "obey the ICMP messages' advertised PMTU",
+        "alternatively on IPv4 networks switch to allowing IP fragmentation"
+      ],
+      "modality": "should",
+      "id": "N-S111-007"
+    }
+  ]
+}

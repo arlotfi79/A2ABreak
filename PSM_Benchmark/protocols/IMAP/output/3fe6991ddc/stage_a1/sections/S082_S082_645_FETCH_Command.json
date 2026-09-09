@@ -1,0 +1,158 @@
+{
+  "section_id": "S082",
+  "title": "S082 6.4.5 FETCH Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S082 6.4.5 FETCH Command"
+  ],
+  "url_anchor": "#s082-645-fetch-command",
+  "word_count": 742,
+  "statement_count": 6,
+  "elapsed_seconds": 30.83,
+  "statements": [
+    {
+      "statement_id": "D-S082-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Result: OK - fetch completed",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S082",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "FETCH command",
+      "pre_cond": "session.state = Selected",
+      "post_cond": "server.sends_untagged_FETCH_responses = true",
+      "actions": [
+        "send untagged FETCH responses",
+        "send tagged OK response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S082-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Result: NO - fetch error: can't fetch that data",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S082",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "FETCH command (fetch error)",
+      "pre_cond": "session.state = Selected",
+      "post_cond": null,
+      "actions": [
+        "send tagged NO response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S082-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Result: BAD - command unknown or arguments invalid",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S082",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "FETCH command (unknown or invalid arguments)",
+      "pre_cond": "session.state = Selected",
+      "post_cond": null,
+      "actions": [
+        "send tagged BAD response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S082-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "The \\Seen flag is implicitly set; if this causes the flags to change, they SHOULD be included as part of the FETCH responses.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S082",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "FETCH BODY[<section>] command",
+      "pre_cond": "session.state = Selected & fetch_item = BODY_section",
+      "post_cond": "message.flag.Seen = true",
+      "actions": [
+        "implicitly set \\Seen flag",
+        "include flags in FETCH response if changed"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S082-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "BODY.PEEK[<section>]<<partial>> - An alternate form of BODY[<section>] that does not implicitly set the \\Seen flag.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S082",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "FETCH BODY.PEEK[<section>] command",
+      "pre_cond": "session.state = Selected & fetch_item = BODY_PEEK_section",
+      "post_cond": "message.flag.Seen = unchanged",
+      "actions": [
+        "send section body data without setting \\Seen flag"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S082-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "BINARY.PEEK[<section-binary>]<<partial>> - An alternate form of BINARY[<section-binary>] that does not implicitly set the \\Seen flag.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S082",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "FETCH BINARY.PEEK[<section-binary>] command",
+      "pre_cond": "session.state = Selected & fetch_item = BINARY_PEEK_section",
+      "post_cond": "message.flag.Seen = unchanged",
+      "actions": [
+        "send decoded section binary data without setting \\Seen flag"
+      ],
+      "modality": "must"
+    }
+  ]
+}

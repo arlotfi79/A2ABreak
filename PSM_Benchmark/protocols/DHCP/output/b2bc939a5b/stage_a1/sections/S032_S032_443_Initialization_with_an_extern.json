@@ -1,0 +1,123 @@
+{
+  "section_id": "S032",
+  "title": "S032 4.4.3 Initialization with an externally assigned network address",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S032 4.4.3 Initialization with an externally assigned network address"
+  ],
+  "url_anchor": "#s032-443-initialization-with-an-externally-assigned-network-address",
+  "word_count": 177,
+  "statement_count": 5,
+  "elapsed_seconds": 34.73,
+  "statements": [
+    {
+      "statement_id": "D-S032-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Once a DHCPACK message with an 'xid' field matching that in the client's DHCPINFORM message arrives from any server, the client is initialized.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "state_name": "INITIALIZED",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S032-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client sends a DHCPINFORM message. The client generates and records a random transaction identifier and inserts that identifier into the 'xid' field. The client places its own network address in the 'ciaddr' field.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S032",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "initialization with externally assigned network address",
+      "pre_cond": null,
+      "post_cond": "client.xid = recorded_transaction_id & message.ciaddr = client.network_address",
+      "actions": [
+        "generate and record random transaction identifier",
+        "insert transaction identifier into xid field",
+        "place own network address in ciaddr field",
+        "unicast DHCPINFORM to server if server address known, else broadcast to limited broadcast address"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S032-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Once a DHCPACK message with an 'xid' field matching that in the client's DHCPINFORM message arrives from any server, the client is initialized.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "INITIALIZED",
+      "trigger": "DHCPACK received",
+      "pre_cond": "message.type = DHCPACK & message.xid = client.xid",
+      "post_cond": "client.state = INITIALIZED",
+      "actions": [
+        "accept DHCPACK configuration parameters"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S032-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client does not receive a DHCPACK within a reasonable period of time (60 seconds or 4 tries if using timeout suggested in section 4.1), then it SHOULD display a message informing the user of the problem, and then SHOULD begin network processing using suitable defaults as per Appendix A.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S032",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPACK timeout (60 seconds or 4 tries)",
+      "pre_cond": "timer.elapsed >= 60 | retry.count >= 4",
+      "post_cond": null,
+      "actions": [
+        "display message informing user of the problem",
+        "begin network processing using suitable defaults"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S032-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "dhcp_fsm",
+      "description": "Once a DHCPACK message with an 'xid' field matching that in the client's DHCPINFORM message arrives from any server, the client is initialized.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S032",
+      "object_name": "DHCPACK",
+      "field_name": "xid",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "message.xid = client.xid"
+    }
+  ]
+}

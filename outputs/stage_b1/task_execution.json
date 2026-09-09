@@ -1,0 +1,4852 @@
+{
+  "stage": "task_execution",
+  "fsm_input": {
+    "states": [
+      {
+        "id": "D-2-2-010",
+        "state_name": null,
+        "semantic_type": null,
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "task_execution",
+        "source_section": "2.2"
+      },
+      {
+        "id": "D-3-5-001",
+        "state_name": "STREAM_ACTIVE",
+        "semantic_type": "active",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "stream.state = STREAM_ACTIVE",
+        "stage": "task_execution",
+        "source_section": "3.5.2"
+      },
+      {
+        "id": "D-4-1-001",
+        "state_name": "TASK_STATE_UNSPECIFIED",
+        "semantic_type": "unspecified",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "task_execution",
+        "source_section": "4.1.3"
+      },
+      {
+        "id": "D-4-1-003",
+        "state_name": "TASK_STATE_WORKING",
+        "semantic_type": "active",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "task_execution",
+        "source_section": "4.1.3"
+      },
+      {
+        "id": "D-4-1-010",
+        "state_name": "ROLE_UNSPECIFIED",
+        "semantic_type": "unspecified",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "task_execution",
+        "source_section": "4.1.5"
+      },
+      {
+        "id": "D-6-2-001",
+        "state_name": "TASK_STATE_WORKING",
+        "semantic_type": "active",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "task.state = TASK_STATE_WORKING",
+        "stage": "task_execution",
+        "source_section": "6.2"
+      },
+      {
+        "id": "D-6-3-001",
+        "state_name": "TASK_STATE_INPUT_REQUIRED",
+        "semantic_type": "interrupted",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "task_execution",
+        "source_section": "6.3"
+      },
+      {
+        "id": "D-6-5-002",
+        "state_name": "TASK_STATE_WORKING",
+        "semantic_type": "active",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "task_execution",
+        "source_section": "6.5"
+      },
+      {
+        "id": "D-11-7-001",
+        "state_name": "STREAM_STATE_OPEN",
+        "semantic_type": "initial",
+        "is_initial": true,
+        "is_final": false,
+        "invariant_cond": "stream.open = true",
+        "stage": "task_execution",
+        "source_section": "11.7"
+      }
+    ],
+    "transitions": [
+      {
+        "id": "N-3-3-027",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "get_extended_agent_card",
+        "pre_cond": "agent_card.capabilities.extendedAgentCard = false | agent_card.capabilities.extendedAgentCard = null",
+        "post_cond": "UnsupportedOperationError.returned = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-009",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "authorization_error",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-010",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "authorization_error",
+        "pre_cond": "client.authorized = false",
+        "post_cond": null,
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "D-3-1-039",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "SUBSCRIBE_TO_TASK_REQUESTED",
+        "to_state": "STREAM_OPEN",
+        "trigger": "subscribe_to_task_requested",
+        "pre_cond": "!task.state.is_terminal",
+        "post_cond": "stream.open = true & stream.first_event_type = Task",
+        "modality": "must",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.1.6"
+      },
+      {
+        "id": "D-3-1-043",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+        "to_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+        "trigger": "create_push_notification_config_requested",
+        "pre_cond": "agent supports push notifications capability",
+        "post_cond": "push_notification_config.exists = true & push_notification_config.webhook_established = true",
+        "modality": "MUST",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.1.7"
+      },
+      {
+        "id": "D-3-1-042",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+        "to_state": "PUSH_NOTIFICATION_CONFIG_DELETED",
+        "trigger": "delete_push_notification_config_requested",
+        "pre_cond": "push_notification_config.exists = true AND agent.supports_push_notifications = true",
+        "post_cond": "push_notification_config.exists = false AND no_further_notifications_sent = true AND operation_is_idempotent = true",
+        "modality": "must",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.1.10"
+      },
+      {
+        "id": "D-3-2-014",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_reaches_terminal_or_interrupted_state",
+        "pre_cond": "configuration.returnImmediately = false | configuration.returnImmediately = null",
+        "post_cond": "(task.state = COMPLETED | task.state = FAILED | task.state = CANCELED | task.state = REJECTED | task.state = INPUT_REQUIRED | task.state = AUTH_REQUIRED) & response.latest_task_state_included = true & response.all_artifacts_included = true",
+        "modality": "must",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.2.2"
+      },
+      {
+        "id": "N-3-2-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message_request_received",
+        "pre_cond": "acceptedOutputModes is provided in SendMessageConfiguration",
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.2.2"
+      },
+      {
+        "id": "N-3-2-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "response_generated",
+        "pre_cond": "configuration.historyLength != null",
+        "post_cond": "response.history.count <= configuration.historyLength",
+        "modality": "must_not",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.2.2"
+      },
+      {
+        "id": "N-3-2-004",
+        "category": "BEHAVIORAL",
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": null,
+        "trigger": "send_message_request_received",
+        "pre_cond": "configuration.returnImmediately = false | configuration.returnImmediately = null",
+        "post_cond": "task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED | task.state = TASK_STATE_INPUT_REQUIRED | task.state = TASK_STATE_AUTH_REQUIRED",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.2.2"
+      },
+      {
+        "id": "N-3-2-005",
+        "category": "BEHAVIORAL",
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": null,
+        "trigger": "send_message_request_received",
+        "pre_cond": "configuration.returnImmediately = false | configuration.returnImmediately = null",
+        "post_cond": "task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED | task.state = TASK_STATE_INPUT_REQUIRED | task.state = TASK_STATE_AUTH_REQUIRED",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.2.2"
+      },
+      {
+        "id": "N-3-2-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message_response_sent",
+        "pre_cond": "configuration.returnImmediately = false | configuration.returnImmediately = null",
+        "post_cond": "response.task.state != null & response.task.artifacts != null & response.task.status != null",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.2.2"
+      },
+      {
+        "id": "N-3-2-007",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message_request_received",
+        "pre_cond": "configuration.returnImmediately = true",
+        "post_cond": "response_sent = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.2.2"
+      },
+      {
+        "id": "N-3-2-008",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "stream_response_sent",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.2.3"
+      },
+      {
+        "id": "N-3-2-009",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "response_generated",
+        "pre_cond": "configuration.historyLength = 0",
+        "post_cond": "response.history = null",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.2.4"
+      },
+      {
+        "id": "N-3-3-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "error_condition",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-011",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "request_received",
+        "pre_cond": null,
+        "post_cond": "request.parameters.validated = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-012",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "validation_error",
+        "pre_cond": "request.parameters.valid = false",
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-013",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "validation_error",
+        "pre_cond": "request.parameters.valid = false",
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-014",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "resource_request",
+        "pre_cond": "resource.exists = false | resource.accessible = false",
+        "post_cond": null,
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-015",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "resource_request",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-016",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "system_error",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-017",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "system_error",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-018",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "system_error",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-021",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "error_response",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-022",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "error_response",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-023",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message",
+        "pre_cond": "task.state != TASK_STATE_COMPLETED & task.state != TASK_STATE_FAILED & task.state != TASK_STATE_CANCELED",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-024",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "capability_required_operation",
+        "pre_cond": "operation.requires_capability = true & agent_card.capabilities.declared = false",
+        "post_cond": null,
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-025",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "push_notification_operation",
+        "pre_cond": "agent_card.capabilities.pushNotifications = false | agent_card.capabilities.pushNotifications = null",
+        "post_cond": "PushNotificationNotSupportedError.returned = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-026",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "streaming_operation",
+        "pre_cond": "agent_card.capabilities.streaming = false | agent_card.capabilities.streaming = null",
+        "post_cond": "UnsupportedOperationError.returned = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "D-3-3-012",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_streaming_message",
+        "pre_cond": "AgentCard.capabilities.streaming = false | !AgentCard.capabilities.streaming.present",
+        "post_cond": "UnsupportedOperationError.returned = true",
+        "modality": "must",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.3.4"
+      },
+      {
+        "id": "N-3-4-014",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message",
+        "pre_cond": "message.taskId != null",
+        "post_cond": "task.exists = true",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-015",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_message",
+        "pre_cond": "message.taskId != null & task.exists = false",
+        "post_cond": "response.error_type = TaskNotFoundError",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-016",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-017",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message",
+        "pre_cond": "message.taskId != null",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-019",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_message",
+        "pre_cond": "message.taskId != null & message.contextId = null",
+        "post_cond": "request.contextId = task.contextId",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-020",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_message",
+        "pre_cond": "message.contextId != null & message.taskId != null & message.contextId != task.contextId",
+        "post_cond": "response.type = error",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-021",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_message",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-022",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_message",
+        "pre_cond": "message.referenceTaskIds != null",
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "N-3-4-023",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_message",
+        "pre_cond": "message.contextId != null",
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.4"
+      },
+      {
+        "id": "D-3-4-008",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TASK_STATE_INPUT_REQUIRED",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "message_received",
+        "pre_cond": "task.state = TASK_STATE_INPUT_REQUIRED & message.taskId = task.taskId & message.contextId = task.contextId",
+        "post_cond": "task.state = TASK_STATE_WORKING",
+        "modality": "can",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.4.3"
+      },
+      {
+        "id": "N-3-5-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_event_generated",
+        "pre_cond": null,
+        "post_cond": "event.delivery_order = event.generation_order",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.5"
+      },
+      {
+        "id": "N-3-5-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_event_generated",
+        "pre_cond": null,
+        "post_cond": "event.order_preserved = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.5"
+      },
+      {
+        "id": "N-3-5-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "stream_subscription_request",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server",
+          "client"
+        ],
+        "source_section": "3.5"
+      },
+      {
+        "id": "N-3-5-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_event_generated",
+        "pre_cond": "stream.active = true",
+        "post_cond": "event.delivered_to_all_active_streams = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.5"
+      },
+      {
+        "id": "N-3-5-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_event_generated",
+        "pre_cond": "stream.active = true",
+        "post_cond": "stream.received_events = task.generated_events & stream.event_order = task.event_generation_order",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.5"
+      },
+      {
+        "id": "N-3-5-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "stream_closed",
+        "pre_cond": "stream.active = true",
+        "post_cond": null,
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.5"
+      },
+      {
+        "id": "D-3-5-005",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "STREAM_ACTIVE",
+        "to_state": "STREAM_ACTIVE",
+        "trigger": "task_event_generated",
+        "pre_cond": "stream.state = STREAM_ACTIVE",
+        "post_cond": "event_delivered_to_stream & event_order_preserved",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.5.2"
+      },
+      {
+        "id": "D-3-5-006",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "STREAM_ACTIVE",
+        "trigger": "stream_open",
+        "pre_cond": null,
+        "post_cond": "stream.state = STREAM_ACTIVE",
+        "modality": "may",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.5.2"
+      },
+      {
+        "id": "N-3-6-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_request",
+        "pre_cond": "request.A2A-Version.present = true",
+        "post_cond": "server.processing_semantics = request.A2A-Version",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.6"
+      },
+      {
+        "id": "D-3-7-004",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "client_sends_message",
+        "pre_cond": "task.created = true & task.ongoing = true",
+        "post_cond": null,
+        "modality": "SHOULD",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.7"
+      },
+      {
+        "id": "N-3-7-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "stream_reconnect",
+        "pre_cond": "client.streaming = true & client.disconnected = true",
+        "post_cond": "stream.open = true & messages.possibly_missed = true",
+        "modality": "may",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "3.7"
+      },
+      {
+        "id": "D-4-1-045",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TASK_STATE_SUBMITTED or TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_REJECTED",
+        "trigger": "agent_rejects_task",
+        "pre_cond": "task.state IN (TASK_STATE_SUBMITTED, TASK_STATE_WORKING)",
+        "post_cond": "task.state = TASK_STATE_REJECTED",
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "4.1.3"
+      },
+      {
+        "id": "D-4-2-011",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "TaskStatusUpdateEvent",
+        "pre_cond": null,
+        "post_cond": "task.status = TaskStatusUpdateEvent.status",
+        "modality": "unspecified",
+        "actors": [
+          "agent",
+          "client"
+        ],
+        "source_section": "4.2.1"
+      },
+      {
+        "id": "N-4-3-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_request_sent",
+        "pre_cond": "push_notification_config.authentication != null",
+        "post_cond": "request.headers.authorization != null",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "4.3"
+      },
+      {
+        "id": "N-4-3-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_request_received",
+        "pre_cond": null,
+        "post_cond": "response.status_code >= 200 & response.status_code < 300",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "4.3"
+      },
+      {
+        "id": "N-4-3-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_request_received",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "4.3"
+      },
+      {
+        "id": "N-4-3-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_request_received",
+        "pre_cond": null,
+        "post_cond": "notification.task_id = expected_task.id",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "4.3"
+      },
+      {
+        "id": "N-4-3-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_request_received",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "4.3"
+      },
+      {
+        "id": "N-4-3-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_update_occurred",
+        "pre_cond": "push_notification_config.url != null",
+        "post_cond": "push_notification.delivery_attempts >= 1",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "4.3"
+      },
+      {
+        "id": "N-4-3-007",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_delivery_failed",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "4.3"
+      },
+      {
+        "id": "N-4-3-008",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_request_sent",
+        "pre_cond": null,
+        "post_cond": "webhook_request.timeout != null",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "4.3"
+      },
+      {
+        "id": "N-4-3-009",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_delivery_failed",
+        "pre_cond": "push_notification.consecutive_failures >= push_notification_config.max_retries",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "4.3"
+      },
+      {
+        "id": "D-4-3-004",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_update_occurs",
+        "pre_cond": "push_notification_config.webhook_url != null & push_notification_config.authentication != null",
+        "post_cond": "http_post.sent = true & http_post.authorization_header_present = true & http_post.body.type = StreamResponse",
+        "modality": "must",
+        "actors": [
+          "agent"
+        ],
+        "source_section": "4.3.3"
+      },
+      {
+        "id": "D-4-3-005",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "push_notification_received",
+        "pre_cond": null,
+        "post_cond": "client.response_status >= 200 & client.response_status < 300 & client.task_id_validated = true",
+        "modality": "mixed",
+        "actors": [
+          "client"
+        ],
+        "source_section": "4.3.3"
+      },
+      {
+        "id": "D-4-3-006",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "push_notification_delivery_failed",
+        "pre_cond": "http_post.sent = true & client.response_status < 200 | client.response_status >= 300",
+        "post_cond": "push_notification.delivery_attempts >= 1",
+        "modality": "must",
+        "actors": [
+          "agent"
+        ],
+        "source_section": "4.3.3"
+      },
+      {
+        "id": "N-4-6-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "extension_requested",
+        "pre_cond": "client.requested_extension = true & server.supports_extension = false & extension.required = false",
+        "post_cond": "extension.active = false",
+        "modality": "should",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "4.6"
+      },
+      {
+        "id": "N-4-6-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "extension_requested",
+        "pre_cond": "client.requested_extension = true & server.supports_extension = false",
+        "post_cond": "extension.fallback_to_previous_version = false",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "4.6"
+      },
+      {
+        "id": "D-4-6-010",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "extension_version_not_supported",
+        "pre_cond": "extension.required = true",
+        "post_cond": "error_returned = true & error.type = unsupported_extension",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "4.6.3"
+      },
+      {
+        "id": "D-6-1-002",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "TASK_STATE_COMPLETED",
+        "trigger": "message_send",
+        "pre_cond": null,
+        "post_cond": "task.state = TASK_STATE_COMPLETED & task.artifacts != null",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "6.1"
+      },
+      {
+        "id": "D-6-2-010",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TASK_STATE_WORKING",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "artifactUpdate",
+        "pre_cond": "task.state = TASK_STATE_WORKING & stream.open = true",
+        "post_cond": "task.state = TASK_STATE_WORKING",
+        "modality": "unspecified",
+        "actors": [
+          "server"
+        ],
+        "source_section": "6.2"
+      },
+      {
+        "id": "D-6-3-005",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "TASK_STATE_INPUT_REQUIRED",
+        "trigger": "message_send",
+        "pre_cond": null,
+        "post_cond": "task.state = TASK_STATE_INPUT_REQUIRED & task.status.message != null",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "6.3"
+      },
+      {
+        "id": "D-6-3-006",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TASK_STATE_INPUT_REQUIRED",
+        "to_state": null,
+        "trigger": "message_send",
+        "pre_cond": "task.state = TASK_STATE_INPUT_REQUIRED & message.taskId != null",
+        "post_cond": null,
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "6.3"
+      },
+      {
+        "id": "D-6-7-010",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "TASK_STATE_COMPLETED",
+        "trigger": "message_send",
+        "pre_cond": "message.parts contains Part with text != null & message.parts contains Part with raw != null",
+        "post_cond": "task.status.state = TASK_STATE_COMPLETED & task.artifacts != null & task.artifacts[0].parts[0].url != null",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "6.7"
+      },
+      {
+        "id": "D-6-8-009",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": "TASK_STATE_COMPLETED",
+        "trigger": "message_send",
+        "pre_cond": "part.metadata.mediaType = 'application/json' & part.metadata.schema != null",
+        "post_cond": "task.state = TASK_STATE_COMPLETED & task.artifacts != null & task.artifacts[0].parts[0].text != null",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "6.8"
+      },
+      {
+        "id": "N-7-6-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "authorization_required",
+        "pre_cond": null,
+        "post_cond": "task.exists = true",
+        "modality": "must",
+        "actors": [
+          "agent"
+        ],
+        "source_section": "7.6.1"
+      },
+      {
+        "id": "N-9-2-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_request",
+        "pre_cond": null,
+        "post_cond": "request.service_parameters.transport = HTTP_headers",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "9.2"
+      },
+      {
+        "id": "N-9-2-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_request",
+        "pre_cond": null,
+        "post_cond": "request.service_parameter_names.encoding = HTTP_header_fields",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "9.2"
+      },
+      {
+        "id": "N-9-2-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_request",
+        "pre_cond": "request.service_parameter.value_count > 1",
+        "post_cond": "request.service_parameter.values.format = comma_separated & request.service_parameter.header_count = 1",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "9.2"
+      },
+      {
+        "id": "D-9-4-012",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "SendStreamingMessage",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "9.4.2"
+      },
+      {
+        "id": "D-9-4-014",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "SubscribeToTask",
+        "pre_cond": "!(task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED)",
+        "post_cond": "stream.open = true",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "9.4.6"
+      },
+      {
+        "id": "D-9-4-015",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "SubscribeToTask",
+        "pre_cond": "task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED",
+        "post_cond": "error = UnsupportedOperationError",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "9.4.6"
+      },
+      {
+        "id": "N-9-5-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "error_response_sent",
+        "pre_cond": null,
+        "post_cond": "error.data.object.@type != null",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "9.5"
+      },
+      {
+        "id": "N-10-2-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_grpc_request",
+        "pre_cond": "request.transport = gRPC",
+        "post_cond": "service_parameters.extracted = true",
+        "modality": "must",
+        "actors": [
+          "server",
+          "client"
+        ],
+        "source_section": "10.2"
+      },
+      {
+        "id": "N-10-2-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "receive_grpc_request",
+        "pre_cond": "request.transport = gRPC & service_parameters.extracted = true",
+        "post_cond": "service_parameters.required.validated = true",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "10.2"
+      },
+      {
+        "id": "D-10-3-016",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "completed | failed | canceled | rejected",
+        "to_state": null,
+        "trigger": "SubscribeToTask",
+        "pre_cond": "task.state = completed | task.state = failed | task.state = canceled | task.state = rejected",
+        "post_cond": "response.error.type = UnsupportedOperationError",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "10.3"
+      },
+      {
+        "id": "D-10-3-017",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "not_terminal",
+        "to_state": null,
+        "trigger": "SubscribeToTask",
+        "pre_cond": "!(task.state = completed | task.state = failed | task.state = canceled | task.state = rejected)",
+        "post_cond": "stream.open = true",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "10.3"
+      },
+      {
+        "id": "D-10-4-045",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TASK_TERMINAL_STATE",
+        "to_state": null,
+        "trigger": "subscribe_to_task_request",
+        "pre_cond": "task.state = TASK_TERMINAL_STATE",
+        "post_cond": "response.error = UnsupportedOperationError",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "10.4.6"
+      },
+      {
+        "id": "N-10-6-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "grpc_error_response",
+        "pre_cond": "error.category = A2A_SPECIFIC",
+        "post_cond": "status.details.contains_ErrorInfo = true & status.details.ErrorInfo.domain = a2a-protocol.org",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "10.6"
+      },
+      {
+        "id": "N-11-2-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "send_http_request",
+        "pre_cond": "request.transport = HTTP",
+        "post_cond": "request.service_parameters.location = HTTP_headers",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "11.2"
+      },
+      {
+        "id": "D-11-3-012",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TASK_STATE_TERMINAL",
+        "to_state": "TASK_STATE_TERMINAL",
+        "trigger": "task_subscribe_request",
+        "pre_cond": "task.is_terminal = true",
+        "post_cond": "response.is_error = true & task.state = task.state",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "11.3.2"
+      },
+      {
+        "id": "D-11-3-013",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_cancel_request",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "11.3.2"
+      },
+      {
+        "id": "N-11-5-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "http_request_sent",
+        "pre_cond": "request.method = GET | request.method = DELETE",
+        "post_cond": "request.parameters_in = path_parameters | request.parameters_in = query_parameters",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "11.5"
+      },
+      {
+        "id": "N-11-5-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "http_request_sent",
+        "pre_cond": "request.has_query_parameters = true",
+        "post_cond": "query_parameter.name.format = camelCase",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "11.5"
+      },
+      {
+        "id": "N-11-5-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "http_request_sent",
+        "pre_cond": "field.type = repeated",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "client"
+        ],
+        "source_section": "11.5"
+      },
+      {
+        "id": "N-11-5-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "http_request_sent",
+        "pre_cond": "operation.requires_nested_objects = true",
+        "post_cond": "request.method = POST & request.has_body = true",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "11.5"
+      },
+      {
+        "id": "N-11-5-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "http_request_sent",
+        "pre_cond": "request.has_query_parameters = true",
+        "post_cond": "query_parameter.value.encoding = RFC3986",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "11.5"
+      },
+      {
+        "id": "N-11-6-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "error_response_sent",
+        "pre_cond": null,
+        "post_cond": "error.details.object.type_key_present = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "11.6"
+      },
+      {
+        "id": "N-11-6-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "validation_error",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "11.6"
+      },
+      {
+        "id": "N-11-6-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "error_response_sent",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "11.6"
+      },
+      {
+        "id": "N-11-6-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "a2a_specific_error_response_sent",
+        "pre_cond": "error.type = A2A_SPECIFIC",
+        "post_cond": "error.details.contains_ErrorInfo = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "11.6"
+      },
+      {
+        "id": "N-13-1-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "tasks_list_request",
+        "pre_cond": "client.authenticated = true",
+        "post_cond": "response.tasks = tasks_visible_to(client) & response.tasks.scope = caller.authorized_access_boundaries",
+        "modality": "must",
+        "actors": [
+          "server",
+          "client"
+        ],
+        "source_section": "13.1"
+      },
+      {
+        "id": "N-13-1-007",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "tasks_get_request",
+        "pre_cond": "client.authenticated = true",
+        "post_cond": "client.task_access_verified = true",
+        "modality": "must",
+        "actors": [
+          "server",
+          "client"
+        ],
+        "source_section": "13.1"
+      },
+      {
+        "id": "N-13-1-008",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "task_operation_request",
+        "pre_cond": "caller.authenticated = true",
+        "post_cond": "client.access_rights_verified = true",
+        "modality": "must",
+        "actors": [
+          "server",
+          "client"
+        ],
+        "source_section": "13.1"
+      },
+      {
+        "id": "D-13-2-002",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+        "to_state": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+        "trigger": "consecutive_delivery_failures_threshold_reached",
+        "pre_cond": "push_notification.consecutive_failures >= push_notification.configured_failure_limit",
+        "post_cond": "push_notification.delivery_active = false",
+        "modality": "may",
+        "actors": [
+          "agent"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "D-13-2-003",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "PUSH_NOTIFICATION_RECEIVED",
+        "to_state": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+        "trigger": "webhook_request_received",
+        "pre_cond": "webhook_request received with authentication credentials present",
+        "post_cond": "push_notification.http_response_status >= 200 & push_notification.http_response_status < 300",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "D-13-2-005",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": null,
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "SHOULD",
+        "actors": null,
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "push_notification_sent",
+        "pre_cond": null,
+        "post_cond": "webhook_request.authentication = push_notification_config.authentication",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "push_notification_sent",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_delivery_failed",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "push_notification_config_received",
+        "pre_cond": null,
+        "post_cond": "push_notification_config.url.validated = true",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_received",
+        "pre_cond": null,
+        "post_cond": "webhook.authenticity_validated = true",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-007",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_received",
+        "pre_cond": null,
+        "post_cond": "webhook_payload.task_id = client.expected_task_id",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-010",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "webhook_received",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-011",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "push_notification_config_set",
+        "pre_cond": null,
+        "post_cond": "push_notification_config.url.scheme = HTTPS",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-012",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "push_notification_config_set",
+        "pre_cond": null,
+        "post_cond": "push_notification_config.url.scheme = HTTPS",
+        "modality": "should",
+        "actors": [
+          "client",
+          "agent"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-2-015",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "push_notification_config_set",
+        "pre_cond": null,
+        "post_cond": "push_notification_config.token.unique = true & push_notification_config.token.single_purpose = true",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "13.2"
+      },
+      {
+        "id": "N-13-4-018",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "rate_limit_exceeded",
+        "pre_cond": "rate_limit.exceeded = true",
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "agent"
+        ],
+        "source_section": "13.4"
+      },
+      {
+        "id": "N-14-1-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "message_received",
+        "pre_cond": "message.contains_file_references = true",
+        "post_cond": "message.file_references.validated = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "14.1"
+      }
+    ]
+  },
+  "statements": [
+    {
+      "statement_id": "N-3-3-027",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "If AgentCard.capabilities.extendedAgentCard is false or not present, attempts to call the Get Extended Agent Card operation MUST return UnsupportedOperationError.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card",
+      "pre_cond": "agent_card.capabilities.extendedAgentCard = false | agent_card.capabilities.extendedAgentCard = null",
+      "post_cond": "UnsupportedOperationError.returned = true",
+      "actions": [
+        "Return UnsupportedOperationError"
+      ],
+      "modality": "must",
+      "id": "N-3-3-027"
+    },
+    {
+      "statement_id": "N-3-3-009",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers SHOULD indicate what permission or scope is missing (without leaking sensitive information about resources the client cannot access)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authorization_error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Indicate the missing permission or scope in the error response without leaking sensitive information about resources the client cannot access"
+      ],
+      "modality": "should",
+      "id": "N-3-3-009"
+    },
+    {
+      "statement_id": "N-3-3-010",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers MUST NOT reveal the existence of resources the client is not authorized to access",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authorization_error",
+      "pre_cond": "client.authorized = false",
+      "post_cond": null,
+      "actions": [
+        "Suppress any indication of the existence of resources the client is not authorized to access"
+      ],
+      "modality": "must",
+      "id": "N-3-3-010"
+    },
+    {
+      "statement_id": "D-2-2-010",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "artifact",
+      "stage": "task_execution",
+      "description": "Artifact: An output (e.g., a document, image, structured data) generated by the agent as a result of a task, composed of Parts.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "2.2",
+      "object_name": "Artifact",
+      "field_name": "parts",
+      "field_type": "array of Part",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-3-1-039",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "The operation MUST return a Task object as the first event in the stream, representing the current state of the task at the time of subscription. This prevents a potential loss of information between a call to GetTask and calling SubscribeToTask.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "3.1.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "SUBSCRIBE_TO_TASK_REQUESTED",
+      "to_state": "STREAM_OPEN",
+      "trigger": "subscribe_to_task_requested",
+      "pre_cond": "!task.state.is_terminal",
+      "post_cond": "stream.open = true & stream.first_event_type = Task",
+      "actions": [
+        "streaming connection established",
+        "Task object with current state emitted as first stream event"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-1-043",
+      "normative_level": "MUST",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "The operation MUST establish a webhook endpoint for task update notifications. When task updates occur, the agent will send HTTP POST requests to the configured webhook URL with StreamResponse payloads. The configuration MUST persist until task completion or explicit deletion.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "3.1.7",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+      "to_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "trigger": "create_push_notification_config_requested",
+      "pre_cond": "agent supports push notifications capability",
+      "post_cond": "push_notification_config.exists = true & push_notification_config.webhook_established = true",
+      "actions": [
+        "webhook endpoint established for task update notifications",
+        "configuration persists until task completion or explicit deletion"
+      ],
+      "modality": "MUST"
+    },
+    {
+      "statement_id": "D-3-1-042",
+      "normative_level": "CONSTRAINT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "The operation MUST permanently remove the specified push notification configuration. No further notifications will be sent to the configured webhook after deletion. This operation MUST be idempotent - multiple deletions of the same config have the same effect.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "3.1.10",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "PUSH_NOTIFICATION_CONFIG_ACTIVE",
+      "to_state": "PUSH_NOTIFICATION_CONFIG_DELETED",
+      "trigger": "delete_push_notification_config_requested",
+      "pre_cond": "push_notification_config.exists = true AND agent.supports_push_notifications = true",
+      "post_cond": "push_notification_config.exists = false AND no_further_notifications_sent = true AND operation_is_idempotent = true",
+      "actions": [
+        "push notification configuration permanently removed",
+        "no further HTTP POST notifications sent to configured webhook URL",
+        "operation is idempotent — repeated deletions produce the same effect"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-2-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Blocking (return_immediately: false or unset): The operation MUST wait until the task reaches a terminal state (COMPLETED, FAILED, CANCELED, REJECTED) or an interrupted state (INPUT_REQUIRED, AUTH_REQUIRED) before returning. The response MUST include the latest task state with all artifacts and status information. This is the default behavior.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "3.2.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_reaches_terminal_or_interrupted_state",
+      "pre_cond": "configuration.returnImmediately = false | configuration.returnImmediately = null",
+      "post_cond": "(task.state = COMPLETED | task.state = FAILED | task.state = CANCELED | task.state = REJECTED | task.state = INPUT_REQUIRED | task.state = AUTH_REQUIRED) & response.latest_task_state_included = true & response.all_artifacts_included = true",
+      "actions": [
+        "Block operation until task reaches a terminal state (COMPLETED, FAILED, CANCELED, REJECTED) or interrupted state (INPUT_REQUIRED, AUTH_REQUIRED)",
+        "Return response containing latest task state with all artifacts and status information"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "N-3-2-001",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "task_execution",
+      "description": "Agents SHOULD use this to tailor their output.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.2.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message_request_received",
+      "pre_cond": "acceptedOutputModes is provided in SendMessageConfiguration",
+      "post_cond": null,
+      "actions": [
+        "Tailor output based on the acceptedOutputModes list provided by the client"
+      ],
+      "modality": "should",
+      "id": "N-3-2-001"
+    },
+    {
+      "statement_id": "N-3-2-002",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "The server MUST NOT return more messages than the provided value, but MAY apply a lower limit.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.2.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_generated",
+      "pre_cond": "configuration.historyLength != null",
+      "post_cond": "response.history.count <= configuration.historyLength",
+      "actions": [
+        "Ensure the number of returned messages does not exceed the historyLength value"
+      ],
+      "modality": "must_not",
+      "id": "N-3-2-002"
+    },
+    {
+      "statement_id": "N-3-2-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "If false (default), the operation MUST wait until the task reaches a terminal (COMPLETED, FAILED, CANCELED, REJECTED) or interrupted (INPUT_REQUIRED, AUTH_REQUIRED) state before returning.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.2.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": null,
+      "trigger": "send_message_request_received",
+      "pre_cond": "configuration.returnImmediately = false | configuration.returnImmediately = null",
+      "post_cond": "task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED | task.state = TASK_STATE_INPUT_REQUIRED | task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Block the operation from returning until the task reaches a terminal or interrupted state"
+      ],
+      "modality": "must",
+      "id": "N-3-2-004"
+    },
+    {
+      "statement_id": "N-3-2-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "The operation MUST wait until the task reaches a terminal state (COMPLETED, FAILED, CANCELED, REJECTED) or an interrupted state (INPUT_REQUIRED, AUTH_REQUIRED) before returning.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.2.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": null,
+      "trigger": "send_message_request_received",
+      "pre_cond": "configuration.returnImmediately = false | configuration.returnImmediately = null",
+      "post_cond": "task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED | task.state = TASK_STATE_INPUT_REQUIRED | task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Block the operation from returning until the task reaches a terminal or interrupted state"
+      ],
+      "modality": "must",
+      "id": "N-3-2-005"
+    },
+    {
+      "statement_id": "N-3-2-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "The response MUST include the latest task state with all artifacts and status information.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.2.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message_response_sent",
+      "pre_cond": "configuration.returnImmediately = false | configuration.returnImmediately = null",
+      "post_cond": "response.task.state != null & response.task.artifacts != null & response.task.status != null",
+      "actions": [
+        "Include latest task state in the response",
+        "Include all artifacts in the response",
+        "Include status information in the response"
+      ],
+      "modality": "must",
+      "id": "N-3-2-006"
+    },
+    {
+      "statement_id": "N-3-2-007",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "The operation MUST return immediately after creating the task, even if processing is still in progress.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.2.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message_request_received",
+      "pre_cond": "configuration.returnImmediately = true",
+      "post_cond": "response_sent = true",
+      "actions": [
+        "Return response immediately after task creation without waiting for task completion"
+      ],
+      "modality": "must",
+      "id": "N-3-2-007"
+    },
+    {
+      "statement_id": "N-3-2-008",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "A StreamResponse MUST contain exactly one of the following: task, message, statusUpdate, artifactUpdate",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.2.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "stream_response_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Include exactly one of: task, message, statusUpdate, artifactUpdate in each StreamResponse object"
+      ],
+      "modality": "must",
+      "id": "N-3-2-008"
+    },
+    {
+      "statement_id": "N-3-2-009",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "0: No history should be returned; the history field SHOULD be omitted",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.2.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_generated",
+      "pre_cond": "configuration.historyLength = 0",
+      "post_cond": "response.history = null",
+      "actions": [
+        "Omit the history field from the response when historyLength is 0"
+      ],
+      "modality": "should",
+      "id": "N-3-2-009"
+    },
+    {
+      "statement_id": "N-3-3-003",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers MUST return appropriate errors and SHOULD provide actionable information to help clients resolve issues.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "error_condition",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Return appropriate errors to clients"
+      ],
+      "modality": "must",
+      "id": "N-3-3-003"
+    },
+    {
+      "statement_id": "N-3-3-011",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers MUST validate all input parameters before processing",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": null,
+      "post_cond": "request.parameters.validated = true",
+      "actions": [
+        "Validate all input parameters before processing the request"
+      ],
+      "modality": "must",
+      "id": "N-3-3-011"
+    },
+    {
+      "statement_id": "N-3-3-012",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers SHOULD specify which parameter(s) failed validation and why",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "validation_error",
+      "pre_cond": "request.parameters.valid = false",
+      "post_cond": null,
+      "actions": [
+        "Identify which parameter(s) failed validation and provide the reason in the error response"
+      ],
+      "modality": "should",
+      "id": "N-3-3-012"
+    },
+    {
+      "statement_id": "N-3-3-013",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers SHOULD provide guidance on valid parameter values or formats",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "validation_error",
+      "pre_cond": "request.parameters.valid = false",
+      "post_cond": null,
+      "actions": [
+        "Provide guidance on valid parameter values or formats in the error response"
+      ],
+      "modality": "should",
+      "id": "N-3-3-013"
+    },
+    {
+      "statement_id": "N-3-3-014",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers MUST return a not found error when a requested resource does not exist or is not accessible to the authenticated client",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "resource_request",
+      "pre_cond": "resource.exists = false | resource.accessible = false",
+      "post_cond": null,
+      "actions": [
+        "Return a not found error"
+      ],
+      "modality": "must",
+      "id": "N-3-3-014"
+    },
+    {
+      "statement_id": "N-3-3-015",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers SHOULD NOT distinguish between \"does not exist\" and \"not authorized\" to prevent information leakage",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "resource_request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Return the same error response for non-existent and unauthorized resources to prevent information leakage"
+      ],
+      "modality": "should",
+      "id": "N-3-3-015"
+    },
+    {
+      "statement_id": "N-3-3-016",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers SHOULD return appropriate error codes for temporary failures vs. permanent errors",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "system_error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Return error codes that distinguish between temporary failures and permanent errors"
+      ],
+      "modality": "should",
+      "id": "N-3-3-016"
+    },
+    {
+      "statement_id": "N-3-3-017",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers MAY include retry guidance (e.g., Retry-After header in HTTP)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "system_error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Include retry guidance (e.g., Retry-After header in HTTP) in the error response"
+      ],
+      "modality": "may",
+      "id": "N-3-3-017"
+    },
+    {
+      "statement_id": "N-3-3-018",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers SHOULD log system errors for diagnostic purposes",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "system_error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Log system errors for diagnostic purposes"
+      ],
+      "modality": "should",
+      "id": "N-3-3-018"
+    },
+    {
+      "statement_id": "N-3-3-021",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Well-known types from the google.rpc error model (e.g., ErrorInfo, BadRequest) SHOULD be used where applicable.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "error_response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Use well-known types from the google.rpc error model (e.g., ErrorInfo, BadRequest) in error detail objects where applicable"
+      ],
+      "modality": "should",
+      "id": "N-3-3-021"
+    },
+    {
+      "statement_id": "N-3-3-022",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Protocol bindings MUST map these elements to their native error representations while preserving semantic meaning.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "error_response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Map error code, error message, and error details to the native error representation of the protocol binding",
+        "Preserve the semantic meaning of all error elements during mapping"
+      ],
+      "modality": "must",
+      "id": "N-3-3-022"
+    },
+    {
+      "statement_id": "N-3-3-023",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "task_execution",
+      "description": "Agents MAY accept additional messages for tasks in non-terminal states to enable multi-turn interactions (see Section 3.4).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message",
+      "pre_cond": "task.state != TASK_STATE_COMPLETED & task.state != TASK_STATE_FAILED & task.state != TASK_STATE_CANCELED",
+      "post_cond": null,
+      "actions": [
+        "Accept additional messages for tasks in non-terminal states to support multi-turn interactions"
+      ],
+      "modality": "may",
+      "id": "N-3-3-023"
+    },
+    {
+      "statement_id": "N-3-3-024",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "When clients attempt to use operations or features that require capabilities not declared as supported in the Agent Card, the agent MUST return an appropriate error response:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "capability_required_operation",
+      "pre_cond": "operation.requires_capability = true & agent_card.capabilities.declared = false",
+      "post_cond": null,
+      "actions": [
+        "Return an appropriate error response indicating the capability is not supported"
+      ],
+      "modality": "must",
+      "id": "N-3-3-024"
+    },
+    {
+      "statement_id": "N-3-3-025",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "If AgentCard.capabilities.pushNotifications is false or not present, operations related to push notification configuration (Create, Get, List, Delete) MUST return PushNotificationNotSupportedError.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_operation",
+      "pre_cond": "agent_card.capabilities.pushNotifications = false | agent_card.capabilities.pushNotifications = null",
+      "post_cond": "PushNotificationNotSupportedError.returned = true",
+      "actions": [
+        "Return PushNotificationNotSupportedError"
+      ],
+      "modality": "must",
+      "id": "N-3-3-025"
+    },
+    {
+      "statement_id": "N-3-3-026",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "If AgentCard.capabilities.streaming is false or not present, attempts to use SendStreamingMessage or SubscribeToTask operations MUST return UnsupportedOperationError.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "streaming_operation",
+      "pre_cond": "agent_card.capabilities.streaming = false | agent_card.capabilities.streaming = null",
+      "post_cond": "UnsupportedOperationError.returned = true",
+      "actions": [
+        "Return UnsupportedOperationError for SendStreamingMessage or SubscribeToTask operations"
+      ],
+      "modality": "must",
+      "id": "N-3-3-026"
+    },
+    {
+      "statement_id": "D-3-3-012",
+      "normative_level": "CONSTRAINT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "If AgentCard.capabilities.streaming is false or not present, attempts to use SendStreamingMessage or SubscribeToTask operations MUST return UnsupportedOperationError.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "3.3.4",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_streaming_message",
+      "pre_cond": "AgentCard.capabilities.streaming = false | !AgentCard.capabilities.streaming.present",
+      "post_cond": "UnsupportedOperationError.returned = true",
+      "actions": [
+        "Server returns UnsupportedOperationError for SendStreamingMessage or SubscribeToTask"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "N-3-4-014",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "When a client includes a taskId in a Message, it MUST reference an existing task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message",
+      "pre_cond": "message.taskId != null",
+      "post_cond": "task.exists = true",
+      "actions": [
+        "Reference an existing task when including taskId in a Message"
+      ],
+      "modality": "must",
+      "id": "N-3-4-014"
+    },
+    {
+      "statement_id": "N-3-4-015",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Agents MUST return a TaskNotFoundError if the provided taskId does not correspond to an existing task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_message",
+      "pre_cond": "message.taskId != null & task.exists = false",
+      "post_cond": "response.error_type = TaskNotFoundError",
+      "actions": [
+        "Return a TaskNotFoundError to the client"
+      ],
+      "modality": "must",
+      "id": "N-3-4-015"
+    },
+    {
+      "statement_id": "N-3-4-016",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients MAY include the contextId in subsequent messages to indicate continuation of a previous interaction",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Include contextId in subsequent messages to indicate continuation of a previous interaction"
+      ],
+      "modality": "may",
+      "id": "N-3-4-016"
+    },
+    {
+      "statement_id": "N-3-4-017",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients MAY use taskId (with or without contextId) to continue or refine a specific task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message",
+      "pre_cond": "message.taskId != null",
+      "post_cond": null,
+      "actions": [
+        "Use taskId to continue or refine a specific task"
+      ],
+      "modality": "may",
+      "id": "N-3-4-017"
+    },
+    {
+      "statement_id": "N-3-4-019",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "context",
+      "stage": "task_execution",
+      "description": "Agents MUST infer contextId from the task if only taskId is provided",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_message",
+      "pre_cond": "message.taskId != null & message.contextId = null",
+      "post_cond": "request.contextId = task.contextId",
+      "actions": [
+        "Infer contextId from the referenced task when only taskId is provided in the message"
+      ],
+      "modality": "must",
+      "id": "N-3-4-019"
+    },
+    {
+      "statement_id": "N-3-4-020",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "task_execution",
+      "description": "Agents MUST reject messages containing mismatching contextId and taskId (i.e., the provided contextId is different from that of the referenced Task).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_message",
+      "pre_cond": "message.contextId != null & message.taskId != null & message.contextId != task.contextId",
+      "post_cond": "response.type = error",
+      "actions": [
+        "Reject the message containing mismatching contextId and taskId"
+      ],
+      "modality": "must",
+      "id": "N-3-4-020"
+    },
+    {
+      "statement_id": "N-3-4-021",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients SHOULD use the referenceTaskIds field in Message to explicitly reference related tasks",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_message",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Populate the referenceTaskIds field in Message to explicitly reference related tasks"
+      ],
+      "modality": "should",
+      "id": "N-3-4-021"
+    },
+    {
+      "statement_id": "N-3-4-022",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "task_execution",
+      "description": "Agents SHOULD use referenced tasks to understand the context and intent of follow-up requests",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_message",
+      "pre_cond": "message.referenceTaskIds != null",
+      "post_cond": null,
+      "actions": [
+        "Use referenced tasks to understand the context and intent of follow-up requests"
+      ],
+      "modality": "should",
+      "id": "N-3-4-022"
+    },
+    {
+      "statement_id": "N-3-4-023",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "context",
+      "stage": "task_execution",
+      "description": "Agents SHOULD leverage the shared contextId to provide contextually relevant responses",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_message",
+      "pre_cond": "message.contextId != null",
+      "post_cond": null,
+      "actions": [
+        "Leverage shared contextId to provide contextually relevant responses"
+      ],
+      "modality": "should",
+      "id": "N-3-4-023"
+    },
+    {
+      "statement_id": "D-3-4-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "The client continues the interaction by sending a new message with the same taskId and contextId",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "3.4.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TASK_STATE_INPUT_REQUIRED",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "message_received",
+      "pre_cond": "task.state = TASK_STATE_INPUT_REQUIRED & message.taskId = task.taskId & message.contextId = task.contextId",
+      "post_cond": "task.state = TASK_STATE_WORKING",
+      "actions": [
+        "Client sends new message with same taskId and contextId",
+        "Agent resumes processing the task"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "N-3-5-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "All implementations MUST deliver events in the order they were generated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_event_generated",
+      "pre_cond": null,
+      "post_cond": "event.delivery_order = event.generation_order",
+      "actions": [
+        "Deliver events to clients in the order they were generated"
+      ],
+      "modality": "must",
+      "id": "N-3-5-001"
+    },
+    {
+      "statement_id": "N-3-5-002",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Events MUST NOT be reordered during transmission, regardless of protocol binding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_event_generated",
+      "pre_cond": null,
+      "post_cond": "event.order_preserved = true",
+      "actions": [
+        "Preserve event order during transmission regardless of which protocol binding is used"
+      ],
+      "modality": "must",
+      "id": "N-3-5-002"
+    },
+    {
+      "statement_id": "N-3-5-003",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "An agent MAY serve multiple concurrent streams to one or more clients for the same task.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "stream_subscription_request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Serve multiple concurrent streams to one or more clients for the same task"
+      ],
+      "modality": "may",
+      "id": "N-3-5-003"
+    },
+    {
+      "statement_id": "N-3-5-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Events MUST be broadcast to all active streams for that task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_event_generated",
+      "pre_cond": "stream.active = true",
+      "post_cond": "event.delivered_to_all_active_streams = true",
+      "actions": [
+        "Broadcast each generated event to all currently active streams for that task"
+      ],
+      "modality": "must",
+      "id": "N-3-5-004"
+    },
+    {
+      "statement_id": "N-3-5-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Each stream MUST receive the same events in the same order",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_event_generated",
+      "pre_cond": "stream.active = true",
+      "post_cond": "stream.received_events = task.generated_events & stream.event_order = task.event_generation_order",
+      "actions": [
+        "Deliver the same set of events to each active stream",
+        "Deliver those events in the same order to each active stream"
+      ],
+      "modality": "must",
+      "id": "N-3-5-005"
+    },
+    {
+      "statement_id": "N-3-5-006",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Closing one stream MUST NOT affect other active streams for the same task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "stream_closed",
+      "pre_cond": "stream.active = true",
+      "post_cond": null,
+      "actions": [
+        "Leave all other active streams for the same task unaffected when one stream is closed"
+      ],
+      "modality": "must",
+      "id": "N-3-5-006"
+    },
+    {
+      "statement_id": "D-3-5-001",
+      "normative_level": "MUST",
+      "category": "FSM_STATE",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "When multiple streams are active for a task: Events MUST be broadcast to all active streams for that task",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "3.5.2",
+      "state_name": "STREAM_ACTIVE",
+      "enum_name": "StreamState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "stream.state = STREAM_ACTIVE"
+    },
+    {
+      "statement_id": "D-3-5-005",
+      "normative_level": "CONSTRAINT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Events MUST be broadcast to all active streams for that task. Each stream MUST receive the same events in the same order. All implementations MUST deliver events in the order they were generated.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "3.5.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": "STREAM_ACTIVE",
+      "to_state": "STREAM_ACTIVE",
+      "trigger": "task_event_generated",
+      "pre_cond": "stream.state = STREAM_ACTIVE",
+      "post_cond": "event_delivered_to_stream & event_order_preserved",
+      "actions": [
+        "Event broadcast to all active streams for the task",
+        "Event delivered to each active stream in the same order it was generated",
+        "No reordering of events during transmission regardless of protocol binding"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-3-5-006",
+      "normative_level": "MAY",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "An agent MAY serve multiple concurrent streams to one or more clients for the same task. A client reconnecting to a task after a network interruption by opening a new stream.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "3.5.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "STREAM_ACTIVE",
+      "trigger": "stream_open",
+      "pre_cond": null,
+      "post_cond": "stream.state = STREAM_ACTIVE",
+      "actions": [
+        "New stream established for the task",
+        "Stream added to the set of active streams for the task",
+        "Client begins receiving task events on the new stream"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "N-3-6-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Agents MUST process requests using the semantics of the requested A2A-Version (matching Major.Minor).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request",
+      "pre_cond": "request.A2A-Version.present = true",
+      "post_cond": "server.processing_semantics = request.A2A-Version",
+      "actions": [
+        "Process the request using the semantics of the A2A-Version specified in the request, matching Major.Minor"
+      ],
+      "modality": "must",
+      "id": "N-3-6-005"
+    },
+    {
+      "statement_id": "D-3-7-004",
+      "normative_level": "DESCRIPTION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Clients send Messages to provide additional input or instructions for ongoing tasks.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.7",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_sends_message",
+      "pre_cond": "task.created = true & task.ongoing = true",
+      "post_cond": null,
+      "actions": [
+        "client sends Message with additional input or instructions to agent for the ongoing task"
+      ],
+      "modality": "SHOULD"
+    },
+    {
+      "statement_id": "N-3-7-003",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients using streaming to retrieve task updates MAY not receive all status update messages if the client is disconnected and then reconnects.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "3.7",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "stream_reconnect",
+      "pre_cond": "client.streaming = true & client.disconnected = true",
+      "post_cond": "stream.open = true & messages.possibly_missed = true",
+      "actions": [
+        "Client may not receive all status update messages missed during disconnection period"
+      ],
+      "modality": "may",
+      "id": "N-3-7-003"
+    },
+    {
+      "statement_id": "D-4-1-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "The task is in an unknown or indeterminate state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.1.3",
+      "state_name": "TASK_STATE_UNSPECIFIED",
+      "enum_name": "TaskState",
+      "semantic_type": "unspecified",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-4-1-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Indicates that a task is actively being processed by the agent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.1.3",
+      "state_name": "TASK_STATE_WORKING",
+      "enum_name": "TaskState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-4-1-045",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Indicates that the agent has decided to not perform the task... or later once an agent has determined it can't or won't proceed. This is a terminal state.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "4.1.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_SUBMITTED or TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_REJECTED",
+      "trigger": "agent_rejects_task",
+      "pre_cond": "task.state IN (TASK_STATE_SUBMITTED, TASK_STATE_WORKING)",
+      "post_cond": "task.state = TASK_STATE_REJECTED",
+      "actions": [
+        "Agent determines it cannot or will not proceed with the task"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-4-1-010",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "task_execution",
+      "description": "The role is unspecified.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.1.5",
+      "state_name": "ROLE_UNSPECIFIED",
+      "enum_name": "Role",
+      "semantic_type": "unspecified",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-4-2-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "An event sent by the agent to notify the client of a change in a task's status.",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "4.2.1",
+      "actors": [
+        "agent",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TaskStatusUpdateEvent",
+      "pre_cond": null,
+      "post_cond": "task.status = TaskStatusUpdateEvent.status",
+      "actions": [
+        "agent emits TaskStatusUpdateEvent carrying new TaskStatus value",
+        "client receives TaskStatusUpdateEvent and updates local task status"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-4-3-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "The agent MUST include authentication credentials in the request headers as specified in the PushNotificationConfig.authentication field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_sent",
+      "pre_cond": "push_notification_config.authentication != null",
+      "post_cond": "request.headers.authorization != null",
+      "actions": [
+        "Include authentication credentials in the HTTP request headers as specified in PushNotificationConfig.authentication"
+      ],
+      "modality": "must",
+      "id": "N-4-3-001"
+    },
+    {
+      "statement_id": "N-4-3-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients MUST respond with HTTP 2xx status codes to acknowledge successful receipt",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_received",
+      "pre_cond": null,
+      "post_cond": "response.status_code >= 200 & response.status_code < 300",
+      "actions": [
+        "Respond with HTTP 2xx status code to acknowledge successful receipt of the push notification"
+      ],
+      "modality": "must",
+      "id": "N-4-3-002"
+    },
+    {
+      "statement_id": "N-4-3-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients SHOULD process notifications idempotently, as duplicate deliveries may occur",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Process push notifications idempotently to handle duplicate deliveries safely"
+      ],
+      "modality": "should",
+      "id": "N-4-3-003"
+    },
+    {
+      "statement_id": "N-4-3-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients MUST validate the task ID matches an expected task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_received",
+      "pre_cond": null,
+      "post_cond": "notification.task_id = expected_task.id",
+      "actions": [
+        "Validate that the task ID in the push notification payload matches an expected task"
+      ],
+      "modality": "must",
+      "id": "N-4-3-004"
+    },
+    {
+      "statement_id": "N-4-3-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients SHOULD implement appropriate security measures to verify the notification source",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement appropriate security measures to verify the source of the push notification"
+      ],
+      "modality": "should",
+      "id": "N-4-3-005"
+    },
+    {
+      "statement_id": "N-4-3-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MUST attempt delivery at least once for each configured webhook",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_update_occurred",
+      "pre_cond": "push_notification_config.url != null",
+      "post_cond": "push_notification.delivery_attempts >= 1",
+      "actions": [
+        "Attempt HTTP POST delivery to each configured webhook URL at least once when a task update occurs"
+      ],
+      "modality": "must",
+      "id": "N-4-3-006"
+    },
+    {
+      "statement_id": "N-4-3-007",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MAY implement retry logic with exponential backoff for failed deliveries",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_delivery_failed",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement retry logic with exponential backoff upon failed webhook delivery"
+      ],
+      "modality": "may",
+      "id": "N-4-3-007"
+    },
+    {
+      "statement_id": "N-4-3-008",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents SHOULD include a reasonable timeout for webhook requests (recommended: 10-30 seconds)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_request_sent",
+      "pre_cond": null,
+      "post_cond": "webhook_request.timeout != null",
+      "actions": [
+        "Set a reasonable timeout (recommended 10-30 seconds) on outgoing webhook HTTP POST requests"
+      ],
+      "modality": "should",
+      "id": "N-4-3-008"
+    },
+    {
+      "statement_id": "N-4-3-009",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MAY stop attempting delivery after a configured number of consecutive failures",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_delivery_failed",
+      "pre_cond": "push_notification.consecutive_failures >= push_notification_config.max_retries",
+      "post_cond": null,
+      "actions": [
+        "Cease further delivery attempts after a configured number of consecutive webhook delivery failures"
+      ],
+      "modality": "may",
+      "id": "N-4-3-009"
+    },
+    {
+      "statement_id": "D-4-3-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "When a task update occurs, the agent sends an HTTP POST request to the configured webhook URL. The payload uses the same StreamResponse format as streaming operations. The agent MUST include authentication credentials in the request headers as specified in the PushNotificationConfig.authentication field.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "4.3.3",
+      "actors": [
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_update_occurs",
+      "pre_cond": "push_notification_config.webhook_url != null & push_notification_config.authentication != null",
+      "post_cond": "http_post.sent = true & http_post.authorization_header_present = true & http_post.body.type = StreamResponse",
+      "actions": [
+        "Agent sends HTTP POST request to configured webhook URL",
+        "Agent includes Authorization header with authentication scheme and credentials from PushNotificationConfig.authentication",
+        "Agent sets Content-Type header to application/json",
+        "Agent includes StreamResponse object as the request body"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-4-3-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients MUST respond with HTTP 2xx status codes to acknowledge successful receipt. Clients MUST validate the task ID matches an expected task. Clients SHOULD process notifications idempotently, as duplicate deliveries may occur.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "4.3.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_received",
+      "pre_cond": null,
+      "post_cond": "client.response_status >= 200 & client.response_status < 300 & client.task_id_validated = true",
+      "actions": [
+        "Client responds with HTTP 2xx status code to acknowledge receipt",
+        "Client validates that task ID in payload matches an expected task",
+        "Client SHOULD process notifications idempotently (duplicate deliveries may occur)"
+      ],
+      "modality": "mixed"
+    },
+    {
+      "statement_id": "D-4-3-006",
+      "normative_level": "MUST",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MUST attempt delivery at least once for each configured webhook. Agents MAY implement retry logic with exponential backoff for failed deliveries. Agents MAY stop attempting delivery after a configured number of consecutive failures.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "4.3.3",
+      "actors": [
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_delivery_failed",
+      "pre_cond": "http_post.sent = true & client.response_status < 200 | client.response_status >= 300",
+      "post_cond": "push_notification.delivery_attempts >= 1",
+      "actions": [
+        "Agent records delivery failure",
+        "Agent optionally retries with exponential backoff",
+        "Agent optionally stops delivery after configured consecutive failure threshold is reached"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "N-4-6-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "If a client requests a versions of an extension that the agent does not support, the agent SHOULD ignore the extension for that interaction and proceed without it, unless the extension is marked as required in the AgentCard, in which case the agent MUST return an error indicating unsupported extension.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "extension_requested",
+      "pre_cond": "client.requested_extension = true & server.supports_extension = false & extension.required = false",
+      "post_cond": "extension.active = false",
+      "actions": [
+        "Ignore the unsupported extension for the interaction",
+        "Proceed with the interaction without the extension"
+      ],
+      "modality": "should",
+      "id": "N-4-6-003"
+    },
+    {
+      "statement_id": "N-4-6-005",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "It MUST NOT fall back to a previous version of the extension automatically.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "extension_requested",
+      "pre_cond": "client.requested_extension = true & server.supports_extension = false",
+      "post_cond": "extension.fallback_to_previous_version = false",
+      "actions": [
+        "Do not automatically fall back to a previous version of the unsupported extension"
+      ],
+      "modality": "must",
+      "id": "N-4-6-005"
+    },
+    {
+      "statement_id": "D-4-6-010",
+      "normative_level": "CONSTRAINT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "extension",
+      "stage": "task_execution",
+      "description": "If the extension is marked as required in the AgentCard and the agent does not support the requested version, the agent MUST return an error indicating unsupported extension.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "4.6.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "extension_version_not_supported",
+      "pre_cond": "extension.required = true",
+      "post_cond": "error_returned = true & error.type = unsupported_extension",
+      "actions": [
+        "agent returns an error indicating unsupported extension"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-6-1-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Scenario: Client asks a question and receives a completed task response. POST /message:send returns HTTP 200 with a task object whose status.state is TASK_STATE_COMPLETED and whose artifacts array contains the result.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "6.1",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_COMPLETED",
+      "trigger": "message_send",
+      "pre_cond": null,
+      "post_cond": "task.state = TASK_STATE_COMPLETED & task.artifacts != null",
+      "actions": [
+        "client sends POST /message:send with message role=ROLE_USER and parts containing user query",
+        "server processes the message synchronously",
+        "server returns HTTP 200 with task containing id, contextId, status.state=TASK_STATE_COMPLETED, and artifacts array"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-6-2-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "task status state TASK_STATE_WORKING shown in initial SSE response event: {\"task\": {\"id\": \"task-uuid\", \"status\": {\"state\": \"TASK_STATE_WORKING\"}}}",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "6.2",
+      "state_name": "TASK_STATE_WORKING",
+      "enum_name": "TaskState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "task.state = TASK_STATE_WORKING"
+    },
+    {
+      "statement_id": "D-6-2-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "While task is TASK_STATE_WORKING, server emits artifactUpdate SSE events with incremental artifact content: {\"artifactUpdate\": {\"taskId\": \"task-uuid\", \"artifact\": {\"parts\": [{\"text\": \"# Climate Change Report\\n\\n\"}]}}}",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "6.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "artifactUpdate",
+      "pre_cond": "task.state = TASK_STATE_WORKING & stream.open = true",
+      "post_cond": "task.state = TASK_STATE_WORKING",
+      "actions": [
+        "server emits artifactUpdate SSE event referencing taskId with incremental artifact parts"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-6-3-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Agent requires additional input to complete a task; task status state is TASK_STATE_INPUT_REQUIRED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "6.3",
+      "state_name": "TASK_STATE_INPUT_REQUIRED",
+      "enum_name": "TaskState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-6-3-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Agent responds to initial message send with TASK_STATE_INPUT_REQUIRED when it requires additional input to complete the task; response includes agent message asking for clarification",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "6.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_INPUT_REQUIRED",
+      "trigger": "message_send",
+      "pre_cond": null,
+      "post_cond": "task.state = TASK_STATE_INPUT_REQUIRED & task.status.message != null",
+      "actions": [
+        "server creates task with id task-uuid",
+        "server sets task.status.state to TASK_STATE_INPUT_REQUIRED",
+        "server includes agent clarification message in task.status.message",
+        "server returns HTTP 200 with task object"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-6-3-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Client sends follow-up message with taskId referencing the existing task to provide the additional input requested while task is in TASK_STATE_INPUT_REQUIRED",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "6.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TASK_STATE_INPUT_REQUIRED",
+      "to_state": null,
+      "trigger": "message_send",
+      "pre_cond": "task.state = TASK_STATE_INPUT_REQUIRED & message.taskId != null",
+      "post_cond": null,
+      "actions": [
+        "client sends POST /message:send with message.taskId set to existing task id",
+        "client provides requested additional input in message.parts",
+        "client assigns new messageId msg-2 to follow-up message"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-6-5-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "TASK_STATE_WORKING state shown in task listing response example; task is actively being processed",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "6.5",
+      "state_name": "TASK_STATE_WORKING",
+      "enum_name": "TaskState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-6-7-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Scenario: Client sends an image for analysis (POST /message:send with raw file Part), and the agent returns a task in TASK_STATE_COMPLETED with an artifact containing a URL-based Part referencing the modified output image.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "6.7",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_COMPLETED",
+      "trigger": "message_send",
+      "pre_cond": "message.parts contains Part with text != null & message.parts contains Part with raw != null",
+      "post_cond": "task.status.state = TASK_STATE_COMPLETED & task.artifacts != null & task.artifacts[0].parts[0].url != null",
+      "actions": [
+        "Client sends POST /message:send with message containing a text instruction Part and a raw binary file Part (base64-encoded image, filename, mediaType)",
+        "Server processes the uploaded file and performs the requested analysis",
+        "Server returns HTTP 200 with task object in TASK_STATE_COMPLETED",
+        "Server includes artifacts array with one Artifact containing a url Part referencing the processed output file"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-6-8-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Client sends POST /message:send with a message part carrying metadata.mediaType and metadata.schema; server synchronously returns a task in TASK_STATE_COMPLETED state with the structured data payload delivered as text inside an artifact's parts",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "6.8",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TASK_STATE_COMPLETED",
+      "trigger": "message_send",
+      "pre_cond": "part.metadata.mediaType = 'application/json' & part.metadata.schema != null",
+      "post_cond": "task.state = TASK_STATE_COMPLETED & task.artifacts != null & task.artifacts[0].parts[0].text != null",
+      "actions": [
+        "Client sends POST /message:send with message containing part with metadata.mediaType='application/json' and metadata.schema describing desired structure",
+        "Server processes the structured data request",
+        "Server returns HTTP 200 with task object whose status.state=TASK_STATE_COMPLETED",
+        "Structured data is encoded as JSON text in task.artifacts[0].parts[0].text"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-7-6-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "task_execution",
+      "description": "MUST use a Task to track the operation it is performing",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "7.6.1",
+      "actors": [
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authorization_required",
+      "pre_cond": null,
+      "post_cond": "task.exists = true",
+      "actions": [
+        "Use an existing Task object to track the operation that requires authorization"
+      ],
+      "modality": "must",
+      "id": "N-7-6-001"
+    },
+    {
+      "statement_id": "N-9-2-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "A2A service parameters defined in Section 3.2.6 MUST be transmitted using standard HTTP request headers, as JSON-RPC 2.0 operates over HTTP(S).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "9.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": null,
+      "post_cond": "request.service_parameters.transport = HTTP_headers",
+      "actions": [
+        "Transmit all A2A service parameters as standard HTTP request headers"
+      ],
+      "modality": "must",
+      "id": "N-9-2-001"
+    },
+    {
+      "statement_id": "N-9-2-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Service parameter names MUST be transmitted as HTTP header fields",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "9.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": null,
+      "post_cond": "request.service_parameter_names.encoding = HTTP_header_fields",
+      "actions": [
+        "Encode and send service parameter names as HTTP header fields in the request"
+      ],
+      "modality": "must",
+      "id": "N-9-2-002"
+    },
+    {
+      "statement_id": "N-9-2-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Multiple values for the same service parameter (e.g., A2A-Extensions) SHOULD be comma-separated in a single header field",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "9.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_request",
+      "pre_cond": "request.service_parameter.value_count > 1",
+      "post_cond": "request.service_parameter.values.format = comma_separated & request.service_parameter.header_count = 1",
+      "actions": [
+        "Combine multiple values for the same service parameter into a single comma-separated header field"
+      ],
+      "modality": "should",
+      "id": "N-9-2-003"
+    },
+    {
+      "statement_id": "D-9-4-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Sends a message and subscribes to real-time updates via Server-Sent Events.",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "9.4.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SendStreamingMessage",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "client sends SendStreamingMessage request (same structure as SendMessage)",
+        "server responds with HTTP 200 and Content-Type: text/event-stream",
+        "server emits StreamResponse objects over SSE stream"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-9-4-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Subscribes to a task stream for receiving updates on a task that is not in a terminal state.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "9.4.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SubscribeToTask",
+      "pre_cond": "!(task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED)",
+      "post_cond": "stream.open = true",
+      "actions": [
+        "client sends SubscribeToTask request with task id",
+        "server opens SSE stream in same format as SendStreamingMessage for task updates"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-9-4-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Returns UnsupportedOperationError if the task is in a terminal state (completed, failed, canceled, or rejected).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "9.4.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SubscribeToTask",
+      "pre_cond": "task.state = TASK_STATE_COMPLETED | task.state = TASK_STATE_FAILED | task.state = TASK_STATE_CANCELED | task.state = TASK_STATE_REJECTED",
+      "post_cond": "error = UnsupportedOperationError",
+      "actions": [
+        "server returns UnsupportedOperationError"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-9-5-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Each object in the data array MUST include a @type key that identifies the object's type.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "9.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "error_response_sent",
+      "pre_cond": null,
+      "post_cond": "error.data.object.@type != null",
+      "actions": [
+        "Include a @type key in each object within the error data array",
+        "Ensure the @type key identifies the object's type"
+      ],
+      "modality": "must",
+      "id": "N-9-5-001"
+    },
+    {
+      "statement_id": "N-10-2-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Implementations MUST extract A2A service parameters from gRPC metadata for processing",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_grpc_request",
+      "pre_cond": "request.transport = gRPC",
+      "post_cond": "service_parameters.extracted = true",
+      "actions": [
+        "Parse gRPC metadata from the incoming request",
+        "Extract all A2A service parameters from the parsed metadata for further processing"
+      ],
+      "modality": "must",
+      "id": "N-10-2-004"
+    },
+    {
+      "statement_id": "N-10-2-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Servers SHOULD validate required service parameters (e.g., A2A-Version) from metadata",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_grpc_request",
+      "pre_cond": "request.transport = gRPC & service_parameters.extracted = true",
+      "post_cond": "service_parameters.required.validated = true",
+      "actions": [
+        "Check that all required A2A service parameters (e.g., A2A-Version) are present and valid in the gRPC metadata"
+      ],
+      "modality": "should",
+      "id": "N-10-2-005"
+    },
+    {
+      "statement_id": "D-10-3-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "SubscribeToTask: Returns UnsupportedOperationError if the task is already in a terminal state (completed, failed, canceled, rejected).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "10.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "completed | failed | canceled | rejected",
+      "to_state": null,
+      "trigger": "SubscribeToTask",
+      "pre_cond": "task.state = completed | task.state = failed | task.state = canceled | task.state = rejected",
+      "post_cond": "response.error.type = UnsupportedOperationError",
+      "actions": [
+        "Server evaluates current task state",
+        "Server returns UnsupportedOperationError because task is already in a terminal state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-10-3-017",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "SubscribeToTask: Subscribes to task updates for tasks not in a terminal state.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "10.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "not_terminal",
+      "to_state": null,
+      "trigger": "SubscribeToTask",
+      "pre_cond": "!(task.state = completed | task.state = failed | task.state = canceled | task.state = rejected)",
+      "post_cond": "stream.open = true",
+      "actions": [
+        "Server opens a streaming StreamResponse channel",
+        "Server sends task updates to client over the stream"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-10-4-045",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "Subscribe to task updates via streaming. Returns UnsupportedOperationError if the task is in a terminal state.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "10.4.6",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TASK_TERMINAL_STATE",
+      "to_state": null,
+      "trigger": "subscribe_to_task_request",
+      "pre_cond": "task.state = TASK_TERMINAL_STATE",
+      "post_cond": "response.error = UnsupportedOperationError",
+      "actions": [
+        "Server evaluates task current state",
+        "Server detects task is in a terminal state",
+        "Server returns UnsupportedOperationError to client instead of opening stream"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-10-6-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "For A2A-specific errors, implementations MUST include a google.rpc.ErrorInfo message in the status.details array with:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "10.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "grpc_error_response",
+      "pre_cond": "error.category = A2A_SPECIFIC",
+      "post_cond": "status.details.contains_ErrorInfo = true & status.details.ErrorInfo.domain = a2a-protocol.org",
+      "actions": [
+        "Include a google.rpc.ErrorInfo message in the status.details array",
+        "Set ErrorInfo.reason to the A2A error type in UPPER_SNAKE_CASE without the 'Error' suffix",
+        "Set ErrorInfo.domain to 'a2a-protocol.org'",
+        "Optionally include ErrorInfo.metadata with additional error context"
+      ],
+      "modality": "must",
+      "id": "N-10-6-001"
+    },
+    {
+      "statement_id": "N-11-2-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "A2A service parameters defined in Section 3.2.6 MUST be transmitted using standard HTTP request headers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_http_request",
+      "pre_cond": "request.transport = HTTP",
+      "post_cond": "request.service_parameters.location = HTTP_headers",
+      "actions": [
+        "Place all A2A service parameters defined in Section 3.2.6 into standard HTTP request headers"
+      ],
+      "modality": "must",
+      "id": "N-11-2-001"
+    },
+    {
+      "statement_id": "D-11-3-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "POST /tasks/{id}:subscribe - Subscribe to task updates (SSE response, returns error for terminal tasks)",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "11.3.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TASK_STATE_TERMINAL",
+      "to_state": "TASK_STATE_TERMINAL",
+      "trigger": "task_subscribe_request",
+      "pre_cond": "task.is_terminal = true",
+      "post_cond": "response.is_error = true & task.state = task.state",
+      "actions": [
+        "server receives POST /tasks/{id}:subscribe for a task in a terminal state",
+        "server returns an error response instead of opening SSE stream"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-11-3-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "task",
+      "stage": "task_execution",
+      "description": "POST /tasks/{id}:cancel - Cancel task",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "11.3.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_cancel_request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "client sends POST /tasks/{id}:cancel",
+        "server processes cancellation of task identified by {id}"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-11-5-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "HTTP methods that do not support request bodies (GET, DELETE) MUST transmit operation request parameters as path parameters or query parameters.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.5",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "http_request_sent",
+      "pre_cond": "request.method = GET | request.method = DELETE",
+      "post_cond": "request.parameters_in = path_parameters | request.parameters_in = query_parameters",
+      "actions": [
+        "Encode all operation request parameters as path parameters or query parameters when using GET or DELETE HTTP methods"
+      ],
+      "modality": "must",
+      "id": "N-11-5-001"
+    },
+    {
+      "statement_id": "N-11-5-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Query parameter names MUST use camelCase to match the JSON serialization of Protocol Buffer field names.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.5",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "http_request_sent",
+      "pre_cond": "request.has_query_parameters = true",
+      "post_cond": "query_parameter.name.format = camelCase",
+      "actions": [
+        "Format all query parameter names in camelCase corresponding to the JSON serialization of the Protocol Buffer field name"
+      ],
+      "modality": "must",
+      "id": "N-11-5-002"
+    },
+    {
+      "statement_id": "N-11-5-003",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Repeated Fields: Multiple values MAY be passed by repeating the parameter name (e.g., ?tag=value1&tag=value2) or as comma-separated values (e.g., ?tag=value1,value2)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.5",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "http_request_sent",
+      "pre_cond": "field.type = repeated",
+      "post_cond": null,
+      "actions": [
+        "Pass repeated field values either by repeating the query parameter name or as comma-separated values in a single query parameter"
+      ],
+      "modality": "may",
+      "id": "N-11-5-003"
+    },
+    {
+      "statement_id": "N-11-5-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Nested Objects: Not supported in query parameters; operations requiring nested objects MUST use POST with a request body",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.5",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "http_request_sent",
+      "pre_cond": "operation.requires_nested_objects = true",
+      "post_cond": "request.method = POST & request.has_body = true",
+      "actions": [
+        "Use HTTP POST method with a request body when the operation requires nested object parameters"
+      ],
+      "modality": "must",
+      "id": "N-11-5-004"
+    },
+    {
+      "statement_id": "N-11-5-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "All query parameter values MUST be properly URL-encoded per RFC 3986.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.5",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "http_request_sent",
+      "pre_cond": "request.has_query_parameters = true",
+      "post_cond": "query_parameter.value.encoding = RFC3986",
+      "actions": [
+        "Apply RFC 3986 URL encoding to all query parameter values before sending the HTTP request"
+      ],
+      "modality": "must",
+      "id": "N-11-5-005"
+    },
+    {
+      "statement_id": "N-11-6-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Each object in the details array MUST include a @type key that identifies the object's type.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "error_response_sent",
+      "pre_cond": null,
+      "post_cond": "error.details.object.type_key_present = true",
+      "actions": [
+        "Include a @type key in every object in the error details array that identifies the object's type"
+      ],
+      "modality": "must",
+      "id": "N-11-6-001"
+    },
+    {
+      "statement_id": "N-11-6-002",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Implementations SHOULD use well-known types such as google.rpc.BadRequest to attach structured data to validation errors.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "validation_error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Use well-known types such as google.rpc.BadRequest to attach structured data to validation errors in the details array"
+      ],
+      "modality": "should",
+      "id": "N-11-6-002"
+    },
+    {
+      "statement_id": "N-11-6-003",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Additional error context MAY be included as further objects in the details array.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "error_response_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Optionally include additional error context objects in the error details array"
+      ],
+      "modality": "may",
+      "id": "N-11-6-003"
+    },
+    {
+      "statement_id": "N-11-6-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Since multiple A2A error types may map to the same HTTP status code (e.g., TaskNotCancelableError and PushNotificationNotSupportedError both map to 400 Bad Request), implementations MUST include a google.rpc.ErrorInfo object in the details array for A2A-specific errors with:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "11.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "a2a_specific_error_response_sent",
+      "pre_cond": "error.type = A2A_SPECIFIC",
+      "post_cond": "error.details.contains_ErrorInfo = true",
+      "actions": [
+        "Include a google.rpc.ErrorInfo object in the details array",
+        "Set @type to 'type.googleapis.com/google.rpc.ErrorInfo'",
+        "Set reason to the A2A error type in UPPER_SNAKE_CASE without the 'Error' suffix (e.g., TASK_NOT_FOUND, TASK_NOT_CANCELABLE)",
+        "Set domain to 'a2a-protocol.org'"
+      ],
+      "modality": "must",
+      "id": "N-11-6-004"
+    },
+    {
+      "statement_id": "D-11-7-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Streaming responses are simple, linearly ordered sequences: first a Task (or single Message), then zero or more status or artifact update events until the task reaches a terminal or interrupted state, at which point the stream closes.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "11.7",
+      "state_name": "STREAM_STATE_OPEN",
+      "enum_name": "StreamState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "stream.open = true"
+    },
+    {
+      "statement_id": "N-13-1-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "List Tasks: MUST only return tasks visible to the authenticated client according to the agent's authorization model",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tasks_list_request",
+      "pre_cond": "client.authenticated = true",
+      "post_cond": "response.tasks = tasks_visible_to(client) & response.tasks.scope = caller.authorized_access_boundaries",
+      "actions": [
+        "Return only tasks visible to the authenticated client according to the agent's authorization model in response to List Tasks operations"
+      ],
+      "modality": "must",
+      "id": "N-13-1-006"
+    },
+    {
+      "statement_id": "N-13-1-007",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Get Task: MUST verify the authenticated client has access to the requested task according to the agent's authorization model",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tasks_get_request",
+      "pre_cond": "client.authenticated = true",
+      "post_cond": "client.task_access_verified = true",
+      "actions": [
+        "Verify the authenticated client has access to the requested task according to the agent's authorization model before returning task data"
+      ],
+      "modality": "must",
+      "id": "N-13-1-007"
+    },
+    {
+      "statement_id": "N-13-1-008",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Task-related operations (Cancel, Subscribe, Push Notification Config): MUST verify the client has appropriate access rights according to the agent's authorization model",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_operation_request",
+      "pre_cond": "caller.authenticated = true",
+      "post_cond": "client.access_rights_verified = true",
+      "actions": [
+        "Verify the client has appropriate access rights according to the agent's authorization model before executing Cancel, Subscribe, or Push Notification Config operations"
+      ],
+      "modality": "must",
+      "id": "N-13-1-008"
+    },
+    {
+      "statement_id": "D-13-2-002",
+      "normative_level": "REQUIREMENT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents SHOULD implement retry logic with exponential backoff for failed deliveries; Agents MAY stop attempting delivery after a configured number of consecutive failures",
+      "is_inferred": true,
+      "confidence": 0.6,
+      "source_section": "13.2",
+      "actors": [
+        "agent"
+      ],
+      "from_state": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+      "to_state": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+      "trigger": "consecutive_delivery_failures_threshold_reached",
+      "pre_cond": "push_notification.consecutive_failures >= push_notification.configured_failure_limit",
+      "post_cond": "push_notification.delivery_active = false",
+      "actions": [
+        "Agent ceases further webhook delivery attempts"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-13-2-003",
+      "normative_level": "REQUIREMENT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients MUST validate webhook authenticity using the provided authentication credentials; Clients MUST respond with HTTP 2xx status codes to acknowledge successful receipt",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "PUSH_NOTIFICATION_RECEIVED",
+      "to_state": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+      "trigger": "webhook_request_received",
+      "pre_cond": "webhook_request received with authentication credentials present",
+      "post_cond": "push_notification.http_response_status >= 200 & push_notification.http_response_status < 300",
+      "actions": [
+        "Client validates webhook authenticity against PushNotificationConfig.authentication credentials",
+        "Client optionally verifies task ID in payload matches a known expected task",
+        "Client responds with HTTP 2xx status code"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-13-2-005",
+      "normative_level": "RECOMMENDATION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Webhook URLs SHOULD use HTTPS to protect payload confidentiality in transit; Clients SHOULD use HTTPS endpoints for webhook URLs to ensure confidentiality",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "13.2",
+      "object_name": "PushNotificationConfig",
+      "field_name": "url",
+      "field_type": "string (HTTPS URL)",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null,
+      "modality": "SHOULD"
+    },
+    {
+      "statement_id": "N-13-2-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "task_execution",
+      "description": "Agents MUST include authentication credentials in webhook requests as specified in PushNotificationConfig.authentication",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_sent",
+      "pre_cond": null,
+      "post_cond": "webhook_request.authentication = push_notification_config.authentication",
+      "actions": [
+        "Include authentication credentials in the outgoing webhook request as specified in PushNotificationConfig.authentication"
+      ],
+      "modality": "must",
+      "id": "N-13-2-001"
+    },
+    {
+      "statement_id": "N-13-2-002",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "task_execution",
+      "description": "Agents SHOULD implement reasonable timeout values for webhook requests (recommended: 10-30 seconds)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement reasonable timeout values for webhook requests (recommended range: 10-30 seconds)"
+      ],
+      "modality": "should",
+      "id": "N-13-2-002"
+    },
+    {
+      "statement_id": "N-13-2-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "task_execution",
+      "description": "Agents SHOULD implement retry logic with exponential backoff for failed deliveries",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_delivery_failed",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement retry logic with exponential backoff when webhook delivery fails"
+      ],
+      "modality": "should",
+      "id": "N-13-2-003"
+    },
+    {
+      "statement_id": "N-13-2-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "task_execution",
+      "description": "Agents SHOULD validate webhook URLs to prevent SSRF (Server-Side Request Forgery) attacks:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_config_received",
+      "pre_cond": null,
+      "post_cond": "push_notification_config.url.validated = true",
+      "actions": [
+        "Reject private IP ranges (127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)",
+        "Reject localhost and link-local addresses",
+        "Implement URL allowlists where appropriate"
+      ],
+      "modality": "should",
+      "id": "N-13-2-005"
+    },
+    {
+      "statement_id": "N-13-2-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients MUST validate webhook authenticity using the provided authentication credentials",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_received",
+      "pre_cond": null,
+      "post_cond": "webhook.authenticity_validated = true",
+      "actions": [
+        "Validate the authenticity of the incoming webhook using the provided authentication credentials"
+      ],
+      "modality": "must",
+      "id": "N-13-2-006"
+    },
+    {
+      "statement_id": "N-13-2-007",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients SHOULD verify the task ID in the payload matches an expected task they created",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_received",
+      "pre_cond": null,
+      "post_cond": "webhook_payload.task_id = client.expected_task_id",
+      "actions": [
+        "Verify that the task ID in the webhook payload matches a task ID the client previously created"
+      ],
+      "modality": "should",
+      "id": "N-13-2-007"
+    },
+    {
+      "statement_id": "N-13-2-010",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients SHOULD implement rate limiting to prevent webhook flooding",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "webhook_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Implement rate limiting on the webhook receiver endpoint to prevent webhook flooding"
+      ],
+      "modality": "should",
+      "id": "N-13-2-010"
+    },
+    {
+      "statement_id": "N-13-2-011",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients SHOULD use HTTPS endpoints for webhook URLs to ensure confidentiality",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_config_set",
+      "pre_cond": null,
+      "post_cond": "push_notification_config.url.scheme = HTTPS",
+      "actions": [
+        "Use HTTPS endpoints for webhook URLs to ensure confidentiality of notification payloads"
+      ],
+      "modality": "should",
+      "id": "N-13-2-011"
+    },
+    {
+      "statement_id": "N-13-2-012",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Webhook URLs SHOULD use HTTPS to protect payload confidentiality in transit",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client",
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_config_set",
+      "pre_cond": null,
+      "post_cond": "push_notification_config.url.scheme = HTTPS",
+      "actions": [
+        "Use HTTPS scheme for webhook URLs to protect payload confidentiality in transit"
+      ],
+      "modality": "should",
+      "id": "N-13-2-012"
+    },
+    {
+      "statement_id": "N-13-2-015",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "task_execution",
+      "description": "Clients SHOULD use unique, single-purpose tokens for each push notification configuration",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "push_notification_config_set",
+      "pre_cond": null,
+      "post_cond": "push_notification_config.token.unique = true & push_notification_config.token.single_purpose = true",
+      "actions": [
+        "Use a unique, single-purpose token for each individual push notification configuration"
+      ],
+      "modality": "should",
+      "id": "N-13-2-015"
+    },
+    {
+      "statement_id": "N-13-4-018",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "agent",
+      "stage": "task_execution",
+      "description": "Agents SHOULD return appropriate error responses when rate limits are exceeded",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.4",
+      "actors": [
+        "agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "rate_limit_exceeded",
+      "pre_cond": "rate_limit.exceeded = true",
+      "post_cond": null,
+      "actions": [
+        "Return an appropriate error response indicating the rate limit has been exceeded"
+      ],
+      "modality": "should",
+      "id": "N-13-4-018"
+    },
+    {
+      "statement_id": "N-14-1-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "task_execution",
+      "description": "File references within A2A messages MUST be validated to prevent server-side request forgery (SSRF)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "14.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_received",
+      "pre_cond": "message.contains_file_references = true",
+      "post_cond": "message.file_references.validated = true",
+      "actions": [
+        "Validate all file references within A2A messages to prevent SSRF attacks"
+      ],
+      "modality": "must",
+      "id": "N-14-1-004"
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "section_id": "S065",
+  "title": "S065 6.3.9.5 The CHILDREN Return Option",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S065 6.3.9.5 The CHILDREN Return Option"
+  ],
+  "url_anchor": "#s065-6395-the-children-return-option",
+  "word_count": 465,
+  "statement_count": 6,
+  "elapsed_seconds": 46.89,
+  "statements": [
+    {
+      "statement_id": "1-S065-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The CHILDREN return option is simply an indication that the client wants information about whether or not mailboxes contain child mailboxes; a server MAY provide it even if the option is not specified.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command received without CHILDREN return option",
+      "pre_cond": "CHILDREN_return_option.present = false",
+      "post_cond": null,
+      "actions": [
+        "include \\HasChildren and \\HasNoChildren attributes in LIST response"
+      ],
+      "modality": "may",
+      "id": "N-S065-001"
+    },
+    {
+      "statement_id": "2-S065-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The CHILDREN return option defines two new attributes that MUST be returned within a LIST response: \\HasChildren and \\HasNoChildren.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST response generation",
+      "pre_cond": null,
+      "post_cond": "LIST_response.contains(\\HasChildren) | LIST_response.contains(\\HasNoChildren)",
+      "actions": [
+        "include \\HasChildren attribute in LIST response",
+        "include \\HasNoChildren attribute in LIST response"
+      ],
+      "modality": "must",
+      "id": "N-S065-002"
+    },
+    {
+      "statement_id": "3-S065-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Although these attributes MAY be returned in response to any LIST command, the CHILDREN return option is provided to indicate that the client particularly wants this information.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "include \\HasChildren and \\HasNoChildren attributes in LIST response"
+      ],
+      "modality": "may",
+      "id": "N-S065-003"
+    },
+    {
+      "statement_id": "4-S065-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the CHILDREN return option is present, the server MUST return these attributes even if their computation is expensive.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command received with CHILDREN return option",
+      "pre_cond": "CHILDREN_return_option.present = true",
+      "post_cond": "LIST_response.contains(\\HasChildren) | LIST_response.contains(\\HasNoChildren)",
+      "actions": [
+        "return \\HasChildren and \\HasNoChildren attributes in LIST response regardless of computation cost"
+      ],
+      "modality": "must",
+      "id": "N-S065-004"
+    },
+    {
+      "statement_id": "5-S065-5",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server SHOULD NOT set this attribute if there are child mailboxes and the user does not have permission to access any of them.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST response generation with \\HasChildren attribute evaluation",
+      "pre_cond": "mailbox.child_mailboxes.exist = true & user.permission.any_child = false",
+      "post_cond": "LIST_response.\\HasChildren.set = false",
+      "actions": [
+        "omit \\HasChildren attribute from LIST response when user lacks permission to all child mailboxes"
+      ],
+      "modality": "should",
+      "id": "N-S065-005"
+    },
+    {
+      "statement_id": "6-S065-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In this case, \\HasNoChildren SHOULD be used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S065",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST response generation when user lacks permission to all child mailboxes",
+      "pre_cond": "mailbox.child_mailboxes.exist = true & user.permission.any_child = false",
+      "post_cond": "LIST_response.contains(\\HasNoChildren)",
+      "actions": [
+        "set \\HasNoChildren attribute in LIST response"
+      ],
+      "modality": "should",
+      "id": "N-S065-006"
+    }
+  ]
+}

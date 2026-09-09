@@ -1,0 +1,309 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "C-001",
+      "title": "Unbounded Delegation Chain Depth with No Cycle Detection Enables Infinite Auth Loops and Resource Exhaustion in Multi-Agent Topologies",
+      "protocol_phase": "interruption",
+      "attack_scenario": "The A2A protocol explicitly enables multi-hop authorization delegation chains via TASK_STATE_AUTH_REQUIRED (section 7.6), stating this 'enables forming a chain of Tasks in TASK_STATE_AUTH_REQUIRED.' However, the protocol defines no maximum delegation depth counter, no chain identifier, and no cycle detection mechanism. In a topology where Agent A delegates to Agent B, Agent B delegates to Agent C, and Agent C's auth request ultimately routes back to Agent A (directly or through additional hops), a circular delegation loop forms. Each agent individually follows the protocol correctly: receiving an AUTH_REQUIRED state and propagating it upstream via the authorization_delegation transition, whose guard checks only client.is_a2a_agent and client.is_actively_processing_task — no guard checks for chain depth or prior participation. Each hop holds server-side resources (the task in AUTH_REQUIRED, any open stream). The cycle continues indefinitely because no agent has visibility into the full chain topology — the protocol's hop-by-hop interaction model (confirmed as a gap in F-002) means each agent sees only its immediate caller. Even without malicious intent, a mesh topology of cooperative agents can accidentally form cycles. Research confirms 'delegation depth violation' is an attack category in multi-agent systems that requires explicit protocol-level mitigation.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "initiation",
+          "state": "TASK_STATE_NONEXISTENT",
+          "transition": "send_message_requested",
+          "actor": "client",
+          "note": "Agent A (acting as client) sends a task request to Agent B. Task T1 is created on Agent B."
+        },
+        {
+          "step": 2,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "agent_begins_processing",
+          "actor": "server",
+          "note": "Agent B begins processing Task T1. To fulfill it, Agent B (as client) creates Task T2 on Agent C."
+        },
+        {
+          "step": 3,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "authorization_required",
+          "actor": "server",
+          "note": "Agent C determines it needs secondary credentials and transitions Task T2 to AUTH_REQUIRED. Agent C has no visibility into the chain originating from Agent A."
+        },
+        {
+          "step": 4,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_requested (inter-stage from task_execution)",
+          "actor": "server",
+          "note": "Task T2 enters the interruption phase. Agent B receives the auth request."
+        },
+        {
+          "step": 5,
+          "stage": "interruption",
+          "state": "TASK_STATE_WORKING",
+          "transition": "authorization_delegation",
+          "actor": "client",
+          "note": "Agent B, being an A2A agent actively processing Task T1, propagates the auth requirement to Task T1. Guard checks only client.is_a2a_agent=true and client.is_actively_processing_task=true. No depth counter, no chain ID, no cycle check."
+        },
+        {
+          "step": 6,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_delegation_required",
+          "actor": "client",
+          "note": "Task T1 on Agent B is now in AUTH_REQUIRED. Agent A receives the auth request for Task T1."
+        },
+        {
+          "step": 7,
+          "stage": "interruption",
+          "state": "TASK_STATE_WORKING",
+          "transition": "authorization_delegation",
+          "actor": "client",
+          "note": "Agent A, to resolve the auth request, delegates to Agent C (or another agent that routes back to Agent B). This creates a new task which will eventually generate its own AUTH_REQUIRED, cycling back through the chain. No protocol mechanism detects or breaks this cycle. Each hop consumes server resources indefinitely."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "interruption",
+          "state_name": "TASK_STATE_AUTH_REQUIRED",
+          "actor": "shared",
+          "relevance": "Tasks accumulate in AUTH_REQUIRED across multiple agents in the chain with no protocol-level mechanism to time out, detect the cycle, or enforce a maximum chain depth."
+        },
+        {
+          "stage": "interruption",
+          "state_name": "TASK_STATE_WORKING",
+          "actor": "server",
+          "relevance": "The authorization_delegation transition from WORKING to AUTH_REQUIRED has no depth guard, enabling unbounded chain growth."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "interruption",
+          "from_state": "TASK_STATE_WORKING",
+          "to_stage": "interruption",
+          "to_state": "TASK_STATE_AUTH_REQUIRED",
+          "trigger": "authorization_delegation",
+          "relevance": "Guard checks only agent type and active task status, not chain depth or prior participation. This is the transition that enables unbounded chain propagation."
+        },
+        {
+          "from_stage": "interruption",
+          "from_state": "TASK_STATE_AUTH_REQUIRED",
+          "to_stage": "interruption",
+          "to_state": "TASK_STATE_AUTH_REQUIRED",
+          "trigger": "message_received (self-loop)",
+          "relevance": "Tasks remain in AUTH_REQUIRED indefinitely while the circular chain holds, as no protocol-defined timeout or depth limit triggers escape."
+        }
+      ],
+      "missing_primitive": "A protocol-level delegation chain metadata structure: a chain depth counter incremented at each delegation hop and checked against a configurable maximum, a chain identifier (chain_id) propagated with auth requests to enable cycle detection, and/or a list of participating agent identities (visited set) that allows any agent in the chain to detect circular delegation before propagating further. The ACP protocol's max_depth field and transitive revocation demonstrate that such mechanisms are feasible and necessary for multi-agent delegation.",
+      "why_compliance_does_not_prevent": "Every agent in the chain fully complies with the specification. Each agent sees only its immediate caller (by design per the hop-by-hop identity model). The authorization_delegation transition guard requires only that the client is an A2A agent actively processing a task — conditions trivially satisfied in a delegation chain. No normative rule constrains chain depth or requires cycle detection. The protocol explicitly enables chains but provides no structural mechanism to bound or verify them.",
+      "spec_sections_searched": [
+        "7.6",
+        "7.5",
+        "4.1",
+        "3.4",
+        "13.1",
+        "3.1"
+      ],
+      "preliminary_confidence": "HIGH"
+    },
+    {
+      "candidate_id": "C-002",
+      "title": "Pull-Only Agent Card Discovery Lacks Emergency Revocation Mechanism, Creating Uncontrollable Trust Windows After Compromise",
+      "protocol_phase": "discovery",
+      "attack_scenario": "The A2A protocol uses a pull-only discovery model where clients fetch agent cards from well-known endpoints and cache them according to HTTP cache-control directives. The protocol defines optional JWS signing for cards (section 8.7) and recommends clients verify signatures. However, the protocol defines no mechanism for emergency revocation of a previously-trusted agent card. When an agent is compromised (endpoint hijacked, private keys leaked, agent decommissioned with security issues), the server operator has no protocol-defined way to notify caching clients that the previously-valid card is now dangerous. Clients continue using the cached card — including its service endpoint URLs, security schemes, and any JWS-verified trust — for the entire remaining cache TTL duration. During this window, clients may send valid credentials to a compromised endpoint, attempt authentication using security schemes controlled by the attacker, or discover extended card details that reveal additional capabilities. The protocol adds a trust establishment mechanism (JWS signing) without a corresponding trust revocation mechanism (no CRL, no OCSP equivalent, no revocation push channel). By contrast, TLS (which the protocol builds on) has certificate revocation via CRL/OCSP. The cache TTL-based refresh is a performance mechanism, not a security revocation mechanism — it cannot provide the sub-minute revocation needed for security incidents.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "discovery",
+          "state": "AGENT_CARD_RECEIVED",
+          "transition": "(initial state - card fetched)",
+          "actor": "client",
+          "note": "Client fetches agent card from .well-known/agent.json. Card is JWS-signed and verified. Client trusts the card and caches it with Cache-Control max-age (e.g., 3600 seconds)."
+        },
+        {
+          "step": 2,
+          "stage": "discovery",
+          "state": "AGENT_CARD_CACHE_VALID",
+          "transition": "agent_card_fetch",
+          "actor": "client",
+          "note": "Card enters cache. All subsequent operations use the cached card. No protocol mechanism exists for the server to signal that this cached card should be invalidated."
+        },
+        {
+          "step": 3,
+          "stage": "discovery",
+          "state": "AGENT_CARD_CACHE_VALID",
+          "transition": "(card remains cached - no protocol event triggers invalidation)",
+          "actor": "client",
+          "note": "Agent is compromised or decommissioned. Server operator has no protocol-defined push mechanism to revoke the card. The cached card remains valid from the client's perspective."
+        },
+        {
+          "step": 4,
+          "stage": "discovery",
+          "state": "TRANSPORT_SELECTED",
+          "transition": "supportedInterfaces_parsed",
+          "actor": "client",
+          "note": "Client selects transport from the cached (now compromised) card. The card's service endpoint URL may now point to an attacker-controlled server or the original compromised server."
+        },
+        {
+          "step": 5,
+          "stage": "discovery",
+          "state": "CLIENT_AUTH_DISCOVERY",
+          "transition": "auth_discovery_initiated",
+          "actor": "client",
+          "note": "Client discovers auth requirements from the compromised card. Security schemes may have been modified by the attacker."
+        },
+        {
+          "step": 6,
+          "stage": "authentication",
+          "state": "CLIENT_CREDENTIAL_TRANSMISSION",
+          "transition": "credentials_acquired",
+          "actor": "client",
+          "note": "Client sends credentials (OAuth tokens, API keys) to the compromised endpoint. The protocol provided no mechanism to revoke the cached card before the credentials were transmitted."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "discovery",
+          "state_name": "AGENT_CARD_CACHE_VALID",
+          "actor": "client",
+          "relevance": "This state persists for the entire cache TTL duration. No protocol-defined transition exists for emergency invalidation — only the cache_ttl_expired transition leads to re-fetching."
+        },
+        {
+          "stage": "discovery",
+          "state_name": "AGENT_CARD_CACHE_EXPIRED",
+          "actor": "client",
+          "relevance": "This state is reached only after natural TTL expiry. There is no protocol mechanism to force early transition to this state from CACHE_VALID for security reasons."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "discovery",
+          "from_state": "AGENT_CARD_CACHE_VALID",
+          "to_stage": "discovery",
+          "to_state": "AGENT_CARD_CACHE_EXPIRED",
+          "trigger": "cache_ttl_expired",
+          "relevance": "This is the ONLY transition out of CACHE_VALID. It is timer-based, not security-event-based. There is no 'cache_revoked' trigger or 'security_alert_received' transition."
+        }
+      ],
+      "missing_primitive": "A protocol-level agent card revocation mechanism: either a mandatory revocation endpoint (analogous to OCSP) that clients must check before using cached cards for security-sensitive operations, a push-based revocation notification channel allowing servers to signal cached-card invalidation, or a short-lived card validity model with mandatory frequent re-verification. Alternatively, the protocol could define a maximum cache TTL for security-sensitive fields (endpoint URLs, security schemes) separate from the general cache TTL.",
+      "why_compliance_does_not_prevent": "The client fully complies by caching the card and honoring the cache-control directives. The server fully complied by serving a valid, JWS-signed card at fetch time. No normative rule requires the client to re-validate the card before security-sensitive operations, and no normative rule provides the server a mechanism to push revocation to caching clients. The SHOULD for caching and the cache expiration mechanism are performance features, not security revocation features.",
+      "spec_sections_searched": [
+        "8.3",
+        "8.6",
+        "8.7",
+        "7.2",
+        "7.3",
+        "13.3",
+        "4.4"
+      ],
+      "preliminary_confidence": "MEDIUM"
+    },
+    {
+      "candidate_id": "C-003",
+      "title": "No Protocol Mechanism for Authentication Credential Lifecycle During Long-Lived SSE Streams Enables Post-Revocation Data Leakage",
+      "protocol_phase": "task_execution",
+      "attack_scenario": "The A2A protocol specifies that servers 'MUST authenticate every incoming request' and that tasks can last 'minutes, hours, or even days.' For SSE streaming, the initial HTTP request is authenticated once at stream establishment. The protocol defines no mechanism for mid-stream credential re-authentication, no stream-level auth challenge event type, and no mandatory stream duration limit tied to credential lifetime. When a client's authentication credential (OAuth token, API key) is revoked or expires during an active SSE stream — a normal security lifecycle event for enterprise deployments using short-lived tokens — the server continues sending task status updates and artifact data on the established stream. The protocol provides no application-level signal for the server to communicate 'auth expired' to trigger client re-authentication before resubscription. If the server closes the stream (a transport-level action, not a protocol-defined one), the client resubscribes using SubscribeToTask, but will retry with the same expired credentials before discovering they're invalid. The asymmetry with push notifications is notable: each push notification is a separate HTTP request with per-request authentication, while SSE streams rely solely on initial authentication for their entire lifetime.",
+      "preliminary_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "CLIENT_CREDENTIAL_TRANSMISSION",
+          "transition": "request_received",
+          "actor": "server",
+          "note": "Client sends message/stream request with valid Bearer token (e.g., 1-hour expiry OAuth token). Server authenticates this single HTTP request."
+        },
+        {
+          "step": 2,
+          "stage": "authentication",
+          "state": "REQUEST_AUTHORIZED",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Request is authorized. The authentication is bound to this single HTTP connection. No protocol mechanism exists for credential refresh during the connection's lifetime."
+        },
+        {
+          "step": 3,
+          "stage": "initiation",
+          "state": "STREAM_STATE_OPEN",
+          "transition": "POST_message_stream",
+          "actor": "client",
+          "note": "SSE stream is established. Task begins processing. Stream will remain open for the task's entire duration."
+        },
+        {
+          "step": 4,
+          "stage": "task_execution",
+          "state": "STREAM_ACTIVE",
+          "transition": "stream_open",
+          "actor": "shared",
+          "note": "Stream becomes active. Server sends events. Protocol defines no periodic re-authentication heartbeat, no auth-challenge event type, no credential refresh mechanism."
+        },
+        {
+          "step": 5,
+          "stage": "task_execution",
+          "state": "STREAM_ACTIVE",
+          "transition": "task_event_generated (self-loop)",
+          "actor": "server",
+          "note": "Hours pass. The original auth token has expired or been revoked (user deactivated, session terminated by admin, token blacklisted). Server continues sending status updates and artifact data on the stream because no protocol mechanism signals credential invalidation mid-stream."
+        },
+        {
+          "step": 6,
+          "stage": "task_execution",
+          "state": "STREAM_ACTIVE",
+          "transition": "task_event_generated (self-loop)",
+          "actor": "server",
+          "note": "Potentially sensitive task output continues flowing to the client whose authorization has been revoked. The client receives data it should no longer have access to. The protocol defines no STREAM_AUTH_EXPIRED event type and no mandatory stream termination on credential lifecycle events."
+        }
+      ],
+      "involved_states": [
+        {
+          "stage": "task_execution",
+          "state_name": "STREAM_ACTIVE",
+          "actor": "server",
+          "relevance": "The stream remains in ACTIVE state indefinitely with no protocol mechanism to transition based on credential lifecycle events. The only exit transitions are task state changes, not auth state changes."
+        },
+        {
+          "stage": "task_execution",
+          "state_name": "STREAM_CLOSED",
+          "actor": "server",
+          "relevance": "Stream closure is triggered only by task reaching terminal/interrupted state. No auth-related closure trigger exists in the protocol."
+        }
+      ],
+      "involved_transitions": [
+        {
+          "from_stage": "task_execution",
+          "from_state": "STREAM_ACTIVE",
+          "to_stage": "task_execution",
+          "to_state": "STREAM_ACTIVE",
+          "trigger": "task_event_generated",
+          "relevance": "This self-loop continues regardless of credential validity. Guard checks stream.state = STREAM_ACTIVE, not credential.valid = true."
+        },
+        {
+          "from_stage": "task_execution",
+          "from_state": "STREAM_ACTIVE",
+          "to_stage": "task_execution",
+          "to_state": "STREAM_CLOSED",
+          "trigger": "task_reaches_terminal_or_interrupted_state",
+          "relevance": "The ONLY protocol-defined exit from STREAM_ACTIVE. Trigger is task state change, not credential expiry. No 'credential_expired' or 'auth_revoked' trigger exists."
+        }
+      ],
+      "missing_primitive": "A protocol-level credential lifecycle management mechanism for long-lived streams: either a mandatory periodic re-authentication heartbeat event that the server sends and the client must respond to with fresh credentials, an AUTH_CHALLENGE stream event type that signals credential expiry and allows in-band re-authentication, a protocol-defined maximum stream duration tied to credential lifetime with mandatory resubscription, or a STREAM_AUTH_EXPIRED event type that the server sends when it detects credential revocation, signaling the client to obtain fresh credentials before resubscribing.",
+      "why_compliance_does_not_prevent": "The server fully complied by authenticating the initial HTTP request. The protocol's 'MUST authenticate every incoming request' was satisfied — the SSE stream IS one request, authenticated at establishment. No normative rule requires mid-stream credential re-validation, periodic re-authentication, or stream termination on credential lifecycle events. The protocol defines task-state-based stream closure but no auth-state-based stream closure. A fully compliant server with short-lived tokens faces an irreconcilable tension between the protocol's single-request-auth model and the multi-hour stream duration it supports.",
+      "spec_sections_searched": [
+        "7.2",
+        "7.4",
+        "7.5",
+        "3.5",
+        "3.2",
+        "13.1",
+        "streaming-and-async topics"
+      ],
+      "preliminary_confidence": "MEDIUM"
+    }
+  ],
+  "structural_observations": [
+    "The FSM has no transition from TASK_STATE_INPUT_REQUIRED or TASK_STATE_AUTH_REQUIRED to TASK_STATE_FAILED. The only exits from interrupted states are: client provides input/credentials (→ WORKING) or cancel (→ CANCELED). A server-initiated timeout from an interrupted state to FAILED would require a transition not currently present in the protocol's state machine, meaning the protocol structurally prevents servers from timing out stuck interrupted tasks without canceling them.",
+    "The PushNotificationConfig.authentication field is optional in both the TypeScript type definition (authentication?: PushNotificationAuthenticationInfo) and the protobuf definition (AuthenticationInfo authentication = 4 without REQUIRED annotation). The normative MUST for server-to-webhook authentication is conditional on this field being present: 'The A2A Server MUST authenticate itself to the client's webhook URL according to the scheme specified in PushNotificationConfig.authentication.' When omitted, the protocol permits unauthenticated push notifications, creating a tension with the non-normative guidance that webhook endpoints 'MUST rigorously verify the authenticity of incoming notification requests.'",
+    "The protocol's version negotiation has a backward-compatibility provision: 'except for 0.3 Clients - 0.3 will be assumed for empty header.' This means servers that support both v0.3 and v1.0 will interpret missing A2A-Version headers as v0.3 requests. Since v1.0 modernized OAuth flows (removing implicit/password grants), this creates a theoretical downgrade surface, though it is mitigated by the fundamental assumption that compliant v1.0 clients MUST send the header.",
+    "The referenceTaskIds field in the Message data model enables cross-task references but inherits the same authorization gap identified in F-004 (task-to-identity binding). A client referencing another client's task ID has no protocol-level authorization check beyond the general 'appropriate authorization scoping' MUST, which lacks a defined mechanism."
+  ]
+}

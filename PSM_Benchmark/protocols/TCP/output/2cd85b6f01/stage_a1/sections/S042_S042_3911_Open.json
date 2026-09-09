@@ -1,0 +1,177 @@
+{
+  "section_id": "S042",
+  "title": "S042 3.9.1.1 Open",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S042 3.9.1.1 Open"
+  ],
+  "url_anchor": "#s042-3911-open",
+  "word_count": 616,
+  "statement_count": 8,
+  "elapsed_seconds": 38.95,
+  "statements": [
+    {
+      "statement_id": "D-S042-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Every passive OPEN call either creates a new connection record in LISTEN state, or it returns an error; it MUST NOT affect any previously created connection record (MUST-41).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "state_name": "LISTEN",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = LISTEN"
+    },
+    {
+      "statement_id": "D-S042-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "A TCP implementation that supports multiple concurrent connections MUST provide an OPEN call that will functionally allow an application to LISTEN on a port while a connection block with the same local port is in SYN-SENT or SYN-RECEIVED state (MUST-42).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "state_name": "SYN-SENT",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = SYN-SENT"
+    },
+    {
+      "statement_id": "D-S042-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "A TCP implementation that supports multiple concurrent connections MUST provide an OPEN call that will functionally allow an application to LISTEN on a port while a connection block with the same local port is in SYN-SENT or SYN-RECEIVED state (MUST-42).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "state_name": "SYN-RECEIVED",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = SYN-RECEIVED"
+    },
+    {
+      "statement_id": "D-S042-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "A transmission control block (TCB) is created and partially filled in with data from the OPEN command parameters.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "object_name": "connection",
+      "field_name": "TCB",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S042-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Every passive OPEN call either creates a new connection record in LISTEN state, or it returns an error; it MUST NOT affect any previously created connection record (MUST-41).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S042",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "LISTEN",
+      "trigger": "passive OPEN",
+      "pre_cond": null,
+      "post_cond": "connection.TCB != null & protocol.state = LISTEN",
+      "actions": [
+        "create TCB",
+        "create connection record in LISTEN state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S042-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "On an active OPEN command, the TCP endpoint will begin the procedure to synchronize (i.e., establish) the connection at once.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S042",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "SYN-SENT",
+      "trigger": "active OPEN",
+      "pre_cond": null,
+      "post_cond": "connection.TCB != null",
+      "actions": [
+        "create TCB",
+        "begin connection synchronization procedure"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S042-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If data is not successfully delivered to the destination within the timeout period, the TCP endpoint will abort the connection.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S042",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "timeout expiry",
+      "pre_cond": "connection.timeout != null & data.delivery_success = false",
+      "post_cond": null,
+      "actions": [
+        "abort connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S042-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "A fully specified passive call can be made active by the subsequent execution of a SEND.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S042",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "SEND",
+      "pre_cond": "protocol.state = LISTEN & connection.remote_socket != null",
+      "post_cond": null,
+      "actions": [
+        "convert passive connection to active"
+      ],
+      "modality": "can"
+    }
+  ]
+}

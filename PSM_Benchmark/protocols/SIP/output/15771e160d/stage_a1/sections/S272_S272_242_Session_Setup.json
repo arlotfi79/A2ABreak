@@ -1,0 +1,133 @@
+{
+  "section_id": "S272",
+  "title": "S272 24.2 Session Setup",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S272 24.2 Session Setup"
+  ],
+  "url_anchor": "#s272-242-session-setup",
+  "word_count": 583,
+  "statement_count": 5,
+  "elapsed_seconds": 45.89,
+  "statements": [
+    {
+      "statement_id": "D-S272-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "The media session between Alice and Bob is now established.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S272",
+      "state_name": "Established",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.ack_sent = true"
+    },
+    {
+      "statement_id": "D-S272-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "F1 INVITE Alice -> atlanta.com proxy; F2 100 Trying atlanta.com proxy -> Alice. Alice sends INVITE and receives 100 Trying provisional response.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "S272",
+      "actors": [
+        "Alice",
+        "atlanta.com proxy"
+      ],
+      "from_state": null,
+      "to_state": "Trying",
+      "trigger": "send_INVITE",
+      "pre_cond": null,
+      "post_cond": "transaction.provisional_received = true",
+      "actions": [
+        "send INVITE",
+        "receive 100 Trying"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S272-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "F6 180 Ringing Bob -> biloxi.com proxy; F8 180 Ringing atlanta.com proxy -> Alice. 180 Ringing propagated back to Alice.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "S272",
+      "actors": [
+        "Bob",
+        "biloxi.com proxy",
+        "atlanta.com proxy",
+        "Alice"
+      ],
+      "from_state": "Trying",
+      "to_state": "Ringing",
+      "trigger": "receive_180_Ringing",
+      "pre_cond": null,
+      "post_cond": "session.alerting = true",
+      "actions": [
+        "receive 180 Ringing"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S272-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "F9 200 OK Bob -> biloxi.com proxy ... F11 200 OK atlanta.com proxy -> Alice; F12 ACK Alice -> Bob. Alice receives 200 OK to INVITE and sends ACK; the media session is now established.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S272",
+      "actors": [
+        "Alice",
+        "Bob"
+      ],
+      "from_state": "Ringing",
+      "to_state": "Established",
+      "trigger": "receive_200_OK_send_ACK",
+      "pre_cond": null,
+      "post_cond": "session.state = Established",
+      "actions": [
+        "receive 200 OK for INVITE",
+        "send ACK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S272-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "F13 BYE Bob -> Alice; F14 200 OK Alice -> Bob. Bob sends BYE to terminate the established session; Alice responds with 200 OK.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S272",
+      "actors": [
+        "Bob",
+        "Alice"
+      ],
+      "from_state": "Established",
+      "to_state": "Terminated",
+      "trigger": "send_BYE",
+      "pre_cond": "session.state = Established",
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "send BYE",
+        "receive 200 OK for BYE"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

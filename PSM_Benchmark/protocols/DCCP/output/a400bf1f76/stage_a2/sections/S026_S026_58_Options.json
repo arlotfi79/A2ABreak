@@ -1,0 +1,279 @@
+{
+  "section_id": "S026",
+  "title": "S026 5.8 Options",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S026 5.8 Options"
+  ],
+  "url_anchor": "#s026-58-options",
+  "word_count": 517,
+  "statement_count": 11,
+  "elapsed_seconds": 86.73,
+  "statements": [
+    {
+      "statement_id": "N-S026-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "However, the combination of all options MUST add up to a multiple of 32 bits; Padding options MUST be added as necessary to fill out option space to a word boundary.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "options.total_length % 32 = 0",
+      "actions": [
+        "ensure combined options length is a multiple of 32 bits"
+      ],
+      "modality": "must",
+      "id": "N-S026-001"
+    },
+    {
+      "statement_id": "N-S026-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "However, the combination of all options MUST add up to a multiple of 32 bits; Padding options MUST be added as necessary to fill out option space to a word boundary.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "options.total_length % 32 != 0",
+      "post_cond": "padding_options_added = true & options.total_length % 32 = 0",
+      "actions": [
+        "add Padding options to fill option space to word boundary"
+      ],
+      "modality": "must",
+      "id": "N-S026-002"
+    },
+    {
+      "statement_id": "N-S026-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Options MUST be processed sequentially, starting with the first option in the packet header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "packet_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "process options sequentially beginning with the first option in the packet header"
+      ],
+      "modality": "must",
+      "id": "N-S026-003"
+    },
+    {
+      "statement_id": "N-S026-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Options with unknown types MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "option_received",
+      "pre_cond": "option.type = unknown",
+      "post_cond": "option.processed = false",
+      "actions": [
+        "ignore option whose type is unknown"
+      ],
+      "modality": "must",
+      "id": "N-S026-004"
+    },
+    {
+      "statement_id": "N-S026-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Also, options with nonsensical lengths (length byte less than two or more than the remaining space in the options portion of the header) MUST be ignored, and any option space following an option with nonsensical length MUST likewise be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "option_received",
+      "pre_cond": "option.length < 2 | option.length > remaining_option_space",
+      "post_cond": "option.processed = false",
+      "actions": [
+        "ignore option with nonsensical length"
+      ],
+      "modality": "must",
+      "id": "N-S026-005"
+    },
+    {
+      "statement_id": "N-S026-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Also, options with nonsensical lengths (length byte less than two or more than the remaining space in the options portion of the header) MUST be ignored, and any option space following an option with nonsensical length MUST likewise be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "option_with_nonsensical_length_encountered",
+      "pre_cond": "option.length < 2 | option.length > remaining_option_space",
+      "post_cond": "subsequent_option_space.processed = false",
+      "actions": [
+        "ignore all option space following an option with nonsensical length"
+      ],
+      "modality": "must",
+      "id": "N-S026-006"
+    },
+    {
+      "statement_id": "N-S026-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Unless otherwise specified, multiple occurrences of the same option MUST be processed independently; for some options, this will mean in practice that the last valid occurrence of an option takes precedence.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "multiple_occurrences_of_same_option_received",
+      "pre_cond": "option.occurrence_count > 1",
+      "post_cond": null,
+      "actions": [
+        "process each occurrence of the same option independently"
+      ],
+      "modality": "must",
+      "id": "N-S026-007"
+    },
+    {
+      "statement_id": "N-S026-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "If an option occurs on an unexpected packet type, it MUST generally be ignored; any such restrictions are mentioned in each option's description.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "option_received_on_unexpected_packet_type",
+      "pre_cond": "option.packet_type = unexpected",
+      "post_cond": "option.processed = false",
+      "actions": [
+        "ignore option received on an unexpected packet type"
+      ],
+      "modality": "must",
+      "id": "N-S026-008"
+    },
+    {
+      "statement_id": "N-S026-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "The table summarizes the most common restriction: when the DCCP-Data? column value is N, the corresponding option MUST be ignored when received on a DCCP-Data packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "option_received_on_DCCP-Data_packet",
+      "pre_cond": "option.dccp_data_allowed = false & packet.type = DCCP-Data",
+      "post_cond": "option.processed = false",
+      "actions": [
+        "ignore option whose DCCP-Data? column value is N when received on a DCCP-Data packet"
+      ],
+      "modality": "must",
+      "id": "N-S026-009"
+    },
+    {
+      "statement_id": "N-S026-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Options with invalid values MUST be ignored unless otherwise specified.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "option_received",
+      "pre_cond": "option.value = invalid",
+      "post_cond": "option.processed = false",
+      "actions": [
+        "ignore option with invalid value"
+      ],
+      "modality": "must",
+      "id": "N-S026-010"
+    },
+    {
+      "statement_id": "N-S026-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "For example, any Data Checksum option with option length 4 MUST be ignored, since all valid Data Checksum options have option length 6.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Data_Checksum_option_received",
+      "pre_cond": "option.type = Data_Checksum & option.length = 4",
+      "post_cond": "option.processed = false",
+      "actions": [
+        "ignore Data Checksum option whose option length is 4"
+      ],
+      "modality": "must",
+      "id": "N-S026-011"
+    }
+  ]
+}

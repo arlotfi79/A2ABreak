@@ -1,0 +1,119 @@
+{
+  "section_id": "S039",
+  "title": "S039 5.4 Autologout Timer",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S039 5.4 Autologout Timer"
+  ],
+  "url_anchor": "#s039-54-autologout-timer",
+  "word_count": 77,
+  "statement_count": 5,
+  "elapsed_seconds": 50.23,
+  "statements": [
+    {
+      "statement_id": "D-S039-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "imap_fsm",
+      "description": "If a server has an inactivity autologout timer that applies to sessions after authentication, the duration of that timer MUST be at least 30 minutes.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "object_name": "autologout_timer",
+      "field_name": "duration",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": ">=30 minutes",
+      "guard_semantics": "applies to sessions after authentication"
+    },
+    {
+      "statement_id": "D-S039-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "timer",
+      "stage": "imap_fsm",
+      "description": "The receipt of any command from the client during that interval resets the autologout timer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command received",
+      "pre_cond": "autologout_timer.active = true & (session.state = Authenticated | session.state = Selected)",
+      "post_cond": "autologout_timer.elapsed = 0",
+      "actions": [
+        "reset autologout timer"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Inactivity autologout timer applies to sessions after authentication; timer expiry causes autologout.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S039",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Logout",
+      "trigger": "autologout_timer_expiry",
+      "pre_cond": "autologout_timer.active = true & (session.state = Authenticated | session.state = Selected)",
+      "post_cond": null,
+      "actions": [
+        "initiate autologout"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "imap_fsm",
+      "description": "This specification doesn't have any restrictions on an autologout timer used before successful client authentication. Servers are allowed to use a shortened pre-authentication timer to protect themselves from Denial-of-Service attacks.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "object_name": "pre_authentication_autologout_timer",
+      "field_name": "duration",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "applies before successful client authentication"
+    },
+    {
+      "statement_id": "D-S039-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Servers are allowed to use a shortened pre-authentication timer to protect themselves from Denial-of-Service attacks.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S039",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Logout",
+      "trigger": "pre_authentication_timer_expiry",
+      "pre_cond": "pre_authentication_autologout_timer.active = true & session.state = Not Authenticated",
+      "post_cond": null,
+      "actions": [
+        "initiate autologout"
+      ],
+      "modality": "may"
+    }
+  ]
+}

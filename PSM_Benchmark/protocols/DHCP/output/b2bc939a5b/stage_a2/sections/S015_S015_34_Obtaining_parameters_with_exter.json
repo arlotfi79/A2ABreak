@@ -1,0 +1,112 @@
+{
+  "section_id": "S015",
+  "title": "S015 3.4 Obtaining parameters with externally configured network address",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S015 3.4 Obtaining parameters with externally configured network address"
+  ],
+  "url_anchor": "#s015-34-obtaining-parameters-with-externally-configured-network-address",
+  "word_count": 135,
+  "statement_count": 4,
+  "elapsed_seconds": 40.54,
+  "statements": [
+    {
+      "statement_id": "1-S015-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If a client has obtained a network address through some other means (e.g., manual configuration), it may use a DHCPINFORM request message to obtain other local configuration parameters.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "externally_configured_address_obtained",
+      "pre_cond": "client.address_source = external",
+      "post_cond": "client.dhcpinform_sent = true",
+      "actions": [
+        "send DHCPINFORM request message"
+      ],
+      "modality": "may",
+      "id": "N-S015-001"
+    },
+    {
+      "statement_id": "2-S015-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The servers SHOULD unicast the DHCPACK reply to the address given in the 'ciaddr' field of the DHCPINFORM message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPINFORM_received",
+      "pre_cond": "message.type = DHCPINFORM & message.ciaddr != null",
+      "post_cond": "server.dhcpack_sent = true & dhcpack.destination = message.ciaddr",
+      "actions": [
+        "unicast DHCPACK reply to ciaddr field of DHCPINFORM"
+      ],
+      "modality": "should",
+      "id": "N-S015-002"
+    },
+    {
+      "statement_id": "3-S015-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server SHOULD check the network address in a DHCPINFORM message for consistency, but MUST NOT check for an existing lease.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPINFORM_received",
+      "pre_cond": "message.type = DHCPINFORM",
+      "post_cond": "server.network_address_consistency_checked = true",
+      "actions": [
+        "check network address in DHCPINFORM for consistency"
+      ],
+      "modality": "should",
+      "id": "N-S015-003"
+    },
+    {
+      "statement_id": "4-S015-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server SHOULD check the network address in a DHCPINFORM message for consistency, but MUST NOT check for an existing lease.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S015",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DHCPINFORM_received",
+      "pre_cond": "message.type = DHCPINFORM",
+      "post_cond": "server.existing_lease_checked = false",
+      "actions": [
+        "do not check for an existing lease"
+      ],
+      "modality": "must",
+      "id": "N-S015-004"
+    }
+  ]
+}

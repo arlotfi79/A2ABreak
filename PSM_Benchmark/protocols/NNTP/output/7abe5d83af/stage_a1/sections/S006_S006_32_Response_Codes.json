@@ -1,0 +1,174 @@
+{
+  "section_id": "S006",
+  "title": "S006 3.2 Response Codes",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S006 3.2 Response Codes"
+  ],
+  "url_anchor": "#s006-32-response-codes",
+  "word_count": 573,
+  "statement_count": 7,
+  "elapsed_seconds": 46.94,
+  "statements": [
+    {
+      "statement_id": "D-S006-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "2xx - Command completed OK",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "2xx_response_received",
+      "pre_cond": null,
+      "post_cond": "command.result = success",
+      "actions": [
+        "treat command as completed successfully"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "3xx - Command OK so far; send the rest of it",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "3xx_response_received",
+      "pre_cond": null,
+      "post_cond": "command.partial = true",
+      "actions": [
+        "send remainder of command to server"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "4xx - Command was syntactically correct but failed for some reason",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "4xx_response_received",
+      "pre_cond": null,
+      "post_cond": "command.result = failure",
+      "actions": [
+        "treat command as failed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "5xx - Command unknown, unsupported, unavailable, or syntax error",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "5xx_response_received",
+      "pre_cond": null,
+      "post_cond": "command.result = error",
+      "actions": [
+        "treat command as unknown or unsupported"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "If a client receives an unexpected response, it SHOULD use the first digit of the response to determine the result. For example, an unexpected 2xx should be taken as success, and an unexpected 4xx or 5xx as failure.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S006",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unexpected_response_received",
+      "pre_cond": "response.code = unexpected",
+      "post_cond": null,
+      "actions": [
+        "evaluate response.code[0] to determine success or failure"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S006-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Each response MUST begin with a three-digit status indicator.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "object_name": "response",
+      "field_name": "status_indicator",
+      "field_type": "three-digit numeric code",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S006-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST respond to any command with the appropriate generic response (given in Section 3.2.1) if it represents the situation. Otherwise, each recognized command MUST return one of the response codes specifically listed in its description or in an extension.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S006",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send appropriate generic response or command-specific response code"
+      ],
+      "modality": "must"
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "section_id": "S098",
+  "title": "S098 7.2.2 CAPABILITY Response",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S098 7.2.2 CAPABILITY Response"
+  ],
+  "url_anchor": "#s098-722-capability-response",
+  "word_count": 432,
+  "statement_count": 8,
+  "elapsed_seconds": 51.35,
+  "statements": [
+    {
+      "statement_id": "D-S098-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server will respond with a tagged NO response to any attempt to use the LOGIN command even if the user name and password are valid when LOGINDISABLED is advertised.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S098",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "LOGIN command received",
+      "pre_cond": "server.capability.LOGINDISABLED = true",
+      "post_cond": null,
+      "actions": [
+        "send tagged NO response",
+        "do not check credential validity"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S098-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "An IMAP client MUST NOT issue the LOGIN command if the server advertises the LOGINDISABLED capability.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S098",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "LOGIN command",
+      "pre_cond": "server.capability.LOGINDISABLED = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S098-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The LOGINDISABLED capability indicates that the LOGIN command is disabled.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S098",
+      "object_name": "CAPABILITY",
+      "field_name": "LOGINDISABLED",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": [
+        "LOGINDISABLED"
+      ],
+      "guard_semantics": "When present, prohibits client from issuing LOGIN command"
+    },
+    {
+      "statement_id": "D-S098-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "It is quite common for the server to change the list of capabilities after successful TLS negotiation (STARTTLS command).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S098",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "STARTTLS command successful",
+      "pre_cond": null,
+      "post_cond": "server.capability_list = updated",
+      "actions": [
+        "update capability listing",
+        "send updated CAPABILITY response"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S098-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "It is quite common for the server to change the list of capabilities after successful authentication (AUTHENTICATE or LOGIN commands).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S098",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "AUTHENTICATE or LOGIN command successful",
+      "pre_cond": null,
+      "post_cond": "server.capability_list = updated",
+      "actions": [
+        "update capability listing",
+        "send updated CAPABILITY response code in tagged OK"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S098-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server MAY send capabilities automatically, by using the CAPABILITY response code in the initial PREAUTH or OK responses.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S098",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Not Authenticated",
+      "trigger": "initial server greeting (PREAUTH or OK)",
+      "pre_cond": null,
+      "post_cond": "client.known_capabilities = server.capabilities",
+      "actions": [
+        "include CAPABILITY response code in greeting"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S098-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server MAY send capabilities automatically by sending an updated CAPABILITY response code in the tagged OK response as part of a successful authentication.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S098",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "successful authentication (AUTHENTICATE or LOGIN)",
+      "pre_cond": null,
+      "post_cond": "client.known_capabilities = updated_server.capabilities",
+      "actions": [
+        "include updated CAPABILITY response code in tagged OK response"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S098-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "It is unnecessary for a client to send a separate CAPABILITY command if it recognizes these automatic capabilities and there was no change to the TLS and/or authentication state since they were received.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S098",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "automatic CAPABILITY received",
+      "pre_cond": "session.tls_state_changed = false & session.auth_state_changed = false",
+      "post_cond": null,
+      "actions": [
+        "skip CAPABILITY command"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

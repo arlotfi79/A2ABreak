@@ -1,0 +1,200 @@
+{
+  "section_id": "S062",
+  "title": "S062 13.4.1 General Usage",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S062 13.4.1 General Usage"
+  ],
+  "url_anchor": "#s062-1341-general-usage",
+  "word_count": 1664,
+  "statement_count": 9,
+  "elapsed_seconds": 68.91,
+  "statements": [
+    {
+      "statement_id": "D-S062-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY requests are valid when the session is in Ready or Play state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "state_name": "Ready",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = Ready"
+    },
+    {
+      "statement_id": "D-S062-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY requests are valid when the session is in Ready or Play state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "state_name": "Play",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = Play"
+    },
+    {
+      "statement_id": "D-S062-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY requests are valid when the session is in Ready or Play state. Upon receipt of the PLAY request, the server MUST position the normal play time to the beginning of the range specified and deliver stream data.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Play",
+      "trigger": "PLAY request received",
+      "pre_cond": "session.state = Ready",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "position NPT to start of Range",
+        "begin media delivery"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A PLAY request while the stream is still in the Play state is legal and can be issued without an intervening PAUSE request. Such a request MUST replace the current PLAY action with the new one requested, i.e., being handled in the same way as if the request was received in Ready state.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY request received",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "replace current PLAY action with new PLAY request parameters"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "After playing the desired range, the presentation does NOT change to the Ready state, media delivery simply stops. If it is necessary to put the stream into the Ready state, a PAUSE request MUST be issued.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "end of requested range reached",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Play & media_delivery = stopped",
+      "actions": [
+        "stop media delivery"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "If it is necessary to put the stream into the Ready state, a PAUSE request MUST be issued.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S062",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Ready",
+      "trigger": "PAUSE request received",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Ready",
+      "actions": [
+        "stop media delivery",
+        "set pause point to current media position"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S062-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A PLAY request MUST include a Session header to indicate to which session the request applies.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "object_name": "PLAY request",
+      "field_name": "Session",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S062-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Servers MUST include a Range header in any PLAY response, even if no Range header was present in the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "object_name": "PLAY response",
+      "field_name": "Range",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S062-009",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY requests are valid when the session is in Ready or Play state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "object_name": "PLAY request",
+      "field_name": "session.state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "Ready",
+        "Play"
+      ],
+      "guard_semantics": "session.state = Ready | session.state = Play"
+    }
+  ]
+}

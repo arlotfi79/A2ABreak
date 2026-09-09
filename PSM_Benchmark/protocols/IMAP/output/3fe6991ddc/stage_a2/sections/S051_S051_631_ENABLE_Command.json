@@ -1,0 +1,206 @@
+{
+  "section_id": "S051",
+  "title": "S051 6.3.1 ENABLE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S051 6.3.1 ENABLE Command"
+  ],
+  "url_anchor": "#s051-631-enable-command",
+  "word_count": 630,
+  "statement_count": 8,
+  "elapsed_seconds": 120.27,
+  "statements": [
+    {
+      "statement_id": "N-S051-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the argument is not an extension known to the server, the server MUST ignore the argument.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "authenticated",
+      "trigger": "ENABLE_received_with_unknown_argument",
+      "pre_cond": "argument.known_to_server = false",
+      "post_cond": "argument.ignored = true",
+      "actions": [
+        "ignore unknown capability argument"
+      ],
+      "modality": "must",
+      "id": "N-S051-001"
+    },
+    {
+      "statement_id": "N-S051-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the argument is an extension known to the server, and it is not specifically permitted to be enabled using ENABLE, the server MUST ignore the argument.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "authenticated",
+      "trigger": "ENABLE_received_with_non_enabling_argument",
+      "pre_cond": "argument.known_to_server = true & argument.enable_permitted = false",
+      "post_cond": "argument.ignored = true",
+      "actions": [
+        "ignore non-enabling capability argument"
+      ],
+      "modality": "must",
+      "id": "N-S051-002"
+    },
+    {
+      "statement_id": "N-S051-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the argument is an extension that is supported by the server and that needs to be enabled, the server MUST enable the extension for the duration of the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "authenticated",
+      "trigger": "ENABLE_received_with_supported_argument",
+      "pre_cond": "extension.supported_by_server = true & extension.requires_enabling = true",
+      "post_cond": "extension.enabled = true & extension.active_until_connection_close = true",
+      "actions": [
+        "enable extension",
+        "maintain extension enabled until connection closed"
+      ],
+      "modality": "must",
+      "id": "N-S051-003"
+    },
+    {
+      "statement_id": "N-S051-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the ENABLE command is successful, the server MUST send an untagged ENABLED response (Section 7.2.1), which includes all enabled extensions as specified above.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "authenticated",
+      "trigger": "ENABLE_command_success",
+      "pre_cond": "ENABLE.result = success",
+      "post_cond": "ENABLED_response.sent = true & ENABLED_response.includes_all_enabled_extensions = true",
+      "actions": [
+        "send untagged ENABLED response",
+        "include all enabled extensions in ENABLED response"
+      ],
+      "modality": "must",
+      "id": "N-S051-004"
+    },
+    {
+      "statement_id": "N-S051-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Clients SHOULD only include extensions that need to be enabled by the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S051-005"
+    },
+    {
+      "statement_id": "N-S051-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "Clients MUST NOT issue ENABLE once they SELECT/EXAMINE a mailbox; however, server implementations don't have to check that no mailbox is selected or was previously selected during the duration of a connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "ENABLE_command",
+      "pre_cond": "mailbox.selected = true | mailbox.examined = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S051-006"
+    },
+    {
+      "statement_id": "N-S051-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "When multiple ENABLE commands are issued, each corresponding ENABLED response SHOULD only contain extensions enabled by the corresponding ENABLE command, i.e., for the above example, the ENABLED response to \"ENABLE c\" should not contain \"a\" or \"b\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "authenticated",
+      "trigger": "ENABLE_command_completion",
+      "pre_cond": "session.enable_command_count > 1",
+      "post_cond": "ENABLED_response.extensions = corresponding_ENABLE_command.newly_enabled_extensions",
+      "actions": [
+        "include only extensions enabled by the corresponding ENABLE command in ENABLED response"
+      ],
+      "modality": "should",
+      "id": "N-S051-007"
+    },
+    {
+      "statement_id": "N-S051-8",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MUST NOT change the CAPABILITY list as a result of executing ENABLE; that is, a CAPABILITY command issued right after an ENABLE command MUST list the same capabilities as a CAPABILITY command issued before the ENABLE command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S051",
+      "actors": [
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "authenticated",
+      "trigger": "ENABLE_command_executed",
+      "pre_cond": null,
+      "post_cond": "server.capability_list = server.capability_list_pre_enable",
+      "actions": [
+        "preserve CAPABILITY list unchanged after ENABLE execution"
+      ],
+      "modality": "must",
+      "id": "N-S051-008"
+    }
+  ]
+}

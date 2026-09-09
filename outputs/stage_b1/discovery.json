@@ -1,0 +1,1713 @@
+{
+  "stage": "discovery",
+  "fsm_input": {
+    "states": [
+      {
+        "id": "D-2-2-011",
+        "state_name": null,
+        "semantic_type": null,
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "discovery",
+        "source_section": "2.2"
+      },
+      {
+        "id": "D-7-3-001",
+        "state_name": "CLIENT_AUTH_DISCOVERY",
+        "semantic_type": "initial",
+        "is_initial": true,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "discovery",
+        "source_section": "7.3"
+      },
+      {
+        "id": "D-8-1-001",
+        "state_name": null,
+        "semantic_type": null,
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "discovery",
+        "source_section": "8.1"
+      },
+      {
+        "id": "D-13-3-001",
+        "state_name": "EXTENDED_CARD_UNSUPPORTED",
+        "semantic_type": "terminal",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "agent_card.capabilities.extendedAgentCard = false | !agent_card.capabilities.extendedAgentCard.present",
+        "stage": "discovery",
+        "source_section": "13.3"
+      }
+    ],
+    "transitions": [
+      {
+        "id": "N-3-3-028",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "get_extended_agent_card",
+        "pre_cond": "agent_card.capabilities.extendedAgentCard = true & agent_card.extended_card.configured = false",
+        "post_cond": "ExtendedAgentCardNotConfiguredError.returned = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-030",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "capability_check",
+        "pre_cond": null,
+        "post_cond": "client.capability_validated = true",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-5-2-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "protocol_selection",
+        "pre_cond": "agent_card.supported_protocols != null",
+        "post_cond": "client.selectedProtocol != null & agent_card.supportedProtocols.contains(client.selectedProtocol)",
+        "modality": "may",
+        "actors": [
+          "client"
+        ],
+        "source_section": "5.2"
+      },
+      {
+        "id": "N-5-2-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "protocol_selection_failed",
+        "pre_cond": null,
+        "post_cond": "client.fallback_logic_implemented = true",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "5.2"
+      },
+      {
+        "id": "N-5-8-003",
+        "category": "BEHAVIORAL",
+        "from_state": "BINDING_VERSION_CURRENT",
+        "to_state": "BINDING_VERSION_NEW",
+        "trigger": "binding_breaking_change_introduced",
+        "pre_cond": "binding.breaking_change = true",
+        "post_cond": "binding.uri = new_uri & binding.uri != previous_uri",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "5.8"
+      },
+      {
+        "id": "D-6-9-006",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "GET_public_agent_card",
+        "pre_cond": null,
+        "post_cond": "agent_card.capabilities.extendedAgentCard = true & agent_card.securitySchemes != null",
+        "modality": "unspecified",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "6.9"
+      },
+      {
+        "id": "D-7-3-004",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "CLIENT_AUTH_DISCOVERY",
+        "to_state": "CLIENT_CREDENTIAL_ACQUISITION",
+        "trigger": null,
+        "pre_cond": "client.state = CLIENT_AUTH_DISCOVERY & agent_card.securitySchemes != null",
+        "post_cond": "client.state = CLIENT_CREDENTIAL_ACQUISITION & client.required_auth_scheme != null",
+        "modality": "unspecified",
+        "actors": [
+          "client"
+        ],
+        "source_section": "7.3"
+      },
+      {
+        "id": "N-8-3-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_received",
+        "pre_cond": null,
+        "post_cond": "client.transport.selected = true & client.url.correct = true",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.3"
+      },
+      {
+        "id": "D-8-3-004",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "AGENT_CARD_RECEIVED",
+        "to_state": "TRANSPORT_SELECTED",
+        "trigger": "supportedInterfaces_parsed",
+        "pre_cond": "agent_card.supportedInterfaces != null",
+        "post_cond": "client.selectedTransport = agent_card.supportedInterfaces[first_supported_index]",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.3.2"
+      },
+      {
+        "id": "D-8-3-005",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "TRANSPORT_SELECTED",
+        "to_state": "TRANSPORT_CONNECTED",
+        "trigger": "transport_url_resolved",
+        "pre_cond": "client.selectedTransport != null",
+        "post_cond": "client.connectionUrl = client.selectedTransport.url",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.3.2"
+      },
+      {
+        "id": "N-8-4-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_signing_initiated",
+        "pre_cond": "agent_card.signed = false",
+        "post_cond": "agent_card.content.canonicalized = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.1"
+      },
+      {
+        "id": "N-8-4-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_canonicalization_initiated",
+        "pre_cond": null,
+        "post_cond": "agent_card.json.field_presence_semantics = protobuf_section_5_7",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.1"
+      },
+      {
+        "id": "N-8-4-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_canonicalization_initiated",
+        "pre_cond": "agent_card.field.marked_optional = true & agent_card.field.explicitly_set = false",
+        "post_cond": "agent_card.field.included_in_json = false",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.1"
+      },
+      {
+        "id": "N-8-4-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_canonicalization_initiated",
+        "pre_cond": "agent_card.field.marked_optional = true & agent_card.field.explicitly_set = true",
+        "post_cond": "agent_card.field.included_in_json = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.1"
+      },
+      {
+        "id": "N-8-4-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_canonicalization_initiated",
+        "pre_cond": "agent_card.field.marked_required = true",
+        "post_cond": "agent_card.field.present_in_json = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.1"
+      },
+      {
+        "id": "N-8-4-007",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_canonicalization_initiated",
+        "pre_cond": "agent_card.field.has_default_value = true & agent_card.field.marked_required = false & agent_card.field.marked_optional = false",
+        "post_cond": "agent_card.field.included_in_json = false",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.1"
+      },
+      {
+        "id": "N-8-4-008",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_canonicalization_initiated",
+        "pre_cond": null,
+        "post_cond": "agent_card.json.rfc8785_canonicalized = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.1"
+      },
+      {
+        "id": "N-8-4-009",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_signing_initiated",
+        "pre_cond": null,
+        "post_cond": "agent_card.signatures_field.included_in_signed_content = false",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.1"
+      },
+      {
+        "id": "N-8-4-010",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_signing_initiated",
+        "pre_cond": null,
+        "post_cond": "agent_card.signature.protected_header.alg != null & agent_card.signature.protected_header.kid != null",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.2"
+      },
+      {
+        "id": "N-8-4-011",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_signing_initiated",
+        "pre_cond": null,
+        "post_cond": "agent_card.signature.protected_header.typ = JOSE",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.2"
+      },
+      {
+        "id": "N-8-4-012",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_signing_initiated",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.4.2"
+      },
+      {
+        "id": "N-8-4-013",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_signature_verification_initiated",
+        "pre_cond": "client.verifying_agent_card_signature = true",
+        "post_cond": "agent_card.signature.verified = true",
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.4.3"
+      },
+      {
+        "id": "N-8-4-014",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_received",
+        "pre_cond": "agent_card.signatures != null",
+        "post_cond": "agent_card.at_least_one_signature_verified = true",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.4.3"
+      },
+      {
+        "id": "N-8-4-015",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "public_key_retrieval_initiated",
+        "pre_cond": null,
+        "post_cond": "client.public_key_retrieval.channel = HTTPS",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.4.3"
+      },
+      {
+        "id": "N-8-4-017",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_signature_verification_initiated",
+        "pre_cond": "client.key.expired = true | client.key.revoked = true",
+        "post_cond": null,
+        "modality": "must",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.4.3"
+      },
+      {
+        "id": "N-8-6-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_fetch",
+        "pre_cond": null,
+        "post_cond": "response.headers.Cache-Control.max-age != null",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.6"
+      },
+      {
+        "id": "N-8-6-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_fetch",
+        "pre_cond": null,
+        "post_cond": "response.headers.ETag != null",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.6"
+      },
+      {
+        "id": "N-8-6-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_fetch",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "8.6"
+      },
+      {
+        "id": "N-8-6-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_fetch",
+        "pre_cond": null,
+        "post_cond": "client.http_caching_honored = true",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.6"
+      },
+      {
+        "id": "N-8-6-006",
+        "category": "BEHAVIORAL",
+        "from_state": "AGENT_CARD_CACHE_EXPIRED",
+        "to_state": null,
+        "trigger": "agent_card_cache_expired",
+        "pre_cond": "agent_card.cached = true & agent_card.cache_expired = true",
+        "post_cond": "request.headers.If-None-Match != null | request.headers.If-Modified-Since != null",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.6"
+      },
+      {
+        "id": "N-8-6-007",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": "AGENT_CARD_CACHE_VALID",
+        "trigger": "agent_card_fetch",
+        "pre_cond": "server.caching_headers_present = false",
+        "post_cond": "client.cache_duration = implementation_specific",
+        "modality": "may",
+        "actors": [
+          "client"
+        ],
+        "source_section": "8.6"
+      },
+      {
+        "id": "D-8-6-005",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": null,
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": null,
+        "actors": null,
+        "source_section": "8.6.2"
+      },
+      {
+        "id": "N-12-7-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "custom_binding_configured",
+        "pre_cond": "binding.type = custom",
+        "post_cond": "agent_card.supportedInterfaces.customBinding.declared = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "12.7"
+      },
+      {
+        "id": "D-13-3-002",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": null,
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": null,
+        "actors": null,
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-13-3-004",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "get_extended_agent_card_response",
+        "pre_cond": null,
+        "post_cond": "response.caching_headers.present = true",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-13-3-011",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "get_extended_agent_card_response",
+        "pre_cond": "client.authenticated = true",
+        "post_cond": "client.cached_agent_card = extended_agent_card",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-13-3-013",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": "EXTENDED_CARD_UNSUPPORTED",
+        "trigger": "get_extended_agent_card_request",
+        "pre_cond": "agent_card.capabilities.extendedAgentCard = false | !agent_card.capabilities.extendedAgentCard",
+        "post_cond": "response.error = UnsupportedOperationError",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-13-3-014",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": "EXTENDED_CARD_NOT_CONFIGURED",
+        "trigger": "get_extended_agent_card_request",
+        "pre_cond": "agent_card.capabilities.extendedAgentCard = true & agent_card.extended_card_configured = false",
+        "post_cond": "response.error = ExtendedAgentCardNotConfiguredError",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-14-3-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "well_known_uri_request",
+        "pre_cond": null,
+        "post_cond": "response.body.type = AgentCard",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "14.3"
+      },
+      {
+        "id": "N-14-3-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "agent_card_received",
+        "pre_cond": "agent_card.signature != null",
+        "post_cond": "agent_card.signature_verified = true",
+        "modality": "should",
+        "actors": [
+          "client"
+        ],
+        "source_section": "14.3"
+      },
+      {
+        "id": "N-Appendix A- Migratio-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "legacy_identifier_resolution_request",
+        "pre_cond": "legacy_identifier.removal_version_reached = false",
+        "post_cond": "legacy_identifier.resolvable = true",
+        "modality": "must",
+        "actors": [],
+        "source_section": "Appendix A. Migratio"
+      },
+      {
+        "id": "N-12-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "custom_binding_created",
+        "pre_cond": "binding.type = custom",
+        "post_cond": "binding.compliant_with_section5 = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "12"
+      }
+    ]
+  },
+  "statements": [
+    {
+      "statement_id": "D-2-2-011",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Agent Card: A JSON metadata document published by an A2A Server, describing its identity, capabilities, skills, service endpoint, and authentication requirements.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "2.2",
+      "object_name": "AgentCard",
+      "field_name": null,
+      "field_type": "object",
+      "required": null,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "N-3-3-028",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "If the agent declares support but has not configured an extended card, it MUST return ExtendedAgentCardNotConfiguredError.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card",
+      "pre_cond": "agent_card.capabilities.extendedAgentCard = true & agent_card.extended_card.configured = false",
+      "post_cond": "ExtendedAgentCardNotConfiguredError.returned = true",
+      "actions": [
+        "Return ExtendedAgentCardNotConfiguredError"
+      ],
+      "modality": "must",
+      "id": "N-3-3-028"
+    },
+    {
+      "statement_id": "N-3-3-030",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients SHOULD validate capability support by examining the Agent Card before attempting operations that require optional capabilities.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "capability_check",
+      "pre_cond": null,
+      "post_cond": "client.capability_validated = true",
+      "actions": [
+        "Examine the Agent Card to validate that required optional capabilities are declared before attempting the operation"
+      ],
+      "modality": "should",
+      "id": "N-3-3-030"
+    },
+    {
+      "statement_id": "N-5-2-002",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients MAY choose any protocol declared by the agent",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "5.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "protocol_selection",
+      "pre_cond": "agent_card.supported_protocols != null",
+      "post_cond": "client.selectedProtocol != null & agent_card.supportedProtocols.contains(client.selectedProtocol)",
+      "actions": [
+        "Select any protocol from the set of protocols declared in the agent's AgentCard"
+      ],
+      "modality": "may",
+      "id": "N-5-2-002"
+    },
+    {
+      "statement_id": "N-5-2-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients SHOULD implement fallback logic for alternative protocols",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "5.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "protocol_selection_failed",
+      "pre_cond": null,
+      "post_cond": "client.fallback_logic_implemented = true",
+      "actions": [
+        "Implement fallback logic that attempts alternative protocols when the primary protocol is unavailable or fails"
+      ],
+      "modality": "should",
+      "id": "N-5-2-003"
+    },
+    {
+      "statement_id": "N-5-8-003",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When a breaking change is introduced to a binding, a new URI MUST be used so that clients can distinguish between incompatible versions:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "5.8",
+      "actors": [
+        "server"
+      ],
+      "from_state": "BINDING_VERSION_CURRENT",
+      "to_state": "BINDING_VERSION_NEW",
+      "trigger": "binding_breaking_change_introduced",
+      "pre_cond": "binding.breaking_change = true",
+      "post_cond": "binding.uri = new_uri & binding.uri != previous_uri",
+      "actions": [
+        "Assign a new URI to the updated binding",
+        "Ensure the new URI is distinct from all prior incompatible versions of the binding"
+      ],
+      "modality": "must",
+      "id": "N-5-8-003"
+    },
+    {
+      "statement_id": "D-6-9-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Step 1: Client fetches the public Agent Card via GET /.well-known/agent-card.json; server responds with an Agent Card whose capabilities.extendedAgentCard=true and securitySchemes define the required authentication scheme.",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "6.9",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "GET_public_agent_card",
+      "pre_cond": null,
+      "post_cond": "agent_card.capabilities.extendedAgentCard = true & agent_card.securitySchemes != null",
+      "actions": [
+        "Client sends GET /.well-known/agent-card.json HTTP/1.1 to Host: example.com",
+        "Server returns Agent Card containing capabilities.extendedAgentCard=true and securitySchemes with OpenID Connect scheme entry"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-7-3-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Discovery of Requirements: The client discovers the server's required authentication schemes via the securitySchemes field in the AgentCard.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "7.3",
+      "state_name": "CLIENT_AUTH_DISCOVERY",
+      "enum_name": "ClientAuthenticationProcess",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-7-3-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "The client discovers the server's required authentication schemes via the securitySchemes field in the AgentCard, then proceeds to obtain credentials.",
+      "is_inferred": true,
+      "confidence": 0.72,
+      "source_section": "7.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": "CLIENT_AUTH_DISCOVERY",
+      "to_state": "CLIENT_CREDENTIAL_ACQUISITION",
+      "trigger": null,
+      "pre_cond": "client.state = CLIENT_AUTH_DISCOVERY & agent_card.securitySchemes != null",
+      "post_cond": "client.state = CLIENT_CREDENTIAL_ACQUISITION & client.required_auth_scheme != null",
+      "actions": [
+        "Client reads securitySchemes field from AgentCard",
+        "Client identifies required authentication scheme"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-8-1-001",
+      "normative_level": "MUST",
+      "category": "FSM_STATE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "A2A Servers MUST make an Agent Card available. The Agent Card describes the server's identity, capabilities, skills, and interaction requirements.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.1",
+      "object_name": "Server",
+      "field_name": "agent_card",
+      "field_type": "AgentCard",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "N-8-3-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients MUST follow these rules:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_received",
+      "pre_cond": null,
+      "post_cond": "client.transport.selected = true & client.url.correct = true",
+      "actions": [
+        "Parse supportedInterfaces if present and select the first supported transport",
+        "Prefer earlier entries in the ordered list when multiple options are supported",
+        "Use the correct URL for the selected transport"
+      ],
+      "modality": "must",
+      "id": "N-8-3-005"
+    },
+    {
+      "statement_id": "D-8-3-004",
+      "normative_level": "CONSTRAINT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients MUST parse supportedInterfaces if present, and select the first supported transport; prefer earlier entries in the ordered list when multiple options are supported",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "8.3.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AGENT_CARD_RECEIVED",
+      "to_state": "TRANSPORT_SELECTED",
+      "trigger": "supportedInterfaces_parsed",
+      "pre_cond": "agent_card.supportedInterfaces != null",
+      "post_cond": "client.selectedTransport = agent_card.supportedInterfaces[first_supported_index]",
+      "actions": [
+        "Parse supportedInterfaces field from AgentCard",
+        "Iterate entries in declared preference order",
+        "Select first entry whose transport is supported by the client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-8-3-005",
+      "normative_level": "CONSTRAINT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients MUST use the correct URL for the selected transport",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "8.3.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSPORT_SELECTED",
+      "to_state": "TRANSPORT_CONNECTED",
+      "trigger": "transport_url_resolved",
+      "pre_cond": "client.selectedTransport != null",
+      "post_cond": "client.connectionUrl = client.selectedTransport.url",
+      "actions": [
+        "Read url field from the selected interface entry",
+        "Use that url as the endpoint for the chosen transport"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "N-8-4-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Before signing, the Agent Card content MUST be canonicalized using the JSON Canonicalization Scheme (JCS) as defined in RFC 8785.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_signing_initiated",
+      "pre_cond": "agent_card.signed = false",
+      "post_cond": "agent_card.content.canonicalized = true",
+      "actions": [
+        "Canonicalize Agent Card content using JSON Canonicalization Scheme (JCS) as defined in RFC 8785 before signing"
+      ],
+      "modality": "must",
+      "id": "N-8-4-002"
+    },
+    {
+      "statement_id": "N-8-4-003",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Before canonicalization, the JSON representation MUST respect Protocol Buffer field presence semantics as defined in Section 5.7.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_canonicalization_initiated",
+      "pre_cond": null,
+      "post_cond": "agent_card.json.field_presence_semantics = protobuf_section_5_7",
+      "actions": [
+        "Apply Protocol Buffer field presence semantics to JSON representation before canonicalization"
+      ],
+      "modality": "must",
+      "id": "N-8-4-003"
+    },
+    {
+      "statement_id": "N-8-4-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Fields marked with the optional keyword that were not explicitly set MUST be omitted from the JSON object",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.4.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_canonicalization_initiated",
+      "pre_cond": "agent_card.field.marked_optional = true & agent_card.field.explicitly_set = false",
+      "post_cond": "agent_card.field.included_in_json = false",
+      "actions": [
+        "Omit optional fields that were not explicitly set from the JSON object"
+      ],
+      "modality": "must",
+      "id": "N-8-4-004"
+    },
+    {
+      "statement_id": "N-8-4-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Fields marked with optional that were explicitly set to a value (even if that value matches a default) MUST be included in the JSON object",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "8.4.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_canonicalization_initiated",
+      "pre_cond": "agent_card.field.marked_optional = true & agent_card.field.explicitly_set = true",
+      "post_cond": "agent_card.field.included_in_json = true",
+      "actions": [
+        "Include optional fields that were explicitly set in the JSON object even if the value matches a default"
+      ],
+      "modality": "must",
+      "id": "N-8-4-005"
+    },
+    {
+      "statement_id": "N-8-4-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Fields marked with REQUIRED MUST always be present, even if the field value matches the default.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_canonicalization_initiated",
+      "pre_cond": "agent_card.field.marked_required = true",
+      "post_cond": "agent_card.field.present_in_json = true",
+      "actions": [
+        "Include REQUIRED fields in the JSON object even if the field value matches the default"
+      ],
+      "modality": "must",
+      "id": "N-8-4-006"
+    },
+    {
+      "statement_id": "N-8-4-007",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Fields with default values MUST be omitted unless the field is marked as REQUIRED or has the optional keyword.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_canonicalization_initiated",
+      "pre_cond": "agent_card.field.has_default_value = true & agent_card.field.marked_required = false & agent_card.field.marked_optional = false",
+      "post_cond": "agent_card.field.included_in_json = false",
+      "actions": [
+        "Omit fields with default values from the JSON object unless the field is marked as REQUIRED or has the optional keyword"
+      ],
+      "modality": "must",
+      "id": "N-8-4-007"
+    },
+    {
+      "statement_id": "N-8-4-008",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "The Agent Card JSON MUST be canonicalized according to RFC 8785, which specifies:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.4.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_canonicalization_initiated",
+      "pre_cond": null,
+      "post_cond": "agent_card.json.rfc8785_canonicalized = true",
+      "actions": [
+        "Apply predictable lexicographic ordering of object properties",
+        "Apply consistent representation of numbers, strings, and other primitive values",
+        "Remove insignificant whitespace"
+      ],
+      "modality": "must",
+      "id": "N-8-4-008"
+    },
+    {
+      "statement_id": "N-8-4-009",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "The signatures field itself MUST be excluded from the content being signed to avoid circular dependencies.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_signing_initiated",
+      "pre_cond": null,
+      "post_cond": "agent_card.signatures_field.included_in_signed_content = false",
+      "actions": [
+        "Exclude the signatures field from the content being signed"
+      ],
+      "modality": "must",
+      "id": "N-8-4-009"
+    },
+    {
+      "statement_id": "N-8-4-010",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "The protected header MUST include:",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_signing_initiated",
+      "pre_cond": null,
+      "post_cond": "agent_card.signature.protected_header.alg != null & agent_card.signature.protected_header.kid != null",
+      "actions": [
+        "Include alg parameter in JWS protected header",
+        "Include kid parameter in JWS protected header"
+      ],
+      "modality": "must",
+      "id": "N-8-4-010"
+    },
+    {
+      "statement_id": "N-8-4-011",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "typ: SHOULD be set to \"JOSE\" for JWS",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_signing_initiated",
+      "pre_cond": null,
+      "post_cond": "agent_card.signature.protected_header.typ = JOSE",
+      "actions": [
+        "Set typ parameter to 'JOSE' in JWS protected header"
+      ],
+      "modality": "should",
+      "id": "N-8-4-011"
+    },
+    {
+      "statement_id": "N-8-4-012",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "The protected header MAY include:",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "8.4.2",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_signing_initiated",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Optionally include jku (URL to JSON Web Key Set containing the public key) parameter in JWS protected header"
+      ],
+      "modality": "may",
+      "id": "N-8-4-012"
+    },
+    {
+      "statement_id": "N-8-4-013",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients verifying Agent Card signatures MUST:",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_signature_verification_initiated",
+      "pre_cond": "client.verifying_agent_card_signature = true",
+      "post_cond": "agent_card.signature.verified = true",
+      "actions": [
+        "Extract the signature from the signatures array",
+        "Retrieve the public key using the kid and jku or from a trusted key store",
+        "Remove properties with default values from the received Agent Card",
+        "Exclude the signatures field",
+        "Canonicalize the resulting JSON using RFC 8785",
+        "Verify the signature against the canonicalized payload"
+      ],
+      "modality": "must",
+      "id": "N-8-4-013"
+    },
+    {
+      "statement_id": "N-8-4-014",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients SHOULD verify at least one signature before trusting an Agent Card",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_received",
+      "pre_cond": "agent_card.signatures != null",
+      "post_cond": "agent_card.at_least_one_signature_verified = true",
+      "actions": [
+        "Verify at least one signature in the Agent Card before trusting it"
+      ],
+      "modality": "should",
+      "id": "N-8-4-014"
+    },
+    {
+      "statement_id": "N-8-4-015",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Public keys SHOULD be retrieved over secure channels (HTTPS)",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "public_key_retrieval_initiated",
+      "pre_cond": null,
+      "post_cond": "client.public_key_retrieval.channel = HTTPS",
+      "actions": [
+        "Retrieve public keys over secure channels (HTTPS)"
+      ],
+      "modality": "should",
+      "id": "N-8-4-015"
+    },
+    {
+      "statement_id": "N-8-4-017",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Expired or revoked keys MUST NOT be used for verification",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "8.4.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_signature_verification_initiated",
+      "pre_cond": "client.key.expired = true | client.key.revoked = true",
+      "post_cond": null,
+      "actions": [
+        "Reject use of expired or revoked keys for signature verification"
+      ],
+      "modality": "must",
+      "id": "N-8-4-017"
+    },
+    {
+      "statement_id": "N-8-6-002",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Agent Card HTTP endpoints SHOULD include a Cache-Control response header with a max-age directive appropriate for the agent's expected update frequency",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": null,
+      "post_cond": "response.headers.Cache-Control.max-age != null",
+      "actions": [
+        "Include Cache-Control response header with a max-age directive appropriate for the agent's expected update frequency in Agent Card HTTP responses"
+      ],
+      "modality": "should",
+      "id": "N-8-6-002"
+    },
+    {
+      "statement_id": "N-8-6-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Agent Card HTTP endpoints SHOULD include an ETag response header derived from the Agent Card's version field or a hash of the card content",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": null,
+      "post_cond": "response.headers.ETag != null",
+      "actions": [
+        "Include an ETag response header derived from the Agent Card's version field or a hash of the card content in Agent Card HTTP responses"
+      ],
+      "modality": "should",
+      "id": "N-8-6-003"
+    },
+    {
+      "statement_id": "N-8-6-004",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Agent Card HTTP endpoints MAY include a Last-Modified response header",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Optionally include a Last-Modified response header in Agent Card HTTP responses"
+      ],
+      "modality": "may",
+      "id": "N-8-6-004"
+    },
+    {
+      "statement_id": "N-8-6-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients SHOULD honor HTTP caching semantics as defined in RFC 9111 when fetching Agent Cards",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_fetch",
+      "pre_cond": null,
+      "post_cond": "client.http_caching_honored = true",
+      "actions": [
+        "Honor HTTP caching semantics as defined in RFC 9111 when fetching Agent Cards"
+      ],
+      "modality": "should",
+      "id": "N-8-6-005"
+    },
+    {
+      "statement_id": "N-8-6-006",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "When a cached Agent Card has expired, clients SHOULD use conditional requests (If-None-Match with the stored ETag, or If-Modified-Since) to avoid re-downloading unchanged cards",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AGENT_CARD_CACHE_EXPIRED",
+      "to_state": null,
+      "trigger": "agent_card_cache_expired",
+      "pre_cond": "agent_card.cached = true & agent_card.cache_expired = true",
+      "post_cond": "request.headers.If-None-Match != null | request.headers.If-Modified-Since != null",
+      "actions": [
+        "Send conditional request using If-None-Match with the stored ETag, or If-Modified-Since header to avoid re-downloading unchanged Agent Cards"
+      ],
+      "modality": "should",
+      "id": "N-8-6-006"
+    },
+    {
+      "statement_id": "N-8-6-007",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "When the server does not include caching headers, clients MAY apply an implementation-specific default cache duration",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "AGENT_CARD_CACHE_VALID",
+      "trigger": "agent_card_fetch",
+      "pre_cond": "server.caching_headers_present = false",
+      "post_cond": "client.cache_duration = implementation_specific",
+      "actions": [
+        "Apply an implementation-specific default cache duration when the server does not include caching headers"
+      ],
+      "modality": "may",
+      "id": "N-8-6-007"
+    },
+    {
+      "statement_id": "D-8-6-005",
+      "normative_level": "RECOMMENDATION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When a cached Agent Card has expired, clients SHOULD use conditional requests (If-None-Match with the stored ETag, or If-Modified-Since) to avoid re-downloading unchanged cards",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "8.6.2",
+      "state_name": "AGENT_CARD_CACHE_EXPIRED",
+      "enum_name": "AgentCardCacheState",
+      "semantic_type": null,
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "agent_card.cache.expired = true"
+    },
+    {
+      "statement_id": "N-12-7-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Custom bindings MUST be declared in the Agent Card:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "12.7",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "custom_binding_configured",
+      "pre_cond": "binding.type = custom",
+      "post_cond": "agent_card.supportedInterfaces.customBinding.declared = true",
+      "actions": [
+        "Declare the custom binding in the Agent Card under supportedInterfaces",
+        "Include a Transport Identifier URI identifying the binding",
+        "Include the full Endpoint URL where the binding is available"
+      ],
+      "modality": "must",
+      "id": "N-12-7-001"
+    },
+    {
+      "statement_id": "D-13-3-001",
+      "normative_level": "MUST",
+      "category": "FSM_STATE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When capabilities.extendedAgentCard is false or not present, the operation MUST return UnsupportedOperationError",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "13.3",
+      "state_name": "EXTENDED_CARD_UNSUPPORTED",
+      "enum_name": "ExtendedAgentCardState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "agent_card.capabilities.extendedAgentCard = false | !agent_card.capabilities.extendedAgentCard.present"
+    },
+    {
+      "statement_id": "D-13-3-002",
+      "normative_level": "CONSTRAINT",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When support is declared but no extended card is configured, the operation MUST return ExtendedAgentCardNotConfiguredError",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "13.3",
+      "state_name": "EXTENDED_CARD_NOT_CONFIGURED",
+      "enum_name": null,
+      "semantic_type": "error",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "agent_card.capabilities.extendedAgentCard = true & !extended_card.configured"
+    },
+    {
+      "statement_id": "N-13-3-004",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Agents SHOULD implement appropriate caching headers to control client-side caching of extended cards",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card_response",
+      "pre_cond": null,
+      "post_cond": "response.caching_headers.present = true",
+      "actions": [
+        "Include appropriate caching headers in the extended agent card response to control client-side caching"
+      ],
+      "modality": "should",
+      "id": "N-13-3-004"
+    },
+    {
+      "statement_id": "N-13-3-011",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients retrieving extended cards SHOULD replace their cached public Agent Card with the extended version for the duration of their authenticated session",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card_response",
+      "pre_cond": "client.authenticated = true",
+      "post_cond": "client.cached_agent_card = extended_agent_card",
+      "actions": [
+        "Replace the cached public Agent Card with the extended card for the duration of the authenticated session"
+      ],
+      "modality": "should",
+      "id": "N-13-3-011"
+    },
+    {
+      "statement_id": "N-13-3-013",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "When capabilities.extendedAgentCard is false or not present, the operation MUST return UnsupportedOperationError",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "EXTENDED_CARD_UNSUPPORTED",
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": "agent_card.capabilities.extendedAgentCard = false | !agent_card.capabilities.extendedAgentCard",
+      "post_cond": "response.error = UnsupportedOperationError",
+      "actions": [
+        "Return UnsupportedOperationError when capabilities.extendedAgentCard is false or not present"
+      ],
+      "modality": "must",
+      "id": "N-13-3-013"
+    },
+    {
+      "statement_id": "N-13-3-014",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "When support is declared but no extended card is configured, the operation MUST return ExtendedAgentCardNotConfiguredError",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "EXTENDED_CARD_NOT_CONFIGURED",
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": "agent_card.capabilities.extendedAgentCard = true & agent_card.extended_card_configured = false",
+      "post_cond": "response.error = ExtendedAgentCardNotConfiguredError",
+      "actions": [
+        "Return ExtendedAgentCardNotConfiguredError when extended card support is declared but no extended card is configured"
+      ],
+      "modality": "must",
+      "id": "N-13-3-014"
+    },
+    {
+      "statement_id": "N-14-3-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "The resource at this URI MUST return an AgentCard object as defined in Section 4.4.1 of the A2A specification.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "14.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "well_known_uri_request",
+      "pre_cond": null,
+      "post_cond": "response.body.type = AgentCard",
+      "actions": [
+        "Return an AgentCard object as defined in Section 4.4.1 at the /.well-known/agent-card.json URI"
+      ],
+      "modality": "must",
+      "id": "N-14-3-001"
+    },
+    {
+      "statement_id": "N-14-3-006",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients SHOULD verify signatures when present to ensure the Agent Card has not been tampered with",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "14.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "agent_card_received",
+      "pre_cond": "agent_card.signature != null",
+      "post_cond": "agent_card.signature_verified = true",
+      "actions": [
+        "Verify the JWS signature on the Agent Card when a signature is present",
+        "Confirm the Agent Card has not been tampered with"
+      ],
+      "modality": "should",
+      "id": "N-14-3-006"
+    },
+    {
+      "statement_id": "N-Appendix A- Migratio-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "All legacy names and anchors MUST remain resolvable until the stated earliest removal version.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "Appendix A. Migratio",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "legacy_identifier_resolution_request",
+      "pre_cond": "legacy_identifier.removal_version_reached = false",
+      "post_cond": "legacy_identifier.resolvable = true",
+      "actions": [
+        "Keep all legacy protocol message names and anchors resolvable",
+        "Maintain resolvability until the stated earliest removal version is reached"
+      ],
+      "modality": "must",
+      "id": "N-Appendix A- Migratio-001",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-12-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Custom bindings MUST comply with all requirements defined in Section 5 (Protocol Binding Requirements and Interoperability).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "12",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "custom_binding_created",
+      "pre_cond": "binding.type = custom",
+      "post_cond": "binding.compliant_with_section5 = true",
+      "actions": [
+        "Comply with all requirements defined in Section 5 (Protocol Binding Requirements and Interoperability)"
+      ],
+      "modality": "must",
+      "id": "N-12-002",
+      "is_global_constraint": true
+    }
+  ]
+}

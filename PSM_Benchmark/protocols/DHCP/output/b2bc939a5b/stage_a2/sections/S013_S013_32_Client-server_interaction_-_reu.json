@@ -1,0 +1,252 @@
+{
+  "section_id": "S013",
+  "title": "S013 3.2 Client-server interaction - reusing a previously allocated network",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S013 3.2 Client-server interaction - reusing a previously allocated network"
+  ],
+  "url_anchor": "#s013-32-client-server-interaction---reusing-a-previously-allocated-network",
+  "word_count": 903,
+  "statement_count": 10,
+  "elapsed_seconds": 134.75,
+  "statements": [
+    {
+      "statement_id": "1-S013-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "As the client has not received its network address, it MUST NOT fill in the 'ciaddr' field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "broadcast_DHCPREQUEST_for_address_reuse",
+      "pre_cond": "client.received_network_address = false",
+      "post_cond": "message.ciaddr = 0x0",
+      "actions": [
+        "Do not fill in the 'ciaddr' field in DHCPREQUEST"
+      ],
+      "modality": "must",
+      "id": "N-S013-001"
+    },
+    {
+      "statement_id": "2-S013-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client used a 'client identifier' to obtain its address, the client MUST use the same 'client identifier' in the DHCPREQUEST message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DHCPREQUEST_for_address_reuse",
+      "pre_cond": "client.used_client_identifier_to_obtain_address = true",
+      "post_cond": "message.client_identifier = client.original_client_identifier",
+      "actions": [
+        "Include the same 'client identifier' in the DHCPREQUEST message"
+      ],
+      "modality": "must",
+      "id": "N-S013-002"
+    },
+    {
+      "statement_id": "3-S013-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "Servers SHOULD NOT check that the client's network address is already in use; the client may respond to ICMP Echo Request messages at this point.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S013-003"
+    },
+    {
+      "statement_id": "4-S013-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "If the client's request is invalid (e.g., the client has moved to a new subnet), servers SHOULD respond with a DHCPNAK message to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_invalid_DHCPREQUEST",
+      "pre_cond": "server.client_request_valid = false",
+      "post_cond": null,
+      "actions": [
+        "send DHCPNAK to client"
+      ],
+      "modality": "should",
+      "id": "N-S013-004"
+    },
+    {
+      "statement_id": "5-S013-5",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "Servers SHOULD NOT respond if their information is not guaranteed to be accurate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "server.information_accuracy_guaranteed = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S013-005"
+    },
+    {
+      "statement_id": "6-S013-6",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "For example, a server that identifies a request for an expired binding that is owned by another server SHOULD NOT respond with a DHCPNAK unless the servers are using an explicit mechanism to maintain coherency among the servers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_DHCPREQUEST_for_expired_binding_owned_by_another_server",
+      "pre_cond": "server.binding_expired = true & server.binding_owner != server.self & server.explicit_coherency_mechanism = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S013-006"
+    },
+    {
+      "statement_id": "7-S013-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server MUST broadcast the DHCPNAK message to the 0xffffffff broadcast address because the client may not have a correct network address or subnet mask, and the client may not be answering ARP requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DHCPNAK",
+      "pre_cond": "message.giaddr = 0x0",
+      "post_cond": "message.destination = 0xffffffff",
+      "actions": [
+        "broadcast DHCPNAK to 0xffffffff broadcast address"
+      ],
+      "modality": "must",
+      "id": "N-S013-007"
+    },
+    {
+      "statement_id": "8-S013-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "Otherwise, the server MUST send the DHCPNAK message to the IP address of the BOOTP relay agent, as recorded in 'giaddr'.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_DHCPNAK",
+      "pre_cond": "message.giaddr != 0x0",
+      "post_cond": "message.destination = message.giaddr",
+      "actions": [
+        "send DHCPNAK to IP address of BOOTP relay agent recorded in giaddr"
+      ],
+      "modality": "must",
+      "id": "N-S013-008"
+    },
+    {
+      "statement_id": "9-S013-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client detects that the IP address in the DHCPACK message is already in use, the client MUST send a DHCPDECLINE message to the server and restarts the configuration process by requesting a new network address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "INIT",
+      "trigger": "detect_IP_address_in_DHCPACK_already_in_use",
+      "pre_cond": "client.received_DHCPACK = true & client.detected_assigned_address_in_use = true",
+      "post_cond": "client.state = INIT",
+      "actions": [
+        "send DHCPDECLINE to server",
+        "restart configuration process by requesting a new network address"
+      ],
+      "modality": "must",
+      "id": "N-S013-009"
+    },
+    {
+      "statement_id": "10-S013-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "If the client receives neither a DHCPACK or a DHCPNAK message after employing the retransmission algorithm, the client MAY choose to use the previously allocated network address and configuration parameters for the remainder of the unexpired lease.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S013",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "BOUND",
+      "trigger": "retransmission_algorithm_exhausted_without_DHCPACK_or_DHCPNAK",
+      "pre_cond": "client.received_DHCPACK = false & client.received_DHCPNAK = false & client.retransmission_algorithm_complete = true & client.lease_unexpired = true",
+      "post_cond": "client.state = BOUND",
+      "actions": [
+        "use previously allocated network address and configuration parameters for remainder of unexpired lease"
+      ],
+      "modality": "may",
+      "id": "N-S013-010"
+    }
+  ]
+}

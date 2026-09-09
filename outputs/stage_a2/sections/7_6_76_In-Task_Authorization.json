@@ -1,0 +1,306 @@
+{
+  "section_id": "7.6",
+  "title": "7.6. In-Task Authorization",
+  "depth": 3,
+  "parent_path": [
+    "7. Authentication and Authorization",
+    "7.6. In-Task Authorization"
+  ],
+  "url_anchor": "#76-in-task-authorization",
+  "word_count": 630,
+  "statement_count": 12,
+  "elapsed_seconds": 143.53,
+  "statements": [
+    {
+      "statement_id": "N-7.6-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "MUST use a Task to track the operation it is performing",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_required",
+      "pre_cond": null,
+      "post_cond": "task.exists = true",
+      "actions": [
+        "Use an existing Task object to track the operation that requires authorization"
+      ],
+      "modality": "must",
+      "id": "N-7-6-001"
+    },
+    {
+      "statement_id": "N-7.6-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "MUST transition the TaskState to TASK_STATE_AUTH_REQUIRED",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_required",
+      "pre_cond": "task.state = TASK_STATE_WORKING",
+      "post_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Transition the TaskState to TASK_STATE_AUTH_REQUIRED"
+      ],
+      "modality": "must",
+      "id": "N-7-6-002"
+    },
+    {
+      "statement_id": "N-7.6-003",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "MUST include a TaskStatus message explaining the required authorization, unless the details of the authorization have been negotiated out-of-band or via an extension",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_required",
+      "pre_cond": "!(authorization.negotiated_out_of_band = true | authorization.negotiated_via_extension = true)",
+      "post_cond": "task.status.message.included = true",
+      "actions": [
+        "Include a TaskStatus message that explains the required authorization"
+      ],
+      "modality": "must",
+      "id": "N-7-6-003"
+    },
+    {
+      "statement_id": "N-7.6-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "Agents MUST arrange to receive credentials via an out-of-band means, unless an in-band mechanism has been negotiated out-of-band or via an extension.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": null,
+      "trigger": "authorization_required",
+      "pre_cond": "!(in_band_mechanism.negotiated_out_of_band = true | in_band_mechanism.negotiated_via_extension = true)",
+      "post_cond": "credential.reception_channel = out_of_band",
+      "actions": [
+        "Arrange to receive credentials via an out-of-band means"
+      ],
+      "modality": "must",
+      "id": "N-7-6-004"
+    },
+    {
+      "statement_id": "N-7.6-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "If the credential is received out-of-band, the agent SHOULD maintain any active response streams with the client after setting the TaskState to TASK_STATE_AUTH_REQUIRED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "task_state_set_to_auth_required",
+      "pre_cond": "credential.reception_channel = out_of_band & task.state = TASK_STATE_AUTH_REQUIRED",
+      "post_cond": "stream.active = true",
+      "actions": [
+        "Maintain any active response streams with the client after setting the TaskState to TASK_STATE_AUTH_REQUIRED"
+      ],
+      "modality": "should",
+      "id": "N-7-6-005"
+    },
+    {
+      "statement_id": "N-7.6-006",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "The agent MAY immediately continue Task processing after receiving the credential, without a requirement that clients send a follow-up message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": "TASK_STATE_WORKING",
+      "trigger": "credential_received",
+      "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "post_cond": "task.state = TASK_STATE_WORKING",
+      "actions": [
+        "Immediately continue Task processing after receiving the credential without waiting for a client follow-up message"
+      ],
+      "modality": "may",
+      "id": "N-7-6-006"
+    },
+    {
+      "statement_id": "N-7.6-007",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "Agents SHOULD support receiving messages directed to the Task while the Task remains in TASK_STATE_AUTH_REQUIRED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "message_received",
+      "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED",
+      "post_cond": null,
+      "actions": [
+        "Accept and process messages directed to the Task while Task remains in TASK_STATE_AUTH_REQUIRED"
+      ],
+      "modality": "should",
+      "id": "N-7-6-007"
+    },
+    {
+      "statement_id": "N-7.6-008",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "interruption",
+      "description": "The client SHOULD follow all In-Task Authorization Agent Responsibilities.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "7.6.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TASK_STATE_WORKING",
+      "to_state": "TASK_STATE_AUTH_REQUIRED",
+      "trigger": "authorization_delegation_required",
+      "pre_cond": "client.is_a2a_agent = true & client.task.state = TASK_STATE_WORKING",
+      "post_cond": "client.task.state = TASK_STATE_AUTH_REQUIRED",
+      "actions": [
+        "Follow all In-Task Authorization Agent Responsibilities when delegating the authorization request to the client's own client"
+      ],
+      "modality": "should",
+      "id": "N-7-6-008"
+    },
+    {
+      "statement_id": "N-7.6-009",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "interruption",
+      "description": "To avoid this, a client SHOULD perform one of the following: Subscribe to a stream of events for the Task using the Subscribe to Task operation / Register a webhook to receive events, if supported by the agent, using the Create Push Notification Config operation / Begin polling the Task using the Get Task operation",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "7.6.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": null,
+      "trigger": "task_auth_required_received",
+      "pre_cond": "task.state = TASK_STATE_AUTH_REQUIRED & client.active_response_stream.open = false",
+      "post_cond": null,
+      "actions": [
+        "Subscribe to a stream of events for the Task using the Subscribe to Task operation, OR",
+        "Register a webhook to receive events using the Create Push Notification Config operation, OR",
+        "Begin polling the Task using the Get Task operation"
+      ],
+      "modality": "should",
+      "id": "N-7-6-009"
+    },
+    {
+      "statement_id": "N-7.6-010",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "Agents SHOULD receive credentials for in-task authorization requests out of band via a secure channel, such as HTTPS.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.6.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TASK_STATE_AUTH_REQUIRED",
+      "to_state": null,
+      "trigger": "credential_received",
+      "pre_cond": null,
+      "post_cond": "credential.channel = secure_out_of_band",
+      "actions": [
+        "Receive credentials via a secure out-of-band channel such as HTTPS"
+      ],
+      "modality": "should",
+      "id": "N-7-6-010"
+    },
+    {
+      "statement_id": "N-7.6-011",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "Credentials SHOULD be bound to the agent which originated the request, such that only this agent is able to use the credentials.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "7.6.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "credential.exchange_mode = in_band",
+      "post_cond": "credential.bound_to = originating_agent",
+      "actions": [
+        "Bind credentials to the agent which originated the request so that only that agent is able to use them"
+      ],
+      "modality": "should",
+      "id": "N-7-6-011"
+    },
+    {
+      "statement_id": "N-7.6-012",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "interruption",
+      "description": "Credentials containing sensitive information SHOULD be only readable by the agent which originated the request, such as by encrypting the credential.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "7.6.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "credential.exchange_mode = in_band & credential.contains_sensitive_info = true",
+      "post_cond": "credential.readable_by = originating_agent",
+      "actions": [
+        "Ensure credentials containing sensitive information are only readable by the originating agent, e.g. by encrypting the credential"
+      ],
+      "modality": "should",
+      "id": "N-7-6-012"
+    }
+  ]
+}

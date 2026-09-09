@@ -1,0 +1,126 @@
+{
+  "section_id": "S035",
+  "title": "S035 3.8.6.1 Zero-Window Probing",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S035 3.8.6.1 Zero-Window Probing"
+  ],
+  "url_anchor": "#s035-3861-zero-window-probing",
+  "word_count": 226,
+  "statement_count": 5,
+  "elapsed_seconds": 28.78,
+  "statements": [
+    {
+      "statement_id": "D-S035-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "The transmitting host SHOULD send the first zero-window probe when a zero window has existed for the retransmission timeout period (SHLD-29).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S035",
+      "actors": [
+        "sending TCP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "retransmission timeout expires with zero send window",
+      "pre_cond": "connection.send_window = 0 & timer.retransmission_timeout = expired",
+      "post_cond": "zwp.probe_sent = true",
+      "actions": [
+        "transmit zero-window probe segment"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S035-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "SHOULD increase exponentially the interval between successive probes (SHLD-30).",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S035",
+      "actors": [
+        "sending TCP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "successive zero-window probe sent",
+      "pre_cond": "connection.send_window = 0 & zwp.probe_sent = true",
+      "post_cond": "zwp.probe_interval = zwp.probe_interval * 2",
+      "actions": [
+        "increase probe interval exponentially"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S035-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "As long as the receiving TCP peer continues to send acknowledgments in response to the probe segments, the sending TCP peer MUST allow the connection to stay open (MUST-37).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S035",
+      "actors": [
+        "sending TCP peer",
+        "receiving TCP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "acknowledgment received in response to zero-window probe",
+      "pre_cond": "connection.send_window = 0 & zwp.ack_received = true",
+      "post_cond": "connection.open = true",
+      "actions": [
+        "keep connection open"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S035-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "When the receiving TCP peer has a zero window and a segment arrives, it must still send an acknowledgment showing its next expected sequence number and current window (zero).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S035",
+      "actors": [
+        "receiving TCP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "segment received while receive window is zero",
+      "pre_cond": "connection.receive_window = 0 & segment.received = true",
+      "post_cond": "ack.sent = true & ack.window = 0",
+      "actions": [
+        "send ACK with next expected sequence number",
+        "send ACK with window = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S035-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "Probing of zero (offered) windows MUST be supported (MUST-36).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S035",
+      "object_name": "TCP implementation",
+      "field_name": "zero_window_probing",
+      "field_type": "feature flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

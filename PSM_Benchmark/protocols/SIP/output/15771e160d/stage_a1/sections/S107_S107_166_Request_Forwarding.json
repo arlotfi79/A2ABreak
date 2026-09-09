@@ -1,0 +1,177 @@
+{
+  "section_id": "S107",
+  "title": "S107 16.6 Request Forwarding",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S107 16.6 Request Forwarding"
+  ],
+  "url_anchor": "#s107-166-request-forwarding",
+  "word_count": 2745,
+  "statement_count": 7,
+  "elapsed_seconds": 85.6,
+  "statements": [
+    {
+      "statement_id": "D-S107-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy must have a mechanism to maintain the target set as responses are received and associate the responses to each forwarded request with the original request. For the purposes of this model, this mechanism is a 'response context' created by the proxy layer before forwarding the first request.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S107",
+      "object_name": "proxy",
+      "field_name": "response_context",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S107-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "As soon as the target set is non-empty, a proxy MAY begin forwarding the request. A stateful proxy MUST create a new client transaction for this request and instructs the transaction to send the request using the address, port and transport determined in step 7.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S107",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "target_set_non_empty",
+      "pre_cond": "target_set.non_empty = true",
+      "post_cond": "client_transaction.created = true & response_context.created = true",
+      "actions": [
+        "create response context",
+        "copy request",
+        "update request fields",
+        "create new client transaction",
+        "forward request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S107-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the client transaction reports failure to send the request or a timeout from its state machine, the proxy continues to the next address in that ordered set.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S107",
+      "actors": [
+        "proxy",
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_transaction_send_failure | client_transaction_timeout",
+      "pre_cond": "ordered_set.exhausted = false",
+      "post_cond": null,
+      "actions": [
+        "continue to next address in ordered set",
+        "create new client transaction for next tuple"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S107-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the ordered set is exhausted, the request cannot be forwarded to this element in the target set. The proxy does not need to place anything in the response context, but otherwise acts as if this element of the target set returned a 408 (Request Timeout) final response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S107",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ordered_set_exhausted",
+      "pre_cond": "ordered_set.exhausted = true",
+      "post_cond": null,
+      "actions": [
+        "treat target element as returning 408 Request Timeout final response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S107-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "Timer C MUST be set for each client transaction when an INVITE request is proxied. The timer MUST be larger than 3 minutes.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S107",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE_request_proxied",
+      "pre_cond": "request.method = INVITE",
+      "post_cond": "timer_C.active = true & timer_C.value > 180",
+      "actions": [
+        "set timer C with value greater than 3 minutes"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S107-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "Section 16.7 bullet 2 discusses how this timer is updated with provisional responses, and Section 16.8 discusses processing when it fires.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S107",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "timer_C_expires",
+      "pre_cond": "timer_C.active = true",
+      "post_cond": null,
+      "actions": [
+        "process timer C expiry per Section 16.8"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S107-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Since each attempt uses a new client transaction, it represents a new branch. Thus, the branch parameter provided with the Via header field inserted in step 8 MUST be different for each attempt.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S107",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "next_address_tuple_attempted",
+      "pre_cond": null,
+      "post_cond": "via.branch_parameter.unique = true",
+      "actions": [
+        "create new client transaction",
+        "insert Via with unique branch parameter"
+      ],
+      "modality": "must"
+    }
+  ]
+}

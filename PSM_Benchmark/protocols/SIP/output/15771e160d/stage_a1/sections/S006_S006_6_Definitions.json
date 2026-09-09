@@ -1,0 +1,270 @@
+{
+  "section_id": "S006",
+  "title": "S006 6 Definitions",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S006 6 Definitions"
+  ],
+  "url_anchor": "#s006-6-definitions",
+  "word_count": 2279,
+  "statement_count": 12,
+  "elapsed_seconds": 113.18,
+  "statements": [
+    {
+      "statement_id": "D-S006-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A dialog is a peer-to-peer SIP relationship between two UAs that persists for some time.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "state_name": "Dialog",
+      "enum_name": "DialogState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "dialog.identified_by = call_id & dialog.local_tag != null & dialog.remote_tag != null"
+    },
+    {
+      "statement_id": "D-S006-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "A dialog is established by SIP messages, such as a 2xx response to an INVITE request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S006",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": "Dialog",
+      "trigger": "2xx response to INVITE received",
+      "pre_cond": "request.method = INVITE & response.code >= 200 & response.code < 300",
+      "post_cond": "dialog.established = true",
+      "actions": [
+        "establish dialog"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A SIP transaction occurs between a client and a server and comprises all messages from the first request sent from the client to the server up to a final (non-1xx) response sent from the server to the client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "first request sent from client to server",
+      "pre_cond": null,
+      "post_cond": "transaction.active = true",
+      "actions": [
+        "begin transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A final response terminates a SIP transaction, as opposed to a provisional response that does not. All 2xx, 3xx, 4xx, 5xx and 6xx responses are final.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "final response received",
+      "pre_cond": "response.code >= 200",
+      "post_cond": "transaction.terminated = true",
+      "actions": [
+        "terminate transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A provisional response (1xx) does not terminate a SIP transaction.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S006",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "1xx provisional response received",
+      "pre_cond": "response.code >= 100 & response.code < 200",
+      "post_cond": "transaction.terminated = false",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the request is INVITE and the final response is a non-2xx, the transaction also includes an ACK to the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "non-2xx final response to INVITE received",
+      "pre_cond": "request.method = INVITE & response.code >= 300",
+      "post_cond": "transaction.includes_ACK = true",
+      "actions": [
+        "send ACK to non-2xx final response",
+        "terminate transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The ACK for a 2xx response to an INVITE request is a separate transaction.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "object_name": "ACK",
+      "field_name": "separate_transaction",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "true"
+      ],
+      "guard_semantics": "request.method = INVITE & response.code >= 200 & response.code < 300"
+    },
+    {
+      "statement_id": "D-S006-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy is a logical entity that maintains the client and server transaction state machines defined by this specification during the processing of a request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "object_name": "Stateful Proxy",
+      "field_name": "transaction_state_machines",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "client_transaction_state_machine",
+        "server_transaction_state_machine"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S006-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateless proxy is a logical entity that does not maintain the client or server transaction state machines defined in this specification when it processes requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "object_name": "Stateless Proxy",
+      "field_name": "transaction_state_machines",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S006-010",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A proxy is call stateful if it retains state for a dialog from the initiating INVITE to the terminating BYE request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S006",
+      "state_name": "Call Stateful",
+      "enum_name": "ProxyStatefulness",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "proxy.dialog_state_retained = true & dialog.initiated_by = INVITE & dialog.terminated_by_BYE = false"
+    },
+    {
+      "statement_id": "D-S006-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A 2xx or 6xx class final response always terminates a sequential search.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S006",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "2xx or 6xx final response received during sequential search",
+      "pre_cond": "proxy.search_mode = sequential & (response.code >= 200 & response.code < 300 | response.code >= 600 & response.code < 700)",
+      "post_cond": "sequential_search.terminated = true",
+      "actions": [
+        "terminate sequential search"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "A client recurses on a 3xx response when it generates a new request to one or more of the URIs in the Contact header field in the response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S006",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "3xx response received",
+      "pre_cond": "response.code >= 300 & response.code < 400",
+      "post_cond": null,
+      "actions": [
+        "generate new request to Contact URI(s) from 3xx response"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

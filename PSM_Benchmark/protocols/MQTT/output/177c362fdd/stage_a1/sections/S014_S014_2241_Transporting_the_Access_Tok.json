@@ -1,0 +1,247 @@
+{
+  "section_id": "S014",
+  "title": "S014 2.2.4.1 Transporting the Access Token inside the MQTT CONNECT",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S014 2.2.4.1 Transporting the Access Token inside the MQTT CONNECT"
+  ],
+  "url_anchor": "#s014-2241-transporting-the-access-token-inside-the-mqtt-connect",
+  "word_count": 1156,
+  "statement_count": 11,
+  "elapsed_seconds": 156.9,
+  "statements": [
+    {
+      "statement_id": "D-S014-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "After sending the CONNECT packet, the Client MUST wait to receive the CONNACK packet from the Broker. The only packets it is allowed to send are DISCONNECT or AUTH that are in response to the Broker AUTH.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "state_name": "Waiting for CONNACK",
+      "enum_name": "ClientConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = Waiting for CONNACK"
+    },
+    {
+      "statement_id": "D-S014-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Except for a DISCONNECT and AUTH response from the Client, the Broker MUST NOT process any packets before sending a CONNACK packet.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S014",
+      "state_name": "Processing CONNECT",
+      "enum_name": "BrokerConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "server.state = Processing CONNECT"
+    },
+    {
+      "statement_id": "D-S014-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "After sending the CONNECT packet, the Client MUST wait to receive the CONNACK packet from the Broker.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S014",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Waiting for CONNACK",
+      "trigger": "CONNECT sent",
+      "pre_cond": null,
+      "post_cond": "client.state = Waiting for CONNACK",
+      "actions": [
+        "send CONNECT packet with token in Authentication Data"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The only packets it is allowed to send are DISCONNECT or AUTH that are in response to the Broker AUTH.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S014",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Waiting for CONNACK",
+      "to_state": "Waiting for CONNACK",
+      "trigger": "AUTH received from Broker",
+      "pre_cond": "client.state = Waiting for CONNACK",
+      "post_cond": null,
+      "actions": [
+        "send AUTH to Broker"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S014-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If the Will Flag is set to 1, the Broker MUST check that the token allows the publication of the Will Message. If the Will authorization fails, the connection is refused.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S014",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Processing CONNECT",
+      "to_state": "Connection Refused",
+      "trigger": "Will authorization failure",
+      "pre_cond": "connect.will_flag = 1 & token.scope.covers(will_topic) = false",
+      "post_cond": null,
+      "actions": [
+        "refuse connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "In MQTT v5.0, the Client signals a new Session by setting the Clean Start flag to 1 in the CONNECT packet. If the Broker starts a new Session, the Broker MUST set the Session Present flag to 0 in the CONNACK packet to signal this to the Client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S014",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Processing CONNECT",
+      "to_state": "Connected",
+      "trigger": "CONNECT accepted with Clean Start = 1",
+      "pre_cond": "connect.clean_start = 1",
+      "post_cond": "connack.session_present = 0",
+      "actions": [
+        "start new session",
+        "send CONNACK with Session Present = 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "If a CONNECT packet is received with Clean Start set to 0, and there is a Session associated with the Client Identifier, the Broker MUST resume communications with the Client based on the state from the existing Session. The Broker MUST set the Session Present flag to 1 in the CONNACK packet.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S014",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Processing CONNECT",
+      "to_state": "Connected",
+      "trigger": "CONNECT received with Clean Start = 0 and existing session",
+      "pre_cond": "connect.clean_start = 0 & session.exists = true",
+      "post_cond": "connack.session_present = 1",
+      "actions": [
+        "resume existing session",
+        "send CONNACK with Session Present = 1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "If this Client Identifier represents a Client already connected to the Broker, the Broker sends a DISCONNECT packet to the existing Client with reason code 0x8E (Session taken over) and closes the connection to the Client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S014",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Connected",
+      "to_state": "Disconnected",
+      "trigger": "duplicate Client Identifier CONNECT received",
+      "pre_cond": "session.client_id.collision = true",
+      "post_cond": null,
+      "actions": [
+        "send DISCONNECT(0x8E) to existing client",
+        "close connection to existing client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S014-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The User Name Flag and Password Flag MUST be set to 0 to use AUTH packets for authentication and authorization.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "object_name": "CONNECT",
+      "field_name": "User Name Flag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        0
+      ],
+      "guard_semantics": "must be 0 when using AUTH-based token transport"
+    },
+    {
+      "statement_id": "D-S014-010",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The User Name Flag and Password Flag MUST be set to 0 to use AUTH packets for authentication and authorization.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "object_name": "CONNECT",
+      "field_name": "Password Flag",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        0
+      ],
+      "guard_semantics": "must be 0 when using AUTH-based token transport"
+    },
+    {
+      "statement_id": "D-S014-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "When reconnecting to a Broker that supports continuing existing Sessions, the Client MUST still provide a token in addition to using the same Client Identifier and setting the Clean Start to 0.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S014",
+      "object_name": "CONNECT",
+      "field_name": "Authentication Data",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "must be present even when resuming an existing session (connect.clean_start = 0)"
+    }
+  ]
+}

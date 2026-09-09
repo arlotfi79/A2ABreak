@@ -1,0 +1,63 @@
+digraph authentication {
+    rankdir=LR;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=10];
+    edge [fontname="Helvetica", fontsize=9];
+
+    // States
+    "TLS_HANDSHAKE_INITIATED" [fontname="Helvetica", fontsize="10", shape="doublecircle", style="filled,dashed", fillcolor="#d4edda", color="#28a745", label="TLS_HANDSHAKE\nINITIATED"];
+    "SERVER_IDENTITY_VERIFIED" [fontname="Helvetica", fontsize="10", shape="circle", style="dashed", label="SERVER_IDENTITY\nVERIFIED"];
+    "CLIENT_CREDENTIAL_ACQUISITION" [fontname="Helvetica", fontsize="10", shape="circle", style="solid", label="CLIENT_CREDENTIAL\nACQUISITION"];
+    "CLIENT_CREDENTIAL_TRANSMISSION" [fontname="Helvetica", fontsize="10", shape="circle", style="solid", label="CLIENT_CREDENTIAL\nTRANSMISSION"];
+    "SERVER_VALIDATING_REQUEST" [fontname="Helvetica", fontsize="10", shape="circle", style="dashed", label="SERVER_VALIDATING\nREQUEST"];
+    "authenticated" [fontname="Helvetica", fontsize="10", shape="circle", style="dashed", label="authenticated"];
+    "AUTHENTICATION_FAILED" [fontname="Helvetica", fontsize="10", shape="diamond", style="filled,dashed", fillcolor="#fff3cd", color="#fd7e14", label="AUTHENTICATION\nFAILED"];
+    "AUTHORIZATION_DENIED" [fontname="Helvetica", fontsize="10", shape="rectangle", style="filled,dashed", fillcolor="#f8d7da", color="#dc3545", label="AUTHORIZATION_DENIED"];
+    "REQUEST_AUTHORIZED" [fontname="Helvetica", fontsize="10", shape="circle", style="dashed", label="REQUEST_AUTHORIZED"];
+    "TASK_STATE_AUTH_REQUIRED" [fontname="Helvetica", fontsize="10", shape="ellipse", style="filled", fillcolor="#cce5ff", color="#004085", label="TASK_STATE_AUTH\nREQUIRED"];
+
+    // Inter-stage: entry from previous stage
+    "__ENTRY__" [shape=hexagon, label="← prev stage", style=filled, fillcolor="#cce5ff", color="#004085", fontname="Helvetica", fontsize=9];
+    "__ENTRY__" -> "TLS_HANDSHAKE_INITIATED" [style=dotted, color="#004085", arrowsize=0.7];
+    "__ENTRY__" -> "TASK_STATE_AUTH_REQUIRED" [style=dotted, color="#004085", arrowsize=0.7];
+
+    // Inter-stage: exit to next stage
+    "__EXIT__" [shape=hexagon, label="next stage →", style=filled, fillcolor="#fff3cd", color="#856404", fontname="Helvetica", fontsize=9];
+    "REQUEST_AUTHORIZED" -> "__EXIT__" [style=dotted, color="#856404", arrowsize=0.7, label="initiation"];
+    "REQUEST_AUTHORIZED" -> "__EXIT__" [style=dotted, color="#856404", arrowsize=0.7, label="task_execution"];
+
+    // Transitions
+    "TLS_HANDSHAKE_INITIATED" -> "SERVER_IDENTITY_VERIFIED" [label="tls_certificate_validated\n[client.server_identity_verified = true]", style=dashed, color="#fd7e14", fontcolor="#fd7e14"];
+    "SERVER_IDENTITY_VERIFIED" -> "CLIENT_CREDENTIAL_ACQUISITION" [label="auth_requirements_discovered", style=dashed, color="#666666", fontcolor="#666666"];
+    "CLIENT_CREDENTIAL_ACQUISITION" -> "CLIENT_CREDENTIAL_TRANSMISSION" [label="credentials_acquired\n[client.credentials_acquired = true]", style=dashed, color="#666666", fontcolor="#666666"];
+    "CLIENT_CREDENTIAL_TRANSMISSION" -> "SERVER_VALIDATING_REQUEST" [label="request_received", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "CLIENT_CREDENTIAL_TRANSMISSION" -> "SERVER_VALIDATING_REQUEST" [label="get_extended_agent_card_request\n[request.auth_scheme matches agent_card.securitySchemes]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "SERVER_VALIDATING_REQUEST" -> "authenticated" [label="credentials_validated\n[request.authenticated = true]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "SERVER_VALIDATING_REQUEST" -> "AUTHENTICATION_FAILED" [label="authentication_challenge_or_rejection\n[request.credentials.valid = false | request.credentials = null]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "SERVER_VALIDATING_REQUEST" -> "AUTHENTICATION_FAILED" [label="authentication_error", style=dashed, color="#fd7e14", fontcolor="#fd7e14"];
+    "authenticated" -> "REQUEST_AUTHORIZED" [label="request_received\n[client.permissions.sufficient = true]", style=dashed, color="#28a745", fontcolor="#28a745"];
+    "authenticated" -> "AUTHORIZATION_DENIED" [label="request_received\n[client.authenticated = true & client.permissions.sufficient = false]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "authenticated" -> "REQUEST_AUTHORIZED" [label="A2A_protocol_operations_request\n[caller.authenticated = true]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "authenticated" -> "REQUEST_AUTHORIZED" [label="get_extended_agent_card_request\n[client.authenticated = true]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "AUTHENTICATION_FAILED" -> "CLIENT_CREDENTIAL_ACQUISITION" [label="authentication_retry\n[response.authentication_challenge_info = present]", style=dashed, color="#28a745", fontcolor="#28a745"];
+    "TASK_STATE_AUTH_REQUIRED" -> "CLIENT_CREDENTIAL_ACQUISITION" [label="secondary_credentials_requested", style=dashed, color="#666666", fontcolor="#666666"];
+
+    // Legend
+    subgraph cluster_legend {
+        label="Legend"; fontsize=9; fontname="Helvetica";
+        style=dotted; color="#aaaaaa";
+        node [fontsize=8, fontname="Helvetica"];
+        L1 [shape=doublecircle, label="initial",    style=filled, fillcolor="#d4edda", color="#28a745"];
+        L2 [shape=rectangle,   label="terminal",   style=filled, fillcolor="#f8d7da", color="#dc3545"];
+        L3 [shape=diamond,     label="error",      style=filled, fillcolor="#fff3cd", color="#fd7e14"];
+        L4 [shape=ellipse,     label="interrupted",style=filled, fillcolor="#cce5ff", color="#004085"];
+        L5 [shape=circle,      label="intermediate"];
+        L6 [shape=circle,      label="inferred",   style=dashed];
+        L1 -> L2 [label="must",   color="#dc3545", fontcolor="#dc3545", fontsize=8];
+        L2 -> L3 [label="should",  color="#fd7e14", fontcolor="#fd7e14", fontsize=8];
+        L3 -> L4 [label="may",    color="#28a745", fontcolor="#28a745", fontsize=8];
+        L4 -> L5 [label="inferred",style=dashed,   color="#666666",    fontsize=8];
+        L5 -> L6 [style=invis];
+    }
+
+}

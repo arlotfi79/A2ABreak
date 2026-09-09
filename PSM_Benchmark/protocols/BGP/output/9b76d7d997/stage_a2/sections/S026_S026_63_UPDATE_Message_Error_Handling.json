@@ -1,0 +1,703 @@
+{
+  "section_id": "S026",
+  "title": "S026 6.3 UPDATE Message Error Handling",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S026 6.3 UPDATE Message Error Handling"
+  ],
+  "url_anchor": "#s026-63-update-message-error-handling",
+  "word_count": 671,
+  "statement_count": 29,
+  "elapsed_seconds": 358.47,
+  "statements": [
+    {
+      "statement_id": "N-S026-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "All errors detected while processing the UPDATE message MUST be indicated by sending the NOTIFICATION message with the Error Code UPDATE Message Error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "UPDATE_message_error_detected",
+      "pre_cond": "protocol.state = Established & update_message.error = true",
+      "post_cond": "NOTIFICATION.sent = true & NOTIFICATION.error_code = UPDATE_Message_Error",
+      "actions": [
+        "send NOTIFICATION message with Error Code=UPDATE Message Error"
+      ],
+      "modality": "must",
+      "id": "N-S026-001"
+    },
+    {
+      "statement_id": "N-S026-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the Withdrawn Routes Length or Total Attribute Length is too large (i.e., if Withdrawn Routes Length + Total Attribute Length + 23 exceeds the message Length), then the Error Subcode MUST be set to Malformed Attribute List.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "UPDATE_length_overflow_detected",
+      "pre_cond": "protocol.state = Established & (update_message.withdrawn_routes_length + update_message.total_attribute_length + 23) > update_message.length",
+      "post_cond": "NOTIFICATION.error_subcode = Malformed_Attribute_List",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Malformed Attribute List"
+      ],
+      "modality": "must",
+      "id": "N-S026-002"
+    },
+    {
+      "statement_id": "N-S026-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If any recognized attribute has Attribute Flags that conflict with the Attribute Type Code, then the Error Subcode MUST be set to Attribute Flags Error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "attribute_flags_conflict_detected",
+      "pre_cond": "protocol.state = Established & update_message.attribute.flags.conflict_with_type_code = true",
+      "post_cond": "NOTIFICATION.error_subcode = Attribute_Flags_Error",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Attribute Flags Error"
+      ],
+      "modality": "must",
+      "id": "N-S026-003"
+    },
+    {
+      "statement_id": "N-S026-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The Data field MUST contain the erroneous attribute (type, length, and value).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S026-004"
+    },
+    {
+      "statement_id": "N-S026-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If any recognized attribute has an Attribute Length that conflicts with the expected length (based on the attribute type code), then the Error Subcode MUST be set to Attribute Length Error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "attribute_length_conflict_detected",
+      "pre_cond": "protocol.state = Established & update_message.attribute.length != expected_length(update_message.attribute.type_code)",
+      "post_cond": "NOTIFICATION.error_subcode = Attribute_Length_Error",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Attribute Length Error"
+      ],
+      "modality": "must",
+      "id": "N-S026-005"
+    },
+    {
+      "statement_id": "N-S026-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The Data field MUST contain the erroneous attribute (type, length, and value).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S026-006"
+    },
+    {
+      "statement_id": "N-S026-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If any of the well-known mandatory attributes are not present, then the Error Subcode MUST be set to Missing Well-known Attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "well_known_mandatory_attribute_missing",
+      "pre_cond": "protocol.state = Established & update_message.well_known_mandatory_attribute.present = false",
+      "post_cond": "NOTIFICATION.error_subcode = Missing_Well_known_Attribute",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Missing Well-known Attribute"
+      ],
+      "modality": "must",
+      "id": "N-S026-007"
+    },
+    {
+      "statement_id": "N-S026-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The Data field MUST contain the Attribute Type Code of the missing, well-known attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S026-008"
+    },
+    {
+      "statement_id": "N-S026-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If any of the well-known mandatory attributes are not recognized, then the Error Subcode MUST be set to Unrecognized Well-known Attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "well_known_mandatory_attribute_unrecognized",
+      "pre_cond": "protocol.state = Established & update_message.well_known_mandatory_attribute.recognized = false",
+      "post_cond": "NOTIFICATION.error_subcode = Unrecognized_Well_known_Attribute",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Unrecognized Well-known Attribute"
+      ],
+      "modality": "must",
+      "id": "N-S026-009"
+    },
+    {
+      "statement_id": "N-S026-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The Data field MUST contain the unrecognized attribute (type, length, and value).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S026-010"
+    },
+    {
+      "statement_id": "N-S026-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the ORIGIN attribute has an undefined value, then the Error Sub-code MUST be set to Invalid Origin Attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "ORIGIN_attribute_undefined_value",
+      "pre_cond": "protocol.state = Established & update_message.ORIGIN.value = undefined",
+      "post_cond": "NOTIFICATION.error_subcode = Invalid_Origin_Attribute",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Invalid Origin Attribute"
+      ],
+      "modality": "must",
+      "id": "N-S026-011"
+    },
+    {
+      "statement_id": "N-S026-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The Data field MUST contain the unrecognized attribute (type, length, and value).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S026-012"
+    },
+    {
+      "statement_id": "N-S026-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the NEXT_HOP attribute field is syntactically incorrect, then the Error Subcode MUST be set to Invalid NEXT_HOP Attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "NEXT_HOP_syntactically_incorrect",
+      "pre_cond": "protocol.state = Established & update_message.NEXT_HOP.syntactically_correct = false",
+      "post_cond": "NOTIFICATION.error_subcode = Invalid_NEXT_HOP_Attribute",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Invalid NEXT_HOP Attribute"
+      ],
+      "modality": "must",
+      "id": "N-S026-013"
+    },
+    {
+      "statement_id": "N-S026-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The Data field MUST contain the incorrect attribute (type, length, and value).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S026-014"
+    },
+    {
+      "statement_id": "N-S026-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The IP address in the NEXT_HOP MUST meet the following criteria to be considered semantically correct:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "NEXT_HOP_semantic_validation",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "update_message.NEXT_HOP.semantically_correct = true",
+      "actions": [
+        "validate NEXT_HOP IP address against semantic correctness criteria"
+      ],
+      "modality": "must",
+      "id": "N-S026-015"
+    },
+    {
+      "statement_id": "N-S026-16",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "a) It MUST NOT be the IP address of the receiving speaker.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "receiving BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "NEXT_HOP_semantic_validation",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": "update_message.NEXT_HOP.ip_address != receiving_speaker.ip_address",
+      "actions": [
+        "verify NEXT_HOP IP address is not equal to the receiving speaker's IP address"
+      ],
+      "modality": "must",
+      "id": "N-S026-016"
+    },
+    {
+      "statement_id": "N-S026-17",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "b) In the case of an EBGP, where the sender and receiver are one IP hop away from each other, either the IP address in the NEXT_HOP MUST be the sender's IP address that is used to establish the BGP connection, or the interface associated with the NEXT_HOP IP address MUST share a common subnet with the receiving BGP speaker.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "sender",
+        "receiving BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "NEXT_HOP_EBGP_semantic_validation",
+      "pre_cond": "protocol.state = Established & session.type = EBGP & sender.ip_hops_to_receiver = 1",
+      "post_cond": "(update_message.NEXT_HOP.ip_address = sender.bgp_connection_ip_address) | (update_message.NEXT_HOP.interface.subnet = receiving_speaker.subnet)",
+      "actions": [
+        "verify NEXT_HOP is sender's BGP-connection IP address or shares a common subnet with the receiving BGP speaker"
+      ],
+      "modality": "must",
+      "id": "N-S026-017"
+    },
+    {
+      "statement_id": "N-S026-18",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the NEXT_HOP attribute is semantically incorrect, the error SHOULD be logged, and the route SHOULD be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "NEXT_HOP_semantically_incorrect",
+      "pre_cond": "protocol.state = Established & update_message.NEXT_HOP.semantically_correct = false",
+      "post_cond": "error.logged = true & route.ignored = true",
+      "actions": [
+        "log the error",
+        "ignore the route"
+      ],
+      "modality": "should",
+      "id": "N-S026-018"
+    },
+    {
+      "statement_id": "N-S026-19",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "In this case, a NOTIFICATION message SHOULD NOT be sent, and the connection SHOULD NOT be closed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "NEXT_HOP_semantically_incorrect",
+      "pre_cond": "protocol.state = Established & update_message.NEXT_HOP.semantically_correct = false",
+      "post_cond": "NOTIFICATION.sent = false & connection.closed = false",
+      "actions": [
+        "do not send NOTIFICATION message",
+        "do not close the connection"
+      ],
+      "modality": "should",
+      "id": "N-S026-019"
+    },
+    {
+      "statement_id": "N-S026-20",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the path is syntactically incorrect, then the Error Subcode MUST be set to Malformed AS_PATH.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "AS_PATH_syntactically_incorrect",
+      "pre_cond": "protocol.state = Established & update_message.AS_PATH.syntactically_correct = false",
+      "post_cond": "NOTIFICATION.error_subcode = Malformed_AS_PATH",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Malformed AS_PATH"
+      ],
+      "modality": "must",
+      "id": "N-S026-020"
+    },
+    {
+      "statement_id": "N-S026-21",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the UPDATE message is received from an external peer, the local system MAY check whether the leftmost (with respect to the position of octets in the protocol message) AS in the AS_PATH attribute is equal to the autonomous system number of the peer that sent the message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "local system",
+        "external peer"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "UPDATE_received_from_external_peer",
+      "pre_cond": "protocol.state = Established & peer.type = external",
+      "post_cond": null,
+      "actions": [
+        "optionally check that leftmost AS in AS_PATH equals the peer's autonomous system number"
+      ],
+      "modality": "may",
+      "id": "N-S026-021"
+    },
+    {
+      "statement_id": "N-S026-22",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the check determines this is not the case, the Error Subcode MUST be set to Malformed AS_PATH.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "AS_PATH_leftmost_AS_mismatch",
+      "pre_cond": "protocol.state = Established & peer.type = external & update_message.AS_PATH.leftmost_AS != peer.as_number",
+      "post_cond": "NOTIFICATION.error_subcode = Malformed_AS_PATH",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Malformed AS_PATH"
+      ],
+      "modality": "must",
+      "id": "N-S026-022"
+    },
+    {
+      "statement_id": "N-S026-23",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If an optional attribute is recognized, then the value of this attribute MUST be checked.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "optional_attribute_recognized",
+      "pre_cond": "protocol.state = Established & update_message.optional_attribute.recognized = true",
+      "post_cond": "update_message.optional_attribute.value.checked = true",
+      "actions": [
+        "check the value of the recognized optional attribute"
+      ],
+      "modality": "must",
+      "id": "N-S026-023"
+    },
+    {
+      "statement_id": "N-S026-24",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If an error is detected, the attribute MUST be discarded, and the Error Subcode MUST be set to Optional Attribute Error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "optional_attribute_error_detected",
+      "pre_cond": "protocol.state = Established & update_message.optional_attribute.error = true",
+      "post_cond": "update_message.optional_attribute.discarded = true & NOTIFICATION.error_subcode = Optional_Attribute_Error",
+      "actions": [
+        "discard the erroneous optional attribute",
+        "set NOTIFICATION Error Subcode to Optional Attribute Error"
+      ],
+      "modality": "must",
+      "id": "N-S026-024"
+    },
+    {
+      "statement_id": "N-S026-25",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The Data field MUST contain the attribute (type, length, and value).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S026-025"
+    },
+    {
+      "statement_id": "N-S026-26",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If any attribute appears more than once in the UPDATE message, then the Error Subcode MUST be set to Malformed Attribute List.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "duplicate_attribute_detected",
+      "pre_cond": "protocol.state = Established & update_message.attribute.count > 1",
+      "post_cond": "NOTIFICATION.error_subcode = Malformed_Attribute_List",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Malformed Attribute List"
+      ],
+      "modality": "must",
+      "id": "N-S026-026"
+    },
+    {
+      "statement_id": "N-S026-27",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the field is syntactically incorrect, then the Error Subcode MUST be set to Invalid Network Field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "NLRI_field_syntactically_incorrect",
+      "pre_cond": "protocol.state = Established & update_message.NLRI.syntactically_correct = false",
+      "post_cond": "NOTIFICATION.error_subcode = Invalid_Network_Field",
+      "actions": [
+        "set NOTIFICATION Error Subcode to Invalid Network Field"
+      ],
+      "modality": "must",
+      "id": "N-S026-027"
+    },
+    {
+      "statement_id": "N-S026-28",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If a prefix in the NLRI field is semantically incorrect (e.g., an unexpected multicast IP address), an error SHOULD be logged locally, and the prefix SHOULD be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "NLRI_prefix_semantically_incorrect",
+      "pre_cond": "protocol.state = Established & update_message.NLRI.prefix.semantically_correct = false",
+      "post_cond": "error.logged = true & update_message.NLRI.prefix.ignored = true",
+      "actions": [
+        "log the error locally",
+        "ignore the semantically incorrect prefix"
+      ],
+      "modality": "should",
+      "id": "N-S026-028"
+    },
+    {
+      "statement_id": "N-S026-29",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "An UPDATE message that contains correct path attributes, but no NLRI, SHALL be treated as a valid UPDATE message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": "Established",
+      "trigger": "UPDATE_received_with_no_NLRI",
+      "pre_cond": "protocol.state = Established & update_message.path_attributes.correct = true & update_message.NLRI.present = false",
+      "post_cond": "update_message.valid = true",
+      "actions": [
+        "treat the UPDATE message as a valid UPDATE message"
+      ],
+      "modality": "shall",
+      "id": "N-S026-029"
+    }
+  ]
+}

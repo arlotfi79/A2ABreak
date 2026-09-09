@@ -1,0 +1,217 @@
+{
+  "section_id": "S079",
+  "title": "S079 12.2.2 UAS Behavior",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S079 12.2.2 UAS Behavior"
+  ],
+  "url_anchor": "#s079-1222-uas-behavior",
+  "word_count": 597,
+  "statement_count": 9,
+  "elapsed_seconds": 55.76,
+  "statements": [
+    {
+      "statement_id": "D-S079-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If a particular request is accepted by the UAS, all the state changes associated with it are performed.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS accepts request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "perform all state changes associated with request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S079-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the request is rejected, none of the state changes are performed.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS rejects request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "perform no state changes"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S079-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the request has a tag in the To header field, the UAS core computes the dialog identifier corresponding to the request and compares it with existing dialogs. If there is a match, this is a mid-dialog request. In that case, the UAS first applies the same processing rules for requests outside of a dialog.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive request with To tag matching existing dialog",
+      "pre_cond": "request.To.tag != null & dialog.identifier.match = true",
+      "post_cond": null,
+      "actions": [
+        "apply processing rules for requests outside dialog (Section 8.2)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S079-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the UAS wishes to reject the request because it does not wish to recreate the dialog, it MUST respond to the request with a 481 (Call/Transaction Does Not Exist) status code and pass that to the server transaction.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS rejects request with unrecognized To tag",
+      "pre_cond": "request.To.tag != null & dialog.identifier.match = false & uas.recreate_dialog = false",
+      "post_cond": null,
+      "actions": [
+        "respond with 481 (Call/Transaction Does Not Exist)",
+        "pass response to server transaction"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S079-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the remote sequence number is empty, it MUST be set to the value of the sequence number in the CSeq header field value in the request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive in-dialog request with empty remote sequence number",
+      "pre_cond": "dialog.remote_sequence_number = empty",
+      "post_cond": "dialog.remote_sequence_number = request.CSeq.sequence_number",
+      "actions": [
+        "set remote_sequence_number = CSeq.sequence_number"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S079-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the remote sequence number was not empty, but the sequence number of the request is lower than the remote sequence number, the request is out of order and MUST be rejected with a 500 (Server Internal Error) response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive in-dialog request with CSeq lower than remote sequence number",
+      "pre_cond": "dialog.remote_sequence_number != empty & request.CSeq.sequence_number < dialog.remote_sequence_number",
+      "post_cond": null,
+      "actions": [
+        "reject with 500 (Server Internal Error)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S079-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the remote sequence number was not empty, and the sequence number of the request is greater than the remote sequence number, the request is in order. The UAS MUST then set the remote sequence number to the value of the sequence number in the CSeq header field value in the request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive in-dialog request with CSeq greater than remote sequence number",
+      "pre_cond": "dialog.remote_sequence_number != empty & request.CSeq.sequence_number > dialog.remote_sequence_number",
+      "post_cond": "dialog.remote_sequence_number = request.CSeq.sequence_number",
+      "actions": [
+        "set remote_sequence_number = CSeq.sequence_number"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S079-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "When a UAS receives a target refresh request, it MUST replace the dialog's remote target URI with the URI from the Contact header field in that request, if present.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S079",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive target refresh request with Contact header",
+      "pre_cond": "request.type = target_refresh & request.Contact != null",
+      "post_cond": "dialog.remote_target_URI = request.Contact.URI",
+      "actions": [
+        "replace dialog.remote_target_URI with Contact URI"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S079-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If the remote sequence number is empty, it MUST be set to the value of the sequence number in the CSeq header field value in the request.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S079",
+      "object_name": "dialog",
+      "field_name": "remote_sequence_number",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

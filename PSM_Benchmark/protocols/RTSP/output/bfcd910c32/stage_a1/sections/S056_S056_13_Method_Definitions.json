@@ -1,0 +1,105 @@
+{
+  "section_id": "S056",
+  "title": "S056 13. Method Definitions",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S056 13. Method Definitions"
+  ],
+  "url_anchor": "#s056-13-method-definitions",
+  "word_count": 521,
+  "statement_count": 4,
+  "elapsed_seconds": 41.36,
+  "statements": [
+    {
+      "statement_id": "D-S056-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PAUSE is required because it is the only way of leaving the Play state without terminating the whole session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S056",
+      "state_name": "Play",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S056-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PAUSE is required because it is the only way of leaving the Play state without terminating the whole session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S056",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "PAUSE",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state != Play & session.terminated = false",
+      "actions": [
+        "send PAUSE request",
+        "leave Play state without terminating session"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PAUSE is the only way of leaving the Play state without terminating the whole session \u2014 implying TEARDOWN leaves the Play state by terminating the whole session.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S056",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": null,
+      "trigger": "TEARDOWN",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.terminated = true",
+      "actions": [
+        "terminate session"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S056-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If an RTSP agent does not support a particular method, it MUST return a 501 (Not Implemented) response code and the requesting RTSP agent, in turn, SHOULD NOT try this method again for the given agent/resource combination.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S056",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unsupported_method_request",
+      "pre_cond": "server.supports_method = false",
+      "post_cond": "server.sent_response = 501",
+      "actions": [
+        "send 501 Not Implemented response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

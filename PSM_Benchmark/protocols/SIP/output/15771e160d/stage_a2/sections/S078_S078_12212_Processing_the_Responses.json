@@ -1,0 +1,87 @@
+{
+  "section_id": "S078",
+  "title": "S078 12.2.1.2 Processing the Responses",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S078 12.2.1.2 Processing the Responses"
+  ],
+  "url_anchor": "#s078-12212-processing-the-responses",
+  "word_count": 194,
+  "statement_count": 3,
+  "elapsed_seconds": 22.78,
+  "statements": [
+    {
+      "statement_id": "N-S078-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When a UAC receives a 2xx response to a target refresh request, it MUST replace the dialog's remote target URI with the URI from the Contact header field in that response, if present.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S078",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_2xx_response_to_target_refresh_request",
+      "pre_cond": "response.status_class = 2xx & request.type = target_refresh & response.Contact != null",
+      "post_cond": "dialog.remote_target_uri = response.Contact.uri",
+      "actions": [
+        "Replace dialog's remote target URI with URI from Contact header field in the 2xx response"
+      ],
+      "modality": "must",
+      "id": "N-S078-001"
+    },
+    {
+      "statement_id": "N-S078-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the response for a request within a dialog is a 481 (Call/Transaction Does Not Exist) or a 408 (Request Timeout), the UAC SHOULD terminate the dialog.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S078",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "receive_481_or_408_response_within_dialog",
+      "pre_cond": "(response.status_code = 481 | response.status_code = 408) & request.within_dialog = true",
+      "post_cond": "dialog.state = Terminated",
+      "actions": [
+        "Terminate the dialog"
+      ],
+      "modality": "should",
+      "id": "N-S078-002"
+    },
+    {
+      "statement_id": "N-S078-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "A UAC SHOULD also terminate a dialog if no response at all is received for the request (the client transaction would inform the TU about the timeout.)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S078",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "client_transaction_timeout_no_response",
+      "pre_cond": "response = null & request.within_dialog = true & client_transaction.state = Timeout",
+      "post_cond": "dialog.state = Terminated",
+      "actions": [
+        "Terminate the dialog"
+      ],
+      "modality": "should",
+      "id": "N-S078-003"
+    }
+  ]
+}

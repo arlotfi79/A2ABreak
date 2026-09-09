@@ -1,0 +1,127 @@
+{
+  "section_id": "S308",
+  "title": "S308 28.2 Minor Functional Changes",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S308 28.2 Minor Functional Changes"
+  ],
+  "url_anchor": "#s308-282-minor-functional-changes",
+  "word_count": 240,
+  "statement_count": 5,
+  "elapsed_seconds": 24.88,
+  "statements": [
+    {
+      "statement_id": "D-S308-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Added a 'glare handling' mechanism to deal with the case where both parties send each other a re-INVITE simultaneously. It uses the new 491 (Request Pending) error code.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S308",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "re-INVITE received while re-INVITE pending",
+      "pre_cond": "transaction.re_invite_pending = true",
+      "post_cond": null,
+      "actions": [
+        "send 491 (Request Pending)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S308-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "There were a variety of mechanisms described for handling failures at any time during a call; those are now generally unified. BYE is sent to terminate.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S308",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "failure during call",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send BYE"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S308-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Only 2xx responses to INVITEs are retransmitted over TCP.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S308",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "2xx response to INVITE sent over TCP",
+      "pre_cond": "transaction.transport = TCP & transaction.response_code = 2xx & transaction.method = INVITE",
+      "post_cond": null,
+      "actions": [
+        "retransmit 2xx response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S308-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Client and server transaction machines are now driven based on timeouts rather than retransmit counts. This allows the state machines to be properly specified for TCP and UDP.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S308",
+      "object_name": "transaction_state_machine",
+      "field_name": "timeout_driven",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "timeout-based"
+      ],
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S308-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Allowed a registrar to reject registrations with expirations that are too short in duration. Defined the 423 response code and the Min-Expires for this purpose.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S308",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REGISTER received with expiration too short",
+      "pre_cond": "transaction.method = REGISTER & registration.expiry < server.min_expires",
+      "post_cond": null,
+      "actions": [
+        "send 423 response with Min-Expires header"
+      ],
+      "modality": "may"
+    }
+  ]
+}

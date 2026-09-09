@@ -1,0 +1,115 @@
+{
+  "section_id": "8.3",
+  "title": "8.3. Protocol Declaration Requirements",
+  "depth": 3,
+  "parent_path": [
+    "8. Agent Discovery: The Agent Card",
+    "8.3. Protocol Declaration Requirements"
+  ],
+  "url_anchor": "#83-protocol-declaration-requirements",
+  "word_count": 103,
+  "statement_count": 5,
+  "elapsed_seconds": 26.06,
+  "statements": [
+    {
+      "statement_id": "D-8-3-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "The supportedInterfaces field SHOULD declare all supported protocol combinations in preference order",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.3.1",
+      "object_name": "AgentCard",
+      "field_name": "supportedInterfaces",
+      "field_type": "array",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-8-3-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Each interface MUST accurately declare its transport protocol",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.3.1",
+      "object_name": "Interface",
+      "field_name": "transportProtocol",
+      "field_type": "string",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-8-3-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Each interface MUST accurately declare its URL",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.3.1",
+      "object_name": "Interface",
+      "field_name": "url",
+      "field_type": "string",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-8-3-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients MUST parse supportedInterfaces if present, and select the first supported transport; prefer earlier entries in the ordered list when multiple options are supported",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "8.3.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AGENT_CARD_RECEIVED",
+      "to_state": "TRANSPORT_SELECTED",
+      "trigger": "supportedInterfaces_parsed",
+      "pre_cond": "agent_card.supportedInterfaces != null",
+      "post_cond": "client.selectedTransport = agent_card.supportedInterfaces[first_supported_index]",
+      "actions": [
+        "Parse supportedInterfaces field from AgentCard",
+        "Iterate entries in declared preference order",
+        "Select first entry whose transport is supported by the client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-8-3-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "discovery",
+      "description": "Clients MUST use the correct URL for the selected transport",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "8.3.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSPORT_SELECTED",
+      "to_state": "TRANSPORT_CONNECTED",
+      "trigger": "transport_url_resolved",
+      "pre_cond": "client.selectedTransport != null",
+      "post_cond": "client.connectionUrl = client.selectedTransport.url",
+      "actions": [
+        "Read url field from the selected interface entry",
+        "Use that url as the endpoint for the chosen transport"
+      ],
+      "modality": "must"
+    }
+  ]
+}

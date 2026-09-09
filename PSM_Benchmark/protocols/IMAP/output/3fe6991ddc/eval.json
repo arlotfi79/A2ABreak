@@ -1,0 +1,989 @@
+{
+  "protocol": "IMAP",
+  "model": "a2a-pipeline",
+  "fingerprint": {
+    "evaluator_sha256": "c302bb6e01e8e95f5fa4f1147efd289e0cba243ca3a707eeb9ae731a6a83b668",
+    "ground_truth_sha256": "ac980ad2f18a27b45fa9dbba47bc4a9d6b8faeb879d9b78f85dd67bc8da417a2",
+    "exported_fsm_sha256": "cf842f3a0585d5844ebbb3e2bb0adaf957e032aad626e4ab69ee111b5cc055d2",
+    "minilm": {
+      "found": true,
+      "snapshots": [
+        "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+      ]
+    },
+    "packages": {
+      "python": "3.13.2",
+      "numpy": "2.4.2",
+      "torch": "2.12.0",
+      "sentence-transformers": "5.5.1",
+      "pandas": "3.0.3",
+      "scikit-learn": "1.8.0",
+      "litellm": "1.83.14"
+    }
+  },
+  "official": {
+    "states": {
+      "Protocol": "IMAP",
+      "Model": "a2a-pipeline",
+      "Total Extracted": 9,
+      "Total GT": 5,
+      "Matched": 4,
+      "Precision": 0.444,
+      "Recall": 0.8,
+      "F1-Score": 0.571
+    },
+    "transitions": {
+      "Protocol": "IMAP",
+      "Model": "a2a-pipeline",
+      "TotalExtracted": 53,
+      "TotalGT": 11,
+      "Matched": 5,
+      "UnmatchedGT": 6,
+      "UnmatchedExtracted": 48,
+      "Precision": 0.094,
+      "Recall": 0.455,
+      "F1-Score": 0.156
+    },
+    "call": {
+      "match_all_states": {
+        "threshold": 0.5
+      },
+      "batch_evaluate_transitions_combined": {
+        "if_partial": false,
+        "state_threshold": 0.5,
+        "trans_threshold": 0.5
+      }
+    }
+  },
+  "diagnostics": {
+    "state_matches": [
+      {
+        "gt": "Connection_Established_Server_Greeting",
+        "extracted": null,
+        "score": 0.49407848715782166
+      },
+      {
+        "gt": "Not_Authenticated",
+        "extracted": "Authenticated",
+        "score": 0.860569953918457
+      },
+      {
+        "gt": "Authenticated",
+        "extracted": "Authenticated",
+        "score": 1.0
+      },
+      {
+        "gt": "Selected",
+        "extracted": "Selected",
+        "score": 1.0000003576278687
+      },
+      {
+        "gt": "Logout",
+        "extracted": "Logout",
+        "score": 1.0000007152557373
+      }
+    ],
+    "unmatched_gt_states": [
+      "Connection_Established_Server_Greeting"
+    ],
+    "unselected_extracted_states": [
+      "Logout",
+      "ConnectionClosed",
+      "IDLE",
+      "ContinuationPending"
+    ],
+    "matched_transitions": [
+      {
+        "extracted": {
+          "from": "NotAuthenticated",
+          "event": "receive LOGIN OK",
+          "action": "enter Authenticated state",
+          "to": "Authenticated"
+        },
+        "gt": {
+          "from": "Not_Authenticated",
+          "event": "Sends LOGIN or AUTHENTICATE command",
+          "action": "Sends LOGIN or AUTHENTICATE command",
+          "to": "Authenticated"
+        }
+      },
+      {
+        "extracted": {
+          "from": "NotAuthenticated",
+          "event": "send LOGOUT command",
+          "action": "send BYE untagged response; send tagged OK response",
+          "to": "Logout"
+        },
+        "gt": {
+          "from": "Not_Authenticated",
+          "event": "Sends LOGOUT or server shutdown",
+          "action": "Close connection",
+          "to": "Logout"
+        }
+      },
+      {
+        "extracted": {
+          "from": "NotAuthenticated",
+          "event": "server shutdown",
+          "action": "",
+          "to": "Logout"
+        },
+        "gt": {
+          "from": "Authenticated",
+          "event": "Sends LOGOUT or server shutdown",
+          "action": "Close connection",
+          "to": "Logout"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Selected",
+          "event": "send CLOSE command",
+          "action": "close selected mailbox; send tagged OK response",
+          "to": "Authenticated"
+        },
+        "gt": {
+          "from": "Selected",
+          "event": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+          "action": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+          "to": "Authenticated"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Selected",
+          "event": "send LOGOUT command",
+          "action": "send BYE untagged response; send tagged OK response",
+          "to": "Logout"
+        },
+        "gt": {
+          "from": "Selected",
+          "event": "Sends LOGOUT or server shutdown",
+          "action": "Close connection",
+          "to": "Logout"
+        }
+      }
+    ],
+    "unmatched_gt_transitions": [
+      {
+        "from": "Connection_Established_Server_Greeting",
+        "event": "connect without pre-authentication",
+        "action": "Send OK greeting",
+        "to": "Not_Authenticated"
+      },
+      {
+        "from": "Connection_Established_Server_Greeting",
+        "event": "Connects with pre-authentication",
+        "action": "Send PREAUTH greeting",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Connection_Established_Server_Greeting",
+        "event": "Connection reject",
+        "action": "Send BYE greeting",
+        "to": "Logout"
+      },
+      {
+        "from": "Authenticated",
+        "event": "Sends SELECT or EXAMINE command",
+        "action": "Sends SELECT or EXAMINE command",
+        "to": "Selected"
+      },
+      {
+        "from": "Authenticated",
+        "event": "Send requests mailbox listing",
+        "action": "List mailbox",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Selected",
+        "event": "Client manages messages",
+        "action": "Read/write/delete messages",
+        "to": "Selected"
+      }
+    ],
+    "unmatched_extracted_transitions": [
+      {
+        "from": "ConnectionEstablished",
+        "event": "connection established",
+        "action": "server sends greeting",
+        "to": "ServerGreeting"
+      },
+      {
+        "from": "ServerGreeting",
+        "event": "receive OK greeting",
+        "action": "send OK greeting",
+        "to": "NotAuthenticated"
+      },
+      {
+        "from": "ServerGreeting",
+        "event": "receive PREAUTH greeting",
+        "action": "send PREAUTH greeting",
+        "to": "Authenticated"
+      },
+      {
+        "from": "ServerGreeting",
+        "event": "receive BYE greeting",
+        "action": "send BYE greeting",
+        "to": "Logout"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "receive AUTHENTICATE OK",
+        "action": "enter Authenticated state",
+        "to": "Authenticated"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "receive STARTTLS OK",
+        "action": "begin TLS negotiation; discard cached capabilities",
+        "to": "NotAuthenticated"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "receive AUTHENTICATE BAD",
+        "action": "cancel authentication exchange",
+        "to": "NotAuthenticated"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "receive AUTHENTICATE NO",
+        "action": "send tagged NO response",
+        "to": "NotAuthenticated"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "send auth cancellation",
+        "action": "send tagged BAD response",
+        "to": "NotAuthenticated"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "receive LOGIN NO",
+        "action": "send tagged NO response",
+        "to": "NotAuthenticated"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "receive LOGIN BAD",
+        "action": "send tagged BAD response",
+        "to": "NotAuthenticated"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "receive STARTTLS BAD",
+        "action": "send tagged BAD response",
+        "to": "NotAuthenticated"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "receive LOGIN LOGINDISABLED",
+        "action": "send tagged NO response",
+        "to": "NotAuthenticated"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "cond connection closed",
+        "action": "",
+        "to": "Logout"
+      },
+      {
+        "from": "NotAuthenticated",
+        "event": "timeout pre auth timer",
+        "action": "initiate autologout",
+        "to": "Logout"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive SELECT OK",
+        "action": "select mailbox for access",
+        "to": "Selected"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive EXAMINE OK",
+        "action": "open mailbox as read-only",
+        "to": "Selected"
+      },
+      {
+        "from": "Authenticated",
+        "event": "send LOGOUT command",
+        "action": "send BYE untagged response; send tagged OK response",
+        "to": "Logout"
+      },
+      {
+        "from": "Authenticated",
+        "event": "server shutdown",
+        "action": "",
+        "to": "Logout"
+      },
+      {
+        "from": "Authenticated",
+        "event": "cond connection closed",
+        "action": "",
+        "to": "Logout"
+      },
+      {
+        "from": "Authenticated",
+        "event": "timeout autologout",
+        "action": "initiate autologout",
+        "to": "Logout"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive SELECT NO",
+        "action": "send tagged NO response",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive EXAMINE NO",
+        "action": "send tagged NO response",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "send ENABLE command",
+        "action": "enable supported extensions; send untagged ENABLED response",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "send DELETE command",
+        "action": "remove mailbox permanently",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "send SUBSCRIBE command",
+        "action": "add mailbox to subscribed set",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "send LIST command",
+        "action": "send untagged LIST responses",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "send NAMESPACE command",
+        "action": "send untagged NAMESPACE response",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "send STATUS command",
+        "action": "send untagged STATUS response",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "send APPEND command",
+        "action": "append message to mailbox",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Selected",
+        "event": "send UNSELECT command",
+        "action": "free session resources; send tagged OK response",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Selected",
+        "event": "receive SELECT NO",
+        "action": "deselect current mailbox; send tagged NO response",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Selected",
+        "event": "receive EXAMINE NO",
+        "action": "deselect current mailbox",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Selected",
+        "event": "receive unsolicited CLOSED",
+        "action": "deselect current mailbox",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Selected",
+        "event": "receive SELECT OK",
+        "action": "deselect current mailbox; select new mailbox",
+        "to": "Selected"
+      },
+      {
+        "from": "Selected",
+        "event": "receive EXAMINE OK",
+        "action": "close current mailbox; select new mailbox read-only",
+        "to": "Selected"
+      },
+      {
+        "from": "Selected",
+        "event": "server shutdown",
+        "action": "",
+        "to": "Logout"
+      },
+      {
+        "from": "Selected",
+        "event": "cond connection closed",
+        "action": "",
+        "to": "Logout"
+      },
+      {
+        "from": "Selected",
+        "event": "timeout autologout",
+        "action": "initiate autologout",
+        "to": "Logout"
+      },
+      {
+        "from": "Selected",
+        "event": "send FETCH command",
+        "action": "send untagged FETCH responses",
+        "to": "Selected"
+      },
+      {
+        "from": "Selected",
+        "event": "send EXPUNGE command",
+        "action": "send untagged EXPUNGE responses",
+        "to": "Selected"
+      },
+      {
+        "from": "Selected",
+        "event": "send SEARCH command",
+        "action": "send untagged ESEARCH response",
+        "to": "Selected"
+      },
+      {
+        "from": "Selected",
+        "event": "send COPY command",
+        "action": "copy messages to destination",
+        "to": "Selected"
+      },
+      {
+        "from": "Selected",
+        "event": "send MOVE command",
+        "action": "move messages to destination",
+        "to": "Selected"
+      },
+      {
+        "from": "Selected",
+        "event": "send UID command",
+        "action": "process command using UIDs",
+        "to": "Selected"
+      },
+      {
+        "from": "Selected",
+        "event": "send APPEND command",
+        "action": "send untagged EXISTS response",
+        "to": "Selected"
+      },
+      {
+        "from": "Selected",
+        "event": "send STATUS command",
+        "action": "send untagged STATUS response",
+        "to": "Selected"
+      },
+      {
+        "from": "Logout",
+        "event": "cond close complete",
+        "action": "server closes connection; client closes connection",
+        "to": "ConnectionClosed"
+      }
+    ],
+    "precision": 0.444,
+    "recall": 0.8,
+    "f1_score": 0.571
+  },
+  "supplementary": {
+    "note": "Supplementary only — the official numbers above come from the benchmark's own entry points. The official state matcher is many-to-one and the official transition matcher is greedy and order-sensitive; these one-to-one numbers bound that effect.",
+    "one_to_one": {
+      "states": {
+        "threshold": 0.5,
+        "matched": 4,
+        "total_gt": 5,
+        "total_extracted": 9,
+        "precision": 0.4444,
+        "recall": 0.8,
+        "f1": 0.5714,
+        "pairs": [
+          {
+            "gt": "Not_Authenticated",
+            "extracted": "NotAuthenticated",
+            "score": 0.7611
+          },
+          {
+            "gt": "Authenticated",
+            "extracted": "Authenticated",
+            "score": 1.0
+          },
+          {
+            "gt": "Selected",
+            "extracted": "Selected",
+            "score": 1.0
+          },
+          {
+            "gt": "Logout",
+            "extracted": "Logout",
+            "score": 1.0
+          }
+        ]
+      },
+      "transitions": {
+        "threshold": 0.5,
+        "matched": 5,
+        "total_gt": 11,
+        "total_extracted": 53,
+        "precision": 0.0943,
+        "recall": 0.4545,
+        "f1": 0.1562,
+        "pairs": [
+          {
+            "extracted": {
+              "from": "NotAuthenticated",
+              "event": "receive LOGIN OK",
+              "action": "enter Authenticated state",
+              "to": "Authenticated"
+            },
+            "gt": {
+              "from": "Not_Authenticated",
+              "event": "Sends LOGIN or AUTHENTICATE command",
+              "action": "Sends LOGIN or AUTHENTICATE command",
+              "to": "Authenticated"
+            },
+            "label_score": 0.5024
+          },
+          {
+            "extracted": {
+              "from": "NotAuthenticated",
+              "event": "server shutdown",
+              "action": "",
+              "to": "Logout"
+            },
+            "gt": {
+              "from": "Not_Authenticated",
+              "event": "Sends LOGOUT or server shutdown",
+              "action": "Close connection",
+              "to": "Logout"
+            },
+            "label_score": 0.632
+          },
+          {
+            "extracted": {
+              "from": "Authenticated",
+              "event": "server shutdown",
+              "action": "",
+              "to": "Logout"
+            },
+            "gt": {
+              "from": "Authenticated",
+              "event": "Sends LOGOUT or server shutdown",
+              "action": "Close connection",
+              "to": "Logout"
+            },
+            "label_score": 0.632
+          },
+          {
+            "extracted": {
+              "from": "Selected",
+              "event": "send CLOSE command",
+              "action": "close selected mailbox; send tagged OK response",
+              "to": "Authenticated"
+            },
+            "gt": {
+              "from": "Selected",
+              "event": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+              "action": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+              "to": "Authenticated"
+            },
+            "label_score": 0.5046
+          },
+          {
+            "extracted": {
+              "from": "Selected",
+              "event": "server shutdown",
+              "action": "",
+              "to": "Logout"
+            },
+            "gt": {
+              "from": "Selected",
+              "event": "Sends LOGOUT or server shutdown",
+              "action": "Close connection",
+              "to": "Logout"
+            },
+            "label_score": 0.632
+          }
+        ]
+      }
+    },
+    "threshold_sensitivity": {
+      "0.4": {
+        "states_official_style": {
+          "matched": 5,
+          "precision": 0.556,
+          "recall": 1.0,
+          "f1": 0.715
+        },
+        "states_one_to_one": {
+          "threshold": 0.4,
+          "matched": 5,
+          "total_gt": 5,
+          "total_extracted": 9,
+          "precision": 0.5556,
+          "recall": 1.0,
+          "f1": 0.7143,
+          "pairs": [
+            {
+              "gt": "Connection_Established_Server_Greeting",
+              "extracted": "ConnectionClosed",
+              "score": 0.4941
+            },
+            {
+              "gt": "Not_Authenticated",
+              "extracted": "NotAuthenticated",
+              "score": 0.7611
+            },
+            {
+              "gt": "Authenticated",
+              "extracted": "Authenticated",
+              "score": 1.0
+            },
+            {
+              "gt": "Selected",
+              "extracted": "Selected",
+              "score": 1.0
+            },
+            {
+              "gt": "Logout",
+              "extracted": "Logout",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.4,
+          "matched": 6,
+          "total_gt": 11,
+          "total_extracted": 53,
+          "precision": 0.1132,
+          "recall": 0.5455,
+          "f1": 0.1875,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "NotAuthenticated",
+                "event": "receive LOGIN OK",
+                "action": "enter Authenticated state",
+                "to": "Authenticated"
+              },
+              "gt": {
+                "from": "Not_Authenticated",
+                "event": "Sends LOGIN or AUTHENTICATE command",
+                "action": "Sends LOGIN or AUTHENTICATE command",
+                "to": "Authenticated"
+              },
+              "label_score": 0.5024
+            },
+            {
+              "extracted": {
+                "from": "NotAuthenticated",
+                "event": "server shutdown",
+                "action": "",
+                "to": "Logout"
+              },
+              "gt": {
+                "from": "Not_Authenticated",
+                "event": "Sends LOGOUT or server shutdown",
+                "action": "Close connection",
+                "to": "Logout"
+              },
+              "label_score": 0.632
+            },
+            {
+              "extracted": {
+                "from": "Authenticated",
+                "event": "server shutdown",
+                "action": "",
+                "to": "Logout"
+              },
+              "gt": {
+                "from": "Authenticated",
+                "event": "Sends LOGOUT or server shutdown",
+                "action": "Close connection",
+                "to": "Logout"
+              },
+              "label_score": 0.632
+            },
+            {
+              "extracted": {
+                "from": "Authenticated",
+                "event": "send APPEND command",
+                "action": "append message to mailbox",
+                "to": "Authenticated"
+              },
+              "gt": {
+                "from": "Authenticated",
+                "event": "Send requests mailbox listing",
+                "action": "List mailbox",
+                "to": "Authenticated"
+              },
+              "label_score": 0.4729
+            },
+            {
+              "extracted": {
+                "from": "Selected",
+                "event": "send CLOSE command",
+                "action": "close selected mailbox; send tagged OK response",
+                "to": "Authenticated"
+              },
+              "gt": {
+                "from": "Selected",
+                "event": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+                "action": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+                "to": "Authenticated"
+              },
+              "label_score": 0.5046
+            },
+            {
+              "extracted": {
+                "from": "Selected",
+                "event": "server shutdown",
+                "action": "",
+                "to": "Logout"
+              },
+              "gt": {
+                "from": "Selected",
+                "event": "Sends LOGOUT or server shutdown",
+                "action": "Close connection",
+                "to": "Logout"
+              },
+              "label_score": 0.632
+            }
+          ]
+        }
+      },
+      "0.5": {
+        "states_official_style": {
+          "matched": 4,
+          "precision": 0.444,
+          "recall": 0.8,
+          "f1": 0.571
+        },
+        "states_one_to_one": {
+          "threshold": 0.5,
+          "matched": 4,
+          "total_gt": 5,
+          "total_extracted": 9,
+          "precision": 0.4444,
+          "recall": 0.8,
+          "f1": 0.5714,
+          "pairs": [
+            {
+              "gt": "Not_Authenticated",
+              "extracted": "NotAuthenticated",
+              "score": 0.7611
+            },
+            {
+              "gt": "Authenticated",
+              "extracted": "Authenticated",
+              "score": 1.0
+            },
+            {
+              "gt": "Selected",
+              "extracted": "Selected",
+              "score": 1.0
+            },
+            {
+              "gt": "Logout",
+              "extracted": "Logout",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.5,
+          "matched": 5,
+          "total_gt": 11,
+          "total_extracted": 53,
+          "precision": 0.0943,
+          "recall": 0.4545,
+          "f1": 0.1562,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "NotAuthenticated",
+                "event": "receive LOGIN OK",
+                "action": "enter Authenticated state",
+                "to": "Authenticated"
+              },
+              "gt": {
+                "from": "Not_Authenticated",
+                "event": "Sends LOGIN or AUTHENTICATE command",
+                "action": "Sends LOGIN or AUTHENTICATE command",
+                "to": "Authenticated"
+              },
+              "label_score": 0.5024
+            },
+            {
+              "extracted": {
+                "from": "NotAuthenticated",
+                "event": "server shutdown",
+                "action": "",
+                "to": "Logout"
+              },
+              "gt": {
+                "from": "Not_Authenticated",
+                "event": "Sends LOGOUT or server shutdown",
+                "action": "Close connection",
+                "to": "Logout"
+              },
+              "label_score": 0.632
+            },
+            {
+              "extracted": {
+                "from": "Authenticated",
+                "event": "server shutdown",
+                "action": "",
+                "to": "Logout"
+              },
+              "gt": {
+                "from": "Authenticated",
+                "event": "Sends LOGOUT or server shutdown",
+                "action": "Close connection",
+                "to": "Logout"
+              },
+              "label_score": 0.632
+            },
+            {
+              "extracted": {
+                "from": "Selected",
+                "event": "send CLOSE command",
+                "action": "close selected mailbox; send tagged OK response",
+                "to": "Authenticated"
+              },
+              "gt": {
+                "from": "Selected",
+                "event": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+                "action": "Sends CLOSE, UNSELECT, or SELECT/EXAMINE fails",
+                "to": "Authenticated"
+              },
+              "label_score": 0.5046
+            },
+            {
+              "extracted": {
+                "from": "Selected",
+                "event": "server shutdown",
+                "action": "",
+                "to": "Logout"
+              },
+              "gt": {
+                "from": "Selected",
+                "event": "Sends LOGOUT or server shutdown",
+                "action": "Close connection",
+                "to": "Logout"
+              },
+              "label_score": 0.632
+            }
+          ]
+        }
+      },
+      "0.6": {
+        "states_official_style": {
+          "matched": 4,
+          "precision": 0.444,
+          "recall": 0.8,
+          "f1": 0.571
+        },
+        "states_one_to_one": {
+          "threshold": 0.6,
+          "matched": 4,
+          "total_gt": 5,
+          "total_extracted": 9,
+          "precision": 0.4444,
+          "recall": 0.8,
+          "f1": 0.5714,
+          "pairs": [
+            {
+              "gt": "Not_Authenticated",
+              "extracted": "NotAuthenticated",
+              "score": 0.7611
+            },
+            {
+              "gt": "Authenticated",
+              "extracted": "Authenticated",
+              "score": 1.0
+            },
+            {
+              "gt": "Selected",
+              "extracted": "Selected",
+              "score": 1.0
+            },
+            {
+              "gt": "Logout",
+              "extracted": "Logout",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.6,
+          "matched": 3,
+          "total_gt": 11,
+          "total_extracted": 53,
+          "precision": 0.0566,
+          "recall": 0.2727,
+          "f1": 0.0938,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "NotAuthenticated",
+                "event": "server shutdown",
+                "action": "",
+                "to": "Logout"
+              },
+              "gt": {
+                "from": "Not_Authenticated",
+                "event": "Sends LOGOUT or server shutdown",
+                "action": "Close connection",
+                "to": "Logout"
+              },
+              "label_score": 0.632
+            },
+            {
+              "extracted": {
+                "from": "Authenticated",
+                "event": "server shutdown",
+                "action": "",
+                "to": "Logout"
+              },
+              "gt": {
+                "from": "Authenticated",
+                "event": "Sends LOGOUT or server shutdown",
+                "action": "Close connection",
+                "to": "Logout"
+              },
+              "label_score": 0.632
+            },
+            {
+              "extracted": {
+                "from": "Selected",
+                "event": "server shutdown",
+                "action": "",
+                "to": "Logout"
+              },
+              "gt": {
+                "from": "Selected",
+                "event": "Sends LOGOUT or server shutdown",
+                "action": "Close connection",
+                "to": "Logout"
+              },
+              "label_score": 0.632
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,388 @@
+{
+  "section_id": "S030",
+  "title": "S030 6.1 Token Transport",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S030 6.1 Token Transport"
+  ],
+  "url_anchor": "#s030-61-token-transport",
+  "word_count": 645,
+  "statement_count": 16,
+  "elapsed_seconds": 192.83,
+  "statements": [
+    {
+      "statement_id": "N-S030-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "As in MQTT v5.0, the token MAY either be transported before, by publishing to the \"authz-info\" topic, or inside the CONNECT packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S030-001"
+    },
+    {
+      "statement_id": "N-S030-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "If the Client provided the token via the \"authz-info\" topic and will not update the token in the CONNECT packet, it MUST authenticate over TLS.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT_sent_without_token_update",
+      "pre_cond": "client.token_transport = authz_info & client.token_update_in_CONNECT = false",
+      "post_cond": "client.transport = TLS",
+      "actions": [
+        "authenticate over TLS"
+      ],
+      "modality": "must",
+      "id": "N-S030-002"
+    },
+    {
+      "statement_id": "N-S030-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker SHOULD still be prepared to store the Client access token for future use (regardless of the method of transport).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "token_received",
+      "pre_cond": null,
+      "post_cond": "server.client_token_stored = true",
+      "actions": [
+        "store client access token for future use"
+      ],
+      "modality": "should",
+      "id": "N-S030-003"
+    },
+    {
+      "statement_id": "N-S030-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Table 2 shows how the MQTT connect flags MUST be set to initiate a connection with the Broker.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S030-004"
+    },
+    {
+      "statement_id": "N-S030-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client SHOULD set the Clean flag to 1 to always start a new Session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "new Session",
+      "trigger": "CONNECT_sent",
+      "pre_cond": null,
+      "post_cond": "connection.clean_flag = 1",
+      "actions": [
+        "set Clean flag = 1 in CONNECT packet"
+      ],
+      "modality": "should",
+      "id": "N-S030-005"
+    },
+    {
+      "statement_id": "N-S030-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Clean flag is set to 0, the Broker MUST resume communications with the Client based on the state from the current Session (as identified by the Client Identifier).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "current Session",
+      "to_state": null,
+      "trigger": "CONNECT_received",
+      "pre_cond": "connection.clean_flag = 0 & session.exists = true",
+      "post_cond": "session.state = resumed",
+      "actions": [
+        "resume communications based on current Session state identified by Client Identifier"
+      ],
+      "modality": "must",
+      "id": "N-S030-006"
+    },
+    {
+      "statement_id": "N-S030-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If there is no Session associated with the Client Identifier, the Broker MUST create a new Session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": "new Session",
+      "trigger": "CONNECT_received",
+      "pre_cond": "session.exists = false",
+      "post_cond": "session.state = new",
+      "actions": [
+        "create new Session"
+      ],
+      "modality": "must",
+      "id": "N-S030-007"
+    },
+    {
+      "statement_id": "N-S030-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST set the Session Present flag in the CONNACK packet accordingly, i.e., 0 to indicate a new Session to the Client and 1 to indicate that the existing Session is continued.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNACK_sent",
+      "pre_cond": null,
+      "post_cond": "(session.state = new & CONNACK.session_present = 0) | (session.state = resumed & CONNACK.session_present = 1)",
+      "actions": [
+        "set Session Present = 0 in CONNACK if new Session",
+        "set Session Present = 1 in CONNACK if existing Session is continued"
+      ],
+      "modality": "must",
+      "id": "N-S030-008"
+    },
+    {
+      "statement_id": "N-S030-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST still perform PoP validation on the provided Client token.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CONNECT_received",
+      "pre_cond": null,
+      "post_cond": "server.pop_validation_performed = true",
+      "actions": [
+        "perform PoP validation on provided client token"
+      ],
+      "modality": "must",
+      "id": "N-S030-009"
+    },
+    {
+      "statement_id": "N-S030-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Brokers SHOULD implement administrative policies to limit misuse.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S030-010"
+    },
+    {
+      "statement_id": "N-S030-11",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MAY set the Will Flag as desired (marked as \"X\" in Table 2).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S030-011"
+    },
+    {
+      "statement_id": "N-S030-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "User Name and Password flags MUST be set to 1 to ensure that the Payload of the CONNECT packet includes both the User Name and Password fields.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S030-012"
+    },
+    {
+      "statement_id": "N-S030-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "To signal that the User Name field contains an ACE token, this field MUST be prefixed with the keyword \"ace\", i.e., the User Name field is a concatenation of 'a', 'c', 'e', and the access token represented as:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S030-013"
+    },
+    {
+      "statement_id": "N-S030-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "To this end, the access token MUST be encoded with base64url, omitting the \"=\" padding characters [RFC4648].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S030-014"
+    },
+    {
+      "statement_id": "N-S030-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "The Password field MUST be set to the keyed message digest (MAC) or signature associated with the access token for PoP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S030-015"
+    },
+    {
+      "statement_id": "N-S030-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MUST apply the PoP key on the challenge derived from the TLS session, as described in Section 2.2.4.2.1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PoP_challenge_derived_from_TLS_session",
+      "pre_cond": null,
+      "post_cond": "client.pop_key_applied = true",
+      "actions": [
+        "apply PoP key on challenge derived from TLS session"
+      ],
+      "modality": "must",
+      "id": "N-S030-016"
+    }
+  ]
+}

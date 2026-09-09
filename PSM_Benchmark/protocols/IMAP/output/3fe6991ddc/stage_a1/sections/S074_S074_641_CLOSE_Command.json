@@ -1,0 +1,141 @@
+{
+  "section_id": "S074",
+  "title": "S074 6.4.1 CLOSE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S074 6.4.1 CLOSE Command"
+  ],
+  "url_anchor": "#s074-641-close-command",
+  "word_count": 165,
+  "statement_count": 5,
+  "elapsed_seconds": 30.41,
+  "statements": [
+    {
+      "statement_id": "D-S074-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "The CLOSE command permanently removes all messages that have the \\Deleted flag set from the currently selected mailbox, and it returns to the authenticated state from the selected state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S074",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": "authenticated",
+      "trigger": "CLOSE command",
+      "pre_cond": "protocol.state = selected",
+      "post_cond": "protocol.state = authenticated",
+      "actions": [
+        "permanently remove messages with \\Deleted flag from selected mailbox",
+        "send tagged OK response",
+        "return to authenticated state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S074-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "No messages are removed, and no error is given, if the mailbox is selected by an EXAMINE command or is otherwise selected as read-only. The CLOSE command still returns to the authenticated state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S074",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": "authenticated",
+      "trigger": "CLOSE command",
+      "pre_cond": "protocol.state = selected & mailbox.read_only = true",
+      "post_cond": "protocol.state = authenticated",
+      "actions": [
+        "send tagged OK response",
+        "return to authenticated state without expunge"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S074-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "The SELECT command MAY be issued without previously issuing a CLOSE command. The SELECT command implicitly closes the currently selected mailbox without doing an expunge.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S074",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": "selected",
+      "trigger": "SELECT command",
+      "pre_cond": "protocol.state = selected",
+      "post_cond": "protocol.state = selected & mailbox = new_mailbox",
+      "actions": [
+        "implicitly close currently selected mailbox without expunge",
+        "select new mailbox"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S074-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "The EXAMINE command MAY be issued without previously issuing a CLOSE command. The EXAMINE command implicitly closes the currently selected mailbox without doing an expunge.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S074",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": "selected",
+      "trigger": "EXAMINE command",
+      "pre_cond": "protocol.state = selected",
+      "post_cond": "protocol.state = selected & mailbox = new_mailbox",
+      "actions": [
+        "implicitly close currently selected mailbox without expunge",
+        "select new mailbox as read-only"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S074-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "The LOGOUT command MAY be issued without previously issuing a CLOSE command. The LOGOUT command implicitly closes the currently selected mailbox without doing an expunge.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S074",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": "logout",
+      "trigger": "LOGOUT command",
+      "pre_cond": "protocol.state = selected",
+      "post_cond": "protocol.state = logout",
+      "actions": [
+        "implicitly close currently selected mailbox without expunge",
+        "begin logout sequence"
+      ],
+      "modality": "may"
+    }
+  ]
+}

@@ -1,0 +1,231 @@
+{
+  "section_id": "S059",
+  "title": "S059 13.3 SETUP",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S059 13.3 SETUP"
+  ],
+  "url_anchor": "#s059-133-setup",
+  "word_count": 1156,
+  "statement_count": 10,
+  "elapsed_seconds": 119.84,
+  "statements": [
+    {
+      "statement_id": "D-S059-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Init: Initial state. No session exists.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S059",
+      "state_name": "Init",
+      "enum_name": "SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.exists = false"
+    },
+    {
+      "statement_id": "D-S059-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Ready: Session is ready to start playing.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S059",
+      "state_name": "Ready",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S059-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Play: Session is playing, i.e., sending media-stream data in the direction S->C.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S059",
+      "state_name": "Play",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.sending_media = true"
+    },
+    {
+      "statement_id": "D-S059-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Init and Ready can also be used for the creation of the RTSP session. A successful SETUP in Init creates the session and moves to Ready.",
+      "is_inferred": true,
+      "confidence": 0.9,
+      "source_section": "S059",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Init",
+      "to_state": "Ready",
+      "trigger": "SETUP request succeeds",
+      "pre_cond": "session.state = Init",
+      "post_cond": "session.state = Ready & session.id != null",
+      "actions": [
+        "generate session identifier",
+        "set transport parameters",
+        "send 200 OK with Session header"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S059-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP can be used in Ready state to change the transport parameters of media streams that are already set up, or for creation of the RTSP session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S059",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "SETUP request",
+      "pre_cond": "session.state = Ready",
+      "post_cond": "session.state = Ready",
+      "actions": [
+        "update transport parameters",
+        "send 200 OK response"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S059-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP can be used in Play state to change the transport parameters of media streams that are already set up.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S059",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "SETUP request",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "update transport parameters",
+        "send 200 OK response"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S059-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "If a SETUP request on a session fails for any reason, the session state, as well as transport and other parameters for associated streams, MUST remain unchanged from their values as if the SETUP request had never been received by the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S059",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP request fails",
+      "pre_cond": "SETUP.response != 200",
+      "post_cond": "session.state = session.state_pre_request & session.transport = session.transport_pre_request",
+      "actions": [
+        "return error response",
+        "preserve session state unchanged"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S059-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MUST generate a session identifier in response to a successful SETUP request unless a SETUP request to a server includes a session identifier or a Pipelined-Requests header referencing an existing session context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S059",
+      "object_name": "SETUP 200 OK response",
+      "field_name": "session identifier",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "SETUP.request.session_id = null & SETUP.request.pipelined_requests_ref = null"
+    },
+    {
+      "statement_id": "D-S059-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A session will exist until it is either removed by a TEARDOWN request or is timed out by the server. The server MAY remove a session that has not demonstrated liveness signs from the client(s) within a certain timeout period. The default timeout value is 60 seconds.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S059",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TEARDOWN request | session_liveness_timeout",
+      "pre_cond": null,
+      "post_cond": "session.exists = false",
+      "actions": [
+        "remove session"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S059-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If a SETUP request to a server includes a session identifier referencing an existing session context, the server MUST bundle this SETUP request into the existing session (aggregated session) or return a 459 (Aggregate Operation Not Allowed) error code.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S059",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP request with existing session identifier",
+      "pre_cond": "SETUP.request.session_id != null & session.exists = true",
+      "post_cond": "session.streams.includes(new_stream) | response.code = 459",
+      "actions": [
+        "bundle stream into existing aggregated session",
+        "send 200 OK or 459 response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

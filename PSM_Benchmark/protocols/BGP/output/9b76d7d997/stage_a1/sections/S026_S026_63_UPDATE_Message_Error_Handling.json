@@ -1,0 +1,127 @@
+{
+  "section_id": "S026",
+  "title": "S026 6.3 UPDATE Message Error Handling",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S026 6.3 UPDATE Message Error Handling"
+  ],
+  "url_anchor": "#s026-63-update-message-error-handling",
+  "word_count": 671,
+  "statement_count": 5,
+  "elapsed_seconds": 32.5,
+  "statements": [
+    {
+      "statement_id": "D-S026-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "All errors detected while processing the UPDATE message MUST be indicated by sending the NOTIFICATION message with the Error Code UPDATE Message Error.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S026",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UPDATE message error detected",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send NOTIFICATION (Error Code: UPDATE Message Error)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S026-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If the NEXT_HOP attribute is semantically incorrect, the error SHOULD be logged, and the route SHOULD be ignored. In this case, a NOTIFICATION message SHOULD NOT be sent, and the connection SHOULD NOT be closed.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S026",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "NEXT_HOP attribute semantically incorrect",
+      "pre_cond": null,
+      "post_cond": "connection.open = true",
+      "actions": [
+        "log error",
+        "ignore route"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S026-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If any optional attribute is recognized and an error is detected, the attribute MUST be discarded, and the Error Subcode MUST be set to Optional Attribute Error.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S026",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "optional attribute error detected",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "discard attribute",
+        "send NOTIFICATION (Error Code: UPDATE Message Error, Error Subcode: Optional Attribute Error)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S026-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "bgp_fsm",
+      "description": "If a prefix in the NLRI field is semantically incorrect (e.g., an unexpected multicast IP address), an error SHOULD be logged locally, and the prefix SHOULD be ignored.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S026",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "NLRI prefix semantically incorrect",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "log error locally",
+        "ignore prefix"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S026-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "An UPDATE message that contains correct path attributes, but no NLRI, SHALL be treated as a valid UPDATE message.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S026",
+      "object_name": "UPDATE message",
+      "field_name": "NLRI",
+      "field_type": "field",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "NLRI absence does not constitute an error when path attributes are correct"
+    }
+  ]
+}

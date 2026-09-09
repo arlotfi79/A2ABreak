@@ -1,0 +1,64 @@
+{
+  "section_id": "S025",
+  "title": "S025 3.2 PUBLISH Packets from the Broker to the Subscriber Clients",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S025 3.2 PUBLISH Packets from the Broker to the Subscriber Clients"
+  ],
+  "url_anchor": "#s025-32-publish-packets-from-the-broker-to-the-subscriber-clients",
+  "word_count": 130,
+  "statement_count": 2,
+  "elapsed_seconds": 14.32,
+  "statements": [
+    {
+      "statement_id": "D-S025-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST close the Network Connection and SHOULD send a DISCONNECT packet with reason code 0x87 (Not authorized) before closing the Network Connection to unauthorized subscribers.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S025",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Connected",
+      "to_state": "Network Connection Closed",
+      "trigger": "Unauthorized subscriber identified for PUBLISH forwarding",
+      "pre_cond": "connection.subscriber_authorized = false",
+      "post_cond": "connection.state = NetworkConnectionClosed",
+      "actions": [
+        "send DISCONNECT packet with reason code 0x87 (Not authorized)",
+        "close Network Connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S025-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "mqtt_fsm",
+      "description": "The Broker forwards the PUBLISH packet to all the valid subscribers \u2014 subscribers with valid matching Topic Subscriptions and authorized access.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S025",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Connected",
+      "to_state": "Connected",
+      "trigger": "PUBLISH packet received with valid matching Topic Subscription and authorized subscriber",
+      "pre_cond": "connection.subscriber_authorized = true & session.subscription_match = true",
+      "post_cond": "message.forwarded = true",
+      "actions": [
+        "forward PUBLISH packet to subscriber"
+      ],
+      "modality": "must"
+    }
+  ]
+}

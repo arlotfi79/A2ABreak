@@ -1,0 +1,101 @@
+{
+  "section_id": "S081",
+  "title": "S081 14. Embedded (Interleaved) Binary Data",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S081 14. Embedded (Interleaved) Binary Data"
+  ],
+  "url_anchor": "#s081-14-embedded-interleaved-binary-data",
+  "word_count": 519,
+  "statement_count": 4,
+  "elapsed_seconds": 40.64,
+  "statements": [
+    {
+      "statement_id": "D-S081-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The channel identifier is defined in the Transport header with the interleaved parameter (Section 18.54).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S081",
+      "object_name": "Transport header",
+      "field_name": "interleaved",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "required when embedded interleaved binary data channels are used"
+    },
+    {
+      "statement_id": "D-S081-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "C->S SETUP with Transport: RTP/AVP/TCP;unicast;interleaved=0-1 followed by S->C 200 OK with assigned interleaved channels and Session identifier, establishing interleaved transport channels.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S081",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP request with interleaved transport parameter",
+      "pre_cond": "connection.transport = TCP",
+      "post_cond": "session.interleaved_channels_assigned = true",
+      "actions": [
+        "assign interleaved channel IDs in Transport header",
+        "create session"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S081-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "C->S PLAY followed by S->C 200 OK then server begins sending interleaved binary data blocks ($005 RTP, $006 RTCP) over the TCP connection.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S081",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY request",
+      "pre_cond": "session.interleaved_channels_assigned = true & connection.transport = TCP",
+      "post_cond": "server.sending_interleaved_binary_data = true",
+      "actions": [
+        "send 200 OK with RTP-Info and Range",
+        "begin sending interleaved RTP/RTCP binary data blocks on assigned channels"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S081-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "Interleaved binary data SHOULD only be used if RTSP is carried over TCP.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S081",
+      "object_name": "interleaved binary data",
+      "field_name": "transport",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "TCP"
+      ],
+      "guard_semantics": "interleaved binary data is only permitted when the underlying transport is TCP"
+    }
+  ]
+}

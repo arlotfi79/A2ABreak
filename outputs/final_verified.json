@@ -1,0 +1,887 @@
+{
+    "final_findings": [
+        {
+            "finding_id": "F-001",
+            "candidate_id": "run1:C-001",
+            "title": "Auth-Required Delegation Chain Lacks Structured Scope Object, Enabling Scope Amplification",
+            "severity": "HIGH",
+            "description": "The A2A protocol explicitly enables multi-hop authorization delegation chains via TASK_STATE_AUTH_REQUIRED (section 7.6), stating this 'enables forming a chain of Tasks in TASK_STATE_AUTH_REQUIRED.' However, when a middleman agent (Agent B) receives an auth requirement from a downstream agent (Agent C) and propagates it upstream, the protocol defines no structured, machine-readable scope object for the authorization request. The TaskStatus.message carrying auth details is free-form (a Message with Parts), and the spec only says details SHOULD use 'a PushNotificationAuthenticationInfo-like structure,' which describes authentication schemes, not authorization scopes. Consequently, Agent B can create a new auth request with amplified scope (e.g., requesting 'read:calendar read:email' when Agent C only requested 'read:calendar') and the upstream client has no protocol mechanism to detect or compare the scope against the original request. The authorization_delegation transition guard checks only client.is_a2a_agent and client.is_actively_processing_task—no guard constrains scope fidelity. Under full compliance, every participant follows the spec yet scope amplification is undetectable because no protocol-defined scope schema exists to compare across hops.",
+            "fsm_trace": [
+              {
+                "step": 1,
+                "stage": "task_execution",
+                "state": "task_execution:TASK_STATE_WORKING",
+                "transition": "authorization_required",
+                "actor": "server",
+                "note": "Agent C determines it needs secondary credentials and transitions its task to AUTH_REQUIRED. The auth details are in a free-form TaskStatus.message with no protocol-defined scope schema.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 2,
+                "stage": "task_execution → interruption",
+                "state": "task_execution:TASK_STATE_AUTH_REQUIRED",
+                "transition": "authorization_requested (inter-stage)",
+                "actor": "server",
+                "note": "The AUTH_REQUIRED state crosses from task_execution to the interruption phase. Agent B (as client to C) receives the free-form auth request.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 3,
+                "stage": "interruption",
+                "state": "interruption:TASK_STATE_WORKING",
+                "transition": "authorization_delegation",
+                "actor": "client",
+                "note": "Agent B propagates auth to its own task by transitioning to AUTH_REQUIRED. Guard only checks client.is_a2a_agent=true and client.is_actively_processing_task=true. Agent B creates a NEW free-form auth request that may amplify scope with no protocol constraint.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 4,
+                "stage": "interruption",
+                "state": "interruption:TASK_STATE_AUTH_REQUIRED",
+                "transition": "message_received (self-loop)",
+                "actor": "server",
+                "note": "The upstream client or user receives the potentially amplified auth request. No protocol mechanism exists to verify scope fidelity against the original request from Agent C.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 5,
+                "stage": "interruption",
+                "state": "interruption:TASK_STATE_AUTH_REQUIRED",
+                "transition": "credential_received",
+                "actor": "server",
+                "note": "Credentials (potentially over-scoped) are accepted and task resumes. Guard checks only task.state=TASK_STATE_AUTH_REQUIRED, not whether credentials match the originally requested scope.",
+                "is_reconstructed": false
+              }
+            ],
+            "missing_primitive": "A protocol-defined structured authorization scope object (schema/data type) that accompanies TASK_STATE_AUTH_REQUIRED transitions, specifying exact permissions in a machine-readable format that can be structurally compared or cryptographically linked across delegation hops to prevent scope amplification.",
+            "confirmed_absent": true,
+            "confirmed_not_by_design": true,
+            "spec_sections_checked": [
+              "7.5",
+              "7.6",
+              "4.1",
+              "4.2",
+              "3.4",
+              "13.1"
+            ],
+            "preventing_rule_checked_and_absent": true,
+            "source_ids": [
+              "N-7-6-001",
+              "N-7-6-003",
+              "D-7-6-002",
+              "D-7-6-005",
+              "N-7-6-008"
+            ]
+        },
+        {
+            "finding_id": "F-002",
+            "candidate_id": "run1:C-002",
+            "title": "No Principal Identity Propagation Across Multi-Hop Auth Delegation Chains",
+            "severity": "HIGH",
+            "description": "The A2A protocol explicitly states that payloads 'don't carry user or client identity information directly' and that 'identity is established at the transport/HTTP layer.' At each hop in a multi-agent chain, only the immediate caller's identity is known: Agent B knows Agent A's identity; Agent C knows Agent B's identity. The original User's identity is never carried forward. When the protocol simultaneously enables forming multi-hop 'chain of Tasks in TASK_STATE_AUTH_REQUIRED,' a fundamental architectural tension arises: the transport-layer identity model provides only hop-by-hop identity, while end-to-end identity propagation is needed for the credential provider to make informed authorization decisions and for downstream agents to verify delegation provenance. Credentials flowing back through the chain travel as regular Message data with no protocol binding to the delegation context, meaning intermediary agents receive credentials with no protocol-level restriction on their use. The protocol defines the multi-hop delegation feature without providing a bridge mechanism between its hop-by-hop identity model and the end-to-end identity needs of delegation chains.",
+            "fsm_trace": [
+              {
+                "step": 1,
+                "stage": "authentication",
+                "state": "authentication:REQUEST_AUTHORIZED",
+                "transition": "initial_message_authorized (inter-stage)",
+                "actor": "client",
+                "note": "User authenticates with Agent A at the transport layer. REQUEST_AUTHORIZED records only the User's identity. This identity will not propagate to subsequent hops.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 2,
+                "stage": "authentication",
+                "state": "authentication:REQUEST_AUTHORIZED",
+                "transition": "initial_message_authorized (inter-stage)",
+                "actor": "client",
+                "note": "Agent A authenticates with Agent B using Agent A's own credentials. Agent B's REQUEST_AUTHORIZED records Agent A's identity—the User's identity is lost at this hop boundary.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 3,
+                "stage": "task_execution",
+                "state": "task_execution:TASK_STATE_WORKING",
+                "transition": "authorization_required",
+                "actor": "server",
+                "note": "Agent C needs credentials for a third-party resource. Agent C knows only Agent B's identity. Agent C cannot assess whether the original User should be authorized for the requested action.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 4,
+                "stage": "interruption",
+                "state": "interruption:TASK_STATE_WORKING",
+                "transition": "authorization_delegation",
+                "actor": "client",
+                "note": "Agent B propagates auth request to Agent A. The delegation transition carries no field identifying the original principal (the User) or the originating agent (Agent C).",
+                "is_reconstructed": false
+              },
+              {
+                "step": 5,
+                "stage": "interruption",
+                "state": "interruption:TASK_STATE_AUTH_REQUIRED",
+                "transition": "credential_received",
+                "actor": "server",
+                "note": "User provides credentials which flow back through the chain as regular Message data. Each intermediary receives credentials without any protocol binding restricting use to the specific delegation context.",
+                "is_reconstructed": false
+              }
+            ],
+            "missing_primitive": "A protocol-level delegation context or principal identity token that travels with the auth-required delegation chain, enabling downstream agents to know the original principal and credential providers to verify the delegation chain's legitimacy. The protocol's 'No Identity in Payload' design was established for point-to-point interactions but is architecturally insufficient for the multi-hop delegation chains the protocol explicitly enables.",
+            "confirmed_absent": true,
+            "confirmed_not_by_design": true,
+            "spec_sections_checked": [
+              "7.2",
+              "7.3",
+              "7.5",
+              "7.6",
+              "4.1",
+              "13.1"
+            ],
+            "preventing_rule_checked_and_absent": true,
+            "source_ids": [
+              "N-7-6-001",
+              "D-7-6-005",
+              "N-7-6-008",
+              "N-7-5-001"
+            ]
+        },
+        {
+            "finding_id": "F-004",
+            "candidate_id": "run2:C-001:corrected",
+            "title": "Client-Provided contextId Accepted Without Ownership Verification Enables Cross-Client Context Injection and Information Leakage",
+            "severity": "MEDIUM",
+            "description": "The A2A protocol allows agents to accept client-provided contextId values (MAY, §3.4.1) and explicitly permits clients to use a contextId without a taskId to start a new task within an existing conversation context (§3.4.3). While task-level authorization is server-enforceable (the server knows the task creator from the authenticated request and §13.1 MUSTs mandate per-client task scoping), no equivalent context-level authorization mechanism exists. The contextId data model has no owner field, no creator binding, no context access token, and no server-side requirement to verify that a client providing a contextId is authorized to create tasks within that context. Critically, §3.4.3 actively defines cross-client context entry as a supported pattern, meaning a server that rejects such requests is arguably non-compliant. When an agent accepts client-provided contextIds and uses contextId to maintain internal state or LLM context (as the spec allows via §3.4.1 MAY), a second authenticated client that knows or guesses a contextId can inject a new task into another client's context. The agent processes this task using the shared conversational state, leaking information from prior interactions through the agent's internal processing — not through task access controls, which remain intact. The attack operates below the task authorization layer, at a context layer the protocol exposes but provides no authorization model for.",
+            "fsm_trace": [
+              {
+                "step": 1,
+                "stage": "authentication",
+                "state": "authenticated",
+                "transition": "A2A_protocol_operations_request",
+                "actor": "server",
+                "note": "Client A authenticates with valid credentials. Server records Client A's identity at the transport layer per §7.4 MUST.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 2,
+                "stage": "initiation",
+                "state": "TASK_STATE_NONEXISTENT",
+                "transition": "task_creation",
+                "actor": "server",
+                "note": "Client A sends SendMessage with no contextId. Server generates contextId=X, creates Task T1 (owned by Client A — server can enforce task-level auth). Agent begins accumulating conversational state keyed by contextId=X per §3.4.1 MAY.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 3,
+                "stage": "task_execution",
+                "state": "TASK_STATE_WORKING",
+                "transition": "task_processing_continues",
+                "actor": "server",
+                "note": "Client A interacts over multiple turns in context X. Agent accumulates sensitive state: user preferences, PII, prior approvals, business data. Task T1 may complete or continue. Context X persists with accumulated state.",
+                "is_reconstructed": true
+              },
+              {
+                "step": 4,
+                "stage": "authentication",
+                "state": "authenticated",
+                "transition": "A2A_protocol_operations_request",
+                "actor": "server",
+                "note": "Client B (separate principal) authenticates with its own valid credentials. Client B has learned contextId=X through legitimate means (shared environment, referenceTaskIds, leaked logs, predictable generation).",
+                "is_reconstructed": false
+              },
+              {
+                "step": 5,
+                "stage": "initiation",
+                "state": "TASK_STATE_NONEXISTENT",
+                "transition": "task_creation",
+                "actor": "server",
+                "note": "Client B sends SendMessage with contextId=X and no taskId. Per §3.4.3 this is a normatively valid pattern: 'Clients MAY use contextId without taskId to start a new task within an existing conversation context.' Server validates only contextId-taskId consistency (no taskId provided, check passes). No context ownership verification exists — no owner field, no context access token, no creator binding. The spec actively invites this pattern. Server creates Task T2 in context X, owned by Client B. Task-level auth is intact (server knows T2 belongs to Client B). Context-level auth is absent (no mechanism to verify Client B should be in context X).",
+                "is_reconstructed": false
+              },
+              {
+                "step": 6,
+                "stage": "task_execution",
+                "state": "TASK_STATE_WORKING",
+                "transition": "task_event_generated",
+                "actor": "server",
+                "note": "Agent processes Client B's Task T2 using context X's accumulated conversational state (per §3.4.1 MAY for maintaining LLM context). Agent's response to Client B is informed by Client A's prior interactions — information leakage through the agent's internal processing, not through task access controls. All task-level MUSTs in §13.1 are fully satisfied. Client B only accesses its own Task T2. The leakage operates below the task authorization layer.",
+                "is_reconstructed": true
+              },
+              {
+                "step": 7,
+                "stage": "task_execution",
+                "state": "TASK_STATE_COMPLETED",
+                "transition": "task_completed",
+                "actor": "server",
+                "note": "Context poisoning path: Client B's messages are now part of context X's conversational history. When Client A later creates Task T3 in context X (normal multi-turn continuation per §3.4.3), the agent processes it with a context poisoned by Client B's injected messages. Client A's tasks were never accessed or manipulated — the corruption operates through shared agent state below the task authorization layer.",
+                "is_reconstructed": true
+              }
+            ],
+            "missing_primitive": "A protocol-level context ownership model. Unlike task ownership (where the server has creator identity from the authenticated request and MUSTs telling it to scope access), context ownership has: (1) no creator field in any data structure, (2) no context access token returned on creation, (3) a spec feature at §3.4.3 that actively invites cross-client context entry, (4) authorization MUSTs at §13.1 scoped to task operations not context operations, (5) no CreateContext or JoinContext operation with authorization checks. The server cannot enforce context ownership because the spec tells it to accept client-provided contextIds (§3.4.1 MAY) and to allow new tasks in existing contexts (§3.4.3) with no ownership verification defined.",
+            "confirmed_absent": true,
+            "confirmed_not_by_design": true,
+            "spec_sections_checked": [
+              "3.4.1",
+              "3.4.2",
+              "3.4.3",
+              "4.1",
+              "7.2",
+              "7.4",
+              "7.5",
+              "13.1",
+              "3.3.2"
+            ],
+            "preventing_rule_checked_and_absent": true,
+            "source_ids": [
+              "D-3-4-012",
+              "D-3-7-003",
+              "N-3-4-012",
+              "D-4-1-044",
+              "N-13-1-002",
+              "N-3-3-008"
+            ]
+        },
+        {
+            "finding_id": "F-005",
+            "candidate_id": "run2:C-002",
+            "title": "Push Notification Webhook URL Ownership Verification Absent from Normative Specification",
+            "severity": "MEDIUM",
+            "description": "The A2A protocol's push notification mechanism allows clients to register arbitrary webhook URLs for task update delivery. The normative specification requires only that the server 'MUST establish a webhook endpoint for task update notifications' and 'MUST authenticate itself to the client's webhook URL according to the scheme specified in PushNotificationConfig.authentication'—but PushNotificationConfig.authentication is optional. The non-normative Streaming & Async guide states 'Servers SHOULD NOT blindly trust and send POST requests to any URL' and lists ownership verification as one of several suggested mitigation strategies, but no mandatory ownership verification mechanism (e.g., challenge-response) exists in the normative spec. An authenticated client can register a webhook URL pointing to any valid public HTTPS endpoint it does not own, causing the server to deliver HTTP POST requests containing task status payloads to the unowned endpoint. This enables DDoS amplification (multiple tasks with configs targeting the same victim URL) and information leakage (task state details sent to unintended third parties). The retry mechanism for failed deliveries further amplifies impact on the targeted endpoint.",
+            "fsm_trace": [
+              {
+                "step": 1,
+                "stage": "authentication",
+                "state": "authentication:authenticated",
+                "transition": "A2A_protocol_operations_request",
+                "actor": "server",
+                "note": "Attacker authenticates to the A2A server with valid credentials—a legitimate authorized client.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 2,
+                "stage": "initiation",
+                "state": "initiation:TASK_STATE_NONEXISTENT",
+                "transition": "message_send",
+                "actor": "client",
+                "note": "Attacker sends a message with pushNotificationConfig.url pointing to a public third-party endpoint. The URL passes any SSRF validation since it is not a private IP.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 3,
+                "stage": "initiation",
+                "state": "initiation:TASK_STATE_SUBMITTED",
+                "transition": "task_creation",
+                "actor": "server",
+                "note": "Server creates the task and registers the push notification configuration with the unverified URL.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 4,
+                "stage": "task_execution",
+                "state": "task_execution:PUSH_NOTIFICATION_CONFIG_NONEXISTENT",
+                "transition": "create_push_notification_config_requested",
+                "actor": "server",
+                "note": "Push notification config transitions to ACTIVE. Guard checks only capability support, not URL ownership. No ownership verification mechanism exists in the protocol.",
+                "is_reconstructed": true
+              },
+              {
+                "step": 5,
+                "stage": "task_execution",
+                "state": "task_execution:PUSH_NOTIFICATION_CONFIG_ACTIVE",
+                "transition": "task state change triggers notification delivery",
+                "actor": "server",
+                "note": "Server sends HTTP POST with StreamResponse payload to the third-party URL. If PushNotificationConfig.authentication was omitted, the POST is sent unauthenticated. The third-party endpoint receives unwanted traffic containing task state information.",
+                "is_reconstructed": true
+              }
+            ],
+            "missing_primitive": "A mandatory protocol-level webhook URL ownership verification mechanism, such as a challenge-response handshake before activating push notification delivery. The server should send a verification request with a unique token to the proposed URL, and the URL must echo the token to prove client control. This is standard in webhook systems (Stripe, GitHub, Slack) but absent from the A2A normative specification.",
+            "confirmed_absent": true,
+            "confirmed_not_by_design": true,
+            "spec_sections_checked": [
+              "3.1",
+              "4.3",
+              "13.2",
+              "streaming-and-async topics"
+            ],
+            "preventing_rule_checked_and_absent": true,
+            "source_ids": [
+              "D-3-1-043",
+              "D-3-1-042",
+              "D-13-2-002",
+              "D-13-2-003"
+            ]
+        },
+        {
+            "finding_id": "F-001",
+            "candidate_id": "retry2:C-001",
+            "title": "Unbounded Authorization Delegation Chain Depth Enables Circular Resource Exhaustion in Multi-Agent Topologies",
+            "severity": "HIGH",
+            "description": "The A2A protocol explicitly enables multi-hop authorization delegation chains via TASK_STATE_AUTH_REQUIRED (Section 7.6), with the spec acknowledging 'This enables forming a chain of Tasks in TASK_STATE_AUTH_REQUIRED.' However, the protocol defines no maximum delegation depth counter, no chain identifier, and no cycle detection mechanism. The authorization_delegation transition in the interruption phase checks only that the client is an A2A agent actively processing a task — no guard examines chain depth, chain provenance, or prior participant identities. In a mesh topology where agents form a cycle (A→B→C→A), each agent complies individually by propagating AUTH_REQUIRED upstream, but the chain loops indefinitely because each agent has visibility only into its immediate caller (the hop-by-hop identity model). Each hop holds server-side resources (task in AUTH_REQUIRED state, potential open streams) with no protocol-defined timeout or depth escape from interrupted states. This is a missing primitive: the protocol needs chain metadata (depth counter, chain ID, or visited-agent set) to enable any participant to detect or bound circular delegation.",
+            "fsm_trace": [
+              {
+                "step": 1,
+                "stage": "initiation",
+                "state": "TASK_STATE_NONEXISTENT",
+                "transition": "send_message_requested",
+                "actor": "client",
+                "note": "Agent A (client) sends a task request to Agent B. Task T1 is created on Agent B and transitions to WORKING.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 2,
+                "stage": "task_execution",
+                "state": "TASK_STATE_WORKING",
+                "transition": "task_processing_continues (inter-stage from initiation)",
+                "actor": "server",
+                "note": "Agent B processes Task T1. As part of processing, Agent B (acting as client) creates Task T2 on Agent C — a separate FSM instance.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 3,
+                "stage": "task_execution",
+                "state": "TASK_STATE_AUTH_REQUIRED",
+                "transition": "authorization_required",
+                "actor": "server",
+                "note": "Agent C determines it needs secondary credentials for Task T2 and transitions to AUTH_REQUIRED. Guard checks only task.state = TASK_STATE_WORKING. Agent C has no visibility into the chain.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 4,
+                "stage": "interruption",
+                "state": "TASK_STATE_AUTH_REQUIRED",
+                "transition": "authorization_requested (inter-stage from task_execution)",
+                "actor": "server",
+                "note": "Task T2 enters the interruption phase on Agent C. Agent B (as client of Agent C) receives the auth request.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 5,
+                "stage": "interruption",
+                "state": "TASK_STATE_AUTH_REQUIRED",
+                "transition": "authorization_delegation",
+                "actor": "client",
+                "note": "Agent B, being an A2A agent actively processing Task T1, propagates the auth requirement to Task T1 via authorization_delegation. Guard checks only client.is_a2a_agent and client.is_actively_processing_task — no depth counter, no chain ID, no cycle detection.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 6,
+                "stage": "interruption",
+                "state": "TASK_STATE_AUTH_REQUIRED",
+                "transition": "authorization_delegation",
+                "actor": "client",
+                "note": "Agent A receives AUTH_REQUIRED for Task T1. Agent A, to resolve the auth, delegates to another agent that routes back through the chain. The cycle repeats indefinitely — no protocol mechanism detects or breaks it. Each hop holds resources in AUTH_REQUIRED with no timeout transition to FAILED defined in the FSM.",
+                "is_reconstructed": false
+              }
+            ],
+            "missing_primitive": "Protocol-level delegation chain metadata: a chain depth counter incremented at each delegation hop and checked against a maximum, a chain identifier (chain_id) propagated with auth requests for cycle detection, and/or a visited-agent set enabling any agent to detect circular delegation before propagating further.",
+            "confirmed_absent": true,
+            "confirmed_not_by_design": true,
+            "spec_sections_checked": [
+              "7.6",
+              "7.5",
+              "4.1",
+              "3.4",
+              "13.1",
+              "3.1",
+              "3.2"
+            ],
+            "preventing_rule_checked_and_absent": true,
+            "source_ids": [
+              "D-7-6-005",
+              "N-7-6-008",
+              "N-7-6-003",
+              "D-4-1-009"
+            ]
+        },
+        {
+            "finding_id": "F-002",
+            "candidate_id": "retry2:C-003",
+            "title": "No Credential Lifecycle Management for Long-Lived SSE Streams Enables Post-Revocation Data Leakage",
+            "severity": "MEDIUM",
+            "description": "The A2A protocol requires servers to 'MUST authenticate every incoming request' and explicitly supports tasks lasting 'minutes, hours, or even days' via SSE streaming. An SSE stream is established with a single HTTP request that is authenticated once at connection time. The protocol defines no mechanism for mid-stream credential re-validation, no stream-level authentication challenge event type (analogous to HTTP 401 for discrete requests), and no mandatory stream duration limit tied to credential lifetime. When a client's credential (e.g., OAuth token) is revoked or expires during an active SSE stream — a routine security lifecycle event in enterprise deployments using short-lived tokens — the server continues sending task status updates and artifact data on the established stream. The FSM's STREAM_ACTIVE self-loop (task_event_generated) has a guard checking only stream.state, not credential validity, and the only protocol-defined exit from STREAM_ACTIVE is a task state change, not an auth state change. This creates an asymmetry with push notifications, where each notification is a separate HTTP request with per-request authentication. The protocol introduces a tension between its single-request authentication model and its multi-hour stream duration support without providing a reconciliation mechanism.",
+            "fsm_trace": [
+              {
+                "step": 1,
+                "stage": "authentication",
+                "state": "SERVER_VALIDATING_REQUEST",
+                "transition": "request_received",
+                "actor": "server",
+                "note": "Client sends message/stream request with valid Bearer token. Server authenticates this single HTTP request. The MUST authenticate every incoming request rule is satisfied.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 2,
+                "stage": "authentication",
+                "state": "REQUEST_AUTHORIZED",
+                "transition": "A2A_protocol_operations_request",
+                "actor": "server",
+                "note": "Request is authorized. Authentication is bound to this single HTTP connection. No protocol mechanism exists for credential refresh during the connection lifetime.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 3,
+                "stage": "initiation",
+                "state": "STREAM_STATE_OPEN",
+                "transition": "POST_message_stream",
+                "actor": "client",
+                "note": "SSE stream is established for the task. Stream will remain open for the task's entire duration, potentially hours or days.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 4,
+                "stage": "task_execution",
+                "state": "STREAM_ACTIVE",
+                "transition": "stream_open",
+                "actor": "shared",
+                "note": "Stream becomes active. Server sends events. Protocol defines no periodic re-authentication heartbeat and no auth-challenge event type.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 5,
+                "stage": "task_execution",
+                "state": "STREAM_ACTIVE",
+                "transition": "task_event_generated (self-loop)",
+                "actor": "server",
+                "note": "Time passes. The original auth token expires or is revoked. Server continues sending status updates and artifact data because no protocol mechanism signals credential invalidation mid-stream. Guard checks stream.state = STREAM_ACTIVE, not credential.valid = true.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 6,
+                "stage": "task_execution",
+                "state": "STREAM_ACTIVE",
+                "transition": "task_event_generated (self-loop)",
+                "actor": "server",
+                "note": "Sensitive task output continues flowing to a client whose authorization has been revoked. No STREAM_AUTH_EXPIRED event type exists. The only exit from STREAM_ACTIVE is task_reaches_terminal_or_interrupted_state, which is task-state-triggered, not auth-state-triggered.",
+                "is_reconstructed": false
+              }
+            ],
+            "missing_primitive": "A protocol-level credential lifecycle management mechanism for long-lived streams: either a mandatory periodic re-authentication heartbeat, an AUTH_CHALLENGE stream event type for in-band re-authentication, a protocol-defined maximum stream duration tied to credential lifetime, or a STREAM_AUTH_EXPIRED event type signaling the client to resubscribe with fresh credentials.",
+            "confirmed_absent": true,
+            "confirmed_not_by_design": true,
+            "spec_sections_checked": [
+              "7.2",
+              "7.4",
+              "7.5",
+              "3.5",
+              "3.2",
+              "13.1",
+              "11.7"
+            ],
+            "preventing_rule_checked_and_absent": true,
+            "source_ids": [
+              "N-7-4-001",
+              "N-3-5-006",
+              "D-3-5-001",
+              "D-3-5-005"
+            ]
+        },
+        {
+            "finding_id": "F-001",
+            "candidate_id": "retry4_v2:C-001",
+            "title": "Agent Card Skill Claims Are Self-Declared With No Attestation Mechanism, Enabling Capability-Based Task Misdirection",
+            "severity": "HIGH",
+            "description": "The A2A protocol's AgentSkill data model (id, name, description, tags, examples, inputModes, outputModes) consists entirely of self-asserted string fields with no protocol-level mechanism for verification, attestation, or challenge-response validation. Client agents use these unverified claims to select downstream agents for task delegation in multi-agent systems. A fully compliant malicious agent can advertise arbitrary skill claims in its Agent Card, attract tasks containing sensitive domain-specific data, accept and process (or exfiltrate) the data, and produce fabricated artifacts—all while satisfying every normative requirement in the specification. Agent Card signing (JWS) authenticates identity ('this card was issued by entity X') but does not attest capability ('entity X can perform skill Y'). The protocol's GitHub roadmap explicitly acknowledges this gap by listing 'Investigate a QuerySkill() method for dynamically checking unsupported or unanticipated skills' as future work, confirming the mechanism is absent from the current specification and is not an intentional exclusion.",
+            "fsm_trace": [
+              {
+                "step": 1,
+                "stage": "discovery",
+                "state": "AGENT_CARD_RECEIVED",
+                "transition": "(initial state)",
+                "actor": "client",
+                "note": "Client fetches Agent Card from a malicious agent. AgentSkill objects contain false claims. No protocol mechanism validates truthfulness of skill fields.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 2,
+                "stage": "discovery",
+                "state": "TRANSPORT_SELECTED",
+                "transition": "supportedInterfaces_parsed",
+                "actor": "client",
+                "note": "Client selects transport based on unverified skill claims. No skill verification gate exists at this or any subsequent transition.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 3,
+                "stage": "authentication",
+                "state": "REQUEST_AUTHORIZED",
+                "transition": "A2A_protocol_operations_request",
+                "actor": "server",
+                "note": "Client authenticates to the malicious agent. Authentication verifies client identity to server, but no protocol mechanism verifies server's claimed capabilities to client.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 4,
+                "stage": "initiation",
+                "state": "TASK_STATE_NONEXISTENT",
+                "transition": "initial_message_authorized",
+                "actor": "client",
+                "note": "Inter-stage transition from REQUEST_AUTHORIZED. Client sends task message targeting falsely claimed skill. Message may contain sensitive domain data.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 5,
+                "stage": "initiation",
+                "state": "TASK_STATE_WORKING",
+                "transition": "send_message_requested",
+                "actor": "server",
+                "note": "Malicious agent accepts the task and transitions to WORKING. Agent now has full access to all message data.",
+                "is_reconstructed": false
+              },
+              {
+                "step": 6,
+                "stage": "task_execution",
+                "state": "TASK_STATE_COMPLETED",
+                "transition": "message_send",
+                "actor": "server",
+                "note": "Agent produces fabricated artifacts. Client receives plausible but incorrect output. In multi-agent chains, fabricated artifacts propagate downstream.",
+                "is_reconstructed": false
+              }
+            ],
+            "missing_primitive": "A protocol-level skill attestation or verification mechanism. The current AgentSkill data model contains only self-asserted strings with no integrity binding to actual capability. A QuerySkill() challenge-response method (acknowledged on the A2A roadmap as future work), a third-party attestation field, or a protocol-defined verification handshake during discovery would close this gap.",
+            "confirmed_absent": true,
+            "confirmed_not_by_design": true,
+            "spec_sections_checked": [
+              "4.4",
+              "4.4.5",
+              "8.3",
+              "8.6",
+              "8.7",
+              "7.5",
+              "13.1"
+            ],
+            "preventing_rule_checked_and_absent": true,
+            "source_ids": [
+              "D-8-3-004",
+              "D-6-9-006",
+              "N-8-3-005"
+            ]
+        },
+        {
+          "finding_id": "F-001",
+          "candidate_id": "retry:C-001",
+          "title": "Streamed Artifact Chunks Lack Sequence Numbers and Integrity Metadata, Enabling Silent Data Corruption After Resubscription",
+          "severity": "HIGH",
+          "description": "The A2A protocol defines incremental artifact delivery via TaskArtifactUpdateEvent with 'append' and 'lastChunk' fields but no chunk sequence number, chunk index, total expected count, or content hash. The TaskArtifactUpdateEvent data model (taskId, contextId, kind, artifact, append, lastChunk, metadata) contains no integrity primitives. When a client's SSE connection drops during artifact streaming and the client resubscribes via SubscribeToTask, the spec explicitly states that missed events handling is 'implementation-dependent.' While v1.0 mandates that SubscribeToTask return a Task object as the first event (providing a state snapshot), this is a general state-retrieval mechanism — not an artifact integrity mechanism — and the protocol defines no mandatory reconciliation step, no content hash for comparison, and no mechanism to detect gaps during active streaming. A fully compliant server that only sends new events from the resubscription point, combined with a fully compliant client that assembles chunks in order, produces an artifact missing intermediate chunks with no protocol-level detection possible. In multi-agent chains, the corrupted artifact propagates downstream undetected.",
+          "fsm_trace": [
+            {
+              "step": 1,
+              "stage": "initiation",
+              "state": "TASK_STATE_NONEXISTENT",
+              "transition": "POST_message_stream",
+              "actor": "client",
+              "note": "Client initiates a streaming task that will produce a large artifact delivered in multiple chunks.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 2,
+              "stage": "initiation",
+              "state": "STREAM_STATE_OPEN",
+              "transition": "task_lifecycle_stream_established (inter-stage to task_execution:STREAM_STATE_OPEN)",
+              "actor": "shared",
+              "note": "Stream connection established and crosses to task_execution phase.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 3,
+              "stage": "task_execution",
+              "state": "STREAM_STATE_OPEN",
+              "transition": "stream_open",
+              "actor": "shared",
+              "note": "Stream becomes active. Server begins generating artifact chunks.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 4,
+              "stage": "task_execution",
+              "state": "STREAM_ACTIVE",
+              "transition": "task_event_generated (self-loop)",
+              "actor": "server",
+              "note": "Server sends artifact chunks via TaskArtifactUpdateEvent with append: true. Each chunk carries no sequence number, no running hash, no chunk index — only artifact content. Multiple iterations of this self-loop deliver chunks 1-3.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 5,
+              "stage": "task_execution",
+              "state": "SUBSCRIBE_TO_TASK_REQUESTED",
+              "transition": "subscribe_to_task_requested",
+              "actor": "client",
+              "note": "After network disruption (implicit environmental event, not an FSM transition), client resubscribes via SubscribeToTask. The FSM state SUBSCRIBE_TO_TASK_REQUESTED is entered as a new protocol operation. Chunks 4-5 generated during disconnection are lost. The protocol explicitly says missed events handling is implementation-dependent.",
+              "is_reconstructed": true
+            },
+            {
+              "step": 6,
+              "stage": "task_execution",
+              "state": "STREAM_STATE_OPEN",
+              "transition": "stream_open → STREAM_ACTIVE → task_event_generated (self-loop)",
+              "actor": "server",
+              "note": "Server sends remaining chunks (6-7) including lastChunk: true. Client has no protocol mechanism to detect the gap between chunk 3 and chunk 6 — no sequence numbers, content hash, or total chunk count exists in TaskArtifactUpdateEvent.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 7,
+              "stage": "task_execution",
+              "state": "STREAM_CLOSED",
+              "transition": "task_reaches_terminal_or_interrupted_state",
+              "actor": "server",
+              "note": "Stream closes on task completion. Client assembles artifact from chunks 1-3 and 6-7, missing chunks 4-5. The artifact appears complete (lastChunk was received) but content is silently corrupted. No protocol mechanism detects this.",
+              "is_reconstructed": false
+            }
+          ],
+          "missing_primitive": "Protocol-level artifact chunk integrity metadata: sequence numbers or chunk indices on TaskArtifactUpdateEvent, a total expected chunk count declared at artifact start or in the lastChunk event, and/or a content hash of the complete artifact enabling clients to detect missing chunks and trigger reconciliation via GetTask. Additionally, a mandatory reconciliation step after resubscription that requires clients to compare streamed artifact state against the Task snapshot returned by SubscribeToTask.",
+          "confirmed_absent": true,
+          "confirmed_not_by_design": true,
+          "spec_sections_checked": [
+            "3.2",
+            "3.5",
+            "4.2.2",
+            "3.1.6",
+            "streaming-and-async topics"
+          ],
+          "preventing_rule_checked_and_absent": true,
+          "source_ids": [
+            "D-3-5-001",
+            "D-3-5-005",
+            "D-3-1-039",
+            "N-3-5-006"
+          ]
+        },
+        {
+          "finding_id": "F-002",
+          "candidate_id": "retry:C-002",
+          "title": "Agent Card JWS Signing Defines No Trust Model for Key Verification, Rendering Signature Verification Unachievable in Federated Deployments",
+          "severity": "MEDIUM",
+          "description": "The A2A protocol defines optional JWS signing for Agent Cards (MAY) and states clients SHOULD verify signatures when present. The spec requires 'alg', 'typ', and 'kid' in the JWS protected header and allows optional 'jku'. However, the protocol defines no trust model for resolving 'kid' to a trusted key, no mandatory key distribution mechanism, no required certificate authority model, and no binding between the signing key and the claimed provider identity. By contrast, TLS server identity verification has a well-defined trust model via certificate authorities. This asymmetry means the JWS mechanism provides cryptographic integrity without verifiable authenticity in open/federated deployments. A malicious actor can create an Agent Card claiming any provider.organization, sign it with their own key, and serve it via a registry or well-known endpoint. A compliant client receiving this card sees a mathematically valid JWS signature but has no protocol-defined mechanism to verify the signing key belongs to the claimed provider. The client either trusts the unverifiable signature, ignores it, or cannot proceed — all outcomes leave the client unable to distinguish authentic from forged cards when obtained through intermediaries.",
+          "fsm_trace": [
+            {
+              "step": 1,
+              "stage": "discovery",
+              "state": "AGENT_CARD_RECEIVED",
+              "transition": "(initial state)",
+              "actor": "client",
+              "note": "Client fetches an agent card from a registry or .well-known endpoint. The card claims a provider identity and includes a JWS signature. No protocol mechanism exists to verify the signing key belongs to the claimed provider.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 2,
+              "stage": "discovery",
+              "state": "AGENT_CARD_RECEIVED",
+              "transition": "supportedInterfaces_parsed",
+              "actor": "client",
+              "note": "Client parses supportedInterfaces. Client sees JWS signature and attempts verification per SHOULD. The spec provides kid (required) but no mechanism to resolve kid to a trusted key for the claimed provider. Verification is impossible without out-of-band trust establishment.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 3,
+              "stage": "discovery",
+              "state": "TRANSPORT_SELECTED",
+              "transition": "transport_url_resolved",
+              "actor": "client",
+              "note": "Client selects transport and resolves URL from the unverified card. URL may point to an attacker-controlled server.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 4,
+              "stage": "discovery",
+              "state": "TRANSPORT_CONNECTED",
+              "transition": "auth_discovery_initiated",
+              "actor": "client",
+              "note": "Client connects to the endpoint from the unverified card. TLS verifies the domain certificate but not the card's claimed provider identity.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 5,
+              "stage": "discovery",
+              "state": "CLIENT_AUTH_DISCOVERY",
+              "transition": "security_scheme_parsed",
+              "actor": "client",
+              "note": "Client discovers auth requirements from the potentially malicious card's security schemes.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 6,
+              "stage": "discovery",
+              "state": "CLIENT_CREDENTIAL_ACQUISITION",
+              "transition": "transport_security_initiated (inter-stage to authentication:TLS_HANDSHAKE_INITIATED)",
+              "actor": "client",
+              "note": "Client initiates authentication with the attacker's server, potentially sending credentials (OAuth tokens, API keys) to the attacker.",
+              "is_reconstructed": false
+            }
+          ],
+          "missing_primitive": "A protocol-level trust model for agent card signature verification: either a mandatory key discovery mechanism (e.g., required JWK Set URL at a well-known path on the provider's domain, required x5c chain to a recognized CA), a protocol-defined trust anchor for agent identity binding provider claims to verifiable domains, or mandatory binding between the card-serving origin and the card's service endpoint URL. The current spec defines the JWS cryptographic format and requires kid but provides no mechanism to establish trust in the corresponding key.",
+          "confirmed_absent": true,
+          "confirmed_not_by_design": true,
+          "spec_sections_checked": [
+            "4.4.7",
+            "8.7",
+            "7.2",
+            "7.3",
+            "8.3",
+            "8.6",
+            "agent-discovery topics"
+          ],
+          "preventing_rule_checked_and_absent": true,
+          "source_ids": [
+            "D-8-3-004",
+            "N-8-3-005",
+            "N-7-2-001",
+            "D-7-3-001"
+          ]
+        },
+        {
+          "finding_id": "F-002",
+          "candidate_id": "retry3:C-002",
+          "title": "Absent Server-Initiated Timeout or Failure Transitions from Interrupted Task States Enables Indefinite Resource Holding",
+          "severity": "HIGH",
+          "description": "The A2A task state machine enforces strict transition rules with a normative 'An agent implementation MUST NOT transition a task to an invalid state.' The valid transition table defines exits from interrupted states (TASK_STATE_INPUT_REQUIRED, TASK_STATE_AUTH_REQUIRED) only to TASK_STATE_WORKING (requiring client-provided input/credentials) or TASK_STATE_CANCELED (via the client-initiated CancelTask RPC). Critically, no transition from either interrupted state to TASK_STATE_FAILED exists in the valid transition table, and the protocol defines no server-initiated timeout, expiration, or garbage collection mechanism for tasks in these states. While the server controls task state and the INPUT_REQUIRED→CANCELED transition is technically valid, the protocol provides no defined trigger (timeout, max-duration parameter, or server-side cleanup operation) for when the server should exercise this option. The spec's 'Agents MAY implement context expiration or cleanup policies' is vague delegation addressing context-level concerns without defining task state transition mechanics or reconciling with the MUST NOT constraint. A malicious or disconnected client can drive multiple tasks into interrupted states by sending underspecified messages (triggering INPUT_REQUIRED) or operations requiring secondary credentials (triggering AUTH_REQUIRED), then abandon them. The server holds all associated resources (task state, context, history, push notification configurations) with no protocol-defined mechanism to reclaim them through a FAILED transition that accurately indicates the reason for termination.",
+          "fsm_trace": [
+            {
+              "step": 1,
+              "stage": "authentication",
+              "state": "authenticated",
+              "transition": "A2A_protocol_operations_request",
+              "actor": "server",
+              "note": "Malicious client authenticates with valid credentials and is authorized.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 2,
+              "stage": "initiation",
+              "state": "TASK_STATE_NONEXISTENT",
+              "transition": "send_message_requested",
+              "actor": "client",
+              "note": "Client sends a deliberately underspecified message. Repeated for N tasks to amplify resource consumption.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 3,
+              "stage": "initiation",
+              "state": "TASK_STATE_WORKING",
+              "transition": "task_processing_continues",
+              "actor": "server",
+              "note": "Server creates task and begins processing. Task transitions to WORKING, then crosses inter-stage to task_execution phase.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 4,
+              "stage": "task_execution",
+              "state": "TASK_STATE_WORKING",
+              "transition": "agent_requests_input",
+              "actor": "server",
+              "note": "Agent determines the underspecified message requires clarification and transitions task to INPUT_REQUIRED. This is normal, compliant server behavior.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 5,
+              "stage": "task_execution",
+              "state": "TASK_STATE_INPUT_REQUIRED",
+              "transition": "input_requested",
+              "actor": "server",
+              "note": "Task crosses inter-stage to interruption phase as INPUT_REQUIRED.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 6,
+              "stage": "interruption",
+              "state": "TASK_STATE_INPUT_REQUIRED",
+              "transition": "none_available_server_side",
+              "actor": "client",
+              "note": "Client disconnects and abandons the task. The FSM defines only two exits: client_sends_input→WORKING or cancel_task_requested→CANCELED. Both require client action. No transition to FAILED exists. No timeout mechanism is defined. The server holds all task resources indefinitely with no protocol-compliant path to FAILED. Repeating steps 2-6 for N tasks creates N permanently stranded tasks.",
+              "is_reconstructed": false
+            }
+          ],
+          "missing_primitive": "Protocol-defined timeout or server-initiated failure transitions from interrupted states. Specifically needed: (1) Valid transitions INPUT_REQUIRED→FAILED and AUTH_REQUIRED→FAILED in the state transition table, (2) A protocol-level timeout mechanism (e.g., a max_interruption_duration field in TaskStatus or AgentCard capabilities), (3) A TASK_TIMEOUT error/reason type that signals the cause of the transition. The existing 'Agents MAY implement context expiration or cleanup policies' is context-level delegation that does not address task state machine constraints.",
+          "confirmed_absent": true,
+          "confirmed_not_by_design": true,
+          "spec_sections_checked": [
+            "3.2",
+            "3.4",
+            "4.1",
+            "4.3",
+            "7.6",
+            "9.4",
+            "life-of-a-task topics",
+            "specification section on state transitions"
+          ],
+          "preventing_rule_checked_and_absent": true,
+          "source_ids": [
+            "D-4-1-007",
+            "D-4-1-009",
+            "D-3-4-001",
+            "D-7-6-001",
+            "N-3-2-004"
+          ]
+        },
+        {
+          "finding_id": "F-003",
+          "candidate_id": "retry4_v2:C-003",
+          "title": "Absent Task State Versioning Enables Stale-State Decision-Making Under Protocol-Enabled Concurrent Access",
+          "severity": "MEDIUM",
+          "description": "The protocol explicitly enables concurrent multi-client access—'An agent MAY serve multiple concurrent streams to one or more clients for the same task'—but provides no task state versioning, conditional write, or conflict detection mechanism. The Task object contains no version number or ETag. Write operations (SendMessage, CancelTask) accept a taskId but no conditional field to assert expected state version. This creates a protocol-level TOCTOU vulnerability: Client A reads task state (e.g., INPUT_REQUIRED with a specific request), prepares a security-relevant response, but between read and write, Client B concurrently modifies the task context. Client A's response is processed against an updated context it never observed. The protocol defines a stateful system with explicit concurrent access but omits the standard concurrency control primitives (optimistic locking, ETags, conditional operations) that stateful concurrent systems require for correctness. All normative rules are satisfied—both clients are authenticated and authorized, all state transitions are valid—yet the protocol provides no mechanism for clients to express or servers to enforce 'only if unchanged since my last read.'",
+          "fsm_trace": [
+            {
+              "step": 1,
+              "stage": "task_execution",
+              "state": "TASK_STATE_INPUT_REQUIRED",
+              "transition": "agent_requests_input",
+              "actor": "server",
+              "note": "Agent transitions task to INPUT_REQUIRED, requesting specific input. Multiple clients have concurrent access.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 2,
+              "stage": "interruption",
+              "state": "TASK_STATE_WORKING",
+              "transition": "client_sends_input",
+              "actor": "client",
+              "note": "Client B concurrently sends input, transitioning task from INPUT_REQUIRED to WORKING. Agent processes B's input, potentially changing context.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 3,
+              "stage": "interruption",
+              "state": "TASK_STATE_INPUT_REQUIRED",
+              "transition": "agent_requests_input",
+              "actor": "server",
+              "note": "Agent requests new input based on B's modified context. Task is back in INPUT_REQUIRED but with different context than what Client A observed.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 4,
+              "stage": "interruption",
+              "state": "TASK_STATE_WORKING",
+              "transition": "client_sends_input",
+              "actor": "client",
+              "note": "Client A sends its response based on the ORIGINAL context. The message/send has no conditional guard—no expected state version field. Server accepts unconditionally.",
+              "is_reconstructed": false
+            },
+            {
+              "step": 5,
+              "stage": "task_execution",
+              "state": "TASK_STATE_WORKING",
+              "transition": "interruption_resolved",
+              "actor": "server",
+              "note": "Agent processes Client A's stale-context authorization in the new context. Protocol provides no mechanism for server to detect staleness or for client to condition response on a specific state version.",
+              "is_reconstructed": true
+            }
+          ],
+          "missing_primitive": "A task state versioning mechanism for optimistic concurrency control. The Task object should include a monotonically incrementing state version number or ETag, and write operations (SendMessage, CancelTask) should support a conditional field (expectedVersion or If-Match) that causes the server to reject the operation if state has changed since the client's last read. This is standard for concurrent stateful systems but is omitted despite the protocol explicitly enabling concurrent multi-client task access.",
+          "confirmed_absent": true,
+          "confirmed_not_by_design": true,
+          "spec_sections_checked": [
+            "3.2",
+            "3.4",
+            "3.5",
+            "4.1",
+            "3.1.4",
+            "3.1.5",
+            "13.1"
+          ],
+          "preventing_rule_checked_and_absent": true,
+          "source_ids": [
+            "D-3-1-044",
+            "D-6-3-001",
+            "D-3-4-001",
+            "N-3-2-004"
+          ]
+        }
+    ]
+}

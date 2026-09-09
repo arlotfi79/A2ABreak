@@ -1,0 +1,244 @@
+{
+  "section_id": "S005",
+  "title": "S005 2. Authorizing Connection Requests",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S005 2. Authorizing Connection Requests"
+  ],
+  "url_anchor": "#s005-2-authorizing-connection-requests",
+  "word_count": 326,
+  "statement_count": 11,
+  "elapsed_seconds": 86.79,
+  "statements": [
+    {
+      "statement_id": "D-S005-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "Step (A): Client sends Token request to the Authorization Server before initiating an MQTT connection.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "actors": [
+        "Client",
+        "Authorization Server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Token request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Token request to Authorization Server"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "Step (B): Authorization Server returns Access token to Client in response to token request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "actors": [
+        "Authorization Server",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": "Token Obtained",
+      "trigger": "Access token received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "receive Access token from Authorization Server"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Step (C): Client sends Connection request along with the access token to the Broker, initiating connection setup.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": "Token Obtained",
+      "to_state": "Connecting",
+      "trigger": "Connection request + access token",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Connection request with access token to Broker"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Step (D): Broker optionally sends Introspection request to the Authorization Server to validate the access token presented by the Client.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "actors": [
+        "Broker",
+        "Authorization Server"
+      ],
+      "from_state": "Connecting",
+      "to_state": "Introspecting",
+      "trigger": "Introspection request (optional)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Introspection request to Authorization Server"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S005-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Step (E): Authorization Server optionally sends Introspection response to Broker, completing token validation.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S005",
+      "actors": [
+        "Authorization Server",
+        "Broker"
+      ],
+      "from_state": "Introspecting",
+      "to_state": "Connecting",
+      "trigger": "Introspection response (optional)",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "receive Introspection response from Authorization Server"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S005-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Step (F): Broker sends Connection response to Client, completing connection setup.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "Connecting",
+      "to_state": "Connected",
+      "trigger": "Connection response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send Connection response to Client"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "Client holds an access token obtained from the Authorization Server and is ready to initiate an MQTT connection request to the Broker.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S005",
+      "state_name": "Token Obtained",
+      "enum_name": "ConnectionSetupState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S005-008",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Client has sent Connection request with access token to Broker and is awaiting Connection response; Broker may optionally perform introspection during this state.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S005",
+      "state_name": "Connecting",
+      "enum_name": "ConnectionSetupState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S005-009",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Broker has sent Introspection request to Authorization Server and is awaiting Introspection response before proceeding with connection authorization.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S005",
+      "state_name": "Introspecting",
+      "enum_name": "ConnectionSetupState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S005-010",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Client has received Connection response from Broker; connection setup is complete and the Client may use the Pub/Sub interface.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S005",
+      "state_name": "Connected",
+      "enum_name": "ConnectionSetupState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S005-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Connection request sent by the Client to the Broker (step C) must include the access token obtained from the Authorization Server.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "object_name": "Connection request",
+      "field_name": "access token",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

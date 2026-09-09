@@ -1,0 +1,84 @@
+{
+  "section_id": "S141",
+  "title": "S141 18.3 Framing",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S141 18.3 Framing"
+  ],
+  "url_anchor": "#s141-183-framing",
+  "word_count": 144,
+  "statement_count": 3,
+  "elapsed_seconds": 17.63,
+  "statements": [
+    {
+      "statement_id": "D-S141-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If the transport packet ends before the end of the message body, this is considered an error. If the message is a response, it MUST be discarded.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S141",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": "Discarded",
+      "trigger": "transport_packet_truncated",
+      "pre_cond": "message.type = response & transport.packet_end < message.body_end",
+      "post_cond": "message.discarded = true",
+      "actions": [
+        "discard_response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S141-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If the transport packet ends before the end of the message body, this is considered an error. If the message is a request, the element SHOULD generate a 400 (Bad Request) response.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S141",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transport_packet_truncated",
+      "pre_cond": "message.type = request & transport.packet_end < message.body_end",
+      "post_cond": "response.status_code = 400",
+      "actions": [
+        "send_400_bad_request"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S141-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If there are additional bytes in the transport packet beyond the end of the body, they MUST be discarded.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S141",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "extra_bytes_beyond_body",
+      "pre_cond": "transport.packet_end > message.body_end",
+      "post_cond": "extra_bytes.discarded = true",
+      "actions": [
+        "discard_extra_bytes"
+      ],
+      "modality": "must"
+    }
+  ]
+}

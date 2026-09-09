@@ -1,0 +1,176 @@
+{
+  "section_id": "S087",
+  "title": "S087 10.3 CCID-Specific Options, Features, and Reset Codes",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S087 10.3 CCID-Specific Options, Features, and Reset Codes"
+  ],
+  "url_anchor": "#s087-103-ccid-specific-options-features-and-reset-codes",
+  "word_count": 676,
+  "statement_count": 7,
+  "elapsed_seconds": 34.43,
+  "statements": [
+    {
+      "statement_id": "D-S087-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "Reset Codes 128 through 191 indicate that the HC-Sender reset the connection (most likely because of some problem with acknowledgements sent by the HC-Receiver).",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S087",
+      "actors": [
+        "HC-Sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Reset Code 128-191 received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "reset connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S087-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "Reset Codes 192 through 255 indicate that the HC-Receiver reset the connection (most likely because of some problem with data packets sent by the HC-Sender).",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S087",
+      "actors": [
+        "HC-Receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Reset Code 192-255 received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "reset connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S087-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "if a DCCP-Request contains the option sequence 'Mandatory, Change L(CCID, 3), 128', then either the '128' option will be processed by CCID 3 or the connection will be reset.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Mandatory Change(CCID) followed by CCID-specific option where CCID not supported",
+      "pre_cond": "packet.contains(Mandatory, Change_L(CCID)) & server.supports_ccid = false",
+      "post_cond": null,
+      "actions": [
+        "reset connection"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S087-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server MUST treat such options as non-understood. Thus, it will reset the connection on encountering a Mandatory CCID-specific option or feature negotiation request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive Mandatory CCID-specific option or feature negotiation (non-understood)",
+      "pre_cond": "server.implements_ccid2 = false & option.mandatory = true & option.ccid_specific = true",
+      "post_cond": null,
+      "actions": [
+        "reset connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S087-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "send an empty Confirm for a non-Mandatory Change option for a CCID-specific feature",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive non-Mandatory Change option for CCID-specific feature (non-understood)",
+      "pre_cond": "server.implements_ccid2 = false & option.mandatory = false & option.type = Change & option.ccid_specific = true",
+      "post_cond": null,
+      "actions": [
+        "send empty Confirm"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S087-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "ignore other CCID-specific options",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive other CCID-specific option (non-understood, non-mandatory, non-Change)",
+      "pre_cond": "server.implements_ccid2 = false & option.mandatory = false & option.ccid_specific = true",
+      "post_cond": null,
+      "actions": [
+        "ignore option"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S087-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Servers that do not implement the default CCID 2 might nevertheless receive CCID 2-specific options on a DCCP-Request packet. Such a server MUST send Mandatory Change(CCID) options on its DCCP-Response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send DCCP-Response when server does not implement CCID 2",
+      "pre_cond": "server.implements_ccid2 = false",
+      "post_cond": null,
+      "actions": [
+        "include Mandatory Change(CCID) options in DCCP-Response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

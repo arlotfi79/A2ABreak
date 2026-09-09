@@ -1,0 +1,123 @@
+{
+  "section_id": "S108",
+  "title": "S108 7.5.1 EXPUNGE Response",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S108 7.5.1 EXPUNGE Response"
+  ],
+  "url_anchor": "#s108-751-expunge-response",
+  "word_count": 283,
+  "statement_count": 5,
+  "elapsed_seconds": 31.88,
+  "statements": [
+    {
+      "statement_id": "D-S108-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "An EXPUNGE response MUST NOT be sent when no command is in progress",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S108",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send EXPUNGE response",
+      "pre_cond": "server.command_in_progress = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S108-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "An EXPUNGE response MUST NOT be sent while responding to a FETCH, STORE, or SEARCH command",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S108",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send EXPUNGE response",
+      "pre_cond": "server.active_command = FETCH | server.active_command = STORE | server.active_command = SEARCH",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S108-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "An EXPUNGE response MAY be sent during a UID command (UID FETCH, UID STORE, UID SEARCH are different commands from FETCH, STORE, SEARCH)",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S108",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send EXPUNGE response",
+      "pre_cond": "server.active_command = UID_FETCH | server.active_command = UID_STORE | server.active_command = UID_SEARCH",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S108-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A command is not 'in progress' until the complete command has been received; in particular, a command is not 'in progress' during the negotiation of command continuation",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S108",
+      "object_name": "command",
+      "field_name": "command_in_progress",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "false (before complete command received)",
+        "false (during command continuation negotiation)",
+        "true (after complete command received)"
+      ],
+      "guard_semantics": "server.command_in_progress = true only after complete command received and not during continuation negotiation"
+    },
+    {
+      "statement_id": "D-S108-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The update from the EXPUNGE response MUST be remembered by the client",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S108",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive EXPUNGE response",
+      "pre_cond": null,
+      "post_cond": "client.mailbox.message_count = client.mailbox.message_count - 1",
+      "actions": [
+        "decrement message sequence numbers for all successive messages",
+        "decrement mailbox message count"
+      ],
+      "modality": "must"
+    }
+  ]
+}

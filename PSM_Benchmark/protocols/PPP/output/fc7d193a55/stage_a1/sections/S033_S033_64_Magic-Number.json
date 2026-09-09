@@ -1,0 +1,238 @@
+{
+  "section_id": "S033",
+  "title": "S033 6.4 Magic-Number",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S033 6.4 Magic-Number"
+  ],
+  "url_anchor": "#s033-64-magic-number",
+  "word_count": 983,
+  "statement_count": 10,
+  "elapsed_seconds": 52.08,
+  "statements": [
+    {
+      "statement_id": "D-S033-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "When a Configure-Request is received with a Magic-Number Configuration Option and the two Magic-Numbers are different, then the link is not looped-back, and the Magic-Number SHOULD be acknowledged.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S033",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Receive-Configure-Request with different Magic-Number",
+      "pre_cond": "received_magic_number != last_sent_configure_request_magic_number",
+      "post_cond": null,
+      "actions": [
+        "Send Configure-Ack for Magic-Number option"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S033-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If the two Magic-Numbers are equal, then it is possible that the link is looped-back. To determine this, a Configure-Nak MUST be sent specifying a different Magic-Number value.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S033",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Receive-Configure-Request with equal Magic-Number",
+      "pre_cond": "received_magic_number = last_sent_configure_request_magic_number",
+      "post_cond": null,
+      "actions": [
+        "Send Configure-Nak with different Magic-Number value"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S033-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "A new Configure-Request SHOULD NOT be sent to the peer until normal processing would cause it to be sent (that is, until a Configure-Nak is received or the Restart timer runs out).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S033",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Receive-Configure-Nak | timer.restart_timer = expired",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Send Configure-Request"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S033-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "Reception of a Configure-Nak with a Magic-Number different from that of the last Configure-Nak sent to the peer proves that a link is not looped-back, and a new Configure-Request SHOULD be sent with the new Magic-Number.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S033",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Receive-Configure-Nak with different Magic-Number",
+      "pre_cond": "received_configure_nak_magic_number != last_sent_configure_nak_magic_number",
+      "post_cond": null,
+      "actions": [
+        "Send new Configure-Request with new Magic-Number"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S033-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If the Magic-Number is equal to the one sent in the last Configure-Nak, the possibility of a looped-back link is increased, and a new Magic-Number MUST be chosen. In either case, a new Configure-Request SHOULD be sent with the new Magic-Number.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S033",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Receive-Configure-Nak with equal Magic-Number",
+      "pre_cond": "received_configure_nak_magic_number = last_sent_configure_nak_magic_number",
+      "post_cond": null,
+      "actions": [
+        "Choose new Magic-Number",
+        "Send new Configure-Request with new Magic-Number"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S033-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If an implementation does receive a Configure-Reject in response to a Configure-Request, it can only mean that the link is not looped-back, and that its peer will not be using Magic-Numbers. In this case, an implementation SHOULD act as if the negotiation had been successful (as if it had instead received a Configure-Ack).",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S033",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Receive-Configure-Reject for Magic-Number option",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Treat Receive-Configure-Reject as Receive-Configure-Ack"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S033-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "Reception of a Magic-Number field equal to the negotiated local Magic-Number indicates a looped-back link. A somewhat pessimistic procedure is to assume a LCP Down event.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S033",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Reception of local Magic-Number in Echo-Request/Echo-Reply/Discard-Request",
+      "pre_cond": "received_magic_number = negotiated_local_magic_number",
+      "post_cond": null,
+      "actions": [
+        "Generate LCP Down event"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S033-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "A further Open event will begin the process of re-establishing the link, which can't complete until the looped-back condition is terminated, and Magic-Numbers are successfully negotiated.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S033",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Open",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Begin re-establishing link"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S033-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "ppp_fsm",
+      "description": "If Magic-Number has been successfully negotiated, an implementation MUST transmit LCP Echo-Request, Echo-Reply, and Discard-Request packets with the Magic-Number field set to its negotiated Magic-Number.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S033",
+      "object_name": "LCP Echo-Request, Echo-Reply, Discard-Request",
+      "field_name": "Magic-Number",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": "negotiated Magic-Number",
+      "guard_semantics": "magic_number.negotiated = true"
+    },
+    {
+      "statement_id": "D-S033-010",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If an implementation does transmit a Configure-Request with a Magic-Number Configuration Option, then it MUST NOT respond with a Configure-Reject when it receives a Configure-Request with a Magic-Number Configuration Option.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S033",
+      "object_name": "Configure-Request with Magic-Number",
+      "field_name": "Magic-Number Configuration Option",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": "Configure-Ack | Configure-Nak",
+      "guard_semantics": "endpoint.sent_configure_request_with_magic_number = true"
+    }
+  ]
+}

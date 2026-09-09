@@ -1,0 +1,117 @@
+{
+  "section_id": "S004",
+  "title": "S004 2.2 Session Establishment",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S004 2.2 Session Establishment"
+  ],
+  "url_anchor": "#s004-22-session-establishment",
+  "word_count": 493,
+  "statement_count": 4,
+  "elapsed_seconds": 31.93,
+  "statements": [
+    {
+      "statement_id": "D-S004-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client creates an RTSP session by sending a request using the SETUP method to the server. In the Transport header of the SETUP request, the client also includes all the transport parameters necessary to enable the media delivery protocol to function.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP request sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send SETUP request",
+        "include Transport header with transport parameters"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "When receiving a SETUP request, the server determines if the media resource is available and if one or more of the transport parameter specifications are acceptable. If that is successful, an RTSP session context is created and the relevant parameters and state is stored. An identifier is created for the RTSP session and included in the response in the Session header.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "RTSP session context created",
+      "trigger": "SETUP request received with available media resource and acceptable transport parameters",
+      "pre_cond": "server.media_resource_available = true & server.transport_params_acceptable = true",
+      "post_cond": "session.context_created = true & session.identifier_assigned = true",
+      "actions": [
+        "create RTSP session context",
+        "store parameters and state",
+        "create session identifier",
+        "send SETUP response with Session header",
+        "send SETUP response with Transport header"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A SETUP request that references an existing RTSP session but identifies a new media resource is a request to add that media resource under common control with the already-present media resources in an aggregated session.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "RTSP session context created",
+      "to_state": "aggregated session",
+      "trigger": "SETUP request referencing existing session with new media resource",
+      "pre_cond": "session.context_created = true & request.media_resource = new",
+      "post_cond": "session.aggregated = true",
+      "actions": [
+        "add new media resource to existing session under common control"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "To avoid an extra round trip in the session establishment of aggregated RTSP sessions, RTSP 2.0 supports pipelined requests; i.e., the client can send multiple requests back-to-back without waiting first for the completion of any of them. The client uses a client-selected identifier in the Pipelined-Requests header to instruct the server to bind multiple requests together as if they included the session identifier.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "pipelined SETUP requests sent with Pipelined-Requests header",
+      "pre_cond": null,
+      "post_cond": "server.requests_bound_by_pipeline_id = true",
+      "actions": [
+        "send multiple SETUP requests back-to-back",
+        "include Pipelined-Requests header with client-selected identifier",
+        "server binds requests together as if they included session identifier"
+      ],
+      "modality": "can"
+    }
+  ]
+}

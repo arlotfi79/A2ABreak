@@ -1,0 +1,313 @@
+{
+  "section_id": "S067",
+  "title": "S067 10.3 Processing REGISTER Requests",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S067 10.3 Processing REGISTER Requests"
+  ],
+  "url_anchor": "#s067-103-processing-register-requests",
+  "word_count": 1154,
+  "statement_count": 13,
+  "elapsed_seconds": 100.04,
+  "statements": [
+    {
+      "statement_id": "D-S067-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the registrar does not have access to bindings for the domain identified in the Request-URI, and if the server also acts as a proxy server, the server SHOULD forward the request to the addressed domain.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S067",
+      "actors": [
+        "registrar",
+        "proxy server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REGISTER received with unknown domain",
+      "pre_cond": "server.domain_access = false & server.is_proxy = true",
+      "post_cond": null,
+      "actions": [
+        "forward request to addressed domain"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S067-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the authenticated user is not authorized to modify bindings, the registrar MUST return a 403 (Forbidden) and skip the remaining steps.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S067",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "user not authorized to modify bindings",
+      "pre_cond": "user.authorized = false",
+      "post_cond": "response.code = 403",
+      "actions": [
+        "send 403 Forbidden",
+        "skip remaining steps"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the address-of-record is not valid for the domain in the Request-URI, the registrar MUST send a 404 (Not Found) response and skip the remaining steps.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S067",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "address-of-record not valid for domain",
+      "pre_cond": "request.aor.valid = false",
+      "post_cond": "response.code = 404",
+      "actions": [
+        "send 404 Not Found",
+        "skip remaining steps"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the Contact field value is '*' and the request has additional Contact fields or an expiration time other than zero, the request is invalid and the server MUST return a 400 (Invalid Request) and skip the remaining steps.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S067",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "invalid Contact wildcard combination",
+      "pre_cond": "contact.value = \"*\" & (contact.additional_fields = true | expires != 0)",
+      "post_cond": "response.code = 400",
+      "actions": [
+        "send 400 Invalid Request",
+        "skip remaining steps"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the Call-ID agrees for wildcard removal but the CSeq in the request is not higher than the value stored for that binding, the update MUST be aborted and the request fails.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S067",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CSeq not higher than stored value for wildcard binding removal",
+      "pre_cond": "binding.call_id = request.call_id & request.cseq <= binding.cseq",
+      "post_cond": "update.aborted = true",
+      "actions": [
+        "abort update",
+        "fail request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the Call-ID value in the existing binding differs from the Call-ID value in the request, the binding MUST be removed if the expiration time is zero and updated otherwise.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S067",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Call-ID differs from stored binding for contact address",
+      "pre_cond": "binding.call_id != request.call_id",
+      "post_cond": null,
+      "actions": [
+        "remove binding if expires = 0",
+        "update binding if expires != 0"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the Call-IDs are the same and the CSeq value is higher than that of the existing binding, it MUST update or remove the binding as above. If not, the update MUST be aborted and the request fails.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S067",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Call-ID matches stored binding for contact address; CSeq comparison",
+      "pre_cond": "binding.call_id = request.call_id",
+      "post_cond": null,
+      "actions": [
+        "update or remove binding if request.cseq > binding.cseq",
+        "abort update and fail request if request.cseq <= binding.cseq"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the requested expiration interval is greater than zero AND smaller than one hour AND less than a registrar-configured minimum, the registrar MAY reject the registration with a response of 423 (Interval Too Brief). This response MUST contain a Min-Expires header field.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S067",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "expiration interval too brief",
+      "pre_cond": "expires > 0 & expires < 3600 & expires < registrar.min_expires",
+      "post_cond": "response.code = 423",
+      "actions": [
+        "send 423 Interval Too Brief",
+        "include Min-Expires header",
+        "skip remaining steps"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S067-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The binding updates MUST be committed if and only if all binding updates and additions succeed. If any one of them fails, the request MUST fail with a 500 (Server Error) response and all tentative binding updates MUST be removed.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S067",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "one or more binding updates fail",
+      "pre_cond": "binding.update.all_success = false",
+      "post_cond": "response.code = 500",
+      "actions": [
+        "send 500 Server Error",
+        "remove all tentative binding updates"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The registrar returns a 200 (OK) response. The response MUST contain Contact header field values enumerating all current bindings. Each Contact value MUST feature an 'expires' parameter. The response SHOULD include a Date header field.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S067",
+      "actors": [
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "all processing steps completed successfully",
+      "pre_cond": "binding.update.all_success = true",
+      "post_cond": "response.code = 200",
+      "actions": [
+        "send 200 OK",
+        "include Contact header with all current bindings and expires parameter per Contact",
+        "include Date header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S067-011",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A registrar MUST not generate 6xx responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "object_name": "REGISTER response",
+      "field_name": "response code",
+      "field_type": "response code range",
+      "required": false,
+      "allowed_values": [
+        "not 6xx"
+      ],
+      "guard_semantics": "server.role = registrar"
+    },
+    {
+      "statement_id": "D-S067-012",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Registrars MUST NOT include a Record-Route header field in any response to a REGISTER request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "object_name": "REGISTER response",
+      "field_name": "Record-Route",
+      "field_type": "header field",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "server.role = registrar & message.method = REGISTER"
+    },
+    {
+      "statement_id": "D-S067-013",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "REGISTER requests MUST also be processed atomically, meaning that a particular REGISTER request is either processed completely or not at all. Each REGISTER message MUST be processed independently of any other registration or binding changes.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S067",
+      "object_name": "REGISTER request processing",
+      "field_name": "atomicity",
+      "field_type": "processing constraint",
+      "required": true,
+      "allowed_values": [
+        "complete",
+        "not_at_all"
+      ],
+      "guard_semantics": "message.method = REGISTER"
+    }
+  ]
+}

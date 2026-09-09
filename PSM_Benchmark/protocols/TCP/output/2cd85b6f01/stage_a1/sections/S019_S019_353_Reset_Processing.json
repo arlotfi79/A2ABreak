@@ -1,0 +1,142 @@
+{
+  "section_id": "S019",
+  "title": "S019 3.5.3 Reset Processing",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S019 3.5.3 Reset Processing"
+  ],
+  "url_anchor": "#s019-353-reset-processing",
+  "word_count": 174,
+  "statement_count": 6,
+  "elapsed_seconds": 45.93,
+  "statements": [
+    {
+      "statement_id": "D-S019-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "In all states except SYN-SENT, all reset (RST) segments are validated by checking their SEQ fields. A reset is valid if its sequence number is in the window.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S019",
+      "object_name": "RST segment",
+      "field_name": "SEQ",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "RST is valid only if SEQ is within the receive window; applies in all states except SYN-SENT"
+    },
+    {
+      "statement_id": "D-S019-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "In the SYN-SENT state (a RST received in response to an initial SYN), the RST is acceptable if the ACK field acknowledges the SYN.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S019",
+      "object_name": "RST segment",
+      "field_name": "ACK",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "RST is valid in SYN-SENT only if ACK field acknowledges the SYN"
+    },
+    {
+      "statement_id": "D-S019-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the receiver was in the LISTEN state, it ignores it.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S019",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "valid RST received",
+      "pre_cond": "protocol.state = LISTEN",
+      "post_cond": "protocol.state = LISTEN",
+      "actions": [
+        "ignore RST segment"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S019-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the receiver was in SYN-RECEIVED state and had previously been in the LISTEN state, then the receiver returns to the LISTEN state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S019",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "SYN-RECEIVED",
+      "to_state": "LISTEN",
+      "trigger": "valid RST received",
+      "pre_cond": "protocol.state = SYN-RECEIVED & connection.prior_state = LISTEN",
+      "post_cond": "protocol.state = LISTEN",
+      "actions": [
+        "return to LISTEN state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S019-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the receiver was in SYN-RECEIVED state and had not previously been in the LISTEN state, the receiver aborts the connection and goes to the CLOSED state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S019",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "SYN-RECEIVED",
+      "to_state": "CLOSED",
+      "trigger": "valid RST received",
+      "pre_cond": "protocol.state = SYN-RECEIVED & connection.prior_state != LISTEN",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "abort connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S019-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the receiver was in any other state, it aborts the connection and advises the user and goes to the CLOSED state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S019",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "valid RST received",
+      "pre_cond": "protocol.state != LISTEN & protocol.state != SYN-RECEIVED",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "abort connection",
+        "advise user"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

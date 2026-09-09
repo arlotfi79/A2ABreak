@@ -1,0 +1,437 @@
+{
+  "section_id": "S007",
+  "title": "S007 3.2.1 Generic Response Codes",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S007 3.2.1 Generic Response Codes"
+  ],
+  "url_anchor": "#s007-321-generic-response-codes",
+  "word_count": 644,
+  "statement_count": 18,
+  "elapsed_seconds": 269.29,
+  "statements": [
+    {
+      "statement_id": "N-S007-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST respond to any command with the appropriate one of the following generic responses if it represents the situation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send_appropriate_generic_response"
+      ],
+      "modality": "must",
+      "id": "N-S007-001"
+    },
+    {
+      "statement_id": "N-S007-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the command is not recognized, or if it is an optional command that is not implemented by the server, the response code 500 MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unrecognized_or_unimplemented_command_received",
+      "pre_cond": "command.recognized = false | command.implemented = false",
+      "post_cond": "response.code = 500",
+      "actions": [
+        "send_500_response"
+      ],
+      "modality": "must",
+      "id": "N-S007-002"
+    },
+    {
+      "statement_id": "N-S007-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If there is a syntax error in the arguments of a recognized command, including the case where more arguments are provided than the command specifies or the command line is longer than the server accepts, the response code 501 MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_argument_syntax_error",
+      "pre_cond": "command.recognized = true & command.arguments.valid = false",
+      "post_cond": "response.code = 501",
+      "actions": [
+        "send_501_response"
+      ],
+      "modality": "must",
+      "id": "N-S007-003"
+    },
+    {
+      "statement_id": "N-S007-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The line MUST NOT be truncated or split and then interpreted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-004"
+    },
+    {
+      "statement_id": "N-S007-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Note that where a command has variants depending on a second keyword (e.g., LIST ACTIVE and LIST NEWSGROUPS), 501 MUST be used when the base command is implemented but the requested variant is not, and 500 MUST be used only when the base command itself is not implemented.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_with_variant_received",
+      "pre_cond": "command.has_variant = true",
+      "post_cond": "(command.base.implemented = true & command.variant.implemented = false & response.code = 501) | (command.base.implemented = false & response.code = 500)",
+      "actions": [
+        "send_501_if_base_implemented_variant_not",
+        "send_500_if_base_not_implemented"
+      ],
+      "modality": "must",
+      "id": "N-S007-005"
+    },
+    {
+      "statement_id": "N-S007-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If an argument is required to be a base64-encoded string [RFC4648] (there are no such arguments in this specification, but there may be in extensions) and is not validly encoded, the response code 504 MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "invalid_base64_argument_received",
+      "pre_cond": "argument.required_base64 = true & argument.base64_valid = false",
+      "post_cond": "response.code = 504",
+      "actions": [
+        "send_504_response"
+      ],
+      "modality": "must",
+      "id": "N-S007-006"
+    },
+    {
+      "statement_id": "N-S007-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server experiences an internal fault or problem that means it is unable to carry out the command (for example, a necessary file is missing or a necessary service could not be contacted), the response code 403 MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "internal_fault_encountered",
+      "pre_cond": "server.internal_fault = true",
+      "post_cond": "response.code = 403",
+      "actions": [
+        "send_403_response"
+      ],
+      "modality": "must",
+      "id": "N-S007-007"
+    },
+    {
+      "statement_id": "N-S007-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server recognizes the command but does not provide an optional feature (for example, because it does not store the required information), or if it only handles a subset of legitimate cases (see the HDR command, Section 8.5, for an example), the response code 503 MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "optional_feature_unavailable",
+      "pre_cond": "command.recognized = true & (server.feature.available = false | server.handles_subset_only = true)",
+      "post_cond": "response.code = 503",
+      "actions": [
+        "send_503_response"
+      ],
+      "modality": "must",
+      "id": "N-S007-008"
+    },
+    {
+      "statement_id": "N-S007-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the client is not authorized to use the specified facility when the server is in its current state, then the appropriate one of the following response codes MUST be used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unauthorized_facility_access",
+      "pre_cond": "client.authorized_for_facility = false",
+      "post_cond": "response.code = 502 | response.code = 480 | response.code = 483 | response.code = 401",
+      "actions": [
+        "send_authorization_error_response"
+      ],
+      "modality": "must",
+      "id": "N-S007-009"
+    },
+    {
+      "statement_id": "N-S007-10",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Historically, some mode-switching servers (see Section 3.4.1) used this response to indicate that this command will become available after the MODE READER command (Section 5.3) is used, but this usage does not conform to this specification and MUST NOT be used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-010"
+    },
+    {
+      "statement_id": "N-S007-11",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Note that the server MUST NOT close the connection immediately after a 502 response except at the initial connection (Section 5.1) and with the MODE READER command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "502_response_sent",
+      "pre_cond": "!session.at_initial_connection & command.type != MODE_READER",
+      "post_cond": "connection.closed = false",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-011"
+    },
+    {
+      "statement_id": "N-S007-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The first argument of the response MUST be the capability label (see Section 5.2) of the facility that provides the necessary mechanism (usually an extension, which may be a private extension).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-012"
+    },
+    {
+      "statement_id": "N-S007-13",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST NOT use this response code except as specified by the definition of the capability in question.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-013"
+    },
+    {
+      "statement_id": "N-S007-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the server has to terminate the connection for some reason, it MUST give a 400 response code to the next command and then immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_must_terminate",
+      "pre_cond": "server.must_terminate = true",
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "send_400_response",
+        "close_connection"
+      ],
+      "modality": "must",
+      "id": "N-S007-014"
+    },
+    {
+      "statement_id": "N-S007-15",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "Following a 400 response, clients SHOULD NOT simply reconnect immediately and retry the same actions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "received_400_response",
+      "pre_cond": "client.last_response_code = 400",
+      "post_cond": null,
+      "actions": [
+        "do_not_reconnect_immediately"
+      ],
+      "modality": "should",
+      "id": "N-S007-015"
+    },
+    {
+      "statement_id": "N-S007-16",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "Rather, a client SHOULD either use an exponentially increasing delay between retries (e.g., double the waiting time after each 400 response) or present any associated text to the user for them to decide whether and when to retry.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "received_400_response",
+      "pre_cond": "client.last_response_code = 400",
+      "post_cond": null,
+      "actions": [
+        "apply_exponential_backoff_before_retry",
+        "present_400_text_to_user_for_retry_decision"
+      ],
+      "modality": "should",
+      "id": "N-S007-016"
+    },
+    {
+      "statement_id": "N-S007-17",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "The client MUST be prepared to receive any of these responses for any command (except, of course, that the server MUST NOT generate a 500 response code for mandatory commands).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-017"
+    },
+    {
+      "statement_id": "N-S007-18",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The client MUST be prepared to receive any of these responses for any command (except, of course, that the server MUST NOT generate a 500 response code for mandatory commands).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mandatory_command_received",
+      "pre_cond": "command.mandatory = true",
+      "post_cond": "response.code != 500",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-018"
+    }
+  ]
+}

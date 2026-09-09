@@ -1,0 +1,383 @@
+{
+ "proto": "POP3",
+ "system": "ours",
+ "gt_states": 3,
+ "gt_transitions": 18,
+ "cand_states": 4,
+ "cand_transitions": 20,
+ "states_matched": 3,
+ "states_P": 0.75,
+ "states_R": 1.0,
+ "states_F1": 0.8571,
+ "trans_matched": 13,
+ "trans_P": 0.65,
+ "trans_R": 0.7222,
+ "trans_F1": 0.6842,
+ "unmatched_classes": {
+  "real_behavior_not_in_gt": 5
+ },
+ "tokens_in": 2465,
+ "tokens_out": 2889,
+ "cost": 0.08455,
+ "seconds": 38.3,
+ "raw": {
+  "state_matches": [
+   {
+    "gt": "AUTHORIZATION",
+    "candidate": "AUTHORIZATION",
+    "confidence": 1.0,
+    "reason": "Same name, same protocol phase for authenticating the user."
+   },
+   {
+    "gt": "TRANSACTION",
+    "candidate": "TRANSACTION",
+    "confidence": 1.0,
+    "reason": "Same name, same protocol phase for mailbox operations."
+   },
+   {
+    "gt": "UPDATE",
+    "candidate": "UPDATE",
+    "confidence": 1.0,
+    "reason": "Same name, same protocol phase for finalizing and deleting messages."
+   }
+  ],
+  "transition_matches": [
+   {
+    "gt_index": 0,
+    "gt": {
+     "from": "AUTHORIZATION",
+     "event": "send greeting",
+     "action": "reply +OK POP3 server ready",
+     "to": "AUTHORIZATION"
+    },
+    "candidate_index": 0,
+    "candidate": {
+     "from": "WaitForConnection",
+     "event": "receive connection",
+     "action": "send greeting",
+     "to": "AUTHORIZATION"
+    },
+    "confidence": 0.6,
+    "reason": "Both represent the greeting event that leads to the AUTHORIZATION state. The GT has it as a self-loop on AUTHORIZATION while the candidate transitions from WaitForConnection to AUTHORIZATION, but the semantic meaning (server sends greeting upon connection) is the same."
+   },
+   {
+    "gt_index": 1,
+    "gt": {
+     "from": "AUTHORIZATION",
+     "event": "receive USER",
+     "action": "reply request password",
+     "to": "AUTHORIZATION"
+    },
+    "candidate_index": 4,
+    "candidate": {
+     "from": "AUTHORIZATION",
+     "event": "receive USER",
+     "action": "process USER command",
+     "to": "AUTHORIZATION"
+    },
+    "confidence": 0.9,
+    "reason": "Both handle the USER command in AUTHORIZATION state, staying in AUTHORIZATION. Processing the USER command includes replying to request password."
+   },
+   {
+    "gt_index": 2,
+    "gt": {
+     "from": "AUTHORIZATION",
+     "event": "receive PASS",
+     "action": "cond check password",
+     "to": "AUTHORIZATION"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate transition explicitly handles the PASS command."
+   },
+   {
+    "gt_index": 3,
+    "gt": {
+     "from": "AUTHORIZATION",
+     "event": "cond valid USER/PASS",
+     "action": "set authenticated true",
+     "to": "TRANSACTION"
+    },
+    "candidate_index": 1,
+    "candidate": {
+     "from": "AUTHORIZATION",
+     "event": "cond auth success",
+     "action": "acquire maildrop lock; assign message numbers; send positive response",
+     "to": "TRANSACTION"
+    },
+    "confidence": 0.85,
+    "reason": "Both represent successful authentication transitioning from AUTHORIZATION to TRANSACTION. The candidate's 'cond auth success' generalizes USER/PASS success."
+   },
+   {
+    "gt_index": 4,
+    "gt": {
+     "from": "AUTHORIZATION",
+     "event": "receive APOP",
+     "action": "cond check digest",
+     "to": "AUTHORIZATION"
+    },
+    "candidate_index": 3,
+    "candidate": {
+     "from": "AUTHORIZATION",
+     "event": "receive APOP failure",
+     "action": "send -ERR response",
+     "to": "AUTHORIZATION"
+    },
+    "confidence": 0.5,
+    "reason": "The GT transition represents receiving APOP and checking the digest (staying in AUTHORIZATION for the check). The candidate's APOP failure stays in AUTHORIZATION with -ERR. This is a partial match representing the APOP check failing path."
+   },
+   {
+    "gt_index": 5,
+    "gt": {
+     "from": "AUTHORIZATION",
+     "event": "cond valid APOP",
+     "action": "set authenticated true",
+     "to": "TRANSACTION"
+    },
+    "candidate_index": 2,
+    "candidate": {
+     "from": "AUTHORIZATION",
+     "event": "receive APOP success",
+     "action": "send +OK response; enter TRANSACTION state",
+     "to": "TRANSACTION"
+    },
+    "confidence": 0.9,
+    "reason": "Both represent successful APOP authentication transitioning to TRANSACTION."
+   },
+   {
+    "gt_index": 6,
+    "gt": {
+     "from": "AUTHORIZATION",
+     "event": "cond open maildrop failed",
+     "action": "reply -ERR and release lock",
+     "to": "AUTHORIZATION"
+    },
+    "candidate_index": 5,
+    "candidate": {
+     "from": "AUTHORIZATION",
+     "event": "cond auth rejected lock",
+     "action": "release maildrop lock; send -ERR response",
+     "to": "AUTHORIZATION"
+    },
+    "confidence": 0.8,
+    "reason": "Both represent a failure to open/lock the maildrop, sending -ERR and releasing the lock, staying in AUTHORIZATION."
+   },
+   {
+    "gt_index": 7,
+    "gt": {
+     "from": "AUTHORIZATION",
+     "event": "receive QUIT",
+     "action": "reply +OK and close TCP",
+     "to": "UPDATE"
+    },
+    "candidate_index": 7,
+    "candidate": {
+     "from": "AUTHORIZATION",
+     "event": "receive QUIT",
+     "action": "send +OK response; close TCP connection",
+     "to": "WaitForConnection"
+    },
+    "confidence": 0.7,
+    "reason": "Both handle QUIT in AUTHORIZATION with +OK and close TCP. Destination differs (UPDATE vs WaitForConnection) but the protocol behavior is the same \u2014 session ends."
+   },
+   {
+    "gt_index": 8,
+    "gt": {
+     "from": "TRANSACTION",
+     "event": "receive STAT",
+     "action": "reply message count size",
+     "to": "TRANSACTION"
+    },
+    "candidate_index": 10,
+    "candidate": {
+     "from": "TRANSACTION",
+     "event": "receive STAT",
+     "action": "",
+     "to": "TRANSACTION"
+    },
+    "confidence": 0.9,
+    "reason": "Same event and state transition. Candidate omits action detail but the meaning is the same."
+   },
+   {
+    "gt_index": 9,
+    "gt": {
+     "from": "TRANSACTION",
+     "event": "receive LIST",
+     "action": "reply scan listing",
+     "to": "TRANSACTION"
+    },
+    "candidate_index": 11,
+    "candidate": {
+     "from": "TRANSACTION",
+     "event": "receive LIST",
+     "action": "",
+     "to": "TRANSACTION"
+    },
+    "confidence": 0.9,
+    "reason": "Same event and state transition for LIST command."
+   },
+   {
+    "gt_index": 10,
+    "gt": {
+     "from": "TRANSACTION",
+     "event": "receive RETR",
+     "action": "reply full message",
+     "to": "TRANSACTION"
+    },
+    "candidate_index": 12,
+    "candidate": {
+     "from": "TRANSACTION",
+     "event": "receive RETR",
+     "action": "",
+     "to": "TRANSACTION"
+    },
+    "confidence": 0.9,
+    "reason": "Same event and state transition for RETR command."
+   },
+   {
+    "gt_index": 11,
+    "gt": {
+     "from": "TRANSACTION",
+     "event": "receive DELE",
+     "action": "set message deleted",
+     "to": "TRANSACTION"
+    },
+    "candidate_index": 13,
+    "candidate": {
+     "from": "TRANSACTION",
+     "event": "receive DELE",
+     "action": "mark message as deleted; reply +OK",
+     "to": "TRANSACTION"
+    },
+    "confidence": 1.0,
+    "reason": "Same event, same action (mark as deleted), same state transition."
+   },
+   {
+    "gt_index": 12,
+    "gt": {
+     "from": "TRANSACTION",
+     "event": "receive NOOP",
+     "action": "reply OK",
+     "to": "TRANSACTION"
+    },
+    "candidate_index": 14,
+    "candidate": {
+     "from": "TRANSACTION",
+     "event": "receive NOOP",
+     "action": "",
+     "to": "TRANSACTION"
+    },
+    "confidence": 0.9,
+    "reason": "Same event and state transition for NOOP."
+   },
+   {
+    "gt_index": 13,
+    "gt": {
+     "from": "TRANSACTION",
+     "event": "receive RSET",
+     "action": "reset deleted flags",
+     "to": "TRANSACTION"
+    },
+    "candidate_index": 15,
+    "candidate": {
+     "from": "TRANSACTION",
+     "event": "receive RSET",
+     "action": "unmark all deleted messages; reply +OK",
+     "to": "TRANSACTION"
+    },
+    "confidence": 1.0,
+    "reason": "Same event, same action (reset/unmark deleted), same state transition."
+   },
+   {
+    "gt_index": 14,
+    "gt": {
+     "from": "TRANSACTION",
+     "event": "receive QUIT",
+     "action": "set session closing",
+     "to": "UPDATE"
+    },
+    "candidate_index": 9,
+    "candidate": {
+     "from": "TRANSACTION",
+     "event": "receive QUIT",
+     "action": "enter UPDATE state",
+     "to": "UPDATE"
+    },
+    "confidence": 1.0,
+    "reason": "Both handle QUIT in TRANSACTION transitioning to UPDATE."
+   },
+   {
+    "gt_index": 15,
+    "gt": {
+     "from": "UPDATE",
+     "event": "cond deleted messages exist",
+     "action": "delete marked messages",
+     "to": "UPDATE"
+    },
+    "candidate_index": 18,
+    "candidate": {
+     "from": "UPDATE",
+     "event": "cond update complete",
+     "action": "remove deleted messages; release maildrop lock; send goodbye response; close TCP connection",
+     "to": "WaitForConnection"
+    },
+    "confidence": 0.5,
+    "reason": "Both involve deleting marked messages in the UPDATE state. The candidate combines deletion and cleanup into one transition while GT separates them. Partial match."
+   },
+   {
+    "gt_index": 16,
+    "gt": {
+     "from": "UPDATE",
+     "event": "cond cleanup complete",
+     "action": "release lock and close TCP",
+     "to": "UPDATE"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "The candidate merges cleanup into transition 18; no separate cleanup-complete transition exists."
+   },
+   {
+    "gt_index": 17,
+    "gt": {
+     "from": "UPDATE",
+     "event": "timeout 5s",
+     "action": "close TCP connection",
+     "to": "UPDATE"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate transition handles a timeout scenario."
+   }
+  ],
+  "unmatched_candidate_transitions": [
+   {
+    "candidate_index": 6,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Represents retrying authentication after failure, which is valid POP3 behavior not explicitly in the ground truth."
+   },
+   {
+    "candidate_index": 8,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Represents closing connection after repeated auth failures, a plausible server behavior not in the ground truth."
+   },
+   {
+    "candidate_index": 16,
+    "class": "real_behavior_not_in_gt",
+    "reason": "TOP is an optional POP3 command defined in RFC 1939 but not included in the ground truth."
+   },
+   {
+    "candidate_index": 17,
+    "class": "real_behavior_not_in_gt",
+    "reason": "UIDL is an optional POP3 command defined in RFC 1939 but not included in the ground truth."
+   },
+   {
+    "candidate_index": 19,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Abnormal termination (e.g., connection drop) retaining all messages is valid POP3 behavior specified in the RFC but not in the ground truth."
+   }
+  ]
+ }
+}

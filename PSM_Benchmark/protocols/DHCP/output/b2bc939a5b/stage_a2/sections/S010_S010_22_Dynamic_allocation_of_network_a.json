@@ -1,0 +1,206 @@
+{
+  "section_id": "S010",
+  "title": "S010 2.2 Dynamic allocation of network addresses",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S010 2.2 Dynamic allocation of network addresses"
+  ],
+  "url_anchor": "#s010-22-dynamic-allocation-of-network-addresses",
+  "word_count": 271,
+  "statement_count": 8,
+  "elapsed_seconds": 166.85,
+  "statements": [
+    {
+      "statement_id": "S010-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client may extend its lease with subsequent requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "lease_extension_desired",
+      "pre_cond": "client.has_active_lease = true",
+      "post_cond": null,
+      "actions": [
+        "send lease extension request to server"
+      ],
+      "modality": "may",
+      "id": "N-S010-001"
+    },
+    {
+      "statement_id": "S010-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client may issue a message to release the address back to the server when the client no longer needs the address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_no_longer_needs_address",
+      "pre_cond": "client.has_active_lease = true & client.needs_address = false",
+      "post_cond": "address.released = true",
+      "actions": [
+        "send DHCPRELEASE to server"
+      ],
+      "modality": "may",
+      "id": "N-S010-002"
+    },
+    {
+      "statement_id": "S010-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client may ask for a permanent assignment by asking for an infinite lease.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "set requested lease duration to infinite in address request message"
+      ],
+      "modality": "may",
+      "id": "N-S010-003"
+    },
+    {
+      "statement_id": "S010-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "Even when assigning \"permanent\" addresses, a server may choose to give out lengthy but non-infinite leases to allow detection of the fact that the client has been retired.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "server.assigning_permanent_address = true",
+      "post_cond": null,
+      "actions": [
+        "assign lengthy non-infinite lease duration instead of infinite"
+      ],
+      "modality": "may",
+      "id": "N-S010-004"
+    },
+    {
+      "statement_id": "S010-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The server should use whatever information is available in the configuration information repository to choose an address to reuse.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S010-005"
+    },
+    {
+      "statement_id": "S010-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "For example, the server may choose the least recently assigned address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S010-006"
+    },
+    {
+      "statement_id": "S010-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "As a consistency check, the allocating server SHOULD probe the reused address before allocating the address, e.g., with an ICMP echo request, and the client SHOULD probe the newly received address, e.g., with ARP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "address_reuse_candidate_selected",
+      "pre_cond": "server.address_lease_expired = true",
+      "post_cond": null,
+      "actions": [
+        "probe reused address with ICMP echo request before completing allocation"
+      ],
+      "modality": "should",
+      "id": "N-S010-007"
+    },
+    {
+      "statement_id": "S010-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "As a consistency check, the allocating server SHOULD probe the reused address before allocating the address, e.g., with an ICMP echo request, and the client SHOULD probe the newly received address, e.g., with ARP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S010",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new_address_received",
+      "pre_cond": "client.received_new_address = true",
+      "post_cond": null,
+      "actions": [
+        "probe newly received address with ARP"
+      ],
+      "modality": "should",
+      "id": "N-S010-008"
+    }
+  ]
+}

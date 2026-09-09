@@ -1,0 +1,1224 @@
+{
+  "protocol": "MQTT",
+  "model": "a2a-pipeline",
+  "fingerprint": {
+    "evaluator_sha256": "c302bb6e01e8e95f5fa4f1147efd289e0cba243ca3a707eeb9ae731a6a83b668",
+    "ground_truth_sha256": "240cace1bd0c6854d44db3979d45f17ff82996684d66488b3e278526645ffe48",
+    "exported_fsm_sha256": "6195b845f67850c1f3adbd2b04932df1e68ba4788ede0b2ef191c3453c698d63",
+    "minilm": {
+      "found": true,
+      "snapshots": [
+        "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+      ]
+    },
+    "packages": {
+      "python": "3.13.2",
+      "numpy": "2.4.2",
+      "torch": "2.12.0",
+      "sentence-transformers": "5.5.1",
+      "pandas": "3.0.3",
+      "scikit-learn": "1.8.0",
+      "litellm": "1.83.14"
+    }
+  },
+  "official": {
+    "states": {
+      "Protocol": "MQTT",
+      "Model": "a2a-pipeline",
+      "Total Extracted": 37,
+      "Total GT": 12,
+      "Matched": 12,
+      "Precision": 0.324,
+      "Recall": 1.0,
+      "F1-Score": 0.489
+    },
+    "transitions": {
+      "Protocol": "MQTT",
+      "Model": "a2a-pipeline",
+      "TotalExtracted": 57,
+      "TotalGT": 17,
+      "Matched": 4,
+      "UnmatchedGT": 13,
+      "UnmatchedExtracted": 53,
+      "Precision": 0.07,
+      "Recall": 0.235,
+      "F1-Score": 0.108
+    },
+    "call": {
+      "match_all_states": {
+        "threshold": 0.5
+      },
+      "batch_evaluate_transitions_combined": {
+        "if_partial": false,
+        "state_threshold": 0.5,
+        "trans_threshold": 0.5
+      }
+    }
+  },
+  "diagnostics": {
+    "state_matches": [
+      {
+        "gt": "Disconnected",
+        "extracted": "Disconnected",
+        "score": 1.000000238418579
+      },
+      {
+        "gt": "Waiting for Token",
+        "extracted": "TokenUploaded",
+        "score": 0.5456759333610535
+      },
+      {
+        "gt": "Token Requested",
+        "extracted": "TokenUploaded",
+        "score": 0.6582368612289429
+      },
+      {
+        "gt": "Token Received",
+        "extracted": "TokenObtained",
+        "score": 0.6349605321884155
+      },
+      {
+        "gt": "Awaiting CONNACK",
+        "extracted": "AwaitingConnack",
+        "score": 0.8019017577171326
+      },
+      {
+        "gt": "Authenticating",
+        "extracted": "Authenticating",
+        "score": 1.0000001192092896
+      },
+      {
+        "gt": "Token Validating",
+        "extracted": "TokenValidation",
+        "score": 0.833936870098114
+      },
+      {
+        "gt": "Connected",
+        "extracted": "Connected",
+        "score": 1.0
+      },
+      {
+        "gt": "Session Resumed",
+        "extracted": "SessionMaintained",
+        "score": 0.6969606280326843
+      },
+      {
+        "gt": "Unauthorized",
+        "extracted": "Authorizing",
+        "score": 0.572973370552063
+      },
+      {
+        "gt": "Reauthenticating",
+        "extracted": "Reauthenticating",
+        "score": 1.0
+      },
+      {
+        "gt": "Session Terminated",
+        "extracted": "SessionMaintained",
+        "score": 0.6916630864143372
+      }
+    ],
+    "unmatched_gt_states": [],
+    "unselected_extracted_states": [
+      "TokenObtained",
+      "HandshakeInitiated",
+      "WaitingForConnack",
+      "ConnectReceived",
+      "Authenticating",
+      "AwaitingBrokerChallenge",
+      "AwaitingChallengeResponse",
+      "AwaitingConnack",
+      "TokenValidation",
+      "ClientAuthenticated",
+      "ValidationFailed",
+      "Authorizing",
+      "ConnackSent",
+      "ConnectedTlsAnon",
+      "ConnectedTlsKnown",
+      "Connected",
+      "ChallengeSent",
+      "Reauthenticating",
+      "OngoingSession",
+      "CurrentSession",
+      "ExistingSessionContinued",
+      "SessionMaintained",
+      "NotConnected",
+      "ConnectionRefused",
+      "ConnectionRejected",
+      "Disconnected",
+      "NetworkConnectionClosed",
+      "Closed"
+    ],
+    "matched_transitions": [
+      {
+        "extracted": {
+          "from": "TokenObtained",
+          "event": "send connection request",
+          "action": "send connection request with token",
+          "to": "Connecting"
+        },
+        "gt": {
+          "from": "Token Requested",
+          "to": "Disconnected",
+          "event": "Token request timeout/error",
+          "action": "Retry or terminate"
+        }
+      },
+      {
+        "extracted": {
+          "from": "TokenValidation",
+          "event": "cond token valid",
+          "action": "send CONNACK reason_code 0x00",
+          "to": "Connected"
+        },
+        "gt": {
+          "from": "Token Validating",
+          "to": "Connected",
+          "event": "Token valid",
+          "action": "Send CONNACK(Success)"
+        }
+      },
+      {
+        "extracted": {
+          "from": "TokenValidation",
+          "event": "cond token claims verified",
+          "action": "accept token; authenticate client",
+          "to": "ClientAuthenticated"
+        },
+        "gt": {
+          "from": "Token Validating",
+          "to": "Unauthorized",
+          "event": "Token invalid/expired",
+          "action": "Send CONNACK(Not Authorized)"
+        }
+      },
+      {
+        "extracted": {
+          "from": "Connected",
+          "event": "send AUTH reauth",
+          "action": "send AUTH 0x19 Reauthentication; set auth method ace; transport new token",
+          "to": "Reauthenticating"
+        },
+        "gt": {
+          "from": "Connected",
+          "to": "Reauthenticating",
+          "event": "Token expired",
+          "action": "Send AUTH packet"
+        }
+      }
+    ],
+    "unmatched_gt_transitions": [
+      {
+        "from": "Disconnected",
+        "to": "Waiting for Token",
+        "event": "Client initiates connection",
+        "action": "Start TLS handshake"
+      },
+      {
+        "from": "Waiting for Token",
+        "to": "Token Requested",
+        "event": "Request token from AS",
+        "action": "Send token request (HTTPS/PSK/RPK)"
+      },
+      {
+        "from": "Token Requested",
+        "to": "Token Received",
+        "event": "Token received from AS",
+        "action": "Store JWT/CWT token"
+      },
+      {
+        "from": "Token Received",
+        "to": "Authenticating",
+        "event": "Send CONNECT/AUTH packet",
+        "action": "Include token in 'authz-info' topic"
+      },
+      {
+        "from": "Authenticating",
+        "to": "Awaiting CONNACK",
+        "event": "Token uploaded",
+        "action": "Wait for broker response"
+      },
+      {
+        "from": "Awaiting CONNACK",
+        "to": "Token Validating",
+        "event": "Broker processes token",
+        "action": "Validate token (introspection)"
+      },
+      {
+        "from": "Connected",
+        "to": "Session Resumed",
+        "event": "CONNECT(CleanSession=0)",
+        "action": "Resume prior session"
+      },
+      {
+        "from": "Session Resumed",
+        "to": "Connected",
+        "event": "Session validated",
+        "action": "Send CONNACK(Session Present=1)"
+      },
+      {
+        "from": "Session Resumed",
+        "to": "Session Terminated",
+        "event": "Session invalid",
+        "action": "Send DISCONNECT"
+      },
+      {
+        "from": "Reauthenticating",
+        "to": "Token Validating",
+        "event": "Broker validates new token",
+        "action": "Process AUTH/CONNACK"
+      },
+      {
+        "from": "Reauthenticating",
+        "to": "Unauthorized",
+        "event": "Reauthentication failed",
+        "action": "Send DISCONNECT"
+      },
+      {
+        "from": "Connected",
+        "to": "Session Terminated",
+        "event": "DISCONNECT received/sent",
+        "action": "Cleanup session"
+      },
+      {
+        "from": "Unauthorized",
+        "to": "Session Terminated",
+        "event": "DISCONNECT sent",
+        "action": "Close connection"
+      }
+    ],
+    "unmatched_extracted_transitions": [
+      {
+        "from": "NewSession",
+        "event": "receive access token",
+        "action": "receive access token from AS",
+        "to": "TokenObtained"
+      },
+      {
+        "from": "NewSession",
+        "event": "send connect tlsAnon",
+        "action": "establish TLS anonymous connection; connect with MQTT None",
+        "to": "ConnectedTlsAnon"
+      },
+      {
+        "from": "Connecting",
+        "event": "send introspection request",
+        "action": "send introspection request to AS",
+        "to": "Introspecting"
+      },
+      {
+        "from": "Introspecting",
+        "event": "receive introspection response",
+        "action": "receive introspection response from AS",
+        "to": "Connecting"
+      },
+      {
+        "from": "Connecting",
+        "event": "receive connection response",
+        "action": "send connection response to Client",
+        "to": "Connected"
+      },
+      {
+        "from": "Connecting",
+        "event": "receive unsupported protocol",
+        "action": "send CONNACK 0x84; close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "PreAuthenticated",
+        "event": "cond authentication complete",
+        "action": "authenticate to Broker via MQTT or TLS; defer actions until authenticated",
+        "to": "Authenticated"
+      },
+      {
+        "from": "TlsHandshake",
+        "event": "cond TLS handshake complete",
+        "action": "authenticate Broker during TLS handshake",
+        "to": "BrokerAuthenticated"
+      },
+      {
+        "from": "ConnectedTlsAnon",
+        "event": "send token to authzInfo",
+        "action": "publish token to authz-info topic; disconnect from Broker",
+        "to": "Disconnected"
+      },
+      {
+        "from": "Disconnected",
+        "event": "reconnect",
+        "action": "reconnect using TLS Known RPK or PSK",
+        "to": "ConnectedTlsKnown"
+      },
+      {
+        "from": "TokenUploaded",
+        "event": "cond initiate handshake",
+        "action": "upload access token to broker",
+        "to": "HandshakeInitiated"
+      },
+      {
+        "from": "Disconnected",
+        "event": "send CONNECT",
+        "action": "send CONNECT packet",
+        "to": "ConnectSent"
+      },
+      {
+        "from": "ConnectSent",
+        "event": "cond CONNECT sent",
+        "action": "await CONNACK from broker",
+        "to": "WaitingForConnack"
+      },
+      {
+        "from": "WaitingForConnack",
+        "event": "receive AUTH",
+        "action": "send AUTH to Broker",
+        "to": "WaitingForConnack"
+      },
+      {
+        "from": "ConnectReceived",
+        "event": "cond cleanStart1 accepted",
+        "action": "start new session; send CONNACK SessionPresent 0",
+        "to": "Connected"
+      },
+      {
+        "from": "ConnectReceived",
+        "event": "receive CONNECT willUnauthorized",
+        "action": "verify token scope covers will topic",
+        "to": "ConnectionRefused"
+      },
+      {
+        "from": "ConnectReceived",
+        "event": "cond resumeSession",
+        "action": "resume communications from existing session",
+        "to": "Connected"
+      },
+      {
+        "from": "Connected",
+        "event": "receive duplicate clientId",
+        "action": "send DISCONNECT 0x8E to existing client; close existing connection",
+        "to": "Disconnected"
+      },
+      {
+        "from": "ConnectReceived",
+        "event": "cond storedToken found",
+        "action": "send AUTH 0x18 with RS nonce challenge",
+        "to": "AwaitingChallengeResponse"
+      },
+      {
+        "from": "ConnectReceived",
+        "event": "receive CONNECT tokenOnly",
+        "action": "send AUTH 0x18 continue authentication",
+        "to": "AwaitingChallengeResponse"
+      },
+      {
+        "from": "AwaitingBrokerChallenge",
+        "event": "receive AUTH challenge",
+        "action": "send AUTH with nonce and MAC or signature",
+        "to": "AwaitingConnack"
+      },
+      {
+        "from": "AwaitingChallengeResponse",
+        "event": "receive AUTH response",
+        "action": "validate token",
+        "to": "TokenValidation"
+      },
+      {
+        "from": "TokenValidation",
+        "event": "cond signature failed",
+        "action": "fail signature or MAC validation",
+        "to": "ValidationFailed"
+      },
+      {
+        "from": "TokenValidation",
+        "event": "cond token expired or invalid",
+        "action": "check token expiry; check token audience; check issuer authorization",
+        "to": "ValidationFailed"
+      },
+      {
+        "from": "ConnectReceived",
+        "event": "cond validation result obtained",
+        "action": "send CONNACK to Client",
+        "to": "ConnackSent"
+      },
+      {
+        "from": "Authorizing",
+        "event": "cond auth success newSession",
+        "action": "set CONNACK 0x00; set SessionPresent 0; send CONNACK",
+        "to": "Connected"
+      },
+      {
+        "from": "Authorizing",
+        "event": "cond auth success resumeSession",
+        "action": "set SessionPresent 1; send CONNACK",
+        "to": "Connected"
+      },
+      {
+        "from": "Authorizing",
+        "event": "cond connection accepted",
+        "action": "store access token; retain token after disconnect",
+        "to": "Connected"
+      },
+      {
+        "from": "Connected",
+        "event": "publish request",
+        "action": "send MQTT PUBLISH packet",
+        "to": "Connected"
+      },
+      {
+        "from": "Connected",
+        "event": "receive authorized PUBLISH",
+        "action": "forward PUBLISH to subscriber",
+        "to": "Connected"
+      },
+      {
+        "from": "Connected",
+        "event": "cond introspection cached",
+        "action": "cache token introspection result",
+        "to": "Connected"
+      },
+      {
+        "from": "Connected",
+        "event": "receive authzInfo invalidQoS0",
+        "action": "send DISCONNECT 0x87",
+        "to": "Disconnected"
+      },
+      {
+        "from": "Connected",
+        "event": "receive parseError QoS0",
+        "action": "send DISCONNECT 0x99",
+        "to": "Disconnected"
+      },
+      {
+        "from": "Connected",
+        "event": "receive unauthorized PUBLISH QoS0",
+        "action": "send DISCONNECT 0x87; close Network Connection",
+        "to": "Disconnected"
+      },
+      {
+        "from": "Connected",
+        "event": "cond unauthorized subscriber",
+        "action": "close Network Connection",
+        "to": "NetworkConnectionClosed"
+      },
+      {
+        "from": "Connected",
+        "event": "cond unauthorized subscriber disco",
+        "action": "send DISCONNECT 0x87; close Network Connection",
+        "to": "NetworkConnectionClosed"
+      },
+      {
+        "from": "Connected",
+        "event": "cond initiate reauth",
+        "action": "initiate challenge-response reauthentication",
+        "to": "Reauthenticating"
+      },
+      {
+        "from": "Connected",
+        "event": "receive acknowledgment 0x87",
+        "action": "reauthenticate with new token",
+        "to": "Reauthenticating"
+      },
+      {
+        "from": "Connected",
+        "event": "receive PUBACK or SUBACK notAuth",
+        "action": "initiate reauthentication",
+        "to": "Reauthenticating"
+      },
+      {
+        "from": "Connected",
+        "event": "cond token expired",
+        "action": "send DISCONNECT not authorized; close Network Connection",
+        "to": "NetworkConnectionClosed"
+      },
+      {
+        "from": "Connected",
+        "event": "cond PUBLISH authz failure",
+        "action": "ignore PUBLISH packet; disconnect Client",
+        "to": "Disconnected"
+      },
+      {
+        "from": "Connected",
+        "event": "cond token expiration",
+        "action": "disconnect Client",
+        "to": "Disconnected"
+      },
+      {
+        "from": "Connected",
+        "event": "send CLIENT DISCONNECT",
+        "action": "discard Session State; keep retained messages",
+        "to": "Disconnected"
+      },
+      {
+        "from": "Connected",
+        "event": "cond token validated accepted",
+        "action": "cache access token; authorize publish and subscribe",
+        "to": "OngoingSession"
+      },
+      {
+        "from": "Reauthenticating",
+        "event": "cond reauth failed",
+        "action": "send DISCONNECT 0x87",
+        "to": "Disconnected"
+      },
+      {
+        "from": "OngoingSession",
+        "event": "send disconnect longExpiry",
+        "action": "maintain MQTT Session State",
+        "to": "SessionMaintained"
+      },
+      {
+        "from": "OngoingSession",
+        "event": "send disconnect v311",
+        "action": "store Session State indefinitely",
+        "to": "SessionMaintained"
+      },
+      {
+        "from": "CurrentSession",
+        "event": "receive CONNECT cleanFlag0",
+        "action": "resume communications from current session",
+        "to": "ExistingSessionContinued"
+      },
+      {
+        "from": "ExistingSessionContinued",
+        "event": "cond session resumed",
+        "action": "send CONNACK SessionPresent 1",
+        "to": "Connected"
+      },
+      {
+        "from": "Connected",
+        "event": "cond network or protocol error",
+        "action": "publish Will Message to Will Topic",
+        "to": "NotConnected"
+      },
+      {
+        "from": "NotConnected",
+        "event": "timeout session expiry",
+        "action": "discard session state",
+        "to": "Disconnected"
+      },
+      {
+        "from": "NewSession",
+        "event": "send CONNECT without token",
+        "action": "reject CONNECT attempt",
+        "to": "ConnectionRejected"
+      },
+      {
+        "from": "Connected",
+        "event": "cond subscriber token expired",
+        "action": "disconnect Client",
+        "to": "Disconnected"
+      }
+    ],
+    "precision": 0.324,
+    "recall": 1.0,
+    "f1_score": 0.489
+  },
+  "supplementary": {
+    "note": "Supplementary only — the official numbers above come from the benchmark's own entry points. The official state matcher is many-to-one and the official transition matcher is greedy and order-sensitive; these one-to-one numbers bound that effect.",
+    "one_to_one": {
+      "states": {
+        "threshold": 0.5,
+        "matched": 10,
+        "total_gt": 12,
+        "total_extracted": 37,
+        "precision": 0.2703,
+        "recall": 0.8333,
+        "f1": 0.4082,
+        "pairs": [
+          {
+            "gt": "Disconnected",
+            "extracted": "Disconnected",
+            "score": 1.0
+          },
+          {
+            "gt": "Token Requested",
+            "extracted": "TokenUploaded",
+            "score": 0.6582
+          },
+          {
+            "gt": "Token Received",
+            "extracted": "TokenObtained",
+            "score": 0.635
+          },
+          {
+            "gt": "Awaiting CONNACK",
+            "extracted": "AwaitingConnack",
+            "score": 0.8019
+          },
+          {
+            "gt": "Authenticating",
+            "extracted": "Authenticating",
+            "score": 1.0
+          },
+          {
+            "gt": "Token Validating",
+            "extracted": "TokenValidation",
+            "score": 0.8339
+          },
+          {
+            "gt": "Connected",
+            "extracted": "Connected",
+            "score": 1.0
+          },
+          {
+            "gt": "Unauthorized",
+            "extracted": "Authorizing",
+            "score": 0.573
+          },
+          {
+            "gt": "Reauthenticating",
+            "extracted": "Reauthenticating",
+            "score": 1.0
+          },
+          {
+            "gt": "Session Terminated",
+            "extracted": "SessionMaintained",
+            "score": 0.6917
+          }
+        ]
+      },
+      "transitions": {
+        "threshold": 0.5,
+        "matched": 4,
+        "total_gt": 17,
+        "total_extracted": 57,
+        "precision": 0.0702,
+        "recall": 0.2353,
+        "f1": 0.1081,
+        "pairs": [
+          {
+            "extracted": {
+              "from": "TokenObtained",
+              "event": "send connection request",
+              "action": "send connection request with token",
+              "to": "Connecting"
+            },
+            "gt": {
+              "from": "Token Requested",
+              "to": "Disconnected",
+              "event": "Token request timeout/error",
+              "action": "Retry or terminate"
+            },
+            "label_score": 0.5243
+          },
+          {
+            "extracted": {
+              "from": "TokenValidation",
+              "event": "cond token valid",
+              "action": "send CONNACK reason_code 0x00",
+              "to": "Connected"
+            },
+            "gt": {
+              "from": "Token Validating",
+              "to": "Connected",
+              "event": "Token valid",
+              "action": "Send CONNACK(Success)"
+            },
+            "label_score": 0.716
+          },
+          {
+            "extracted": {
+              "from": "TokenValidation",
+              "event": "cond token claims verified",
+              "action": "accept token; authenticate client",
+              "to": "ClientAuthenticated"
+            },
+            "gt": {
+              "from": "Token Validating",
+              "to": "Unauthorized",
+              "event": "Token invalid/expired",
+              "action": "Send CONNACK(Not Authorized)"
+            },
+            "label_score": 0.5684
+          },
+          {
+            "extracted": {
+              "from": "Connected",
+              "event": "receive acknowledgment 0x87",
+              "action": "reauthenticate with new token",
+              "to": "Reauthenticating"
+            },
+            "gt": {
+              "from": "Connected",
+              "to": "Reauthenticating",
+              "event": "Token expired",
+              "action": "Send AUTH packet"
+            },
+            "label_score": 0.5437
+          }
+        ]
+      }
+    },
+    "threshold_sensitivity": {
+      "0.4": {
+        "states_official_style": {
+          "matched": 12,
+          "precision": 0.324,
+          "recall": 1.0,
+          "f1": 0.489
+        },
+        "states_one_to_one": {
+          "threshold": 0.4,
+          "matched": 12,
+          "total_gt": 12,
+          "total_extracted": 37,
+          "precision": 0.3243,
+          "recall": 1.0,
+          "f1": 0.4898,
+          "pairs": [
+            {
+              "gt": "Disconnected",
+              "extracted": "Disconnected",
+              "score": 1.0
+            },
+            {
+              "gt": "Waiting for Token",
+              "extracted": "WaitingForConnack",
+              "score": 0.4329
+            },
+            {
+              "gt": "Token Requested",
+              "extracted": "TokenUploaded",
+              "score": 0.6582
+            },
+            {
+              "gt": "Token Received",
+              "extracted": "TokenObtained",
+              "score": 0.635
+            },
+            {
+              "gt": "Awaiting CONNACK",
+              "extracted": "AwaitingConnack",
+              "score": 0.8019
+            },
+            {
+              "gt": "Authenticating",
+              "extracted": "Authenticating",
+              "score": 1.0
+            },
+            {
+              "gt": "Token Validating",
+              "extracted": "TokenValidation",
+              "score": 0.8339
+            },
+            {
+              "gt": "Connected",
+              "extracted": "Connected",
+              "score": 1.0
+            },
+            {
+              "gt": "Session Resumed",
+              "extracted": "OngoingSession",
+              "score": 0.4733
+            },
+            {
+              "gt": "Unauthorized",
+              "extracted": "Authorizing",
+              "score": 0.573
+            },
+            {
+              "gt": "Reauthenticating",
+              "extracted": "Reauthenticating",
+              "score": 1.0
+            },
+            {
+              "gt": "Session Terminated",
+              "extracted": "SessionMaintained",
+              "score": 0.6917
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.4,
+          "matched": 10,
+          "total_gt": 17,
+          "total_extracted": 57,
+          "precision": 0.1754,
+          "recall": 0.5882,
+          "f1": 0.2703,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "TokenObtained",
+                "event": "send connection request",
+                "action": "send connection request with token",
+                "to": "Connecting"
+              },
+              "gt": {
+                "from": "Token Requested",
+                "to": "Disconnected",
+                "event": "Token request timeout/error",
+                "action": "Retry or terminate"
+              },
+              "label_score": 0.5243
+            },
+            {
+              "extracted": {
+                "from": "Connected",
+                "event": "receive duplicate clientId",
+                "action": "send DISCONNECT 0x8E to existing client; close existing connection",
+                "to": "Disconnected"
+              },
+              "gt": {
+                "from": "Connected",
+                "to": "Session Resumed",
+                "event": "CONNECT(CleanSession=0)",
+                "action": "Resume prior session"
+              },
+              "label_score": 0.4741
+            },
+            {
+              "extracted": {
+                "from": "AwaitingChallengeResponse",
+                "event": "receive AUTH response",
+                "action": "validate token",
+                "to": "TokenValidation"
+              },
+              "gt": {
+                "from": "Awaiting CONNACK",
+                "to": "Token Validating",
+                "event": "Broker processes token",
+                "action": "Validate token (introspection)"
+              },
+              "label_score": 0.4274
+            },
+            {
+              "extracted": {
+                "from": "TokenValidation",
+                "event": "cond token valid",
+                "action": "send CONNACK reason_code 0x00",
+                "to": "Connected"
+              },
+              "gt": {
+                "from": "Token Validating",
+                "to": "Connected",
+                "event": "Token valid",
+                "action": "Send CONNACK(Success)"
+              },
+              "label_score": 0.716
+            },
+            {
+              "extracted": {
+                "from": "TokenValidation",
+                "event": "cond token claims verified",
+                "action": "accept token; authenticate client",
+                "to": "ClientAuthenticated"
+              },
+              "gt": {
+                "from": "Token Validating",
+                "to": "Unauthorized",
+                "event": "Token invalid/expired",
+                "action": "Send CONNACK(Not Authorized)"
+              },
+              "label_score": 0.5684
+            },
+            {
+              "extracted": {
+                "from": "Connected",
+                "event": "receive acknowledgment 0x87",
+                "action": "reauthenticate with new token",
+                "to": "Reauthenticating"
+              },
+              "gt": {
+                "from": "Connected",
+                "to": "Reauthenticating",
+                "event": "Token expired",
+                "action": "Send AUTH packet"
+              },
+              "label_score": 0.5437
+            },
+            {
+              "extracted": {
+                "from": "Connected",
+                "event": "send CLIENT DISCONNECT",
+                "action": "discard Session State; keep retained messages",
+                "to": "Disconnected"
+              },
+              "gt": {
+                "from": "Connected",
+                "to": "Session Terminated",
+                "event": "DISCONNECT received/sent",
+                "action": "Cleanup session"
+              },
+              "label_score": 0.7238
+            },
+            {
+              "extracted": {
+                "from": "Reauthenticating",
+                "event": "cond reauth failed",
+                "action": "send DISCONNECT 0x87",
+                "to": "Disconnected"
+              },
+              "gt": {
+                "from": "Unauthorized",
+                "to": "Session Terminated",
+                "event": "DISCONNECT sent",
+                "action": "Close connection"
+              },
+              "label_score": 0.4862
+            },
+            {
+              "extracted": {
+                "from": "OngoingSession",
+                "event": "send disconnect v311",
+                "action": "store Session State indefinitely",
+                "to": "SessionMaintained"
+              },
+              "gt": {
+                "from": "Session Resumed",
+                "to": "Session Terminated",
+                "event": "Session invalid",
+                "action": "Send DISCONNECT"
+              },
+              "label_score": 0.6477
+            },
+            {
+              "extracted": {
+                "from": "ExistingSessionContinued",
+                "event": "cond session resumed",
+                "action": "send CONNACK SessionPresent 1",
+                "to": "Connected"
+              },
+              "gt": {
+                "from": "Session Resumed",
+                "to": "Connected",
+                "event": "Session validated",
+                "action": "Send CONNACK(Session Present=1)"
+              },
+              "label_score": 0.6812
+            }
+          ]
+        }
+      },
+      "0.5": {
+        "states_official_style": {
+          "matched": 12,
+          "precision": 0.324,
+          "recall": 1.0,
+          "f1": 0.489
+        },
+        "states_one_to_one": {
+          "threshold": 0.5,
+          "matched": 10,
+          "total_gt": 12,
+          "total_extracted": 37,
+          "precision": 0.2703,
+          "recall": 0.8333,
+          "f1": 0.4082,
+          "pairs": [
+            {
+              "gt": "Disconnected",
+              "extracted": "Disconnected",
+              "score": 1.0
+            },
+            {
+              "gt": "Token Requested",
+              "extracted": "TokenUploaded",
+              "score": 0.6582
+            },
+            {
+              "gt": "Token Received",
+              "extracted": "TokenObtained",
+              "score": 0.635
+            },
+            {
+              "gt": "Awaiting CONNACK",
+              "extracted": "AwaitingConnack",
+              "score": 0.8019
+            },
+            {
+              "gt": "Authenticating",
+              "extracted": "Authenticating",
+              "score": 1.0
+            },
+            {
+              "gt": "Token Validating",
+              "extracted": "TokenValidation",
+              "score": 0.8339
+            },
+            {
+              "gt": "Connected",
+              "extracted": "Connected",
+              "score": 1.0
+            },
+            {
+              "gt": "Unauthorized",
+              "extracted": "Authorizing",
+              "score": 0.573
+            },
+            {
+              "gt": "Reauthenticating",
+              "extracted": "Reauthenticating",
+              "score": 1.0
+            },
+            {
+              "gt": "Session Terminated",
+              "extracted": "SessionMaintained",
+              "score": 0.6917
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.5,
+          "matched": 4,
+          "total_gt": 17,
+          "total_extracted": 57,
+          "precision": 0.0702,
+          "recall": 0.2353,
+          "f1": 0.1081,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "TokenObtained",
+                "event": "send connection request",
+                "action": "send connection request with token",
+                "to": "Connecting"
+              },
+              "gt": {
+                "from": "Token Requested",
+                "to": "Disconnected",
+                "event": "Token request timeout/error",
+                "action": "Retry or terminate"
+              },
+              "label_score": 0.5243
+            },
+            {
+              "extracted": {
+                "from": "TokenValidation",
+                "event": "cond token valid",
+                "action": "send CONNACK reason_code 0x00",
+                "to": "Connected"
+              },
+              "gt": {
+                "from": "Token Validating",
+                "to": "Connected",
+                "event": "Token valid",
+                "action": "Send CONNACK(Success)"
+              },
+              "label_score": 0.716
+            },
+            {
+              "extracted": {
+                "from": "TokenValidation",
+                "event": "cond token claims verified",
+                "action": "accept token; authenticate client",
+                "to": "ClientAuthenticated"
+              },
+              "gt": {
+                "from": "Token Validating",
+                "to": "Unauthorized",
+                "event": "Token invalid/expired",
+                "action": "Send CONNACK(Not Authorized)"
+              },
+              "label_score": 0.5684
+            },
+            {
+              "extracted": {
+                "from": "Connected",
+                "event": "receive acknowledgment 0x87",
+                "action": "reauthenticate with new token",
+                "to": "Reauthenticating"
+              },
+              "gt": {
+                "from": "Connected",
+                "to": "Reauthenticating",
+                "event": "Token expired",
+                "action": "Send AUTH packet"
+              },
+              "label_score": 0.5437
+            }
+          ]
+        }
+      },
+      "0.6": {
+        "states_official_style": {
+          "matched": 10,
+          "precision": 0.27,
+          "recall": 0.833,
+          "f1": 0.408
+        },
+        "states_one_to_one": {
+          "threshold": 0.6,
+          "matched": 9,
+          "total_gt": 12,
+          "total_extracted": 37,
+          "precision": 0.2432,
+          "recall": 0.75,
+          "f1": 0.3673,
+          "pairs": [
+            {
+              "gt": "Disconnected",
+              "extracted": "Disconnected",
+              "score": 1.0
+            },
+            {
+              "gt": "Token Requested",
+              "extracted": "TokenUploaded",
+              "score": 0.6582
+            },
+            {
+              "gt": "Token Received",
+              "extracted": "TokenObtained",
+              "score": 0.635
+            },
+            {
+              "gt": "Awaiting CONNACK",
+              "extracted": "AwaitingConnack",
+              "score": 0.8019
+            },
+            {
+              "gt": "Authenticating",
+              "extracted": "Authenticating",
+              "score": 1.0
+            },
+            {
+              "gt": "Token Validating",
+              "extracted": "TokenValidation",
+              "score": 0.8339
+            },
+            {
+              "gt": "Connected",
+              "extracted": "Connected",
+              "score": 1.0
+            },
+            {
+              "gt": "Reauthenticating",
+              "extracted": "Reauthenticating",
+              "score": 1.0
+            },
+            {
+              "gt": "Session Terminated",
+              "extracted": "SessionMaintained",
+              "score": 0.6917
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.6,
+          "matched": 1,
+          "total_gt": 17,
+          "total_extracted": 57,
+          "precision": 0.0175,
+          "recall": 0.0588,
+          "f1": 0.027,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "TokenValidation",
+                "event": "cond token valid",
+                "action": "send CONNACK reason_code 0x00",
+                "to": "Connected"
+              },
+              "gt": {
+                "from": "Token Validating",
+                "to": "Connected",
+                "event": "Token valid",
+                "action": "Send CONNACK(Success)"
+              },
+              "label_score": 0.716
+            }
+          ]
+        }
+      }
+    }
+  }
+}

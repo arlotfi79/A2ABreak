@@ -1,0 +1,147 @@
+{
+  "section_id": "S047",
+  "title": "S047 10.2 Using Connections",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S047 10.2 Using Connections"
+  ],
+  "url_anchor": "#s047-102-using-connections",
+  "word_count": 1321,
+  "statement_count": 6,
+  "elapsed_seconds": 47.65,
+  "statements": [
+    {
+      "statement_id": "D-S047-001",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "An RTSP agent SHALL NOT use more than one connection per RTSP session at any given point.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "object_name": "session",
+      "field_name": "active_connection_count",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "<=1"
+      ],
+      "guard_semantics": "At most one TCP connection per RTSP session may be active at any given point in time"
+    },
+    {
+      "statement_id": "D-S047-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "When the client has discovered that the TCP connection has been lost, it can set up a new one when there is need to communicate again.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S047",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "TCP connection loss detected & new communication needed",
+      "pre_cond": "connection.active = false",
+      "post_cond": "connection.active = true",
+      "actions": [
+        "open new TCP connection"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S047-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server that attempts to send a request to a client that has no connection currently to the server SHALL discard the request.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S047",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server attempts to send request to client",
+      "pre_cond": "connection.active = false",
+      "post_cond": null,
+      "actions": [
+        "discard request"
+      ],
+      "modality": "shall"
+    },
+    {
+      "statement_id": "D-S047-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "When under attack, an RTSP agent can close TCP connections and release state associated with that TCP connection.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S047",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "resource exhaustion attack detected",
+      "pre_cond": "connection.active = true",
+      "post_cond": "connection.active = false",
+      "actions": [
+        "close TCP connection",
+        "release state associated with TCP connection"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S047-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "A persistent connection MAY be closed after a few message exchanges. Later, when the client wishes to send a new request, a new connection would be opened.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S047",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client wishes to send new request after persistent connection closed",
+      "pre_cond": "connection.active = false & connection.type = persistent",
+      "post_cond": "connection.active = true",
+      "actions": [
+        "open new connection"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S047-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "To avoid deadlock situations, both client and server MUST be able to send and receive requests simultaneously.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S047",
+      "object_name": "endpoint",
+      "field_name": "simultaneous_send_receive_capability",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "true"
+      ],
+      "guard_semantics": "Endpoint must support concurrent send and receive to avoid deadlock"
+    }
+  ]
+}

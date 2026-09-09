@@ -1,0 +1,240 @@
+{
+  "section_id": "S096",
+  "title": "S096 14.1 UAC Behavior",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S096 14.1 UAC Behavior"
+  ],
+  "url_anchor": "#s096-141-uac-behavior",
+  "word_count": 596,
+  "statement_count": 11,
+  "elapsed_seconds": 63.73,
+  "statements": [
+    {
+      "statement_id": "D-S096-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If there is an ongoing INVITE client transaction, the TU MUST wait until the transaction reaches the completed or terminated state before initiating the new INVITE.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S096",
+      "state_name": "completed",
+      "enum_name": "INVITE_client_transaction_states",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S096-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If there is an ongoing INVITE client transaction, the TU MUST wait until the transaction reaches the completed or terminated state before initiating the new INVITE.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S096",
+      "state_name": "terminated",
+      "enum_name": "INVITE_client_transaction_states",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S096-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If there is an ongoing INVITE server transaction, the TU MUST wait until the transaction reaches the confirmed or terminated state before initiating the new INVITE.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S096",
+      "state_name": "confirmed",
+      "enum_name": "INVITE_server_transaction_states",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S096-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If there is an ongoing INVITE server transaction, the TU MUST wait until the transaction reaches the confirmed or terminated state before initiating the new INVITE.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S096",
+      "state_name": "terminated",
+      "enum_name": "INVITE_server_transaction_states",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S096-005",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "a UAC MUST NOT initiate a new INVITE transaction within a dialog while another INVITE transaction is in progress in either direction.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S096",
+      "object_name": "INVITE_transaction",
+      "field_name": "in_progress",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "New INVITE may only be initiated when no other INVITE transaction is in progress in either direction within the dialog"
+    },
+    {
+      "statement_id": "D-S096-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If there is an ongoing INVITE client transaction, the TU MUST wait until the transaction reaches the completed or terminated state before initiating the new INVITE.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S096",
+      "actors": [
+        "TU",
+        "UAC"
+      ],
+      "from_state": "completed",
+      "to_state": null,
+      "trigger": "INVITE_client_transaction_reaches_completed_or_terminated",
+      "pre_cond": "transaction.type = INVITE_client & (transaction.state = completed | transaction.state = terminated)",
+      "post_cond": null,
+      "actions": [
+        "initiate_new_INVITE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S096-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If there is an ongoing INVITE server transaction, the TU MUST wait until the transaction reaches the confirmed or terminated state before initiating the new INVITE.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S096",
+      "actors": [
+        "TU",
+        "UAC"
+      ],
+      "from_state": "confirmed",
+      "to_state": null,
+      "trigger": "INVITE_server_transaction_reaches_confirmed_or_terminated",
+      "pre_cond": "transaction.type = INVITE_server & (transaction.state = confirmed | transaction.state = terminated)",
+      "post_cond": null,
+      "actions": [
+        "initiate_new_INVITE"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S096-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If a UA receives a non-2xx final response to a re-INVITE, the session parameters MUST remain unchanged, as if no re-INVITE had been issued.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S096",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_non_2xx_final_response_to_re_INVITE",
+      "pre_cond": "response.code != 2xx & request.method = re-INVITE",
+      "post_cond": "session.parameters = unchanged",
+      "actions": [
+        "retain_previous_session_parameters"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S096-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "if the non-2xx final response is a 481 (Call/Transaction Does Not Exist), or a 408 (Request Timeout), or no response at all is received for the re-INVITE (that is, a timeout is returned by the INVITE client transaction), the UAC will terminate the dialog.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S096",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "terminated",
+      "trigger": "receive_481_or_408_or_timeout_on_re_INVITE",
+      "pre_cond": "(response.code = 481 | response.code = 408 | response = timeout) & request.method = re-INVITE",
+      "post_cond": "dialog.state = terminated",
+      "actions": [
+        "terminate_dialog"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S096-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "If a UAC receives a 491 response to a re-INVITE, it SHOULD start a timer with a value T chosen as follows: if the UAC is the owner of the Call-ID, T is between 2.1 and 4 seconds; otherwise T is between 0 and 2 seconds.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S096",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_491_response_to_re_INVITE",
+      "pre_cond": "response.code = 491 & request.method = re-INVITE",
+      "post_cond": "timer.T.started = true",
+      "actions": [
+        "start_timer_T"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S096-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When the timer fires, the UAC SHOULD attempt the re-INVITE once more, if it still desires for that session modification to take place.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S096",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "timer_T_fires",
+      "pre_cond": "timer.T.expired = true & session.modification_desired = true",
+      "post_cond": null,
+      "actions": [
+        "send_re_INVITE"
+      ],
+      "modality": "should"
+    }
+  ]
+}

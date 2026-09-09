@@ -1,0 +1,213 @@
+{
+  "section_id": "S122",
+  "title": "S122 8.3.3 Examples",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S122 8.3.3 Examples"
+  ],
+  "url_anchor": "#s122-833-examples",
+  "word_count": 411,
+  "statement_count": 8,
+  "elapsed_seconds": 39.07,
+  "statements": [
+    {
+      "statement_id": "D-S122-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of an unsuccessful retrieval of overview information by number because no newsgroup was selected first: [Assumes currently selected newsgroup is invalid.] [C] OVER [S] 412 No newsgroup selected",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S122",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "no_newsgroup_selected",
+      "to_state": "no_newsgroup_selected",
+      "trigger": "OVER",
+      "pre_cond": "session.selected_newsgroup = invalid",
+      "post_cond": "server.response_code = 412",
+      "actions": [
+        "send 412 No newsgroup selected"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of an attempt to retrieve information when the currently selected newsgroup is empty: [C] GROUP example.empty.newsgroup [S] 211 0 0 0 example.empty.newsgroup [C] OVER [S] 420 No current article selected",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S122",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "newsgroup_selected",
+      "to_state": "newsgroup_selected",
+      "trigger": "OVER",
+      "pre_cond": "session.selected_newsgroup.article_count = 0 & session.current_article = null",
+      "post_cond": "server.response_code = 420",
+      "actions": [
+        "send 420 No current article selected"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of an unsuccessful retrieval of overview information on an article by number: [C] OVER 300256 [S] 423 No such article in this group",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S122",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "newsgroup_selected",
+      "to_state": "newsgroup_selected",
+      "trigger": "OVER <article-number>",
+      "pre_cond": "session.selected_newsgroup != null & session.selected_newsgroup.contains(article_number) = false",
+      "post_cond": "server.response_code = 423",
+      "actions": [
+        "send 423 No such article in this group"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of an invalid range: [C] OVER 3000444-3000222 [S] 423 Empty range",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S122",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "newsgroup_selected",
+      "to_state": "newsgroup_selected",
+      "trigger": "OVER <range>",
+      "pre_cond": "session.selected_newsgroup != null & request.range.low > request.range.high",
+      "post_cond": "server.response_code = 423",
+      "actions": [
+        "send 423 Empty range"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of the same commands on a system that does not implement retrieval by message-id: [C] OVER <45223423@example.com> [S] 503 Overview by message-id unsupported",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S122",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OVER <message-id>",
+      "pre_cond": "server.capability.OVER_MSGID = false",
+      "post_cond": "server.response_code = 503",
+      "actions": [
+        "send 503 Overview by message-id unsupported"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of a successful retrieval of overview information for an article (explicitly not using an article number): [C] OVER [S] 224 Overview information follows ... [S] .",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S122",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "newsgroup_selected",
+      "to_state": "newsgroup_selected",
+      "trigger": "OVER",
+      "pre_cond": "session.current_article != null",
+      "post_cond": "server.response_code = 224",
+      "actions": [
+        "send 224 Overview information follows",
+        "send overview data",
+        "send termination line"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of a successful retrieval of overview information for an article by message-id: [C] OVER <45223423@example.com> [S] 224 Overview information follows ... [S] .",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S122",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OVER <message-id>",
+      "pre_cond": "server.capability.OVER_MSGID = true & message.exists = true",
+      "post_cond": "server.response_code = 224",
+      "actions": [
+        "send 224 Overview information follows",
+        "send overview data with article number 0",
+        "send termination line"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of a successful retrieval of overview information for a range of articles: [C] OVER 3000234-3000240 [S] 224 Overview information follows ... [S] .",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S122",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "newsgroup_selected",
+      "to_state": "newsgroup_selected",
+      "trigger": "OVER <range>",
+      "pre_cond": "session.selected_newsgroup != null & request.range.low <= request.range.high",
+      "post_cond": "server.response_code = 224",
+      "actions": [
+        "send 224 Overview information follows",
+        "send overview data for existing articles in range",
+        "send termination line"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

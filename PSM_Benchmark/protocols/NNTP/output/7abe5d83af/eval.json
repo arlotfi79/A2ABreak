@@ -1,0 +1,837 @@
+{
+  "protocol": "NNTP",
+  "model": "a2a-pipeline",
+  "fingerprint": {
+    "evaluator_sha256": "c302bb6e01e8e95f5fa4f1147efd289e0cba243ca3a707eeb9ae731a6a83b668",
+    "ground_truth_sha256": "5e4e310cd1e8e5489c456c37118898f9b5fcebf634d60091b1ac934d79bf49b4",
+    "exported_fsm_sha256": "1a4f8e9f1a47538a91c76964fc17b3021efd975cf1e5e5407a9801216db70573",
+    "minilm": {
+      "found": true,
+      "snapshots": [
+        "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+      ]
+    },
+    "packages": {
+      "python": "3.13.2",
+      "numpy": "2.4.2",
+      "torch": "2.12.0",
+      "sentence-transformers": "5.5.1",
+      "pandas": "3.0.3",
+      "scikit-learn": "1.8.0",
+      "litellm": "1.83.14"
+    }
+  },
+  "official": {
+    "states": {
+      "Protocol": "NNTP",
+      "Model": "a2a-pipeline",
+      "Total Extracted": 27,
+      "Total GT": 10,
+      "Matched": 7,
+      "Precision": 0.259,
+      "Recall": 0.7,
+      "F1-Score": 0.378
+    },
+    "transitions": {
+      "Protocol": "NNTP",
+      "Model": "a2a-pipeline",
+      "TotalExtracted": 60,
+      "TotalGT": 16,
+      "Matched": 0,
+      "UnmatchedGT": 16,
+      "UnmatchedExtracted": 60,
+      "Precision": 0.0,
+      "Recall": 0.0,
+      "F1-Score": 0
+    },
+    "call": {
+      "match_all_states": {
+        "threshold": 0.5
+      },
+      "batch_evaluate_transitions_combined": {
+        "if_partial": false,
+        "state_threshold": 0.5,
+        "trans_threshold": 0.5
+      }
+    }
+  },
+  "diagnostics": {
+    "state_matches": [
+      {
+        "gt": "Initial_Connection",
+        "extracted": null,
+        "score": 0.29395681619644165
+      },
+      {
+        "gt": "Service_Available",
+        "extracted": null,
+        "score": 0.40793123841285706
+      },
+      {
+        "gt": "Connection_Closed",
+        "extracted": "Closed",
+        "score": 0.6747238636016846
+      },
+      {
+        "gt": "Posting_Allowed",
+        "extracted": "PostingAllowed",
+        "score": 0.6345268487930298
+      },
+      {
+        "gt": "Posting_Prohibited",
+        "extracted": "PostingAllowed",
+        "score": 0.6339698433876038
+      },
+      {
+        "gt": "Group_Selected",
+        "extracted": "GroupSelected",
+        "score": 0.7145615816116333
+      },
+      {
+        "gt": "Article_Selected",
+        "extracted": "ArticleInput",
+        "score": 0.5220897197723389
+      },
+      {
+        "gt": "Reading_Headers",
+        "extracted": null,
+        "score": 0.3166506886482239
+      },
+      {
+        "gt": "Reading_Body",
+        "extracted": "ReadingMode",
+        "score": 0.5704748034477234
+      },
+      {
+        "gt": "Posting_Article",
+        "extracted": "PostingAllowed",
+        "score": 0.5040897727012634
+      }
+    ],
+    "unmatched_gt_states": [
+      "Initial_Connection",
+      "Service_Available",
+      "Reading_Headers"
+    ],
+    "unselected_extracted_states": [
+      "ReaderModePostProhibited",
+      "AwaitingData",
+      "ArticleInput",
+      "IhaveWaitingInitial",
+      "IhaveSendingArticle",
+      "IhaveTransfer",
+      "IhaveComplete",
+      "TransferSuccess",
+      "TransferRejected",
+      "TransferFailedRetry",
+      "ContinuationRequired",
+      "AwaitingResponse",
+      "CommandPipeline",
+      "WaitingForResponse",
+      "EncryptedLink",
+      "Ihave335Continuation",
+      "Post340Continuation",
+      "Closed"
+    ],
+    "matched_transitions": [],
+    "unmatched_gt_transitions": [
+      {
+        "from": "Initial_Connection",
+        "event": "Receive 200",
+        "action": "Set service available",
+        "to": "Service_Available"
+      },
+      {
+        "from": "Initial_Connection",
+        "event": "Receive 201",
+        "action": "Set posting prohibited",
+        "to": "Posting_Prohibited"
+      },
+      {
+        "from": "Initial_Connection",
+        "event": "Receive 502",
+        "action": "Close connection",
+        "to": "Connection_Closed"
+      },
+      {
+        "from": "Initial_Connection",
+        "event": "Receive 400",
+        "action": "Close connection",
+        "to": "Connection_Closed"
+      },
+      {
+        "from": "Service_Available",
+        "event": "MODE READER",
+        "action": "Switch to reader mode",
+        "to": "Posting_Allowed"
+      },
+      {
+        "from": "Posting_Prohibited",
+        "event": "MODE READER",
+        "action": "Switch to reader mode",
+        "to": "Posting_Allowed"
+      },
+      {
+        "from": "Posting_Allowed",
+        "event": "GROUP <group_name>",
+        "action": "Select newsgroup",
+        "to": "Group_Selected"
+      },
+      {
+        "from": "Group_Selected",
+        "event": "ARTICLE <article_id>",
+        "action": "Fetch article",
+        "to": "Article_Selected"
+      },
+      {
+        "from": "Group_Selected",
+        "event": "POST",
+        "action": "Start article posting",
+        "to": "Posting_Article"
+      },
+      {
+        "from": "Article_Selected",
+        "event": "HEAD <article_id>",
+        "action": "Read headers",
+        "to": "Reading_Headers"
+      },
+      {
+        "from": "Article_Selected",
+        "event": "BODY <article_id>",
+        "action": "Read body",
+        "to": "Reading_Body"
+      },
+      {
+        "from": "Reading_Headers",
+        "event": "QUIT",
+        "action": "Close connection",
+        "to": "Connection_Closed"
+      },
+      {
+        "from": "Reading_Body",
+        "event": "QUIT",
+        "action": "Close connection",
+        "to": "Connection_Closed"
+      },
+      {
+        "from": "Posting_Article",
+        "event": "Receive 240",
+        "action": "Article posted successfully",
+        "to": "Group_Selected"
+      },
+      {
+        "from": "Posting_Article",
+        "event": "Receive 441",
+        "action": "Posting failed",
+        "to": "Group_Selected"
+      },
+      {
+        "from": "Group_Selected",
+        "event": "QUIT",
+        "action": "Close connection",
+        "to": "Connection_Closed"
+      }
+    ],
+    "unmatched_extracted_transitions": [
+      {
+        "from": "Established",
+        "event": "receive 200 greeting",
+        "action": "send 200 response",
+        "to": "PostingAllowed"
+      },
+      {
+        "from": "Established",
+        "event": "receive 201 greeting",
+        "action": "send 201 response",
+        "to": "PostingProhibited"
+      },
+      {
+        "from": "Established",
+        "event": "receive 502 greeting",
+        "action": "send 502 response; close connection immediately",
+        "to": "Closed"
+      },
+      {
+        "from": "Established",
+        "event": "receive 400 greeting",
+        "action": "send 400 response; close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "Established",
+        "event": "send greeting",
+        "action": "send greeting",
+        "to": "CommandExchange"
+      },
+      {
+        "from": "Established",
+        "event": "receive XENCRYPT success",
+        "action": "negotiate encryption; send 283 response",
+        "to": "EncryptedLink"
+      },
+      {
+        "from": "Established",
+        "event": "receive XSECRET denied",
+        "action": "send 483 response",
+        "to": "Established"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "receive 3xx response",
+        "action": "request further data from client",
+        "to": "AwaitingData"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "connection closed",
+        "action": "close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "timeout autologout",
+        "action": "close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "receive QUIT",
+        "action": "send 205 response; close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "receive command",
+        "action": "reset autologout timer",
+        "to": "CommandExchange"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "send 400 shutdown",
+        "action": "send 400 response; close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "cond fault or disconnect",
+        "action": "cease servicing client",
+        "to": "Closed"
+      },
+      {
+        "from": "AwaitingData",
+        "event": "receive multiline data",
+        "action": "reset autologout timer",
+        "to": "AwaitingData"
+      },
+      {
+        "from": "PostingAllowed",
+        "event": "receive QUIT",
+        "action": "send 205 response; close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "PostingProhibited",
+        "event": "receive QUIT",
+        "action": "send 205 response; close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "TransitMode",
+        "event": "receive MODE READER",
+        "action": "enter reading mode; advertise READER capability",
+        "to": "ReadingMode"
+      },
+      {
+        "from": "TransitMode",
+        "event": "receive MODE READER 200",
+        "action": "send 200 response; switch capabilities to reader mode",
+        "to": "ReaderModePostAllowed"
+      },
+      {
+        "from": "TransitMode",
+        "event": "receive MODE READER 201",
+        "action": "send 201 response",
+        "to": "ReaderModePostProhibited"
+      },
+      {
+        "from": "TransitMode",
+        "event": "receive MODE READER 502",
+        "action": "send 502 response; close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "ReadingMode",
+        "event": "receive IHAVE denied",
+        "action": "send 500 response",
+        "to": "ReadingMode"
+      },
+      {
+        "from": "ReaderModePostAllowed",
+        "event": "receive IHAVE command",
+        "action": "send 500 response",
+        "to": "ReaderModePostAllowed"
+      },
+      {
+        "from": "NoGroupSelected",
+        "event": "receive GROUP success",
+        "action": "send 211 response; set selected newsgroup",
+        "to": "GroupSelected"
+      },
+      {
+        "from": "GroupSelected",
+        "event": "receive GROUP success",
+        "action": "send 211 response; update selected newsgroup",
+        "to": "GroupSelected"
+      },
+      {
+        "from": "GroupSelected",
+        "event": "receive LISTGROUP",
+        "action": "send 211 response; return article number list",
+        "to": "GroupSelected"
+      },
+      {
+        "from": "NoGroupSelected",
+        "event": "receive LISTGROUP with group",
+        "action": "send 211 response; set current article number",
+        "to": "GroupSelected"
+      },
+      {
+        "from": "NoGroupSelected",
+        "event": "receive LISTGROUP no arg",
+        "action": "send 412 response",
+        "to": "NoGroupSelected"
+      },
+      {
+        "from": "GroupSelected",
+        "event": "receive LAST success",
+        "action": "send 223 response; set article to previous",
+        "to": "GroupSelected"
+      },
+      {
+        "from": "NoGroupSelected",
+        "event": "receive LAST no group",
+        "action": "send 412 response",
+        "to": "NoGroupSelected"
+      },
+      {
+        "from": "GroupSelected",
+        "event": "receive LAST no prev",
+        "action": "send 422 response",
+        "to": "GroupSelected"
+      },
+      {
+        "from": "GroupSelected",
+        "event": "receive LAST no article",
+        "action": "send 420 response",
+        "to": "GroupSelected"
+      },
+      {
+        "from": "GroupSelected",
+        "event": "receive NEXT success",
+        "action": "send 223 response; advance article pointer",
+        "to": "GroupSelected"
+      },
+      {
+        "from": "NoGroupSelected",
+        "event": "receive NEXT no group",
+        "action": "send 412 response",
+        "to": "NoGroupSelected"
+      },
+      {
+        "from": "GroupSelected",
+        "event": "receive NEXT no next",
+        "action": "send 421 response",
+        "to": "GroupSelected"
+      },
+      {
+        "from": "PostingAllowed",
+        "event": "receive POST command",
+        "action": "send 340 response",
+        "to": "ArticleInput"
+      },
+      {
+        "from": "ArticleInput",
+        "event": "receive article success",
+        "action": "send 240 response",
+        "to": "PostingAllowed"
+      },
+      {
+        "from": "ArticleInput",
+        "event": "receive article fail",
+        "action": "send 441 response",
+        "to": "PostingAllowed"
+      },
+      {
+        "from": "PostingProhibited",
+        "event": "receive POST command",
+        "action": "send 440 response",
+        "to": "PostingProhibited"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "receive POST allowed",
+        "action": "send 340 response",
+        "to": "ArticleInput"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "receive POST denied",
+        "action": "send 440 response",
+        "to": "CommandExchange"
+      },
+      {
+        "from": "ArticleInput",
+        "event": "receive article terminated",
+        "action": "send transfer result response",
+        "to": "CommandExchange"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "send IHAVE",
+        "action": "send IHAVE message-id",
+        "to": "IhaveWaitingInitial"
+      },
+      {
+        "from": "IhaveWaitingInitial",
+        "event": "receive 335 response",
+        "action": "send article body",
+        "to": "IhaveSendingArticle"
+      },
+      {
+        "from": "IhaveWaitingInitial",
+        "event": "receive 435 response",
+        "action": "send 435 response",
+        "to": "IhaveComplete"
+      },
+      {
+        "from": "IhaveWaitingInitial",
+        "event": "receive 436 initial",
+        "action": "send 436 response",
+        "to": "IhaveComplete"
+      },
+      {
+        "from": "IhaveSendingArticle",
+        "event": "receive 235 response",
+        "action": "send 235 response",
+        "to": "TransferSuccess"
+      },
+      {
+        "from": "IhaveSendingArticle",
+        "event": "receive 436 transfer",
+        "action": "send 436 response",
+        "to": "TransferFailedRetry"
+      },
+      {
+        "from": "IhaveSendingArticle",
+        "event": "receive 437 response",
+        "action": "send 437 response",
+        "to": "TransferRejected"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "receive IHAVE 335",
+        "action": "send 335 response",
+        "to": "IhaveTransfer"
+      },
+      {
+        "from": "IhaveTransfer",
+        "event": "receive article 235",
+        "action": "send 235 response",
+        "to": "CommandExchange"
+      },
+      {
+        "from": "IhaveTransfer",
+        "event": "receive article 437",
+        "action": "send 437 response",
+        "to": "CommandExchange"
+      },
+      {
+        "from": "IhaveTransfer",
+        "event": "receive article 436",
+        "action": "send 436 response",
+        "to": "CommandExchange"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "receive IHAVE 435",
+        "action": "send 435 response",
+        "to": "CommandExchange"
+      },
+      {
+        "from": "CommandExchange",
+        "event": "receive IHAVE 436",
+        "action": "send 436 response",
+        "to": "CommandExchange"
+      },
+      {
+        "from": "CommandPipeline",
+        "event": "send non pipeline cmd",
+        "action": "send non-pipelineable command; suspend further sending",
+        "to": "WaitingForResponse"
+      },
+      {
+        "from": "AwaitingResponse",
+        "event": "receive 3xx continuation",
+        "action": "receive 3xx response",
+        "to": "ContinuationRequired"
+      },
+      {
+        "from": "ContinuationRequired",
+        "event": "send continuation data",
+        "action": "send command-continuation",
+        "to": "AwaitingResponse"
+      },
+      {
+        "from": "NoGroupSelected",
+        "event": "receive OVER no group",
+        "action": "send 412 response",
+        "to": "NoGroupSelected"
+      },
+      {
+        "from": "GroupSelected",
+        "event": "receive OVER success",
+        "action": "send 224 response; send overview data",
+        "to": "GroupSelected"
+      }
+    ],
+    "precision": 0.259,
+    "recall": 0.7,
+    "f1_score": 0.378
+  },
+  "supplementary": {
+    "note": "Supplementary only — the official numbers above come from the benchmark's own entry points. The official state matcher is many-to-one and the official transition matcher is greedy and order-sensitive; these one-to-one numbers bound that effect.",
+    "one_to_one": {
+      "states": {
+        "threshold": 0.5,
+        "matched": 6,
+        "total_gt": 10,
+        "total_extracted": 27,
+        "precision": 0.2222,
+        "recall": 0.6,
+        "f1": 0.3243,
+        "pairs": [
+          {
+            "gt": "Connection_Closed",
+            "extracted": "Closed",
+            "score": 0.6747
+          },
+          {
+            "gt": "Posting_Allowed",
+            "extracted": "PostingAllowed",
+            "score": 0.6345
+          },
+          {
+            "gt": "Posting_Prohibited",
+            "extracted": "PostingProhibited",
+            "score": 0.6101
+          },
+          {
+            "gt": "Group_Selected",
+            "extracted": "GroupSelected",
+            "score": 0.7146
+          },
+          {
+            "gt": "Article_Selected",
+            "extracted": "ArticleInput",
+            "score": 0.5221
+          },
+          {
+            "gt": "Reading_Body",
+            "extracted": "ReadingMode",
+            "score": 0.5705
+          }
+        ]
+      },
+      "transitions": {
+        "threshold": 0.5,
+        "matched": 0,
+        "total_gt": 16,
+        "total_extracted": 60,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "pairs": []
+      }
+    },
+    "threshold_sensitivity": {
+      "0.4": {
+        "states_official_style": {
+          "matched": 8,
+          "precision": 0.296,
+          "recall": 0.8,
+          "f1": 0.432
+        },
+        "states_one_to_one": {
+          "threshold": 0.4,
+          "matched": 8,
+          "total_gt": 10,
+          "total_extracted": 27,
+          "precision": 0.2963,
+          "recall": 0.8,
+          "f1": 0.4324,
+          "pairs": [
+            {
+              "gt": "Service_Available",
+              "extracted": "WaitingForResponse",
+              "score": 0.4079
+            },
+            {
+              "gt": "Connection_Closed",
+              "extracted": "Closed",
+              "score": 0.6747
+            },
+            {
+              "gt": "Posting_Allowed",
+              "extracted": "PostingAllowed",
+              "score": 0.6345
+            },
+            {
+              "gt": "Posting_Prohibited",
+              "extracted": "PostingProhibited",
+              "score": 0.6101
+            },
+            {
+              "gt": "Group_Selected",
+              "extracted": "GroupSelected",
+              "score": 0.7146
+            },
+            {
+              "gt": "Article_Selected",
+              "extracted": "ArticleInput",
+              "score": 0.5221
+            },
+            {
+              "gt": "Reading_Body",
+              "extracted": "ReadingMode",
+              "score": 0.5705
+            },
+            {
+              "gt": "Posting_Article",
+              "extracted": "ReaderModePostProhibited",
+              "score": 0.4234
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.4,
+          "matched": 0,
+          "total_gt": 16,
+          "total_extracted": 60,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "pairs": []
+        }
+      },
+      "0.5": {
+        "states_official_style": {
+          "matched": 7,
+          "precision": 0.259,
+          "recall": 0.7,
+          "f1": 0.378
+        },
+        "states_one_to_one": {
+          "threshold": 0.5,
+          "matched": 6,
+          "total_gt": 10,
+          "total_extracted": 27,
+          "precision": 0.2222,
+          "recall": 0.6,
+          "f1": 0.3243,
+          "pairs": [
+            {
+              "gt": "Connection_Closed",
+              "extracted": "Closed",
+              "score": 0.6747
+            },
+            {
+              "gt": "Posting_Allowed",
+              "extracted": "PostingAllowed",
+              "score": 0.6345
+            },
+            {
+              "gt": "Posting_Prohibited",
+              "extracted": "PostingProhibited",
+              "score": 0.6101
+            },
+            {
+              "gt": "Group_Selected",
+              "extracted": "GroupSelected",
+              "score": 0.7146
+            },
+            {
+              "gt": "Article_Selected",
+              "extracted": "ArticleInput",
+              "score": 0.5221
+            },
+            {
+              "gt": "Reading_Body",
+              "extracted": "ReadingMode",
+              "score": 0.5705
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.5,
+          "matched": 0,
+          "total_gt": 16,
+          "total_extracted": 60,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "pairs": []
+        }
+      },
+      "0.6": {
+        "states_official_style": {
+          "matched": 4,
+          "precision": 0.148,
+          "recall": 0.4,
+          "f1": 0.216
+        },
+        "states_one_to_one": {
+          "threshold": 0.6,
+          "matched": 4,
+          "total_gt": 10,
+          "total_extracted": 27,
+          "precision": 0.1481,
+          "recall": 0.4,
+          "f1": 0.2162,
+          "pairs": [
+            {
+              "gt": "Connection_Closed",
+              "extracted": "Closed",
+              "score": 0.6747
+            },
+            {
+              "gt": "Posting_Allowed",
+              "extracted": "PostingAllowed",
+              "score": 0.6345
+            },
+            {
+              "gt": "Posting_Prohibited",
+              "extracted": "PostingProhibited",
+              "score": 0.6101
+            },
+            {
+              "gt": "Group_Selected",
+              "extracted": "GroupSelected",
+              "score": 0.7146
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.6,
+          "matched": 0,
+          "total_gt": 16,
+          "total_extracted": 60,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "pairs": []
+        }
+      }
+    }
+  }
+}

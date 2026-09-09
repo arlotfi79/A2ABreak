@@ -1,0 +1,209 @@
+{
+  "section_id": "S257",
+  "title": "S257 22.2 User-to-User Authentication",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S257 22.2 User-to-User Authentication"
+  ],
+  "url_anchor": "#s257-222-user-to-user-authentication",
+  "word_count": 352,
+  "statement_count": 8,
+  "elapsed_seconds": 71.06,
+  "statements": [
+    {
+      "statement_id": "N-S257-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When a UAS receives a request from a UAC, the UAS MAY authenticate the originator before the request is processed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S257",
+      "actors": [
+        "UAS",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "authenticate originator before processing request"
+      ],
+      "modality": "may",
+      "id": "N-S257-001"
+    },
+    {
+      "statement_id": "N-S257-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The WWW-Authenticate response-header field MUST be included in 401 (Unauthorized) response messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S257",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_401_Unauthorized",
+      "pre_cond": null,
+      "post_cond": "response.contains(WWW-Authenticate) = true",
+      "actions": [
+        "include WWW-Authenticate header field in 401 response"
+      ],
+      "modality": "must",
+      "id": "N-S257-002"
+    },
+    {
+      "statement_id": "N-S257-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When the originating UAC receives the 401 (Unauthorized), it SHOULD, if it is able, re-originate the request with the proper credentials.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S257",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "received_401_Unauthorized",
+      "pre_cond": "uac.credentials_available = true",
+      "post_cond": null,
+      "actions": [
+        "re-originate request with proper credentials"
+      ],
+      "modality": "should",
+      "id": "N-S257-003"
+    },
+    {
+      "statement_id": "N-S257-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "sip_fsm",
+      "description": "Once authentication credentials have been supplied (either directly by the user, or discovered in an internal keyring), UAs SHOULD cache the credentials for a given value of the To header field and \"realm\" and attempt to re-use these values on the next request for that destination.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S257",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "credentials_supplied",
+      "pre_cond": "ua.credentials_available = true",
+      "post_cond": "ua.credentials_cached = true",
+      "actions": [
+        "cache credentials keyed by To header field value and realm",
+        "re-use cached credentials on next request to same destination"
+      ],
+      "modality": "should",
+      "id": "N-S257-004"
+    },
+    {
+      "statement_id": "N-S257-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "sip_fsm",
+      "description": "UAs MAY cache credentials in any way they would like.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S257",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S257-005"
+    },
+    {
+      "statement_id": "N-S257-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If no credentials for a realm can be located, UACs MAY attempt to retry the request with a username of \"anonymous\" and no password (a password of \"\").",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S257",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "no_realm_credentials_found",
+      "pre_cond": "uac.realm_credentials = null",
+      "post_cond": null,
+      "actions": [
+        "retry request with username=anonymous and empty password"
+      ],
+      "modality": "may",
+      "id": "N-S257-006"
+    },
+    {
+      "statement_id": "N-S257-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "sip_fsm",
+      "description": "Once credentials have been located, any UA that wishes to authenticate itself with a UAS or registrar -- usually, but not necessarily, after receiving a 401 (Unauthorized) response -- MAY do so by including an Authorization header field with the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S257",
+      "actors": [
+        "UA",
+        "UAS",
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "credentials_located",
+      "pre_cond": "ua.credentials_located = true",
+      "post_cond": "request.contains(Authorization) = true",
+      "actions": [
+        "include Authorization header field in outgoing request"
+      ],
+      "modality": "may",
+      "id": "N-S257-007"
+    },
+    {
+      "statement_id": "N-S257-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When a UAC resubmits a request with its credentials after receiving a 401 (Unauthorized) or 407 (Proxy Authentication Required) response, it MUST increment the CSeq header field value as it would normally when sending an updated request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S257",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "resubmit_request_with_credentials_after_401_or_407",
+      "pre_cond": "uac.received_response.status = 401 | uac.received_response.status = 407",
+      "post_cond": "request.CSeq > previous_request.CSeq",
+      "actions": [
+        "increment CSeq header field value before resubmitting request"
+      ],
+      "modality": "must",
+      "id": "N-S257-008"
+    }
+  ]
+}

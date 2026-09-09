@@ -1,0 +1,391 @@
+{
+  "states": [
+    "NewSession",
+    "TokenObtained",
+    "Connecting",
+    "Introspecting",
+    "PreAuthenticated",
+    "Authenticated",
+    "TlsHandshake",
+    "BrokerAuthenticated",
+    "TokenUploaded",
+    "HandshakeInitiated",
+    "ConnectSent",
+    "WaitingForConnack",
+    "ConnectReceived",
+    "Authenticating",
+    "AwaitingBrokerChallenge",
+    "AwaitingChallengeResponse",
+    "AwaitingConnack",
+    "TokenValidation",
+    "ClientAuthenticated",
+    "ValidationFailed",
+    "Authorizing",
+    "ConnackSent",
+    "ConnectedTlsAnon",
+    "ConnectedTlsKnown",
+    "Connected",
+    "ChallengeSent",
+    "Reauthenticating",
+    "OngoingSession",
+    "CurrentSession",
+    "ExistingSessionContinued",
+    "SessionMaintained",
+    "NotConnected",
+    "ConnectionRefused",
+    "ConnectionRejected",
+    "Disconnected",
+    "NetworkConnectionClosed",
+    "Closed"
+  ],
+  "initial_state": "NewSession",
+  "final_states": [
+    "Disconnected",
+    "NetworkConnectionClosed",
+    "Closed"
+  ],
+  "transitions": [
+    {
+      "from": "NewSession",
+      "event": "receive access token",
+      "action": "receive access token from AS",
+      "to": "TokenObtained"
+    },
+    {
+      "from": "NewSession",
+      "event": "send connect tlsAnon",
+      "action": "establish TLS anonymous connection; connect with MQTT None",
+      "to": "ConnectedTlsAnon"
+    },
+    {
+      "from": "TokenObtained",
+      "event": "send connection request",
+      "action": "send connection request with token",
+      "to": "Connecting"
+    },
+    {
+      "from": "Connecting",
+      "event": "send introspection request",
+      "action": "send introspection request to AS",
+      "to": "Introspecting"
+    },
+    {
+      "from": "Introspecting",
+      "event": "receive introspection response",
+      "action": "receive introspection response from AS",
+      "to": "Connecting"
+    },
+    {
+      "from": "Connecting",
+      "event": "receive connection response",
+      "action": "send connection response to Client",
+      "to": "Connected"
+    },
+    {
+      "from": "Connecting",
+      "event": "receive unsupported protocol",
+      "action": "send CONNACK 0x84; close connection",
+      "to": "Closed"
+    },
+    {
+      "from": "PreAuthenticated",
+      "event": "cond authentication complete",
+      "action": "authenticate to Broker via MQTT or TLS; defer actions until authenticated",
+      "to": "Authenticated"
+    },
+    {
+      "from": "TlsHandshake",
+      "event": "cond TLS handshake complete",
+      "action": "authenticate Broker during TLS handshake",
+      "to": "BrokerAuthenticated"
+    },
+    {
+      "from": "ConnectedTlsAnon",
+      "event": "send token to authzInfo",
+      "action": "publish token to authz-info topic; disconnect from Broker",
+      "to": "Disconnected"
+    },
+    {
+      "from": "Disconnected",
+      "event": "reconnect",
+      "action": "reconnect using TLS Known RPK or PSK",
+      "to": "ConnectedTlsKnown"
+    },
+    {
+      "from": "TokenUploaded",
+      "event": "cond initiate handshake",
+      "action": "upload access token to broker",
+      "to": "HandshakeInitiated"
+    },
+    {
+      "from": "Disconnected",
+      "event": "send CONNECT",
+      "action": "send CONNECT packet",
+      "to": "ConnectSent"
+    },
+    {
+      "from": "ConnectSent",
+      "event": "cond CONNECT sent",
+      "action": "await CONNACK from broker",
+      "to": "WaitingForConnack"
+    },
+    {
+      "from": "WaitingForConnack",
+      "event": "receive AUTH",
+      "action": "send AUTH to Broker",
+      "to": "WaitingForConnack"
+    },
+    {
+      "from": "ConnectReceived",
+      "event": "cond cleanStart1 accepted",
+      "action": "start new session; send CONNACK SessionPresent 0",
+      "to": "Connected"
+    },
+    {
+      "from": "ConnectReceived",
+      "event": "receive CONNECT willUnauthorized",
+      "action": "verify token scope covers will topic",
+      "to": "ConnectionRefused"
+    },
+    {
+      "from": "ConnectReceived",
+      "event": "cond resumeSession",
+      "action": "resume communications from existing session",
+      "to": "Connected"
+    },
+    {
+      "from": "Connected",
+      "event": "receive duplicate clientId",
+      "action": "send DISCONNECT 0x8E to existing client; close existing connection",
+      "to": "Disconnected"
+    },
+    {
+      "from": "ConnectReceived",
+      "event": "cond storedToken found",
+      "action": "send AUTH 0x18 with RS nonce challenge",
+      "to": "AwaitingChallengeResponse"
+    },
+    {
+      "from": "ConnectReceived",
+      "event": "receive CONNECT tokenOnly",
+      "action": "send AUTH 0x18 continue authentication",
+      "to": "AwaitingChallengeResponse"
+    },
+    {
+      "from": "AwaitingBrokerChallenge",
+      "event": "receive AUTH challenge",
+      "action": "send AUTH with nonce and MAC or signature",
+      "to": "AwaitingConnack"
+    },
+    {
+      "from": "AwaitingChallengeResponse",
+      "event": "receive AUTH response",
+      "action": "validate token",
+      "to": "TokenValidation"
+    },
+    {
+      "from": "TokenValidation",
+      "event": "cond token valid",
+      "action": "send CONNACK reason_code 0x00",
+      "to": "Connected"
+    },
+    {
+      "from": "TokenValidation",
+      "event": "cond token claims verified",
+      "action": "accept token; authenticate client",
+      "to": "ClientAuthenticated"
+    },
+    {
+      "from": "TokenValidation",
+      "event": "cond signature failed",
+      "action": "fail signature or MAC validation",
+      "to": "ValidationFailed"
+    },
+    {
+      "from": "TokenValidation",
+      "event": "cond token expired or invalid",
+      "action": "check token expiry; check token audience; check issuer authorization",
+      "to": "ValidationFailed"
+    },
+    {
+      "from": "ConnectReceived",
+      "event": "cond validation result obtained",
+      "action": "send CONNACK to Client",
+      "to": "ConnackSent"
+    },
+    {
+      "from": "Authorizing",
+      "event": "cond auth success newSession",
+      "action": "set CONNACK 0x00; set SessionPresent 0; send CONNACK",
+      "to": "Connected"
+    },
+    {
+      "from": "Authorizing",
+      "event": "cond auth success resumeSession",
+      "action": "set SessionPresent 1; send CONNACK",
+      "to": "Connected"
+    },
+    {
+      "from": "Authorizing",
+      "event": "cond connection accepted",
+      "action": "store access token; retain token after disconnect",
+      "to": "Connected"
+    },
+    {
+      "from": "Connected",
+      "event": "publish request",
+      "action": "send MQTT PUBLISH packet",
+      "to": "Connected"
+    },
+    {
+      "from": "Connected",
+      "event": "receive authorized PUBLISH",
+      "action": "forward PUBLISH to subscriber",
+      "to": "Connected"
+    },
+    {
+      "from": "Connected",
+      "event": "cond introspection cached",
+      "action": "cache token introspection result",
+      "to": "Connected"
+    },
+    {
+      "from": "Connected",
+      "event": "receive authzInfo invalidQoS0",
+      "action": "send DISCONNECT 0x87",
+      "to": "Disconnected"
+    },
+    {
+      "from": "Connected",
+      "event": "receive parseError QoS0",
+      "action": "send DISCONNECT 0x99",
+      "to": "Disconnected"
+    },
+    {
+      "from": "Connected",
+      "event": "receive unauthorized PUBLISH QoS0",
+      "action": "send DISCONNECT 0x87; close Network Connection",
+      "to": "Disconnected"
+    },
+    {
+      "from": "Connected",
+      "event": "cond unauthorized subscriber",
+      "action": "close Network Connection",
+      "to": "NetworkConnectionClosed"
+    },
+    {
+      "from": "Connected",
+      "event": "cond unauthorized subscriber disco",
+      "action": "send DISCONNECT 0x87; close Network Connection",
+      "to": "NetworkConnectionClosed"
+    },
+    {
+      "from": "Connected",
+      "event": "cond initiate reauth",
+      "action": "initiate challenge-response reauthentication",
+      "to": "Reauthenticating"
+    },
+    {
+      "from": "Connected",
+      "event": "send AUTH reauth",
+      "action": "send AUTH 0x19 Reauthentication; set auth method ace; transport new token",
+      "to": "Reauthenticating"
+    },
+    {
+      "from": "Connected",
+      "event": "receive acknowledgment 0x87",
+      "action": "reauthenticate with new token",
+      "to": "Reauthenticating"
+    },
+    {
+      "from": "Connected",
+      "event": "receive PUBACK or SUBACK notAuth",
+      "action": "initiate reauthentication",
+      "to": "Reauthenticating"
+    },
+    {
+      "from": "Connected",
+      "event": "cond token expired",
+      "action": "send DISCONNECT not authorized; close Network Connection",
+      "to": "NetworkConnectionClosed"
+    },
+    {
+      "from": "Connected",
+      "event": "cond PUBLISH authz failure",
+      "action": "ignore PUBLISH packet; disconnect Client",
+      "to": "Disconnected"
+    },
+    {
+      "from": "Connected",
+      "event": "cond token expiration",
+      "action": "disconnect Client",
+      "to": "Disconnected"
+    },
+    {
+      "from": "Connected",
+      "event": "send CLIENT DISCONNECT",
+      "action": "discard Session State; keep retained messages",
+      "to": "Disconnected"
+    },
+    {
+      "from": "Connected",
+      "event": "cond token validated accepted",
+      "action": "cache access token; authorize publish and subscribe",
+      "to": "OngoingSession"
+    },
+    {
+      "from": "Reauthenticating",
+      "event": "cond reauth failed",
+      "action": "send DISCONNECT 0x87",
+      "to": "Disconnected"
+    },
+    {
+      "from": "OngoingSession",
+      "event": "send disconnect longExpiry",
+      "action": "maintain MQTT Session State",
+      "to": "SessionMaintained"
+    },
+    {
+      "from": "OngoingSession",
+      "event": "send disconnect v311",
+      "action": "store Session State indefinitely",
+      "to": "SessionMaintained"
+    },
+    {
+      "from": "CurrentSession",
+      "event": "receive CONNECT cleanFlag0",
+      "action": "resume communications from current session",
+      "to": "ExistingSessionContinued"
+    },
+    {
+      "from": "ExistingSessionContinued",
+      "event": "cond session resumed",
+      "action": "send CONNACK SessionPresent 1",
+      "to": "Connected"
+    },
+    {
+      "from": "Connected",
+      "event": "cond network or protocol error",
+      "action": "publish Will Message to Will Topic",
+      "to": "NotConnected"
+    },
+    {
+      "from": "NotConnected",
+      "event": "timeout session expiry",
+      "action": "discard session state",
+      "to": "Disconnected"
+    },
+    {
+      "from": "NewSession",
+      "event": "send CONNECT without token",
+      "action": "reject CONNECT attempt",
+      "to": "ConnectionRejected"
+    },
+    {
+      "from": "Connected",
+      "event": "cond subscriber token expired",
+      "action": "disconnect Client",
+      "to": "Disconnected"
+    }
+  ]
+}

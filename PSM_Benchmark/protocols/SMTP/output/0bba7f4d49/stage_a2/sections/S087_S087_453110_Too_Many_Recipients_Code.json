@@ -1,0 +1,116 @@
+{
+  "section_id": "S087",
+  "title": "S087 4.5.3.1.10 Too Many Recipients Code",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S087 4.5.3.1.10 Too Many Recipients Code"
+  ],
+  "url_anchor": "#s087-453110-too-many-recipients-code",
+  "word_count": 283,
+  "statement_count": 4,
+  "elapsed_seconds": 35.38,
+  "statements": [
+    {
+      "statement_id": "N-S087-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Clients SHOULD treat a 552 code in this case as a temporary, rather than permanent, failure so the logic below works.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_552_response_for_too_many_recipients",
+      "pre_cond": "server.response_code = 552 & context = too_many_recipients",
+      "post_cond": "client.failure_classification = temporary",
+      "actions": [
+        "classify 552 response as temporary failure",
+        "schedule retry for affected recipients"
+      ],
+      "modality": "should",
+      "id": "N-S087-001"
+    },
+    {
+      "statement_id": "N-S087-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If an SMTP server has an implementation limit on the number of RCPT commands and this limit is exhausted, it MUST use a response code of 452 (but the client SHOULD also be prepared for a 552, as noted above).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_command_received_when_implementation_limit_exhausted",
+      "pre_cond": "server.implementation_rcpt_limit_exhausted = true",
+      "post_cond": "server.response_code = 452",
+      "actions": [
+        "send 452 response to RCPT command"
+      ],
+      "modality": "must",
+      "id": "N-S087-002"
+    },
+    {
+      "statement_id": "N-S087-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "If an SMTP server has an implementation limit on the number of RCPT commands and this limit is exhausted, it MUST use a response code of 452 (but the client SHOULD also be prepared for a 552, as noted above).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_552_response_during_RCPT_processing",
+      "pre_cond": "server.response_code = 552 & context = implementation_rcpt_limit_exhausted",
+      "post_cond": "client.handles_552_as_temporary = true",
+      "actions": [
+        "treat 552 response equivalently to 452 temporary failure",
+        "schedule retry for affected recipients"
+      ],
+      "modality": "should",
+      "id": "N-S087-003"
+    },
+    {
+      "statement_id": "N-S087-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the server has a configured site-policy limitation on the number of RCPT commands, it MAY instead use a 5yz response code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S087",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_command_received_when_site_policy_limit_reached",
+      "pre_cond": "server.site_policy_rcpt_limit_exhausted = true",
+      "post_cond": "server.response_code = 5yz",
+      "actions": [
+        "send 5yz response to RCPT command"
+      ],
+      "modality": "may",
+      "id": "N-S087-004"
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "section_id": "S121",
+  "title": "S121 11.7 Other Security Considerations",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S121 11.7 Other Security Considerations"
+  ],
+  "url_anchor": "#s121-117-other-security-considerations",
+  "word_count": 384,
+  "statement_count": 7,
+  "elapsed_seconds": 81.41,
+  "statements": [
+    {
+      "statement_id": "1-S121-1",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server error message for an AUTHENTICATE command that fails due to invalid credentials SHOULD NOT detail why the credentials are invalid.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "AUTHENTICATE_failure_invalid_credentials",
+      "pre_cond": "protocol.state = Not Authenticated & authenticate.result = failure & authenticate.reason = invalid_credentials",
+      "post_cond": "server.error_response.credential_detail = false",
+      "actions": [
+        "Send error response without specifying reason for credential invalidity"
+      ],
+      "modality": "should",
+      "id": "N-S121-001"
+    },
+    {
+      "statement_id": "2-S121-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server implementation MUST implement a configuration that, at the time of authentication, requires: 1. The STARTTLS command has been negotiated or TLS negotiated on an Implicit TLS port OR 2. Some other mechanism that protects the session from password snooping has been provided OR 3. The following measures are in place: a) The LOGINDISABLED capability is advertised, and [SASL] mechanisms (such as PLAIN) using plaintext passwords are NOT advertised in the CAPABILITY list. AND b) The LOGIN command returns an error even if the password is correct AND c) The AUTHENTICATE command returns an error with all [SASL] mechanisms that use plaintext passwords, even if the password is correct.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "authentication_attempt",
+      "pre_cond": "protocol.state = Not Authenticated",
+      "post_cond": "(session.starttls_negotiated = true | session.implicit_tls = true) | session.password_snooping_protection = true | (capability.LOGINDISABLED = advertised & capability.plaintext_sasl_mechanisms = not_advertised & login.plaintext_result = error & authenticate.plaintext_sasl_result = error)",
+      "actions": [
+        "Enforce at authentication time: STARTTLS or Implicit TLS has been negotiated, OR an equivalent password-snooping protection mechanism is active, OR LOGINDISABLED is advertised AND plaintext SASL mechanisms are not advertised AND LOGIN returns error AND AUTHENTICATE returns error for all plaintext SASL mechanisms"
+      ],
+      "modality": "must",
+      "id": "N-S121-002"
+    },
+    {
+      "statement_id": "3-S121-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server error message for a failing LOGIN command SHOULD NOT specify that the user name, as opposed to the password, is invalid.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "LOGIN_failure",
+      "pre_cond": "protocol.state = Not Authenticated & login.result = failure",
+      "post_cond": "server.error_response.specifies_username_invalid = false",
+      "actions": [
+        "Send error response without distinguishing username invalidity from password invalidity"
+      ],
+      "modality": "should",
+      "id": "N-S121-003"
+    },
+    {
+      "statement_id": "4-S121-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server SHOULD have mechanisms in place to limit or delay failed AUTHENTICATE/LOGIN attempts.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "failed_AUTHENTICATE_or_LOGIN",
+      "pre_cond": "protocol.state = Not Authenticated & (authenticate.result = failure | login.result = failure)",
+      "post_cond": "server.rate_limiting = active | server.attempt_delay = active",
+      "actions": [
+        "Apply rate limiting or delay to subsequent failed authentication attempts"
+      ],
+      "modality": "should",
+      "id": "N-S121-004"
+    },
+    {
+      "statement_id": "5-S121-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server SHOULD report any authentication failure and analyze such authentication failure attempts with regard to a password brute-force attack as well as a password spraying attack [NCSC].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "authentication_failure",
+      "pre_cond": "protocol.state = Not Authenticated & (authenticate.result = failure | login.result = failure)",
+      "post_cond": "server.authentication_failure_reported = true & server.attack_analysis_performed = true",
+      "actions": [
+        "Report the authentication failure",
+        "Analyze the failure for evidence of password brute-force attacks",
+        "Analyze the failure for evidence of password spraying attacks"
+      ],
+      "modality": "should",
+      "id": "N-S121-005"
+    },
+    {
+      "statement_id": "6-S121-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Accounts with passwords that match well-known passwords from spraying attacks MUST be blocked, and users associated with such accounts must be requested to change their passwords.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "spraying_attack_password_match_detected",
+      "pre_cond": "account.password_matches_wellknown_spray_list = true",
+      "post_cond": "account.blocked = true & account.user.password_change_requested = true",
+      "actions": [
+        "Block the affected account from authenticating",
+        "Request the associated user to change their password"
+      ],
+      "modality": "must",
+      "id": "N-S121-006"
+    },
+    {
+      "statement_id": "7-S121-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Only a password with significant strength SHOULD be accepted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S121",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "password_strength_evaluation",
+      "pre_cond": "protocol.state = Not Authenticated & password.strength = insufficient",
+      "post_cond": "authentication.result = rejected",
+      "actions": [
+        "Reject authentication for passwords that do not meet significant strength criteria"
+      ],
+      "modality": "should",
+      "id": "N-S121-007"
+    }
+  ]
+}

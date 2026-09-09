@@ -1,0 +1,158 @@
+{
+  "section_id": "S031",
+  "title": "S031 6.8 BGP Connection Collision Detection",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S031 6.8 BGP Connection Collision Detection"
+  ],
+  "url_anchor": "#s031-68-bgp-connection-collision-detection",
+  "word_count": 429,
+  "statement_count": 6,
+  "elapsed_seconds": 64.56,
+  "statements": [
+    {
+      "statement_id": "D-S031-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "Upon receipt of an OPEN message, the local system MUST examine all of its connections that are in the OpenConfirm state. A BGP speaker MAY also examine connections in an OpenSent state if it knows the BGP Identifier of the peer by means outside of the protocol.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S031",
+      "actors": [
+        "local system",
+        "remote BGP speaker"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": null,
+      "trigger": "OPEN message received",
+      "pre_cond": "connection.state = OpenConfirm | connection.state = OpenSent",
+      "post_cond": null,
+      "actions": [
+        "examine all connections in OpenConfirm state for collision",
+        "optionally examine OpenSent connections if peer BGP Identifier is known"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "If the value of the local BGP Identifier is less than the remote one, the local system closes the BGP connection that already exists (the one that is already in the OpenConfirm state), and accepts the BGP connection initiated by the remote system.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S031",
+      "actors": [
+        "local system"
+      ],
+      "from_state": "OpenConfirm",
+      "to_state": "Idle",
+      "trigger": "collision detected, local BGP Identifier less than remote BGP Identifier",
+      "pre_cond": "connection.state = OpenConfirm & local_BGP_Identifier < remote_BGP_Identifier",
+      "post_cond": "existing_connection.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Error Code Cease",
+        "close existing BGP connection in OpenConfirm state",
+        "accept remote-initiated BGP connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "Otherwise, the local system closes the newly created BGP connection (the one associated with the newly received OPEN message), and continues to use the existing one (the one that is already in the OpenConfirm state).",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S031",
+      "actors": [
+        "local system"
+      ],
+      "from_state": null,
+      "to_state": "Idle",
+      "trigger": "collision detected, local BGP Identifier greater than or equal to remote BGP Identifier",
+      "pre_cond": "local_BGP_Identifier >= remote_BGP_Identifier & existing_connection.state = OpenConfirm",
+      "post_cond": "new_connection.state = Idle & existing_connection.state = OpenConfirm",
+      "actions": [
+        "send NOTIFICATION with Error Code Cease",
+        "close newly created BGP connection",
+        "continue using existing OpenConfirm connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "Unless allowed via configuration, a connection collision with an existing BGP connection that is in the Established state causes closing of the newly created connection.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S031",
+      "actors": [
+        "local system"
+      ],
+      "from_state": null,
+      "to_state": "Idle",
+      "trigger": "collision detected with Established state connection",
+      "pre_cond": "existing_connection.state = Established & configuration.allow_collision_override = false",
+      "post_cond": "new_connection.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Error Code Cease",
+        "close newly created BGP connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-005",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "Note that a connection collision cannot be detected with connections that are in Idle, Connect, or Active states.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "object_name": "connection collision detection",
+      "field_name": "state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "OpenSent",
+        "OpenConfirm",
+        "Established"
+      ],
+      "guard_semantics": "collision detection is only applicable when connection.state = OpenConfirm | connection.state = OpenSent | connection.state = Established; not when connection.state = Idle | connection.state = Connect | connection.state = Active"
+    },
+    {
+      "statement_id": "D-S031-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "bgp_fsm",
+      "description": "Closing the BGP connection (that results from the collision resolution procedure) is accomplished by sending the NOTIFICATION message with the Error Code Cease.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S031",
+      "actors": [
+        "local system"
+      ],
+      "from_state": null,
+      "to_state": "Idle",
+      "trigger": "collision resolution close",
+      "pre_cond": null,
+      "post_cond": "connection.state = Idle",
+      "actions": [
+        "send NOTIFICATION with Error Code Cease"
+      ],
+      "modality": "must"
+    }
+  ]
+}

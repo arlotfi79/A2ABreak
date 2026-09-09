@@ -1,0 +1,161 @@
+{
+  "section_id": "3.5",
+  "title": "3.5. Task Update Delivery Mechanisms",
+  "depth": 3,
+  "parent_path": [
+    "3. A2A Protocol Operations",
+    "3.5. Task Update Delivery Mechanisms"
+  ],
+  "url_anchor": "#35-task-update-delivery-mechanisms",
+  "word_count": 413,
+  "statement_count": 6,
+  "elapsed_seconds": 61.24,
+  "statements": [
+    {
+      "statement_id": "N-3.5-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "All implementations MUST deliver events in the order they were generated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_event_generated",
+      "pre_cond": null,
+      "post_cond": "event.delivery_order = event.generation_order",
+      "actions": [
+        "Deliver events to clients in the order they were generated"
+      ],
+      "modality": "must",
+      "id": "N-3-5-001"
+    },
+    {
+      "statement_id": "N-3.5-002",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Events MUST NOT be reordered during transmission, regardless of protocol binding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_event_generated",
+      "pre_cond": null,
+      "post_cond": "event.order_preserved = true",
+      "actions": [
+        "Preserve event order during transmission regardless of which protocol binding is used"
+      ],
+      "modality": "must",
+      "id": "N-3-5-002"
+    },
+    {
+      "statement_id": "N-3.5-003",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "An agent MAY serve multiple concurrent streams to one or more clients for the same task.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "stream_subscription_request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Serve multiple concurrent streams to one or more clients for the same task"
+      ],
+      "modality": "may",
+      "id": "N-3-5-003"
+    },
+    {
+      "statement_id": "N-3.5-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Events MUST be broadcast to all active streams for that task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_event_generated",
+      "pre_cond": "stream.active = true",
+      "post_cond": "event.delivered_to_all_active_streams = true",
+      "actions": [
+        "Broadcast each generated event to all currently active streams for that task"
+      ],
+      "modality": "must",
+      "id": "N-3-5-004"
+    },
+    {
+      "statement_id": "N-3.5-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Each stream MUST receive the same events in the same order",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_event_generated",
+      "pre_cond": "stream.active = true",
+      "post_cond": "stream.received_events = task.generated_events & stream.event_order = task.event_generation_order",
+      "actions": [
+        "Deliver the same set of events to each active stream",
+        "Deliver those events in the same order to each active stream"
+      ],
+      "modality": "must",
+      "id": "N-3-5-005"
+    },
+    {
+      "statement_id": "N-3.5-006",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "streaming",
+      "stage": "task_execution",
+      "description": "Closing one stream MUST NOT affect other active streams for the same task",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "stream_closed",
+      "pre_cond": "stream.active = true",
+      "post_cond": null,
+      "actions": [
+        "Leave all other active streams for the same task unaffected when one stream is closed"
+      ],
+      "modality": "must",
+      "id": "N-3-5-006"
+    }
+  ]
+}

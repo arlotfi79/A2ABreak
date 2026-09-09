@@ -1,0 +1,773 @@
+{
+  "stage": "authentication",
+  "fsm_input": {
+    "states": [
+      {
+        "id": "D-4-1-009",
+        "state_name": "TASK_STATE_AUTH_REQUIRED",
+        "semantic_type": "interrupted",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "authentication",
+        "source_section": "4.1.3"
+      },
+      {
+        "id": "D-7-3-002",
+        "state_name": "CLIENT_CREDENTIAL_ACQUISITION",
+        "semantic_type": "active",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "authentication",
+        "source_section": "7.3"
+      },
+      {
+        "id": "D-7-3-003",
+        "state_name": "CLIENT_CREDENTIAL_TRANSMISSION",
+        "semantic_type": "active",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "stage": "authentication",
+        "source_section": "7.3"
+      }
+    ],
+    "transitions": [
+      {
+        "id": "N-3-3-005",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "request_received",
+        "pre_cond": "request.credentials.valid = false | request.credentials = null",
+        "post_cond": "request.rejected = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-006",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "authentication_error",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-007",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "authentication_error",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-3-3-008",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "request_received",
+        "pre_cond": "client.authenticated = true & client.permissions.sufficient = false",
+        "post_cond": "authorization_error.returned = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "3.3"
+      },
+      {
+        "id": "N-7-2-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "tls_handshake_initiated",
+        "pre_cond": null,
+        "post_cond": "client.server_identity_verified = true",
+        "modality": "should",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "source_section": "7.2"
+      },
+      {
+        "id": "D-7-3-005",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": "CLIENT_CREDENTIAL_ACQUISITION",
+        "to_state": "CLIENT_CREDENTIAL_TRANSMISSION",
+        "trigger": null,
+        "pre_cond": "client.state = CLIENT_CREDENTIAL_ACQUISITION",
+        "post_cond": "client.credentials_acquired = true & client.state = CLIENT_CREDENTIAL_TRANSMISSION",
+        "modality": "unspecified",
+        "actors": [
+          "client"
+        ],
+        "source_section": "7.3"
+      },
+      {
+        "id": "N-7-4-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "incoming_request_received",
+        "pre_cond": null,
+        "post_cond": "request.authenticated = true | request.rejected = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "7.4"
+      },
+      {
+        "id": "N-7-4-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "authentication_challenge_or_rejection",
+        "pre_cond": "request.authenticated = false",
+        "post_cond": "response.error_code = binding_specific_auth_error_code",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "7.4"
+      },
+      {
+        "id": "N-7-4-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "authentication_challenge_or_rejection",
+        "pre_cond": "request.authenticated = false",
+        "post_cond": "response.authentication_challenge_info = present",
+        "modality": "should",
+        "actors": [
+          "server"
+        ],
+        "source_section": "7.4"
+      },
+      {
+        "id": "N-7-5-001",
+        "category": "BEHAVIORAL",
+        "from_state": "authenticated",
+        "to_state": null,
+        "trigger": "request_received",
+        "pre_cond": "client.authenticated = true",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "7.5"
+      },
+      {
+        "id": "N-13-1-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "A2A_protocol_operations_request",
+        "pre_cond": null,
+        "post_cond": "authorization_check.performed = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.1"
+      },
+      {
+        "id": "N-13-1-009",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "A2A_protocol_operations_request",
+        "pre_cond": "caller.authenticated = true",
+        "post_cond": "authorization_check.performed = true & authorization_check.timing = before_database_query",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.1"
+      },
+      {
+        "id": "D-13-3-004",
+        "category": "IMPLICIT_TRANSITION",
+        "from_state": null,
+        "to_state": null,
+        "trigger": null,
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": null,
+        "actors": null,
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-13-3-001",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "get_extended_agent_card_request",
+        "pre_cond": null,
+        "post_cond": null,
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-13-3-002",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "get_extended_agent_card_request",
+        "pre_cond": null,
+        "post_cond": "request.auth_scheme = agent_card.securitySchemes | request.auth_scheme = agent_card.security",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-13-3-003",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "get_extended_agent_card_request",
+        "pre_cond": "client.authenticated = true",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-13-3-010",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "get_extended_agent_card_request",
+        "pre_cond": "client.authenticated == true",
+        "post_cond": "client.permissions_validated = true",
+        "modality": "must",
+        "actors": [
+          "server"
+        ],
+        "source_section": "13.3"
+      },
+      {
+        "id": "N-14-3-007",
+        "category": "BEHAVIORAL",
+        "from_state": null,
+        "to_state": null,
+        "trigger": "authenticated_agent_card_request",
+        "pre_cond": "agent_card.type = extended & endpoint.authenticated = true",
+        "post_cond": null,
+        "modality": "may",
+        "actors": [
+          "server"
+        ],
+        "source_section": "14.3"
+      }
+    ]
+  },
+  "statements": [
+    {
+      "statement_id": "N-3-3-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Servers MUST reject requests with invalid or missing authentication credentials",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "request.credentials.valid = false | request.credentials = null",
+      "post_cond": "request.rejected = true",
+      "actions": [
+        "Reject the request with an authentication error"
+      ],
+      "modality": "must",
+      "id": "N-3-3-005"
+    },
+    {
+      "statement_id": "N-3-3-006",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Servers SHOULD include authentication challenge information in the error response",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authentication_error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Include authentication challenge information in the error response"
+      ],
+      "modality": "should",
+      "id": "N-3-3-006"
+    },
+    {
+      "statement_id": "N-3-3-007",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Servers SHOULD specify which authentication scheme is required",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authentication_error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Specify which authentication scheme is required in the error response"
+      ],
+      "modality": "should",
+      "id": "N-3-3-007"
+    },
+    {
+      "statement_id": "N-3-3-008",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Servers MUST return an authorization error when the authenticated client lacks required permissions",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "3.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "client.authenticated = true & client.permissions.sufficient = false",
+      "post_cond": "authorization_error.returned = true",
+      "actions": [
+        "Return an authorization error"
+      ],
+      "modality": "must",
+      "id": "N-3-3-008"
+    },
+    {
+      "statement_id": "D-4-1-009",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "task",
+      "stage": "authentication",
+      "description": "Indicates that authentication is required to proceed. This is an interrupted state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "4.1.3",
+      "state_name": "TASK_STATE_AUTH_REQUIRED",
+      "enum_name": "TaskState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "N-7-2-001",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "authentication",
+      "description": "A2A Clients SHOULD verify the A2A Server's identity by validating its TLS certificate against trusted certificate authorities (CAs) during the TLS handshake.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.2",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tls_handshake_initiated",
+      "pre_cond": null,
+      "post_cond": "client.server_identity_verified = true",
+      "actions": [
+        "Validate the A2A Server's TLS certificate against trusted certificate authorities (CAs)"
+      ],
+      "modality": "should",
+      "id": "N-7-2-001"
+    },
+    {
+      "statement_id": "D-7-3-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "authentication",
+      "description": "Credential Acquisition (Out-of-Band): The client obtains the necessary credentials through an out-of-band process specific to the required authentication scheme.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "7.3",
+      "state_name": "CLIENT_CREDENTIAL_ACQUISITION",
+      "enum_name": "ClientAuthenticationProcess",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-7-3-003",
+      "normative_level": "REQUIREMENT",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "authentication",
+      "description": "Credential Transmission: The client includes these credentials in protocol-appropriate headers or metadata for every A2A request.",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "7.3",
+      "state_name": "CLIENT_CREDENTIAL_TRANSMISSION",
+      "enum_name": "ClientAuthenticationProcess",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-7-3-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "authentication",
+      "description": "After obtaining credentials through an out-of-band process, the client proceeds to include credentials in protocol-appropriate headers or metadata for every A2A request.",
+      "is_inferred": true,
+      "confidence": 0.72,
+      "source_section": "7.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": "CLIENT_CREDENTIAL_ACQUISITION",
+      "to_state": "CLIENT_CREDENTIAL_TRANSMISSION",
+      "trigger": null,
+      "pre_cond": "client.state = CLIENT_CREDENTIAL_ACQUISITION",
+      "post_cond": "client.credentials_acquired = true & client.state = CLIENT_CREDENTIAL_TRANSMISSION",
+      "actions": [
+        "Client obtains credentials via out-of-band process specific to the required authentication scheme",
+        "Client prepares to include credentials in protocol-appropriate headers or metadata for every subsequent A2A request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-7-4-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "MUST authenticate every incoming request based on the provided credentials and its declared authentication requirements.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "incoming_request_received",
+      "pre_cond": null,
+      "post_cond": "request.authenticated = true | request.rejected = true",
+      "actions": [
+        "Authenticate every incoming request using the provided credentials",
+        "Enforce declared authentication requirements for every request"
+      ],
+      "modality": "must",
+      "id": "N-7-4-001"
+    },
+    {
+      "statement_id": "N-7-4-002",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "SHOULD use appropriate binding-specific error codes for authentication challenges or rejections.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authentication_challenge_or_rejection",
+      "pre_cond": "request.authenticated = false",
+      "post_cond": "response.error_code = binding_specific_auth_error_code",
+      "actions": [
+        "Return a binding-specific error code appropriate for the authentication challenge or rejection"
+      ],
+      "modality": "should",
+      "id": "N-7-4-002"
+    },
+    {
+      "statement_id": "N-7-4-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "SHOULD provide relevant authentication challenge information with error responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.4",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authentication_challenge_or_rejection",
+      "pre_cond": "request.authenticated = false",
+      "post_cond": "response.authentication_challenge_info = present",
+      "actions": [
+        "Include relevant authentication challenge information in the error response"
+      ],
+      "modality": "should",
+      "id": "N-7-4-003"
+    },
+    {
+      "statement_id": "N-7-5-001",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Authorization logic is implementation-specific and MAY consider: Specific skills requested, Actions attempted within tasks, Data access policies, OAuth scopes (if applicable)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "7.5",
+      "actors": [
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "client.authenticated = true",
+      "post_cond": null,
+      "actions": [
+        "Evaluate requested skills against authorization policy",
+        "Evaluate actions attempted within tasks against authorization policy",
+        "Evaluate data access policies",
+        "Evaluate OAuth scopes if applicable"
+      ],
+      "modality": "may",
+      "id": "N-7-5-001"
+    },
+    {
+      "statement_id": "N-13-1-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Servers MUST implement authorization checks on every A2A Protocol Operations request",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "A2A_protocol_operations_request",
+      "pre_cond": null,
+      "post_cond": "authorization_check.performed = true",
+      "actions": [
+        "Implement authorization checks on every A2A Protocol Operations request"
+      ],
+      "modality": "must",
+      "id": "N-13-1-002"
+    },
+    {
+      "statement_id": "N-13-1-009",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Authorization checks MUST occur before any database queries or operations that could leak information about the existence of resources outside the caller's authorization scope",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "A2A_protocol_operations_request",
+      "pre_cond": "caller.authenticated = true",
+      "post_cond": "authorization_check.performed = true & authorization_check.timing = before_database_query",
+      "actions": [
+        "Perform authorization checks before any database queries or operations that could leak information about the existence of resources outside the caller's authorization scope"
+      ],
+      "modality": "must",
+      "id": "N-13-1-009"
+    },
+    {
+      "statement_id": "D-13-3-004",
+      "normative_level": "MUST",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "authentication",
+      "description": "Agents MUST authenticate requests using one of the schemes declared in the public AgentCard.securitySchemes and AgentCard.security fields",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "object_name": "AgentCard",
+      "field_name": "securitySchemes and AgentCard.security",
+      "field_type": null,
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "N-13-3-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "The Get Extended Agent Card operation MUST require authentication",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Require authentication before processing the Get Extended Agent Card operation"
+      ],
+      "modality": "must",
+      "id": "N-13-3-001"
+    },
+    {
+      "statement_id": "N-13-3-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Agents MUST authenticate requests using one of the schemes declared in the public AgentCard.securitySchemes and AgentCard.security fields",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": null,
+      "post_cond": "request.auth_scheme = agent_card.securitySchemes | request.auth_scheme = agent_card.security",
+      "actions": [
+        "Authenticate incoming requests using one of the schemes declared in AgentCard.securitySchemes and AgentCard.security fields"
+      ],
+      "modality": "must",
+      "id": "N-13-3-002"
+    },
+    {
+      "statement_id": "N-13-3-003",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Agents MAY return different extended card content based on the authenticated client's identity or authorization level",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": "client.authenticated = true",
+      "post_cond": null,
+      "actions": [
+        "Return different extended card content based on the authenticated client's identity or authorization level"
+      ],
+      "modality": "may",
+      "id": "N-13-3-003"
+    },
+    {
+      "statement_id": "N-13-3-010",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Agents MUST validate that clients have appropriate permissions before returning privileged information in extended cards",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": "client.authenticated == true",
+      "post_cond": "client.permissions_validated = true",
+      "actions": [
+        "Validate that the client has appropriate permissions before returning privileged information in the extended card"
+      ],
+      "modality": "must",
+      "id": "N-13-3-010"
+    },
+    {
+      "statement_id": "N-14-3-007",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "agent_card",
+      "stage": "authentication",
+      "description": "Extended Agent Cards retrieved via authenticated endpoints (Section 3.1.11) MAY contain additional information and MUST enforce appropriate access controls",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "14.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "authenticated_agent_card_request",
+      "pre_cond": "agent_card.type = extended & endpoint.authenticated = true",
+      "post_cond": null,
+      "actions": [
+        "Include additional information in Extended Agent Cards beyond what is available in the public Agent Card"
+      ],
+      "modality": "may",
+      "id": "N-14-3-007"
+    }
+  ]
+}

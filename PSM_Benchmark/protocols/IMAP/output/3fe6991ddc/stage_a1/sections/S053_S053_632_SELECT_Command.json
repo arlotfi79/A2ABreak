@@ -1,0 +1,178 @@
+{
+  "section_id": "S053",
+  "title": "S053 6.3.2 SELECT Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S053 6.3.2 SELECT Command"
+  ],
+  "url_anchor": "#s053-632-select-command",
+  "word_count": 700,
+  "statement_count": 7,
+  "elapsed_seconds": 41.26,
+  "statements": [
+    {
+      "statement_id": "D-S053-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "OK - select completed, now in selected state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "state_name": "selected",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = selected"
+    },
+    {
+      "statement_id": "D-S053-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "NO - select failure, now in authenticated state: no such mailbox, can't access mailbox",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "state_name": "authenticated",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = authenticated"
+    },
+    {
+      "statement_id": "D-S053-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "OK - select completed, now in selected state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "selected",
+      "trigger": "SELECT OK",
+      "pre_cond": "protocol.state = authenticated",
+      "post_cond": "protocol.state = selected",
+      "actions": [
+        "server sends untagged FLAGS response",
+        "server sends untagged EXISTS response",
+        "server sends untagged LIST response",
+        "server sends untagged OK [PERMANENTFLAGS] response",
+        "server sends untagged OK [UIDNEXT] response",
+        "server sends untagged OK [UIDVALIDITY] response",
+        "server sends tagged OK response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "NO - select failure, now in authenticated state: no such mailbox, can't access mailbox",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "authenticated",
+      "trigger": "SELECT NO",
+      "pre_cond": "protocol.state = authenticated",
+      "post_cond": "protocol.state = authenticated",
+      "actions": [
+        "server sends tagged NO response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The SELECT command automatically deselects any currently selected mailbox before attempting the new selection. When deselecting a selected mailbox, the server MUST return an untagged OK response with the '[CLOSED]' response code. Result: OK - select completed, now in selected state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": "selected",
+      "trigger": "SELECT OK",
+      "pre_cond": "protocol.state = selected",
+      "post_cond": "protocol.state = selected & connection.selected_mailbox = new_mailbox",
+      "actions": [
+        "server deselects current mailbox",
+        "server sends untagged OK [CLOSED] response",
+        "server sends untagged FLAGS response",
+        "server sends untagged EXISTS response",
+        "server sends untagged LIST response",
+        "server sends untagged OK [PERMANENTFLAGS] response",
+        "server sends untagged OK [UIDNEXT] response",
+        "server sends untagged OK [UIDVALIDITY] response",
+        "server sends tagged OK response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The SELECT command automatically deselects any currently selected mailbox before attempting the new selection. Consequently, if a mailbox is selected and a SELECT command that fails is attempted, no mailbox is selected. When deselecting a selected mailbox, the server MUST return an untagged OK response with the '[CLOSED]' response code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": "authenticated",
+      "trigger": "SELECT NO",
+      "pre_cond": "protocol.state = selected",
+      "post_cond": "protocol.state = authenticated & connection.selected_mailbox = null",
+      "actions": [
+        "server deselects current mailbox",
+        "server sends untagged OK [CLOSED] response",
+        "server sends tagged NO response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Only one mailbox can be selected at a time in a connection; simultaneous access to multiple mailboxes requires multiple connections.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "object_name": "connection",
+      "field_name": "selected_mailbox",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "At most one mailbox may be in the selected state per connection at any time"
+    }
+  ]
+}

@@ -1,0 +1,243 @@
+{
+ "states": [
+  "Idle",
+  "Wait Control Reply",
+  "Established",
+  "Wait Stop Reply",
+  "Wait Outgoing Reply",
+  "Wait Connect",
+  "wait_cs_ans",
+  "Wait Disconnect",
+  "closed",
+  "known_state",
+  "Collision Handling"
+ ],
+ "initial_state": "Idle",
+ "final_states": [
+  "closed"
+ ],
+ "transitions": [
+  {
+   "from": "Idle",
+   "event": "TCP Open Indication",
+   "action": "Send Start Control Connection Request",
+   "to": "Wait Control Reply"
+  },
+  {
+   "from": "Wait Control Reply",
+   "event": "Receive Start Control Connection Reply (Version OK)",
+   "action": "Establish control connection",
+   "to": "Established"
+  },
+  {
+   "from": "Wait Control Reply",
+   "event": "cond collision detected",
+   "action": "close TCP",
+   "to": "Idle"
+  },
+  {
+   "from": "Wait Control Reply",
+   "event": "Receive Start Control Connection Reply (Version Not OK)",
+   "action": "Send Stop Control Connection Request",
+   "to": "Wait Stop Reply"
+  },
+  {
+   "from": "Established",
+   "event": "Local Terminate",
+   "action": "Send Stop Control Connection Request",
+   "to": "Wait Stop Reply"
+  },
+  {
+   "from": "Established",
+   "event": "Receive Stop Control Connection Request",
+   "action": "Send Stop Control Connection Reply",
+   "to": "Idle"
+  },
+  {
+   "from": "Wait Stop Reply",
+   "event": "Receive Stop Control Connection Reply",
+   "action": "Close TCP, return to Idle",
+   "to": "Idle"
+  },
+  {
+   "from": "Idle",
+   "event": "receive StartCtlReq unsupported",
+   "action": "send StartCtlConnReply error; close TCP connection",
+   "to": "Idle"
+  },
+  {
+   "from": "Idle",
+   "event": "receive StartCtlConnReq ok",
+   "action": "send StartCtlConnReply",
+   "to": "Established"
+  },
+  {
+   "from": "Established",
+   "event": "timeout echo failure",
+   "action": "detect echo timeout",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "timeout echo reply",
+   "action": "close control connection",
+   "to": "closed"
+  },
+  {
+   "from": "Established",
+   "event": "timeout no message",
+   "action": "send EchoRequest",
+   "to": "Established"
+  },
+  {
+   "from": "Established",
+   "event": "receive StartCtlReq duplicate",
+   "action": "send StopCtlConnReply; close TCP connection",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "receive SetLinkInfo",
+   "action": "update call information; perform PPP negotiation",
+   "to": "Established"
+  },
+  {
+   "from": "Idle",
+   "event": "cond ring detected",
+   "action": "send IncomingCallRequest",
+   "to": "Wait Outgoing Reply"
+  },
+  {
+   "from": "Wait Outgoing Reply",
+   "event": "receive InCallReply reject",
+   "action": "",
+   "to": "Idle"
+  },
+  {
+   "from": "Wait Outgoing Reply",
+   "event": "cond abort",
+   "action": "send CallDisconnectNotify",
+   "to": "Idle"
+  },
+  {
+   "from": "Wait Outgoing Reply",
+   "event": "receive InCallReply accept",
+   "action": "answer call; send IncomingCallConnected",
+   "to": "Established"
+  },
+  {
+   "from": "Established",
+   "event": "receive CallClearRequest",
+   "action": "send CallDisconnectNotify",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "cond telco dropped",
+   "action": "send CallDisconnectNotify",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "cond local disconnect",
+   "action": "send CallDisconnectNotify",
+   "to": "Idle"
+  },
+  {
+   "from": "Idle",
+   "event": "receive InCallReq rejected",
+   "action": "send IncomingCallReply error",
+   "to": "Idle"
+  },
+  {
+   "from": "Idle",
+   "event": "receive InCallReq accepted",
+   "action": "send IncomingCallReply ok",
+   "to": "Wait Connect"
+  },
+  {
+   "from": "Wait Connect",
+   "event": "Receive Incoming Call Connected",
+   "action": "Confirm session establishment",
+   "to": "Established"
+  },
+  {
+   "from": "Wait Connect",
+   "event": "cond caller fail",
+   "action": "send CallDisconnectNotify",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "receive CallDisconnectNotify",
+   "action": "",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "cond local terminate",
+   "action": "send CallClearRequest",
+   "to": "Wait Disconnect"
+  },
+  {
+   "from": "Wait Disconnect",
+   "event": "Local Terminate",
+   "action": "Send Call Clear Request",
+   "to": "Idle"
+  },
+  {
+   "from": "Idle",
+   "event": "receive OutCallReq error",
+   "action": "send OutgoingCallReply error",
+   "to": "Idle"
+  },
+  {
+   "from": "Idle",
+   "event": "receive OutCallReq valid",
+   "action": "allocate physical channel; dial outbound call",
+   "to": "wait_cs_ans"
+  },
+  {
+   "from": "wait_cs_ans",
+   "event": "cond incomplete call",
+   "action": "send OutgoingCallReply error",
+   "to": "Idle"
+  },
+  {
+   "from": "wait_cs_ans",
+   "event": "receive CallClearRequest",
+   "action": "send CallDisconnectNotify",
+   "to": "Idle"
+  },
+  {
+   "from": "wait_cs_ans",
+   "event": "cond telco answer",
+   "action": "send OutgoingCallReply ok",
+   "to": "Established"
+  },
+  {
+   "from": "Idle",
+   "event": "cond open indication",
+   "action": "send OutgoingCallRequest",
+   "to": "Wait Outgoing Reply"
+  },
+  {
+   "from": "Wait Outgoing Reply",
+   "event": "Send Outgoing Call Request",
+   "action": "Wait for PAC response",
+   "to": "Idle"
+  },
+  {
+   "from": "Wait Outgoing Reply",
+   "event": "Receive Outgoing Call Reply (Error)",
+   "action": "Return to Idle",
+   "to": "Established"
+  },
+  {
+   "from": "Wait Outgoing Reply",
+   "event": "Receive Outgoing Call Reply (No Error)",
+   "action": "Establish call",
+   "to": "Wait Disconnect"
+  }
+ ]
+}

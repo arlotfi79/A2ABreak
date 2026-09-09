@@ -1,0 +1,182 @@
+{
+  "section_id": "S004",
+  "title": "S004 2.1 Basic Structure",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S004 2.1 Basic Structure"
+  ],
+  "url_anchor": "#s004-21-basic-structure",
+  "word_count": 954,
+  "statement_count": 8,
+  "elapsed_seconds": 70.15,
+  "statements": [
+    {
+      "statement_id": "D-S004-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "smtp_fsm",
+      "description": "When an SMTP client has a message to transmit, it establishes a two-way transmission channel to an SMTP server.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "state_name": "TRANSMISSION_CHANNEL_ESTABLISHED",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S004-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "Once the transmission channel is established and initial handshaking is completed, the SMTP client normally initiates a mail transaction.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S004",
+      "state_name": "INITIAL_HANDSHAKING_COMPLETED",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = TRANSMISSION_CHANNEL_ESTABLISHED"
+    },
+    {
+      "statement_id": "D-S004-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "Such a transaction consists of a series of commands to specify the originator and destination of the mail and transmission of the message content (including any lines in the header section or other structure) itself.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "state_name": "MAIL_TRANSACTION",
+      "enum_name": "SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = INITIAL_HANDSHAKING_COMPLETED"
+    },
+    {
+      "statement_id": "D-S004-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "When an SMTP client has a message to transmit, it establishes a two-way transmission channel to an SMTP server.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "SMTP client",
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": "TRANSMISSION_CHANNEL_ESTABLISHED",
+      "trigger": "client has message to transmit",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "establish two-way transmission channel to SMTP server"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "Once the transmission channel is established and initial handshaking is completed, the SMTP client normally initiates a mail transaction.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "INITIAL_HANDSHAKING_COMPLETED",
+      "to_state": "MAIL_TRANSACTION",
+      "trigger": "initial handshaking completed",
+      "pre_cond": "connection.state = TRANSMISSION_CHANNEL_ESTABLISHED",
+      "post_cond": "session.state = MAIL_TRANSACTION",
+      "actions": [
+        "initiate mail transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "once the server has issued a success response at the end of the mail data, a formal handoff of responsibility for the message occurs: the protocol requires that a server MUST accept responsibility for either delivering the message or properly reporting the failure to do so",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": "MAIL_TRANSACTION",
+      "to_state": null,
+      "trigger": "server issues success response at end of mail data",
+      "pre_cond": "session.state = MAIL_TRANSACTION",
+      "post_cond": "server.responsibility = ACCEPTED",
+      "actions": [
+        "formal handoff of responsibility for message to server"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S004-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Once a given mail message has been transmitted, the client may either request that the connection be shut down or may initiate other mail transactions.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "MAIL_TRANSACTION",
+      "to_state": "CONNECTION_SHUTDOWN_REQUESTED",
+      "trigger": "mail message transmitted",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "request connection shutdown"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S004-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Once a given mail message has been transmitted, the client may either request that the connection be shut down or may initiate other mail transactions.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S004",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "MAIL_TRANSACTION",
+      "to_state": "MAIL_TRANSACTION",
+      "trigger": "mail message transmitted",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "initiate other mail transactions"
+      ],
+      "modality": "may"
+    }
+  ]
+}

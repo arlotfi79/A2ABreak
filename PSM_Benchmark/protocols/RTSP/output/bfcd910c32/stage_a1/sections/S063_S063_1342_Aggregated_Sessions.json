@@ -1,0 +1,128 @@
+{
+  "section_id": "S063",
+  "title": "S063 13.4.2 Aggregated Sessions",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S063 13.4.2 Aggregated Sessions"
+  ],
+  "url_anchor": "#s063-1342-aggregated-sessions",
+  "word_count": 243,
+  "statement_count": 5,
+  "elapsed_seconds": 33.85,
+  "statements": [
+    {
+      "statement_id": "D-S063-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "In an aggregated session, the PLAY request MUST contain an aggregated control URI.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "object_name": "PLAY request",
+      "field_name": "aggregated control URI",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "session.type = aggregated"
+    },
+    {
+      "statement_id": "D-S063-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server MUST respond with a 460 error (Only Aggregate Operation Allowed) if the client PLAY Request-URI is for a single media on an aggregated session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S063",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PLAY request with single-media URI on aggregated session",
+      "pre_cond": "session.type = aggregated & request.uri = single_media_uri",
+      "post_cond": null,
+      "actions": [
+        "send 460 Only Aggregate Operation Allowed"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S063-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "For aggregated sessions where the initial SETUP request (creating a session) is followed by one or more additional SETUP requests, a PLAY request MAY be pipelined after those additional SETUP requests without awaiting their responses.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S063",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Playing",
+      "trigger": "PLAY request pipelined after additional SETUP requests",
+      "pre_cond": "session.type = aggregated & session.initial_setup_done = true & session.additional_setups_sent = true",
+      "post_cond": "server.state = state_at_PLAY_processing_time",
+      "actions": [
+        "pipeline PLAY after SETUP requests without awaiting SETUP responses"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S063-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "In case of failure, the client can halt the media playout using PAUSE and try to establish the intended state again before issuing another PLAY request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S063",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Playing",
+      "to_state": "Ready",
+      "trigger": "failure detected in pipelined prior request responses",
+      "pre_cond": "session.pipelined_request_failed = true",
+      "post_cond": "session.playout_halted = true",
+      "actions": [
+        "send PAUSE",
+        "halt media playout",
+        "re-establish intended state"
+      ],
+      "modality": "can"
+    },
+    {
+      "statement_id": "D-S063-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "After halting playout via PAUSE following a pipelined failure, the client issues another PLAY request once the intended state is re-established.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S063",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Ready",
+      "to_state": "Playing",
+      "trigger": "PLAY request after re-establishing intended state",
+      "pre_cond": "session.playout_halted = true & session.intended_state_established = true",
+      "post_cond": null,
+      "actions": [
+        "send PLAY"
+      ],
+      "modality": "can"
+    }
+  ]
+}

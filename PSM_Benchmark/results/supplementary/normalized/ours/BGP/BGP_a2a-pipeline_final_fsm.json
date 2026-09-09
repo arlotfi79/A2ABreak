@@ -1,0 +1,668 @@
+{
+ "states": [
+  "Idle",
+  "Connect",
+  "Active",
+  "OpenSent",
+  "OpenConfirm",
+  "Established"
+ ],
+ "initial_state": "Idle",
+ "final_states": [],
+ "transitions": [
+  {
+   "from": "Idle",
+   "event": "ManualStart",
+   "action": "Initiate TCP, start ConnectRetryTimer",
+   "to": "Connect"
+  },
+  {
+   "from": "Idle",
+   "event": "AutomaticStart",
+   "action": "initialize BGP resources; set ConnectRetryCounter to zero; start ConnectRetryTimer; initiate TCP connection; listen for TCP connection",
+   "to": "Connect"
+  },
+  {
+   "from": "Idle",
+   "event": "ManualStart_with_PassiveTcpEstablishment",
+   "action": "Start listening, reset ConnectRetryCounter",
+   "to": "Active"
+  },
+  {
+   "from": "Idle",
+   "event": "AutomaticStart_with_PassiveTcpEstablishment",
+   "action": "Start listening, reset ConnectRetryCounter",
+   "to": "Active"
+  },
+  {
+   "from": "Connect",
+   "event": "ManualStop",
+   "action": "drop TCP connection; release all BGP resources; set ConnectRetryCounter to zero; stop ConnectRetryTimer",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "ConnectRetryTimer Expires",
+   "action": "drop TCP connection; restart ConnectRetryTimer; stop DelayOpenTimer; initiate TCP connection; listen for TCP connection",
+   "to": "Connect"
+  },
+  {
+   "from": "Connect",
+   "event": "DelayOpenTimer_Expires",
+   "action": "Send OPEN, start HoldTimer",
+   "to": "OpenSent"
+  },
+  {
+   "from": "Connect",
+   "event": "TcpConnection Valid",
+   "action": "process TCP connection",
+   "to": "Connect"
+  },
+  {
+   "from": "Connect",
+   "event": "Tcp CR Invalid",
+   "action": "reject TCP connection",
+   "to": "Connect"
+  },
+  {
+   "from": "Connect",
+   "event": "Tcp CR Acked",
+   "action": "stop ConnectRetryTimer; set DelayOpenTimer initial value",
+   "to": "Connect"
+  },
+  {
+   "from": "Connect",
+   "event": "TcpConnectionConfirmed",
+   "action": "stop ConnectRetryTimer; set DelayOpenTimer initial value",
+   "to": "Connect"
+  },
+  {
+   "from": "Connect",
+   "event": "Tcp CR Acked",
+   "action": "stop ConnectRetryTimer; complete BGP initialization; send OPEN message; set HoldTimer large value",
+   "to": "OpenSent"
+  },
+  {
+   "from": "Connect",
+   "event": "TcpConnectionConfirmed",
+   "action": "Send OPEN, start HoldTimer",
+   "to": "OpenSent"
+  },
+  {
+   "from": "Connect",
+   "event": "TcpConnectionFails",
+   "action": "Reset ConnectRetryTimer, listen for incoming connection",
+   "to": "Active"
+  },
+  {
+   "from": "Connect",
+   "event": "TcpConnectionFails",
+   "action": "stop ConnectRetryTimer; drop TCP connection; release all BGP resources",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "BGPOpen",
+   "action": "stop ConnectRetryTimer; complete BGP initialization; stop DelayOpenTimer; send OPEN message; send KEEPALIVE message; start KeepaliveTimer; set HoldTimer negotiated value",
+   "to": "OpenConfirm"
+  },
+  {
+   "from": "Connect",
+   "event": "BGPHeaderErr",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "BGPOpenMsgErr",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "NotifMsgVerErr",
+   "action": "stop ConnectRetryTimer; stop DelayOpenTimer; release all BGP resources; drop TCP connection",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "AutomaticStop",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "HoldTimer Expires",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "KeepaliveTimer Expires",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "IdleHoldTimer Expires",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "BGPOpen",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "OpenCollisionDump",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "NotifMsg",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "KeepAliveMsg",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "UpdateMsg",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Connect",
+   "event": "UpdateMsgErr",
+   "action": "stop ConnectRetryTimer; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "ManualStop",
+   "action": "release all BGP resources; drop TCP connection; set ConnectRetryCounter to zero; stop ConnectRetryTimer",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "ConnectRetryTimer Expires",
+   "action": "restart ConnectRetryTimer; initiate TCP connection; listen for TCP connection",
+   "to": "Connect"
+  },
+  {
+   "from": "Active",
+   "event": "DelayOpenTimer_Expires",
+   "action": "Send OPEN, start HoldTimer",
+   "to": "OpenSent"
+  },
+  {
+   "from": "Active",
+   "event": "TcpConnection Valid",
+   "action": "process TCP connection flags",
+   "to": "Active"
+  },
+  {
+   "from": "Active",
+   "event": "Tcp CR Invalid",
+   "action": "reject TCP connection",
+   "to": "Active"
+  },
+  {
+   "from": "Active",
+   "event": "Tcp CR Acked",
+   "action": "stop ConnectRetryTimer; set DelayOpenTimer initial value",
+   "to": "Active"
+  },
+  {
+   "from": "Active",
+   "event": "TcpConnectionConfirmed",
+   "action": "stop ConnectRetryTimer; set DelayOpenTimer initial value",
+   "to": "Active"
+  },
+  {
+   "from": "Active",
+   "event": "Tcp CR Acked",
+   "action": "set ConnectRetryTimer to zero; complete BGP initialization; send OPEN message; set HoldTimer large value",
+   "to": "OpenSent"
+  },
+  {
+   "from": "Active",
+   "event": "TcpConnectionConfirmed",
+   "action": "set ConnectRetryTimer to zero; complete BGP initialization; send OPEN message; set HoldTimer large value",
+   "to": "OpenSent"
+  },
+  {
+   "from": "Active",
+   "event": "TcpConnectionFails",
+   "action": "Reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "BGPOpen",
+   "action": "stop ConnectRetryTimer; stop DelayOpenTimer; complete BGP initialization; send OPEN message; send KEEPALIVE message; start KeepaliveTimer; set HoldTimer negotiated value",
+   "to": "OpenConfirm"
+  },
+  {
+   "from": "Active",
+   "event": "BGPHeaderErr",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "BGPOpenMsgErr",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "NotifMsgVerErr",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "AutomaticStop",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "HoldTimer Expires",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "KeepaliveTimer Expires",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "IdleHoldTimer Expires",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "BGPOpen",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "OpenCollisionDump",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "NotifMsg",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "KeepAliveMsg",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "UpdateMsg",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Active",
+   "event": "UpdateMsgErr",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "ManualStop",
+   "action": "send NOTIFICATION with Cease; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; set ConnectRetryCounter to zero",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "AutomaticStop",
+   "action": "send NOTIFICATION with Cease; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "HoldTimer Expires",
+   "action": "send NOTIFICATION HoldTimer Expired; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "TcpConnectionFails",
+   "action": "close BGP connection; restart ConnectRetryTimer; listen for TCP connection",
+   "to": "Active"
+  },
+  {
+   "from": "OpenSent",
+   "event": "BGPOpen",
+   "action": "Send KEEPALIVE, start HoldTimer",
+   "to": "OpenConfirm"
+  },
+  {
+   "from": "OpenSent",
+   "event": "BGPHeaderErr",
+   "action": "send NOTIFICATION with error code; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "BGPOpenMsgErr",
+   "action": "Send NOTIFICATION, reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "OpenCollisionDump",
+   "action": "Send NOTIFICATION, reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "NotifMsgVerErr",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "ConnectRetryTimer Expires",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "KeepaliveTimer Expires",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "DelayOpenTimer Expires",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "IdleHoldTimer Expires",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "BGPOpenWithDelay",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "NotifMsg",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "KeepAliveMsg",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "UpdateMsg",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenSent",
+   "event": "UpdateMsgErr",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "ManualStop",
+   "action": "send NOTIFICATION with Cease; release all BGP resources; drop TCP connection; set ConnectRetryCounter to zero; set ConnectRetryTimer to zero",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "AutomaticStop",
+   "action": "send NOTIFICATION with Cease; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "HoldTimer_Expires",
+   "action": "Send NOTIFICATION, reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "KeepaliveTimer Expires",
+   "action": "send KEEPALIVE message; restart KeepaliveTimer",
+   "to": "OpenConfirm"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "TcpConnectionFails",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "NotifMsgVerErr",
+   "action": "Send NOTIFICATION, reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "NotifMsgVerErr",
+   "action": "set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "BGPOpen",
+   "action": "send NOTIFICATION with Cease; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "BGPHeaderErr",
+   "action": "send NOTIFICATION with error code; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "BGPOpenMsgErr",
+   "action": "send NOTIFICATION with error code; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "KeepAliveMsg",
+   "action": "Restart HoldTimer",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "KeepAliveMsg",
+   "action": "restart HoldTimer",
+   "to": "Established"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "ConnectRetryTimer Expires",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "DelayOpenTimer Expires",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "IdleHoldTimer Expires",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "BGPOpenWithDelay",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "UpdateMsg",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "OpenConfirm",
+   "event": "UpdateMsgErr",
+   "action": "send NOTIFICATION FSM Error; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "ManualStop",
+   "action": "Send NOTIFICATION, reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "AutomaticStop",
+   "action": "Send NOTIFICATION, reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "HoldTimer_Expires",
+   "action": "Send NOTIFICATION, reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "KeepaliveTimer Expires",
+   "action": "send KEEPALIVE message; restart KeepaliveTimer",
+   "to": "Established"
+  },
+  {
+   "from": "Established",
+   "event": "OpenCollisionDump",
+   "action": "send NOTIFICATION with Cease; set ConnectRetryTimer to zero; delete associated routes; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "TcpConnectionFails",
+   "action": "Reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "NotifMsgVerErr",
+   "action": "Send NOTIFICATION, reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "NotifMsg",
+   "action": "set ConnectRetryTimer to zero; delete associated routes; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "KeepAliveMsg",
+   "action": "restart HoldTimer",
+   "to": "Established"
+  },
+  {
+   "from": "Established",
+   "event": "UpdateMsg",
+   "action": "process UPDATE message; restart HoldTimer",
+   "to": "Established"
+  },
+  {
+   "from": "Established",
+   "event": "UpdateMsgErr",
+   "action": "Send NOTIFICATION, reset ConnectRetryCounter, release resources",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "ConnectRetryTimer Expires",
+   "action": "send NOTIFICATION FSM Error; delete associated routes; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "DelayOpenTimer Expires",
+   "action": "send NOTIFICATION FSM Error; delete associated routes; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "IdleHoldTimer Expires",
+   "action": "send NOTIFICATION FSM Error; delete associated routes; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "BGPOpenWithDelay",
+   "action": "send NOTIFICATION FSM Error; delete associated routes; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "BGPHeaderErr",
+   "action": "send NOTIFICATION FSM Error; delete associated routes; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "BGPOpenMsgErr",
+   "action": "send NOTIFICATION FSM Error; delete associated routes; set ConnectRetryTimer to zero; release all BGP resources; drop TCP connection; increment ConnectRetryCounter",
+   "to": "Idle"
+  },
+  {
+   "from": "Established",
+   "event": "cond NEXT HOP semantic err",
+   "action": "log error; ignore the route",
+   "to": "Established"
+  },
+  {
+   "from": "Established",
+   "event": "cond NLRI semantic err",
+   "action": "log error locally; ignore semantically incorrect prefix",
+   "to": "Established"
+  },
+  {
+   "from": "Established",
+   "event": "receive UPDATE no NLRI",
+   "action": "treat UPDATE as valid",
+   "to": "Established"
+  }
+ ]
+}

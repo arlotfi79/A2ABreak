@@ -1,0 +1,101 @@
+{
+  "section_id": "S030",
+  "title": "S030 3.1.4 Keep Alives and Timers",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S030 3.1.4 Keep Alives and Timers"
+  ],
+  "url_anchor": "#s030-314-keep-alives-and-timers",
+  "word_count": 107,
+  "statement_count": 4,
+  "elapsed_seconds": 29.86,
+  "statements": [
+    {
+      "statement_id": "D-S030-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "A control connection is in the established state when Start-Control-Connection-Request and Start-Control-Connection-Reply have been exchanged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S030",
+      "state_name": "established",
+      "enum_name": "ControlConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.start_request_exchanged = true & connection.start_reply_exchanged = true"
+    },
+    {
+      "statement_id": "D-S030-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If a control connection is not in the established state, a control connection SHOULD be closed after 60 seconds by a peer waiting for a Start-Control-Connection-Request or Start-Control-Connection-Reply message.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S030",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "wait_timer_60s_expired",
+      "pre_cond": "connection.state != established",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "close underlying TCP connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S030-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If a peer's control connection is in the established state and has not received a control message for 60 seconds, it SHOULD send an Echo-Request message.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S030",
+      "actors": [
+        "peer"
+      ],
+      "from_state": "established",
+      "to_state": "established",
+      "trigger": "keep_alive_timer_60s_expired",
+      "pre_cond": "connection.state = established & connection.time_since_last_message >= 60",
+      "post_cond": "connection.echo_request_sent = true",
+      "actions": [
+        "send Echo-Request message"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S030-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If an Echo-Reply is not received 60 seconds after the Echo-Request message transmission, the control connection SHOULD be closed.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S030",
+      "actors": [
+        "peer"
+      ],
+      "from_state": "established",
+      "to_state": null,
+      "trigger": "echo_reply_timer_60s_expired",
+      "pre_cond": "connection.echo_request_sent = true & connection.echo_reply_received = false",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "close underlying TCP connection"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,258 @@
+{
+  "section_id": "S086",
+  "title": "S086 6.4.8 MOVE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S086 6.4.8 MOVE Command"
+  ],
+  "url_anchor": "#s086-648-move-command",
+  "word_count": 717,
+  "statement_count": 10,
+  "elapsed_seconds": 126.02,
+  "statements": [
+    {
+      "statement_id": "N-S086-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The flags and internal date of the message(s) SHOULD be preserved.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "MOVE_command_received",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "message.flags = original_flags & message.internal_date = original_internal_date",
+      "actions": [
+        "preserve message flags in destination mailbox",
+        "preserve message internal date in destination mailbox"
+      ],
+      "modality": "should",
+      "id": "N-S086-001"
+    },
+    {
+      "statement_id": "N-S086-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In particular, though the COPY and EXPUNGE response codes will be returned, response codes for a STORE MUST NOT be generated, and the \\Deleted flag MUST NOT be set for any message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "MOVE_command_received",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "server.store_response_codes_generated = false",
+      "actions": [
+        "suppress STORE response codes during MOVE processing"
+      ],
+      "modality": "must",
+      "id": "N-S086-002"
+    },
+    {
+      "statement_id": "N-S086-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In particular, though the COPY and EXPUNGE response codes will be returned, response codes for a STORE MUST NOT be generated, and the \\Deleted flag MUST NOT be set for any message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "MOVE_command_received",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "message.deleted_flag = false",
+      "actions": [
+        "do not set \\Deleted flag on any message during MOVE processing"
+      ],
+      "modality": "must",
+      "id": "N-S086-003"
+    },
+    {
+      "statement_id": "N-S086-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Regardless of whether the command is successful in moving the entire set, each individual message MUST be either moved or unaffected.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "MOVE_command_partial_failure",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "message.state = moved | message.state = unaffected",
+      "actions": [
+        "ensure each message in the sequence set is either fully moved to target mailbox or left unmodified in source mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S086-004"
+    },
+    {
+      "statement_id": "N-S086-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MUST leave each message in a state where it is in at least one of the source or target mailboxes (no message can be lost or orphaned).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "MOVE_command_received",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "message.in_source_mailbox = true | message.in_target_mailbox = true",
+      "actions": [
+        "guarantee each message exists in source mailbox or target mailbox after MOVE completes"
+      ],
+      "modality": "must",
+      "id": "N-S086-005"
+    },
+    {
+      "statement_id": "N-S086-6",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server SHOULD NOT leave any message in both mailboxes (it would be bad for a partial failure to result in a bunch of duplicate messages).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "MOVE_command_partial_failure",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "!(message.in_source_mailbox = true & message.in_target_mailbox = true)",
+      "actions": [
+        "remove message from source mailbox after successful copy to target to avoid duplication"
+      ],
+      "modality": "should",
+      "id": "N-S086-006"
+    },
+    {
+      "statement_id": "N-S086-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the destination mailbox does not exist, a server MUST return an error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "MOVE_to_nonexistent_mailbox",
+      "pre_cond": "protocol.state = Selected & destination_mailbox.exists = false",
+      "post_cond": "server.response = tagged_NO",
+      "actions": [
+        "return tagged NO error response to client"
+      ],
+      "modality": "must",
+      "id": "N-S086-007"
+    },
+    {
+      "statement_id": "N-S086-8",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "It MUST NOT automatically create the mailbox.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "MOVE_to_nonexistent_mailbox",
+      "pre_cond": "protocol.state = Selected & destination_mailbox.exists = false",
+      "post_cond": "destination_mailbox.auto_created = false",
+      "actions": [
+        "do not automatically create the destination mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S086-008"
+    },
+    {
+      "statement_id": "N-S086-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Unless it is certain that the destination mailbox cannot be created, the server MUST send the response code \"[TRYCREATE]\" as the prefix of the text of the tagged NO response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "MOVE_to_nonexistent_mailbox",
+      "pre_cond": "protocol.state = Selected & destination_mailbox.exists = false & destination_mailbox.definitely_uncreatable = false",
+      "post_cond": "server.response = tagged_NO & server.response.code = TRYCREATE",
+      "actions": [
+        "include [TRYCREATE] response code as prefix of tagged NO response text"
+      ],
+      "modality": "must",
+      "id": "N-S086-009"
+    },
+    {
+      "statement_id": "N-S086-10",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Servers are also REQUIRED to send the COPYUID response code in an untagged OK before sending EXPUNGE or similar responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S086",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": null,
+      "trigger": "MOVE_command_received",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "server.copyuid_untagged_ok_sent = true & server.copyuid_sent_before_expunge = true",
+      "actions": [
+        "send COPYUID response code in an untagged OK",
+        "ensure untagged OK with COPYUID is sent before any EXPUNGE or similar responses"
+      ],
+      "modality": "must",
+      "id": "N-S086-010"
+    }
+  ]
+}

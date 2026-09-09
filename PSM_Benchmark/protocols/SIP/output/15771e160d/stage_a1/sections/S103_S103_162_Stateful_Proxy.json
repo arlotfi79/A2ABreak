@@ -1,0 +1,191 @@
+{
+  "section_id": "S103",
+  "title": "S103 16.2 Stateful Proxy",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S103 16.2 Stateful Proxy"
+  ],
+  "url_anchor": "#s103-162-stateful-proxy",
+  "word_count": 352,
+  "statement_count": 7,
+  "elapsed_seconds": 46.4,
+  "statements": [
+    {
+      "statement_id": "D-S103-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy creates a new server transaction for each new request received. Any retransmissions of the request will then be handled by that server transaction per Section 17.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S103",
+      "actors": [
+        "stateful proxy",
+        "server transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new request received",
+      "pre_cond": null,
+      "post_cond": "server_transaction.created = true",
+      "actions": [
+        "create new server transaction",
+        "delegate retransmissions to server transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S103-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "An incoming request is processed by a server transaction. Requests from the server transaction are passed to a proxy core.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S103",
+      "actors": [
+        "server transaction",
+        "proxy core"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "incoming request arrives at server transaction",
+      "pre_cond": null,
+      "post_cond": "proxy_core.request_received = true",
+      "actions": [
+        "server transaction processes request",
+        "pass request to proxy core"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S103-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The proxy core determines where to route the request, choosing one or more next-hop locations. An outgoing request for each next-hop location is processed by its own associated client transaction.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S103",
+      "actors": [
+        "proxy core",
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "proxy core receives request from server transaction",
+      "pre_cond": null,
+      "post_cond": "client_transaction.created = true",
+      "actions": [
+        "determine next-hop location(s)",
+        "create client transaction per next-hop",
+        "forward outgoing request via client transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S103-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The proxy core collects the responses from the client transactions and uses them to send responses to the server transaction.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S103",
+      "actors": [
+        "proxy core",
+        "client transaction",
+        "server transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response received from client transaction",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "proxy core collects response from client transaction",
+        "send response to server transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S103-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The proxy core MUST behave as a UAS with respect to sending an immediate provisional on that server transaction (such as 100 Trying) as described in Section 8.2.6.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S103",
+      "actors": [
+        "proxy core",
+        "server transaction"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new INVITE request received by server transaction",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 100 Trying provisional response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S103-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy SHOULD NOT generate 100 (Trying) responses to non-INVITE requests.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S103",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "non-INVITE request received",
+      "pre_cond": "request.method != INVITE",
+      "post_cond": null,
+      "actions": [
+        "do not send 100 Trying"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S103-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "For all new requests, including any with unknown methods, an element intending to proxy the request MUST: 1. Validate the request, 2. Preprocess routing information, 3. Determine target(s), 4. Forward the request to each target, 5. Process all responses.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S103",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new request to be proxied",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "validate request (Section 16.3)",
+        "preprocess routing information (Section 16.4)",
+        "determine target(s) for the request (Section 16.5)",
+        "forward the request to each target (Section 16.6)",
+        "process all responses (Section 16.7)"
+      ],
+      "modality": "must"
+    }
+  ]
+}

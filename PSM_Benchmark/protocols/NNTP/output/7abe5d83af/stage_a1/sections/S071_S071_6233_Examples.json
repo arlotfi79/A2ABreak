@@ -1,0 +1,197 @@
+{
+  "section_id": "S071",
+  "title": "S071 6.2.3.3 Examples",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S071 6.2.3.3 Examples"
+  ],
+  "url_anchor": "#s071-6233-examples",
+  "word_count": 194,
+  "statement_count": 8,
+  "elapsed_seconds": 34.17,
+  "statements": [
+    {
+      "statement_id": "D-S071-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of a successful retrieval of the body of an article (explicitly not using an article number): GROUP misc.test -> 211 1234 3000234 3002322 misc.test; BODY -> 222 3000234 <45223423@example.com> followed by body data.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "NEWSGROUP_SELECTED",
+      "to_state": "BODY_FOLLOWS",
+      "trigger": "BODY (no argument)",
+      "pre_cond": "session.newsgroup_selected = true & session.current_article != null",
+      "post_cond": "session.response_code = 222",
+      "actions": [
+        "send 222 response with article-number and message-id",
+        "send body text block",
+        "send terminator"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of a successful retrieval of the body of an article by message-id: BODY <45223423@example.com> -> 222 0 <45223423@example.com> followed by body data.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "BODY_FOLLOWS",
+      "trigger": "BODY <message-id>",
+      "pre_cond": "session.article_exists(message-id) = true",
+      "post_cond": "session.response_code = 222",
+      "actions": [
+        "send 222 response with 0 and message-id",
+        "send body text block",
+        "send terminator"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of an unsuccessful retrieval of the body of an article by message-id: BODY <i.am.not.there@example.com> -> 430 No Such Article Found.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "BODY <message-id>",
+      "pre_cond": "session.article_exists(message-id) = false",
+      "post_cond": "session.response_code = 430",
+      "actions": [
+        "send 430 No Such Article Found"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of an unsuccessful retrieval of the body of an article by number: GROUP misc.test -> 211; BODY 300256 -> 423 No article with that number.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "NEWSGROUP_SELECTED",
+      "to_state": null,
+      "trigger": "BODY <article-number>",
+      "pre_cond": "session.newsgroup_selected = true & session.article_exists(number) = false",
+      "post_cond": "session.response_code = 423",
+      "actions": [
+        "send 423 No article with that number"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of an unsuccessful retrieval of the body of an article by number because no newsgroup was selected first: [Assumes currently selected newsgroup is invalid.] BODY 300256 -> 412 No newsgroup selected.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "NO_NEWSGROUP_SELECTED",
+      "to_state": null,
+      "trigger": "BODY <article-number>",
+      "pre_cond": "session.newsgroup_selected = false",
+      "post_cond": "session.response_code = 412",
+      "actions": [
+        "send 412 No newsgroup selected"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Assumes currently selected newsgroup is invalid \u2014 precondition for 412 response to BODY command with article number.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S071",
+      "state_name": "NO_NEWSGROUP_SELECTED",
+      "enum_name": "NewsGroupSelectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.newsgroup_selected = false"
+    },
+    {
+      "statement_id": "D-S071-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Example of an attempt to retrieve the body of an article when the currently selected newsgroup is empty: GROUP example.empty.newsgroup -> 211 0 0 0; BODY -> 420 No current article selected.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "NEWSGROUP_SELECTED",
+      "to_state": null,
+      "trigger": "BODY (no argument)",
+      "pre_cond": "session.newsgroup_selected = true & session.current_article = null",
+      "post_cond": "session.response_code = 420",
+      "actions": [
+        "send 420 No current article selected"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S071-008",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "Currently selected newsgroup is empty \u2014 no current article exists for implicit BODY retrieval, yielding 420.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S071",
+      "state_name": "NEWSGROUP_SELECTED",
+      "enum_name": "NewsGroupSelectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.newsgroup_selected = true"
+    }
+  ]
+}

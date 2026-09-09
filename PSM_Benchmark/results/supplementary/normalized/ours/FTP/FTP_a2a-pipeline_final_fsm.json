@@ -1,0 +1,350 @@
+{
+ "states": [
+  "Listening",
+  "ControlConnEstablished",
+  "ExpectedDelay",
+  "Disconnected",
+  "Connected",
+  "Need_Account",
+  "Authenticated",
+  "EnteringPassiveMode",
+  "Awaiting_RNTO",
+  "Restart_Point_Set",
+  "Data_Transfer",
+  "Logged_Out",
+  "Active",
+  "Passive",
+  "Listen",
+  "DataConnClosed",
+  "B",
+  "W",
+  "S",
+  "F",
+  "E",
+  "End",
+  "Awaiting220",
+  "PASS_W"
+ ],
+ "initial_state": "Listening",
+ "final_states": [
+  "DataConnClosed",
+  "End",
+  "F",
+  "Logged_Out",
+  "S"
+ ],
+ "transitions": [
+  {
+   "from": "Listening",
+   "event": "receive TCP connect",
+   "action": "initiate control connection",
+   "to": "ControlConnEstablished"
+  },
+  {
+   "from": "ControlConnEstablished",
+   "event": "cond server ready",
+   "action": "send 220 awaiting input",
+   "to": "Disconnected"
+  },
+  {
+   "from": "ControlConnEstablished",
+   "event": "cond server unready",
+   "action": "send 120 expected delay",
+   "to": "ExpectedDelay"
+  },
+  {
+   "from": "ControlConnEstablished",
+   "event": "receive reply 421",
+   "action": "send 421 close connection",
+   "to": "Logged_Out"
+  },
+  {
+   "from": "Disconnected",
+   "event": "receive USER 230",
+   "action": "send 230 user logged in",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Disconnected",
+   "event": "receive USER",
+   "action": "reply 331",
+   "to": "Connected"
+  },
+  {
+   "from": "Disconnected",
+   "event": "receive USER 332",
+   "action": "send 332 need account",
+   "to": "Need_Account"
+  },
+  {
+   "from": "Connected",
+   "event": "receive PASS",
+   "action": "reply 230",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Connected",
+   "event": "receive PASS",
+   "action": "reply 332",
+   "to": "Need_Account"
+  },
+  {
+   "from": "Connected",
+   "event": "receive PASS",
+   "action": "reply 530",
+   "to": "Disconnected"
+  },
+  {
+   "from": "Need_Account",
+   "event": "receive ACCT",
+   "action": "reply 230",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive PASV",
+   "action": "reply 227",
+   "to": "EnteringPassiveMode"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive service command",
+   "action": "send 125 or 150",
+   "to": "Data_Transfer"
+  },
+  {
+   "from": "Data_Transfer",
+   "event": "receive ABOR",
+   "action": "abort transfer close data",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive RNFR",
+   "action": "reply 350",
+   "to": "Awaiting_RNTO"
+  },
+  {
+   "from": "Awaiting_RNTO",
+   "event": "receive RNTO",
+   "action": "reply 250",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive REST",
+   "action": "reply 350",
+   "to": "Restart_Point_Set"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive QUIT",
+   "action": "reply 221",
+   "to": "Logged_Out"
+  },
+  {
+   "from": "Data_Transfer",
+   "event": "receive QUIT",
+   "action": "reply 221",
+   "to": "Logged_Out"
+  },
+  {
+   "from": "Data_Transfer",
+   "event": "Transfer Complete",
+   "action": "reply 226",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive ABOR idle",
+   "action": "close data if open",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive TYPE",
+   "action": "send 200 command OK",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive STOR denied",
+   "action": "send 550 access denied",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive REIN 220",
+   "action": "reinitialize session defaults",
+   "to": "Disconnected"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive REIN 120",
+   "action": "send 120 then 220",
+   "to": "Awaiting220"
+  },
+  {
+   "from": "Restart_Point_Set",
+   "event": "receive RETR",
+   "action": "reply 150",
+   "to": "Data_Transfer"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive USER relogin",
+   "action": "flush credentials restart login",
+   "to": "Connected"
+  },
+  {
+   "from": "Authenticated",
+   "event": "receive MKD",
+   "action": "send access denied reply",
+   "to": "Authenticated"
+  },
+  {
+   "from": "Active",
+   "event": "receive PASV",
+   "action": "listen on data port",
+   "to": "Passive"
+  },
+  {
+   "from": "Listen",
+   "event": "receive transfer request",
+   "action": "initiate data connection",
+   "to": "Data_Transfer"
+  },
+  {
+   "from": "Data_Transfer",
+   "event": "cond sending completed",
+   "action": "close data connection",
+   "to": "DataConnClosed"
+  },
+  {
+   "from": "Data_Transfer",
+   "event": "receive ABOR data",
+   "action": "close data connection",
+   "to": "DataConnClosed"
+  },
+  {
+   "from": "Data_Transfer",
+   "event": "receive port change",
+   "action": "close data connection",
+   "to": "DataConnClosed"
+  },
+  {
+   "from": "Data_Transfer",
+   "event": "cond control closed",
+   "action": "close data connection",
+   "to": "DataConnClosed"
+  },
+  {
+   "from": "Data_Transfer",
+   "event": "cond irrecoverable error",
+   "action": "close data connection",
+   "to": "DataConnClosed"
+  },
+  {
+   "from": "Data_Transfer",
+   "event": "cond server close",
+   "action": "close data send 250",
+   "to": "DataConnClosed"
+  },
+  {
+   "from": "DataConnClosed",
+   "event": "send transfer prep",
+   "action": "listen on data port",
+   "to": "Listen"
+  },
+  {
+   "from": "B",
+   "event": "send cmd",
+   "action": "send command",
+   "to": "W"
+  },
+  {
+   "from": "W",
+   "event": "receive reply 1xx",
+   "action": "",
+   "to": "W"
+  },
+  {
+   "from": "W",
+   "event": "receive reply 2xx",
+   "action": "",
+   "to": "S"
+  },
+  {
+   "from": "W",
+   "event": "receive reply 3xx",
+   "action": "",
+   "to": "E"
+  },
+  {
+   "from": "W",
+   "event": "receive reply 4xx5xx",
+   "action": "",
+   "to": "F"
+  },
+  {
+   "from": "B",
+   "event": "send RNFR",
+   "action": "send RNFR",
+   "to": "W"
+  },
+  {
+   "from": "W",
+   "event": "receive reply 1xx2xx",
+   "action": "",
+   "to": "E"
+  },
+  {
+   "from": "E",
+   "event": "send RNTO",
+   "action": "send RNTO",
+   "to": "W"
+  },
+  {
+   "from": "W",
+   "event": "receive reply 1xx3xx",
+   "action": "",
+   "to": "S"
+  },
+  {
+   "from": "B",
+   "event": "send REST",
+   "action": "send REST",
+   "to": "W"
+  },
+  {
+   "from": "E",
+   "event": "send transfer cmd",
+   "action": "send transfer command",
+   "to": "W"
+  },
+  {
+   "from": "W",
+   "event": "receive reply 3xx REST",
+   "action": "",
+   "to": "S"
+  },
+  {
+   "from": "B",
+   "event": "send USER",
+   "action": "send USER",
+   "to": "W"
+  },
+  {
+   "from": "W",
+   "event": "receive reply 1xx USER",
+   "action": "",
+   "to": "E"
+  },
+  {
+   "from": "W",
+   "event": "receive reply 3xx USER",
+   "action": "",
+   "to": "PASS_W"
+  }
+ ]
+}

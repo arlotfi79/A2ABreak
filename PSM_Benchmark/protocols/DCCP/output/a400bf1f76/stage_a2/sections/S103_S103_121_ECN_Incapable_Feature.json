@@ -1,0 +1,183 @@
+{
+  "section_id": "S103",
+  "title": "S103 12.1 ECN Incapable Feature",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S103 12.1 ECN Incapable Feature"
+  ],
+  "url_anchor": "#s103-121-ecn-incapable-feature",
+  "word_count": 289,
+  "statement_count": 7,
+  "elapsed_seconds": 69.31,
+  "statements": [
+    {
+      "statement_id": "1-S103-1",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "dccp",
+      "stage": "dccp_fsm",
+      "description": "The use of this feature is NOT RECOMMENDED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "DCCP endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S103-001"
+    },
+    {
+      "statement_id": "2-S103-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A DCCP stack MAY therefore leave the ECN Incapable feature unimplemented, acting as if all connections were ECN capable.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "DCCP stack"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S103-002"
+    },
+    {
+      "statement_id": "3-S103-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "DCCP A MUST be able to read ECN bits from received frames' IP headers when ECN Incapable/A is zero.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "DCCP A"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "ECN_Incapable_A = 0",
+      "post_cond": null,
+      "actions": [
+        "Read ECN bits from received frames' IP headers"
+      ],
+      "modality": "must",
+      "id": "N-S103-003"
+    },
+    {
+      "statement_id": "4-S103-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "If the ECN Incapable/A feature is one, then all of DCCP B's packets MUST be sent as ECN incapable.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "DCCP B"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "ECN_Incapable_A = 1",
+      "post_cond": null,
+      "actions": [
+        "Send all packets as ECN incapable"
+      ],
+      "modality": "must",
+      "id": "N-S103-004"
+    },
+    {
+      "statement_id": "5-S103-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "If a DCCP is not ECN capable, it MUST send Mandatory \"Change L(ECN Incapable, 1)\" options to the other endpoint until acknowledged (by \"Confirm R(ECN Incapable, 1)\") or the connection closes.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "DCCP endpoint",
+        "peer endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ecn_incapable_not_yet_confirmed",
+      "pre_cond": "endpoint.ecn_capable = false & peer.ecn_incapable_confirmed = false & connection.state != CLOSED",
+      "post_cond": null,
+      "actions": [
+        "Send Mandatory Change L(ECN Incapable, 1) option to peer",
+        "Repeat until Confirm R(ECN Incapable, 1) received or connection closes"
+      ],
+      "modality": "must",
+      "id": "N-S103-005"
+    },
+    {
+      "statement_id": "6-S103-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Furthermore, it MUST NOT accept any data until the other endpoint sends \"Confirm R(ECN Incapable, 1)\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "DCCP endpoint",
+        "peer endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "data_received",
+      "pre_cond": "endpoint.ecn_capable = false & peer.ecn_incapable_confirmed = false",
+      "post_cond": null,
+      "actions": [
+        "Refuse to accept received data"
+      ],
+      "modality": "must",
+      "id": "N-S103-006"
+    },
+    {
+      "statement_id": "7-S103-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "It SHOULD send Data Dropped options on its acknowledgements, with Drop Code 0 (\"protocol constraints\"), if the other endpoint does send data inappropriately.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "actors": [
+        "DCCP endpoint",
+        "peer endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "inappropriate_data_received_from_peer",
+      "pre_cond": "endpoint.ecn_capable = false & peer.ecn_incapable_confirmed = false & peer.sent_data = true",
+      "post_cond": null,
+      "actions": [
+        "Include Data Dropped option with Drop Code 0 (protocol constraints) in outgoing acknowledgements"
+      ],
+      "modality": "should",
+      "id": "N-S103-007"
+    }
+  ]
+}

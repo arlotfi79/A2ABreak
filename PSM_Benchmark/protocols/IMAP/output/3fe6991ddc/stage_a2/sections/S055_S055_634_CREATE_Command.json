@@ -1,0 +1,213 @@
+{
+  "section_id": "S055",
+  "title": "S055 6.3.4 CREATE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S055 6.3.4 CREATE Command"
+  ],
+  "url_anchor": "#s055-634-create-command",
+  "word_count": 507,
+  "statement_count": 8,
+  "elapsed_seconds": 82.03,
+  "statements": [
+    {
+      "statement_id": "N-S055-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If a client attempts to create a UTF-8 mailbox name that is not a valid Net-Unicode name, the server MUST reject the creation or convert the name to Net-Unicode prior to creating the mailbox.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE_command_received_with_non_Net_Unicode_UTF8_name",
+      "pre_cond": "command.name = CREATE & mailbox_name.encoding = UTF8 & mailbox_name.valid_Net_Unicode = false",
+      "post_cond": "creation.rejected = true | mailbox_name.converted_to_Net_Unicode = true",
+      "actions": [
+        "reject the creation",
+        "OR convert the name to Net-Unicode prior to creating the mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S055-001"
+    },
+    {
+      "statement_id": "N-S055-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server decides to convert (normalize) the name, it SHOULD return an untagged LIST with an OLDNAME extended data item, with the OLDNAME value being the supplied mailbox name and the name parameter being the normalized mailbox name.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_converts_mailbox_name_to_Net_Unicode",
+      "pre_cond": "server.decision = convert_name",
+      "post_cond": "response.type = untagged_LIST & response.contains_OLDNAME = true & response.OLDNAME_value = supplied_mailbox_name & response.name_parameter = normalized_mailbox_name",
+      "actions": [
+        "return untagged LIST response",
+        "include OLDNAME extended data item",
+        "set OLDNAME value to supplied mailbox name",
+        "set name parameter to normalized mailbox name"
+      ],
+      "modality": "should",
+      "id": "N-S055-002"
+    },
+    {
+      "statement_id": "N-S055-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Mailboxes created in one IMAP session MAY be announced to other IMAP sessions using an unsolicited LIST response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "server",
+        "session"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mailbox_created",
+      "pre_cond": null,
+      "post_cond": "other_sessions.notified_via_unsolicited_LIST = true",
+      "actions": [
+        "send unsolicited LIST response to other IMAP sessions announcing the created mailbox"
+      ],
+      "modality": "may",
+      "id": "N-S055-003"
+    },
+    {
+      "statement_id": "N-S055-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server automatically subscribes a mailbox when it is created, then the unsolicited LIST response for each affected subscribed mailbox name MUST include the \\Subscribed attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_auto_subscribes_on_mailbox_creation",
+      "pre_cond": "server.auto_subscribe = true & mailbox.created = true",
+      "post_cond": "unsolicited_LIST_response.includes_Subscribed_attribute = true",
+      "actions": [
+        "include \\Subscribed attribute in unsolicited LIST response for each affected subscribed mailbox name"
+      ],
+      "modality": "must",
+      "id": "N-S055-004"
+    },
+    {
+      "statement_id": "N-S055-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Server implementations that do not require this declaration MUST ignore the declaration.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE_command_received_with_trailing_hierarchy_separator",
+      "pre_cond": "server.requires_hierarchy_declaration = false & mailbox_name.suffixed_with_hierarchy_separator = true",
+      "post_cond": "hierarchy_declaration.ignored = true",
+      "actions": [
+        "ignore the trailing hierarchy separator declaration"
+      ],
+      "modality": "must",
+      "id": "N-S055-005"
+    },
+    {
+      "statement_id": "N-S055-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server's hierarchy separator character appears elsewhere in the name, the server SHOULD create any superior hierarchical names that are needed for the CREATE command to be successfully completed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE_command_received_with_hierarchy_separator_in_non_trailing_position",
+      "pre_cond": "mailbox_name.contains_hierarchy_separator = true & mailbox_name.hierarchy_separator_position != trailing",
+      "post_cond": "superior_hierarchical_names.created = true",
+      "actions": [
+        "create any superior hierarchical names needed for CREATE command to be successfully completed"
+      ],
+      "modality": "should",
+      "id": "N-S055-006"
+    },
+    {
+      "statement_id": "N-S055-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In other words, an attempt to create \"foo/bar/zap\" on a server in which \"/\" is the hierarchy separator character SHOULD create foo/ and foo/bar/ if they do not already exist.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CREATE_command_received_with_multi_level_hierarchy_name",
+      "pre_cond": "mailbox_name.contains_hierarchy_separator = true & superior_mailboxes.exist = false",
+      "post_cond": "superior_mailboxes.created = true",
+      "actions": [
+        "create each superior hierarchical mailbox that does not already exist"
+      ],
+      "modality": "should",
+      "id": "N-S055-007"
+    },
+    {
+      "statement_id": "N-S055-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "imap",
+      "stage": "imap_fsm",
+      "description": "If a new mailbox is created with the same name as a mailbox that was deleted, its unique identifiers MUST be greater than any unique identifiers used in the previous incarnation of the mailbox unless the new incarnation has a different unique identifier validity value.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "mailbox_created_with_same_name_as_deleted_mailbox",
+      "pre_cond": "new_mailbox.name = deleted_mailbox.name & new_mailbox.uid_validity = deleted_mailbox.uid_validity",
+      "post_cond": "new_mailbox.uid > deleted_mailbox.max_uid",
+      "actions": [
+        "assign unique identifiers strictly greater than any unique identifiers used in the previous incarnation of the mailbox"
+      ],
+      "modality": "must",
+      "id": "N-S055-008"
+    }
+  ]
+}

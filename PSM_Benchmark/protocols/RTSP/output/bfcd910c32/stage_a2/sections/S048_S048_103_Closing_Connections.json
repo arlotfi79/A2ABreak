@@ -1,0 +1,250 @@
+{
+  "section_id": "S048",
+  "title": "S048 10.3 Closing Connections",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S048 10.3 Closing Connections"
+  ],
+  "url_anchor": "#s048-103-closing-connections",
+  "word_count": 433,
+  "statement_count": 10,
+  "elapsed_seconds": 108.27,
+  "statements": [
+    {
+      "statement_id": "N-S048-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client MAY close a connection at any point when no outstanding request/response transactions exist for any RTSP session being managed through the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client"
+      ],
+      "from_state": "open",
+      "to_state": "closed",
+      "trigger": "client_initiates_close",
+      "pre_cond": "connection.outstanding_transactions = 0",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "close connection"
+      ],
+      "modality": "may",
+      "id": "N-S048-001"
+    },
+    {
+      "statement_id": "N-S048-2",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server, however, SHOULD NOT close a connection until all RTSP sessions being managed through the connection have been timed out (Section 18.49).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "open",
+      "to_state": null,
+      "trigger": "server_initiates_close",
+      "pre_cond": "session.all_timed_out = false",
+      "post_cond": "connection.state != closed",
+      "actions": [],
+      "modality": "should",
+      "id": "N-S048-002"
+    },
+    {
+      "statement_id": "N-S048-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server SHOULD NOT close a connection immediately after responding to a session-level TEARDOWN request for the last RTSP session being controlled through the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "open",
+      "to_state": null,
+      "trigger": "teardown_response_sent",
+      "pre_cond": "session.is_last = true & teardown_response.sent = true",
+      "post_cond": "connection.state != closed",
+      "actions": [],
+      "modality": "should",
+      "id": "N-S048-003"
+    },
+    {
+      "statement_id": "N-S048-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server SHOULD wait at least 10 seconds after sending the TEARDOWN response before closing the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "open",
+      "to_state": "closed",
+      "trigger": "teardown_response_sent",
+      "pre_cond": "session.is_last = true & teardown_response.sent = true",
+      "post_cond": "timer.elapsed >= 10 & connection.state = closed",
+      "actions": [
+        "start 10-second wait timer after TEARDOWN response",
+        "close connection after timer expiry"
+      ],
+      "modality": "should",
+      "id": "N-S048-004"
+    },
+    {
+      "statement_id": "N-S048-5",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server SHOULD NOT close the connection directly as a result of responding to a request with an error code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "error_response_sent",
+      "pre_cond": "response.code = error",
+      "post_cond": "connection.state != closed",
+      "actions": [],
+      "modality": "should",
+      "id": "N-S048-005"
+    },
+    {
+      "statement_id": "N-S048-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MAY close a connection if it receives an incomplete message and if the message is not completed within a reasonable amount of time.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "open",
+      "to_state": "closed",
+      "trigger": "incomplete_message_timeout",
+      "pre_cond": "message.complete = false & message.completion_timeout_expired = true",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "close connection"
+      ],
+      "modality": "may",
+      "id": "N-S048-006"
+    },
+    {
+      "statement_id": "N-S048-7",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "It is RECOMMENDED that the server wait at least 10 seconds for the completion of a message or for the next part of the message to arrive (which is an indication that the transport and the client are still alive).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "incomplete_message_received",
+      "pre_cond": "message.complete = false",
+      "post_cond": "timer.wait >= 10",
+      "actions": [
+        "wait at least 10 seconds for message completion or next message part"
+      ],
+      "modality": "should",
+      "id": "N-S048-007"
+    },
+    {
+      "statement_id": "N-S048-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Servers believing they are under attack or that are otherwise starved for resources during that event MAY consider using a shorter timeout.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "server.under_attack = true | server.resource_starved = true",
+      "post_cond": null,
+      "actions": [
+        "use shorter incomplete-message timeout"
+      ],
+      "modality": "may",
+      "id": "N-S048-008"
+    },
+    {
+      "statement_id": "N-S048-9",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "An RTSP message SHOULD NOT be terminated by closing the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S048-009"
+    },
+    {
+      "statement_id": "N-S048-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "Such a message MAY be considered to be incomplete by the receiver and discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_closed_mid_message",
+      "pre_cond": "message.terminated_by_connection_close = true",
+      "post_cond": null,
+      "actions": [
+        "discard incomplete message"
+      ],
+      "modality": "may",
+      "id": "N-S048-010"
+    }
+  ]
+}

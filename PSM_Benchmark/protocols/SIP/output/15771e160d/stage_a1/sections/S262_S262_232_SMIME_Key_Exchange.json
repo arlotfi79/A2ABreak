@@ -1,0 +1,319 @@
+{
+  "section_id": "S262",
+  "title": "S262 23.2 S/MIME Key Exchange",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S262 23.2 S/MIME Key Exchange"
+  ],
+  "url_anchor": "#s262-232-smime-key-exchange",
+  "word_count": 1218,
+  "statement_count": 13,
+  "elapsed_seconds": 55.99,
+  "statements": [
+    {
+      "statement_id": "D-S262-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "If a UA receives an S/MIME body that has been encrypted with a public key unknown to the recipient, it MUST reject the request with a 493 (Undecipherable) response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request_with_smime_body_encrypted_with_unknown_key",
+      "pre_cond": "smime.body.encrypted = true & smime.public_key.known = false",
+      "post_cond": "response.status_code = 493",
+      "actions": [
+        "send 493 (Undecipherable) response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S262-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "This response SHOULD contain a valid certificate for the respondent within a MIME body with a 'certs-only' smime-type parameter.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_493_undecipherable",
+      "pre_cond": "response.status_code = 493",
+      "post_cond": "response.body.smime_type = certs-only",
+      "actions": [
+        "include certificate in 493 response body with smime-type=certs-only"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S262-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "If the certificate cannot be verified, because it is self-signed, or signed by no known authority, or if it is verifiable but its subject does not correspond to the From header field of request, the UAS MUST notify its user of the status of the certificate and request explicit permission before proceeding.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S262",
+      "actors": [
+        "UAS",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": "AWAITING_USER_PERMISSION",
+      "trigger": "certificate_validation_failed_or_subject_mismatch",
+      "pre_cond": "certificate.verified = false | certificate.subject != request.From",
+      "post_cond": "user.notified = true",
+      "actions": [
+        "notify user of certificate status",
+        "request explicit user permission before proceeding"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S262-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "If the certificate was successfully verified and the subject of the certificate corresponds to the From header field of the SIP request, or if the user (after notification) explicitly authorizes the use of the certificate, the UAS SHOULD add this certificate to a local keyring.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S262",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": "AWAITING_USER_PERMISSION",
+      "to_state": null,
+      "trigger": "certificate_verified_and_subject_matches_or_user_authorizes",
+      "pre_cond": "(certificate.verified = true & certificate.subject = request.From) | user.authorization = granted",
+      "post_cond": "keyring.contains(certificate) = true",
+      "actions": [
+        "add certificate to local keyring indexed by address-of-record"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S262-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "If the certificate cannot be verified because it is self-signed, or signed by no known authority, the UAC MUST notify its user of the status of the certificate and request explicit permission before proceeding.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S262",
+      "actors": [
+        "UAC",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": "AWAITING_USER_PERMISSION",
+      "trigger": "response_certificate_unverifiable",
+      "pre_cond": "certificate.verified = false",
+      "post_cond": "user.notified = true",
+      "actions": [
+        "notify user of certificate status",
+        "request explicit user permission before proceeding"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S262-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "If the certificate was successfully verified, and the subject of the certificate corresponds to the To header field in the response, or if the user (after notification) explicitly authorizes the use of the certificate, the UAC SHOULD add this certificate to a local keyring.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S262",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "AWAITING_USER_PERMISSION",
+      "to_state": null,
+      "trigger": "response_certificate_verified_or_user_authorizes",
+      "pre_cond": "(certificate.verified = true & certificate.subject = response.To) | user.authorization = granted",
+      "post_cond": "keyring.contains(certificate) = true",
+      "actions": [
+        "add certificate to local keyring indexed by address-of-record"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S262-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "If there is a discrepancy [between offered and stored certificate], the UA MUST notify its user of a change of the certificate and acquire the user's permission before continuing to process the signaling.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S262",
+      "actors": [
+        "UA",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": "AWAITING_USER_PERMISSION",
+      "trigger": "certificate_discrepancy_detected",
+      "pre_cond": "keyring.certificate != message.certificate & keyring.contains(from_identity) = true",
+      "post_cond": "user.notified = true & signaling.processing.suspended = true",
+      "actions": [
+        "notify user of certificate change",
+        "suspend processing",
+        "acquire user permission"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S262-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "If the user authorizes this certificate, it SHOULD be added to the keyring alongside any previous value(s) for this address-of-record.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": "AWAITING_USER_PERMISSION",
+      "to_state": null,
+      "trigger": "user_authorizes_new_certificate",
+      "pre_cond": "user.authorization = granted",
+      "post_cond": "keyring.contains(new_certificate) = true",
+      "actions": [
+        "add new certificate to keyring alongside previous values for address-of-record"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S262-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "A user agent that receives a request containing an S/MIME body that is not optional (with a Content-Disposition header 'handling' parameter of 'required') MUST reject the request with a 415 Unsupported Media Type response if the MIME type is not understood.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request_with_required_smime_body_unsupported_mime_type",
+      "pre_cond": "request.smime_body.handling = required & request.smime_body.mime_type.understood = false",
+      "post_cond": "response.status_code = 415",
+      "actions": [
+        "reject request with 415 Unsupported Media Type response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S262-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "A user agent that receives such a response when S/MIME is sent SHOULD notify its user that the remote device does not support S/MIME, and it MAY subsequently resend the request without S/MIME.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S262",
+      "actors": [
+        "UA",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_415_after_smime_request",
+      "pre_cond": "response.status_code = 415 & request.smime = true",
+      "post_cond": "user.notified = true",
+      "actions": [
+        "notify user that remote device does not support S/MIME",
+        "optionally resend request without S/MIME"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S262-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "If a user agent sends an S/MIME body in a request, but receives a response that contains a MIME body that is not secured, the UAC SHOULD notify its user that the session could not be secured.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S262",
+      "actors": [
+        "UAC",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_unsecured_response_after_smime_request",
+      "pre_cond": "request.smime = true & response.body.secured = false",
+      "post_cond": "user.notified = true",
+      "actions": [
+        "notify user that session could not be secured"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S262-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "If during the course of a dialog a UA receives a certificate in a CMS SignedData message that does not correspond with the certificates previously exchanged during a dialog, the UA MUST notify its user of the change.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S262",
+      "actors": [
+        "UA",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_mismatched_certificate_during_dialog",
+      "pre_cond": "dialog.established = true & message.certificate != dialog.previous_certificate",
+      "post_cond": "user.notified = true",
+      "actions": [
+        "notify user of certificate change indicating potential security breach"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S262-013",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "user",
+      "stage": "sip_fsm",
+      "description": "State in which a UA has received a certificate requiring user decision before processing can continue \u2014 triggered by unverifiable or mismatched certificates.",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "S262",
+      "state_name": "AWAITING_USER_PERMISSION",
+      "enum_name": "smime_certificate_validation_states",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "user.permission_requested = true & signaling.processing.suspended = true"
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "section_id": "S045",
+  "title": "S045 6.1.1.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S045 6.1.1.2 Description"
+  ],
+  "url_anchor": "#s045-6112-description",
+  "word_count": 715,
+  "statement_count": 7,
+  "elapsed_seconds": 98.3,
+  "statements": [
+    {
+      "statement_id": "D-S045-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "The GROUP or LISTGROUP command MUST be used by a client, and a successful response received, before any other command is used that depends on the value of the currently selected newsgroup or current article number. This implies a session state in which no newsgroup is currently selected.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S045",
+      "state_name": "no group selected",
+      "enum_name": "GroupSelectionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.currently_selected_newsgroup = null"
+    },
+    {
+      "statement_id": "D-S045-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "When a valid group is selected by means of the GROUP command, the currently selected newsgroup MUST be set to that group, and the current article number MUST be set to the first article in the group.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S045",
+      "state_name": "group selected",
+      "enum_name": "GroupSelectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.currently_selected_newsgroup != null"
+    },
+    {
+      "statement_id": "D-S045-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "When a valid group is selected by means of this command, the currently selected newsgroup MUST be set to that group. If an invalid group is specified, the currently selected newsgroup MUST NOT be changed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S045",
+      "object_name": "session",
+      "field_name": "currently_selected_newsgroup",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S045-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "When a valid group is selected by means of this command, the current article number MUST be set to the first article in the group. If an empty newsgroup is selected, the current article number is made invalid. If an invalid group is specified, the current article number MUST NOT be changed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S045",
+      "object_name": "session",
+      "field_name": "current_article_number",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S045-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "When a valid non-empty group is selected by means of the GROUP command, the currently selected newsgroup MUST be set to that group, and the current article number MUST be set to the first article in the group (this applies even if the group is already the currently selected newsgroup).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S045",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "group selected",
+      "trigger": "GROUP command (valid non-empty group)",
+      "pre_cond": "server.group_exists = true & server.group_empty = false",
+      "post_cond": "session.currently_selected_newsgroup = GROUP.argument & session.current_article_number = first_article_in_group",
+      "actions": [
+        "set currently selected newsgroup to requested group",
+        "set current article number to first article in group",
+        "return 211 response with article count and water marks"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S045-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "If an empty newsgroup is selected, the currently selected newsgroup MUST be set to that group, and the current article number is made invalid.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S045",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "group selected",
+      "trigger": "GROUP command (valid empty group)",
+      "pre_cond": "server.group_exists = true & server.group_empty = true",
+      "post_cond": "session.currently_selected_newsgroup = GROUP.argument & session.current_article_number = invalid",
+      "actions": [
+        "set currently selected newsgroup to requested group",
+        "make current article number invalid",
+        "return 211 response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S045-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "If an invalid group is specified, the currently selected newsgroup and current article number MUST NOT be changed. If the group specified is not available on the server, a 411 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S045",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "GROUP command (group not available on server)",
+      "pre_cond": "server.group_exists = false",
+      "post_cond": "session.currently_selected_newsgroup = unchanged & session.current_article_number = unchanged",
+      "actions": [
+        "return 411 response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "section_id": "S017",
+  "title": "S017 2.2.4.2.2 Proof of Possession via Broker-generated Challenge/Response",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S017 2.2.4.2.2 Proof of Possession via Broker-generated Challenge/Response"
+  ],
+  "url_anchor": "#s017-22422-proof-of-possession-via-broker-generated-challengeresponse",
+  "word_count": 371,
+  "statement_count": 10,
+  "elapsed_seconds": 58.46,
+  "statements": [
+    {
+      "statement_id": "D-S017-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Authentication Data inside the Client's CONNECT contains only the two-byte integer token length and the token, the Broker MUST respond with an AUTH packet with the authenticated reason code set to 0x18 (Continue Authentication).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": "AWAITING_CHALLENGE_RESPONSE",
+      "trigger": "CONNECT received with token-only Authentication Data",
+      "pre_cond": "connection.auth_data = token_only",
+      "post_cond": "connection.state = AWAITING_CHALLENGE_RESPONSE",
+      "actions": [
+        "send AUTH reason_code=0x18 with 8-byte RS nonce as challenge"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker also uses this method if the Authentication Data does not contain a token, but the Broker has a token stored for the connecting Client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": "AWAITING_CHALLENGE_RESPONSE",
+      "trigger": "CONNECT received with no token but stored token exists for client",
+      "pre_cond": "connection.auth_data.token = null & session.stored_token != null",
+      "post_cond": "connection.state = AWAITING_CHALLENGE_RESPONSE",
+      "actions": [
+        "send AUTH reason_code=0x18 with 8-byte RS nonce as challenge"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client responds to this with an AUTH packet with reason code 0x18 (Continue Authentication). The Authentication Data includes the 8-byte Client nonce and the signature or MAC computed over the RS nonce concatenated with the Client nonce using PoP key in the token.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AWAITING_BROKER_CHALLENGE",
+      "to_state": "AWAITING_CONNACK",
+      "trigger": "AUTH 0x18 received from Broker with RS nonce challenge",
+      "pre_cond": "connection.auth_method = ace & connection.auth_data.rs_nonce != null",
+      "post_cond": "connection.state = AWAITING_CONNACK",
+      "actions": [
+        "send AUTH reason_code=0x18 with client_nonce and MAC_or_signature over (rs_nonce || client_nonce)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Next, the token is validated. The success case is illustrated in Figure 7: after token validation the Broker sends CONNACK 0x00 (Success).",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TOKEN_VALIDATION",
+      "to_state": "CONNECTED",
+      "trigger": "token validation success",
+      "pre_cond": "connection.state = TOKEN_VALIDATION & token.valid = true",
+      "post_cond": "connection.state = CONNECTED",
+      "actions": [
+        "send CONNACK reason_code=0x00"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker continues authentication using an AUTH packet that contains the Authentication Method and the Authentication Data. The Authentication Method MUST be set to 'ace', and the Authentication Data MUST NOT be empty and MUST contain an 8-byte RS nonce as a challenge for the Client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AWAITING_CHALLENGE_RESPONSE",
+      "to_state": "TOKEN_VALIDATION",
+      "trigger": "AUTH 0x18 received from Client with client nonce and MAC",
+      "pre_cond": "connection.state = AWAITING_CHALLENGE_RESPONSE & connection.auth_method = ace",
+      "post_cond": "connection.state = TOKEN_VALIDATION",
+      "actions": [
+        "validate token (may involve introspection)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker continues authentication; AUTH 0x18 (Continue Authentication) with RS nonce challenge has been sent and Broker is awaiting the client's challenge response.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S017",
+      "state_name": "AWAITING_CHALLENGE_RESPONSE",
+      "enum_name": "PoP_Auth_State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = AWAITING_CHALLENGE_RESPONSE"
+    },
+    {
+      "statement_id": "D-S017-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Broker is performing token validation after receiving the client's AUTH 0x18 challenge response (may involve introspection).",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S017",
+      "state_name": "TOKEN_VALIDATION",
+      "enum_name": "PoP_Auth_State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = TOKEN_VALIDATION"
+    },
+    {
+      "statement_id": "D-S017-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Method MUST be set to 'ace' in the Broker's AUTH challenge packet during PoP challenge/response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "object_name": "AUTH packet (Broker challenge)",
+      "field_name": "Authentication Method",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "ace"
+      ],
+      "guard_semantics": "connection.state = AWAITING_CHALLENGE_RESPONSE"
+    },
+    {
+      "statement_id": "D-S017-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The Authentication Data MUST NOT be empty and MUST contain an 8-byte RS nonce as a challenge for the Client in the Broker's AUTH packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "object_name": "AUTH packet (Broker challenge)",
+      "field_name": "Authentication Data",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": [
+        "8-byte RS nonce"
+      ],
+      "guard_semantics": "connection.state = AWAITING_CHALLENGE_RESPONSE"
+    },
+    {
+      "statement_id": "D-S017-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MAY also reauthenticate using this challenge-response flow, as described in Section 4.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S017",
+      "actors": [
+        "client"
+      ],
+      "from_state": "CONNECTED",
+      "to_state": "AWAITING_BROKER_CHALLENGE",
+      "trigger": "client initiates reauthentication via PoP challenge-response",
+      "pre_cond": "connection.state = CONNECTED",
+      "post_cond": "connection.state = AWAITING_BROKER_CHALLENGE",
+      "actions": [
+        "send AUTH to initiate PoP reauthentication"
+      ],
+      "modality": "may"
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "section_id": "S056",
+  "title": "S056 6.3.5 DELETE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S056 6.3.5 DELETE Command"
+  ],
+  "url_anchor": "#s056-635-delete-command",
+  "word_count": 528,
+  "statement_count": 7,
+  "elapsed_seconds": 34.74,
+  "statements": [
+    {
+      "statement_id": "D-S056-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: OK - delete completed. A tagged OK response is returned only if the mailbox has been deleted.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S056",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "DELETE command received",
+      "pre_cond": "protocol.state = Authenticated & mailbox.exists = true & mailbox.name != INBOX & mailbox.hasNoselect_with_inferiors = false",
+      "post_cond": "mailbox.exists = false & mailbox.messages.removed = true",
+      "actions": [
+        "remove mailbox permanently",
+        "remove all messages in mailbox",
+        "preserve highest-used UID value",
+        "send tagged OK response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: NO - delete failure: can't delete mailbox with that name. It is an error to attempt to delete INBOX or a mailbox name that does not exist.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S056",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "DELETE command received",
+      "pre_cond": "protocol.state = Authenticated & (mailbox.exists = false | mailbox.name = INBOX | mailbox.hasNoselect_with_inferiors = true)",
+      "post_cond": "mailbox.exists = true",
+      "actions": [
+        "send tagged NO response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: BAD - command unknown or arguments invalid.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S056",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "DELETE command received with invalid arguments",
+      "pre_cond": "protocol.state = Authenticated & command.arguments_valid = false",
+      "post_cond": null,
+      "actions": [
+        "send tagged BAD response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S056-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server implementation does not permit deleting the name while inferior hierarchical names exist, then it SHOULD disallow the DELETE command by returning a tagged NO response. The NO response SHOULD include the HASCHILDREN response code.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "DELETE command received for mailbox with inferior hierarchical names",
+      "pre_cond": "protocol.state = Authenticated & mailbox.has_inferior_names = true & mailbox.Noselect = false",
+      "post_cond": "mailbox.exists = true",
+      "actions": [
+        "send tagged NO response with HASCHILDREN response code"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S056-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Alternatively, the server MAY allow the DELETE command, but it sets the \\Noselect mailbox name attribute for that name.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "DELETE command received for mailbox with inferior hierarchical names",
+      "pre_cond": "protocol.state = Authenticated & mailbox.has_inferior_names = true & mailbox.Noselect = false",
+      "post_cond": "mailbox.Noselect = true",
+      "actions": [
+        "set \\Noselect attribute on mailbox",
+        "send tagged OK response"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S056-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server decides to convert (normalize) the mailbox name, it SHOULD return an untagged LIST with the \"\\NonExistent\" attribute and OLDNAME extended data item.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "DELETE command received with mailbox name requiring normalization",
+      "pre_cond": "protocol.state = Authenticated & mailbox.name_normalized = true",
+      "post_cond": null,
+      "actions": [
+        "send untagged LIST response with \\NonExistent attribute and OLDNAME data item"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S056-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailboxes deleted in one IMAP session MAY be announced to other IMAP sessions using an unsolicited LIST response, containing the \"\\NonExistent\" attribute.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S056",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "mailbox deleted in another session",
+      "pre_cond": "protocol.state = Authenticated & other_session.mailbox_deleted = true",
+      "post_cond": null,
+      "actions": [
+        "send unsolicited LIST response with \\NonExistent attribute to other sessions"
+      ],
+      "modality": "may"
+    }
+  ]
+}

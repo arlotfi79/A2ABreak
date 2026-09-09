@@ -1,0 +1,194 @@
+{
+  "states": [
+    "Init",
+    "Ready",
+    "Play",
+    "Terminated"
+  ],
+  "initial_state": "Init",
+  "final_states": [
+    "Terminated"
+  ],
+  "transitions": [
+    {
+      "from": "Init",
+      "event": "receive SETUP success",
+      "action": "generate session identifier; set transport parameters",
+      "to": "Ready"
+    },
+    {
+      "from": "Init",
+      "event": "receive SETUP redirect",
+      "action": "send 3rr redirect response",
+      "to": "Init"
+    },
+    {
+      "from": "Init",
+      "event": "receive REDIRECT",
+      "action": "terminate all sessions",
+      "to": "Init"
+    },
+    {
+      "from": "Ready",
+      "event": "receive SETUP",
+      "action": "update transport parameters",
+      "to": "Ready"
+    },
+    {
+      "from": "Ready",
+      "event": "receive TEARDOWN media",
+      "action": "remove media stream; free associated resources",
+      "to": "Ready"
+    },
+    {
+      "from": "Ready",
+      "event": "receive PAUSE",
+      "action": "send 200 OK response",
+      "to": "Ready"
+    },
+    {
+      "from": "Ready",
+      "event": "receive REDIRECT timed",
+      "action": "set redirect deadline",
+      "to": "Ready"
+    },
+    {
+      "from": "Ready",
+      "event": "receive PLAY",
+      "action": "begin media delivery",
+      "to": "Play"
+    },
+    {
+      "from": "Ready",
+      "event": "receive TEARDOWN session",
+      "action": "destroy session state",
+      "to": "Init"
+    },
+    {
+      "from": "Ready",
+      "event": "receive REDIRECT immediate",
+      "action": "remove session",
+      "to": "Init"
+    },
+    {
+      "from": "Ready",
+      "event": "timeout session",
+      "action": "remove session",
+      "to": "Init"
+    },
+    {
+      "from": "Ready",
+      "event": "cond redirect deadline",
+      "action": "teardown session",
+      "to": "Init"
+    },
+    {
+      "from": "Ready",
+      "event": "receive server TEARDOWN",
+      "action": "terminate session context",
+      "to": "Terminated"
+    },
+    {
+      "from": "Play",
+      "event": "receive PLAY",
+      "action": "replace current play action",
+      "to": "Play"
+    },
+    {
+      "from": "Play",
+      "event": "cond end of range",
+      "action": "stop media delivery",
+      "to": "Play"
+    },
+    {
+      "from": "Play",
+      "event": "cond end of media",
+      "action": "set resume point to end",
+      "to": "Play"
+    },
+    {
+      "from": "Play",
+      "event": "receive PLAY NOTIFY",
+      "action": "send 200 response",
+      "to": "Play"
+    },
+    {
+      "from": "Play",
+      "event": "receive SETUP",
+      "action": "change transport parameters",
+      "to": "Play"
+    },
+    {
+      "from": "Play",
+      "event": "receive REDIRECT timed",
+      "action": "set redirect deadline",
+      "to": "Play"
+    },
+    {
+      "from": "Play",
+      "event": "send PLAY NOTIFY eos",
+      "action": "send end-of-stream notification",
+      "to": "Play"
+    },
+    {
+      "from": "Play",
+      "event": "send PLAY NOTIFY update",
+      "action": "send media properties update",
+      "to": "Play"
+    },
+    {
+      "from": "Play",
+      "event": "cond scale change",
+      "action": "modify playback scale value",
+      "to": "Play"
+    },
+    {
+      "from": "Play",
+      "event": "receive PAUSE",
+      "action": "halt media delivery",
+      "to": "Ready"
+    },
+    {
+      "from": "Play",
+      "event": "cond delivery exceeds stop",
+      "action": "pause media delivery immediately",
+      "to": "Ready"
+    },
+    {
+      "from": "Play",
+      "event": "receive TEARDOWN session",
+      "action": "destroy session state",
+      "to": "Init"
+    },
+    {
+      "from": "Play",
+      "event": "receive REDIRECT immediate",
+      "action": "remove session",
+      "to": "Init"
+    },
+    {
+      "from": "Play",
+      "event": "timeout session",
+      "action": "stop media playout",
+      "to": "Init"
+    },
+    {
+      "from": "Play",
+      "event": "cond redirect deadline",
+      "action": "teardown session",
+      "to": "Init"
+    },
+    {
+      "from": "Play",
+      "event": "receive TEARDOWN affected",
+      "action": "terminate media session",
+      "to": "Init"
+    },
+    {
+      "from": "Play",
+      "event": "receive TEARDOWN aggregate",
+      "action": "halt delivery immediately; destroy session state",
+      "to": "Terminated"
+    }
+  ]
+}

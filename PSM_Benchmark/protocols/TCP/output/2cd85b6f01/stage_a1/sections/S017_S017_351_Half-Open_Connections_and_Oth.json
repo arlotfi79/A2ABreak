@@ -1,0 +1,330 @@
+{
+  "section_id": "S017",
+  "title": "S017 3.5.1 Half-Open Connections and Other Anomalies",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S017 3.5.1 Half-Open Connections and Other Anomalies"
+  ],
+  "url_anchor": "#s017-351-half-open-connections-and-other-anomalies",
+  "word_count": 673,
+  "statement_count": 15,
+  "elapsed_seconds": 127.58,
+  "statements": [
+    {
+      "statement_id": "D-S017-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "TCP Peer A is in CLOSED state after reboot; no connection exists at its end.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "state_name": "CLOSED",
+      "enum_name": "TCPState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = CLOSED"
+    },
+    {
+      "statement_id": "D-S017-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "TCP Peer B is in ESTABLISHED state, believing the connection is open (send 300, receive 100).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "state_name": "ESTABLISHED",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = ESTABLISHED"
+    },
+    {
+      "statement_id": "D-S017-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "TCP Peer A is in SYN-SENT state after sending SYN to reopen the connection following a reboot.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "state_name": "SYN-SENT",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = SYN-SENT"
+    },
+    {
+      "statement_id": "D-S017-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Two TCP Peers A and B with passive connections waiting for SYN are both in LISTEN state (Figure 11).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "state_name": "LISTEN",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = LISTEN"
+    },
+    {
+      "statement_id": "D-S017-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "TCP Peer B moves to SYN-RECEIVED state when an old duplicate SYN arrives while in LISTEN (Figure 11, line 2).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S017",
+      "state_name": "SYN-RECEIVED",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = SYN-RECEIVED"
+    },
+    {
+      "statement_id": "D-S017-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "After TCP Peer A reboots (causing loss of memory), it starts in CLOSED state (Figure 9, line 2).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer A"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "REBOOT",
+      "pre_cond": null,
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "lose connection memory"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "After TCP Peer A reboots, the user attempts to reopen the connection; A's TCP implementation sends a segment containing SYN, transitioning from CLOSED to SYN-SENT (Figure 9, lines 2-3).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer A"
+      ],
+      "from_state": "CLOSED",
+      "to_state": "SYN-SENT",
+      "trigger": "user OPEN",
+      "pre_cond": "protocol.state = CLOSED",
+      "post_cond": "protocol.state = SYN-SENT",
+      "actions": [
+        "send SYN segment"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "TCP Peer B, being in a synchronized state (ESTABLISHED) and the incoming SYN segment outside the window, responds with an ACK indicating what sequence it next expects to hear (Figure 9, lines 3-4).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer B"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "ESTABLISHED",
+      "trigger": "receive SYN (out-of-window)",
+      "pre_cond": "protocol.state = ESTABLISHED & segment.SYN_flag = true & segment.sequence_number outside receive_window",
+      "post_cond": "protocol.state = ESTABLISHED",
+      "actions": [
+        "send ACK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "TCP Peer A sees that the received ACK segment does not acknowledge anything it sent and, being unsynchronized, sends a RST because it has detected a half-open connection; A remains in SYN-SENT (Figure 9, lines 4-5).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer A"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "SYN-SENT",
+      "trigger": "receive ACK (does not acknowledge sent data)",
+      "pre_cond": "protocol.state = SYN-SENT & segment.ACK_flag = true & segment.ACK_num not_in sent_data_range",
+      "post_cond": "protocol.state = SYN-SENT",
+      "actions": [
+        "send RST"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "TCP Peer B aborts at line 5 after receiving RST from TCP Peer A, transitioning from ESTABLISHED to CLOSED (Figure 9, lines 5-6).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer B"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "CLOSED",
+      "trigger": "receive RST",
+      "pre_cond": "protocol.state = ESTABLISHED",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "abort connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "In Figure 10, data arriving at TCP Peer A from TCP Peer B is unacceptable because no such connection exists, so TCP Peer A sends a RST.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer A"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive data segment (no connection exists)",
+      "pre_cond": "connection.exists = false",
+      "post_cond": null,
+      "actions": [
+        "send RST"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "The RST is acceptable so TCP Peer B processes it and aborts the connection, transitioning from ESTABLISHED to CLOSED (Figure 10, line 3).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer B"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "CLOSED",
+      "trigger": "receive RST",
+      "pre_cond": "protocol.state = ESTABLISHED",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "abort connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "An old duplicate SYN arriving at TCP Peer B (LISTEN) stirs B into action, causing B to transition to SYN-RECEIVED and return a SYN-ACK (Figure 11, lines 2-3).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer B"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "SYN-RECEIVED",
+      "trigger": "receive SYN (old duplicate)",
+      "pre_cond": "protocol.state = LISTEN",
+      "post_cond": "protocol.state = SYN-RECEIVED",
+      "actions": [
+        "send SYN-ACK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "TCP Peer A, in LISTEN state, receives a SYN-ACK from TCP Peer B where the ACK is not acceptable, causing TCP Peer A to generate a RST while remaining in LISTEN (Figure 11, lines 3-5).",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer A"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "receive SYN-ACK (ACK not acceptable)",
+      "pre_cond": "protocol.state = LISTEN & segment.SYN_flag = true & segment.ACK_flag = true & segment.ACK_num not_acceptable",
+      "post_cond": "protocol.state = LISTEN",
+      "actions": [
+        "send RST"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S017-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "TCP Peer B accepts the RST and returns to its passive LISTEN state from SYN-RECEIVED (Figure 11, lines 4-5).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "TCP Peer B"
+      ],
+      "from_state": "SYN-RECEIVED",
+      "to_state": "LISTEN",
+      "trigger": "receive RST",
+      "pre_cond": "protocol.state = SYN-RECEIVED",
+      "post_cond": "protocol.state = LISTEN",
+      "actions": [
+        "return to LISTEN"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

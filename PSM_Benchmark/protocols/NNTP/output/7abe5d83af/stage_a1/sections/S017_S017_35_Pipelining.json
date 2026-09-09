@@ -1,0 +1,161 @@
+{
+  "section_id": "S017",
+  "title": "S017 3.5 Pipelining",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S017 3.5 Pipelining"
+  ],
+  "url_anchor": "#s017-35-pipelining",
+  "word_count": 357,
+  "statement_count": 7,
+  "elapsed_seconds": 35.84,
+  "statements": [
+    {
+      "statement_id": "D-S017-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "The initial connection must not be part of a pipeline; that is, the client MUST NOT send any command until it receives the CRLF at the end of the greeting.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "INITIAL_CONNECTION",
+      "to_state": "COMMAND_PIPELINE",
+      "trigger": "receive CRLF at end of greeting",
+      "pre_cond": "connection.initial = true",
+      "post_cond": "client.greeting_received = true",
+      "actions": [
+        "receive greeting CRLF",
+        "enable command sending"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "If the specific description of a command says it 'MUST NOT be pipelined', that command MUST end any pipeline of commands. That is, the client MUST NOT send any following command until it receives the CRLF at the end of the response from the command.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S017",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "COMMAND_PIPELINE",
+      "to_state": "WAITING_FOR_RESPONSE",
+      "trigger": "send MUST-NOT-pipeline command",
+      "pre_cond": "command.pipeline_prohibited = true",
+      "post_cond": "client.must_wait_for_response = true",
+      "actions": [
+        "send non-pipelineable command",
+        "suspend further command sending"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "The client MUST NOT send any following command until it receives the CRLF at the end of the response from the [MUST NOT be pipelined] command.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S017",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "WAITING_FOR_RESPONSE",
+      "to_state": "COMMAND_PIPELINE",
+      "trigger": "receive CRLF at end of response",
+      "pre_cond": "command.pipeline_prohibited = true & client.must_wait_for_response = true",
+      "post_cond": "client.must_wait_for_response = false",
+      "actions": [
+        "receive response CRLF",
+        "resume command sending"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S017-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "The initial connection must not be part of a pipeline; the client MUST NOT send any command until it receives the CRLF at the end of the greeting.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S017",
+      "state_name": "INITIAL_CONNECTION",
+      "enum_name": "PipelineState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "client.greeting_received = false"
+    },
+    {
+      "statement_id": "D-S017-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "Except where stated otherwise, a client MAY use pipelining. That is, it may send a command before receiving the response for the previous command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S017",
+      "state_name": "COMMAND_PIPELINE",
+      "enum_name": "PipelineState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.greeting_received = true & command.pipeline_prohibited = false"
+    },
+    {
+      "statement_id": "D-S017-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "If the specific description of a command says it 'MUST NOT be pipelined', the client MUST NOT send any following command until it receives the CRLF at the end of the response from the command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S017",
+      "state_name": "WAITING_FOR_RESPONSE",
+      "enum_name": "PipelineState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "command.pipeline_prohibited = true & client.response_crlf_received = false"
+    },
+    {
+      "statement_id": "D-S017-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "nntp_fsm",
+      "description": "If the specific description of a command says it 'MUST NOT be pipelined', that command MUST end any pipeline of commands.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S017",
+      "object_name": "command",
+      "field_name": "pipeline_prohibited",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "true",
+        "false"
+      ],
+      "guard_semantics": "When true, client must not send subsequent command until CRLF of response is received"
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "section_id": "S023",
+  "title": "S023 5.4 Configure-Reject",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S023 5.4 Configure-Reject"
+  ],
+  "url_anchor": "#s023-54-configure-reject",
+  "word_count": 259,
+  "statement_count": 5,
+  "elapsed_seconds": 74.43,
+  "statements": [
+    {
+      "statement_id": "N-S023-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If some Configuration Options received in a Configure-Request are not recognizable or are not acceptable for negotiation (as configured by a network administrator), then the implementation MUST transmit a Configure-Reject.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S023",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_Configure-Request_with_unrecognizable_or_unacceptable_options",
+      "pre_cond": "configure_request.options.unrecognizable = true | configure_request.options.unacceptable = true",
+      "post_cond": "configure_reject.transmitted = true",
+      "actions": [
+        "transmit Configure-Reject containing only the unacceptable Configuration Options from the Configure-Request"
+      ],
+      "modality": "must",
+      "id": "N-S023-001"
+    },
+    {
+      "statement_id": "N-S023-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "ppp_fsm",
+      "description": "All recognizable and negotiable Configuration Options are filtered out of the Configure-Reject, but otherwise the Configuration Options MUST NOT be reordered or modified in any way.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S023",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S023-002"
+    },
+    {
+      "statement_id": "N-S023-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "ppp_fsm",
+      "description": "On reception of a Configure-Reject, the Identifier field MUST match that of the last transmitted Configure-Request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S023",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_Configure-Reject",
+      "pre_cond": "configure_reject.identifier = last_transmitted_configure_request.identifier",
+      "post_cond": "configure_reject.valid = true",
+      "actions": [
+        "validate Identifier field against last transmitted Configure-Request identifier",
+        "silently discard Configure-Reject if Identifier does not match"
+      ],
+      "modality": "must",
+      "id": "N-S023-003"
+    },
+    {
+      "statement_id": "N-S023-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "ppp_fsm",
+      "description": "Additionally, the Configuration Options in a Configure-Reject MUST be a proper subset of those in the last transmitted Configure-Request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S023",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_Configure-Reject",
+      "pre_cond": "configure_reject.options.proper_subset_of(last_transmitted_configure_request.options) = true",
+      "post_cond": "configure_reject.valid = true",
+      "actions": [
+        "validate Configure-Reject options are a proper subset of last transmitted Configure-Request options",
+        "silently discard Configure-Reject if options are not a proper subset"
+      ],
+      "modality": "must",
+      "id": "N-S023-004"
+    },
+    {
+      "statement_id": "N-S023-5",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "Reception of a valid Configure-Reject indicates that when a new Configure-Request is sent, it MUST NOT include any of the Configuration Options listed in the Configure-Reject.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S023",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_valid_Configure-Reject",
+      "pre_cond": "configure_reject.valid = true",
+      "post_cond": "new_configure_request.options.contains_any(configure_reject.options) = false",
+      "actions": [
+        "remove all Configure-Reject options from the options set used in the next Configure-Request"
+      ],
+      "modality": "must",
+      "id": "N-S023-005"
+    }
+  ]
+}

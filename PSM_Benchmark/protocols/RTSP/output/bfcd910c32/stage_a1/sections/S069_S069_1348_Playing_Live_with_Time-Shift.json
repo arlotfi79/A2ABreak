@@ -1,0 +1,56 @@
+{
+  "section_id": "S069",
+  "title": "S069 13.4.8 Playing Live with Time-Shift",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S069 13.4.8 Playing Live with Time-Shift"
+  ],
+  "url_anchor": "#s069-1348-playing-live-with-time-shift",
+  "word_count": 251,
+  "statement_count": 2,
+  "elapsed_seconds": 23.04,
+  "statements": [
+    {
+      "statement_id": "D-S069-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The SETUP 200 OK response MUST include the Media-Range header for live media with recording (Random-Access, Time-Progressing, Time-Duration properties).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S069",
+      "object_name": "SETUP response",
+      "field_name": "Media-Range",
+      "field_type": "header",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "media.random_access = Random-Access & media.content_modifications = Time-Progressing & media.retention = Time-Duration"
+    },
+    {
+      "statement_id": "D-S069-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server adjusts the play point to the requested border of the window, if the client requests a play point that is located outside the recording windows, e.g., if requested too far in the past, the server selects the oldest range in the recording.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S069",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY request with play point outside recording window",
+      "pre_cond": "session.media_type = live_with_recording & request.play_point outside media.recording_window",
+      "post_cond": "session.play_point = recording_window.border",
+      "actions": [
+        "adjust play point to nearest valid border of recording window"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

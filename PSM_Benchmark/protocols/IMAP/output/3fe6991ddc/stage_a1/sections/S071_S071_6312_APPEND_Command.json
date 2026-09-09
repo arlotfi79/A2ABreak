@@ -1,0 +1,199 @@
+{
+  "section_id": "S071",
+  "title": "S071 6.3.12 APPEND Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S071 6.3.12 APPEND Command"
+  ],
+  "url_anchor": "#s071-6312-append-command",
+  "word_count": 841,
+  "statement_count": 8,
+  "elapsed_seconds": 68.31,
+  "statements": [
+    {
+      "statement_id": "D-S071-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: OK - append completed. On successful completion of an APPEND, the server returns an APPENDUID response code.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "APPEND command success",
+      "pre_cond": null,
+      "post_cond": "server.response = OK & server.response_code = APPENDUID",
+      "actions": [
+        "send tagged OK with APPENDUID response code"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S071-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: NO - append error: can't append to that mailbox, error in flags or date/time or message text.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "APPEND command failure",
+      "pre_cond": null,
+      "post_cond": "server.response = NO",
+      "actions": [
+        "send tagged NO response"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S071-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: BAD - command unknown or arguments invalid.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "APPEND command with unknown or invalid arguments",
+      "pre_cond": null,
+      "post_cond": "server.response = BAD",
+      "actions": [
+        "send tagged BAD response"
+      ],
+      "modality": "other"
+    },
+    {
+      "statement_id": "D-S071-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the destination mailbox does not exist, a server MUST return an error and MUST NOT automatically create the mailbox. Unless it is certain that the destination mailbox cannot be created, the server MUST send the response code [TRYCREATE] as the prefix of the text of the tagged NO response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S071",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "APPEND command (destination mailbox does not exist)",
+      "pre_cond": "mailbox.exists = false",
+      "post_cond": "server.response = NO & server.response_code = TRYCREATE",
+      "actions": [
+        "send tagged NO with [TRYCREATE] response code",
+        "do not auto-create mailbox"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S071-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the append is unsuccessful for any reason, the mailbox MUST be restored to its state before the APPEND attempt (other than possibly keeping the changed mailbox's UIDNEXT value); no partial appending is permitted.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "APPEND command failure (any reason)",
+      "pre_cond": "append.successful = false",
+      "post_cond": "mailbox.state = mailbox.pre_append_state",
+      "actions": [
+        "restore mailbox to pre-APPEND state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S071-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the mailbox is currently selected, normal new message actions SHOULD occur. Specifically, the server SHOULD notify the client immediately via an untagged EXISTS response. If the server does not do so, the client MAY issue a NOOP command after one or more APPEND commands.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S071",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "selected",
+      "to_state": "selected",
+      "trigger": "APPEND command success (mailbox is currently selected)",
+      "pre_cond": "session.state = selected & append.successful = true",
+      "post_cond": "server.sends_untagged_EXISTS = true",
+      "actions": [
+        "send untagged EXISTS response"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S071-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In the case of a mailbox that has permissions set so that the client can APPEND to the mailbox, but not SELECT or EXAMINE it, the server MUST NOT send an APPENDUID response code as it would disclose information about the mailbox.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S071",
+      "object_name": "tagged OK response",
+      "field_name": "APPENDUID",
+      "field_type": "response code",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "session.can_append = true & session.can_select = false & session.can_examine = false"
+    },
+    {
+      "statement_id": "D-S071-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server decides to convert (normalize) the mailbox name, it SHOULD return an untagged LIST with an OLDNAME extended data item, with the OLDNAME value being the supplied mailbox name and the name parameter being the normalized mailbox name.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "APPEND command with mailbox name normalization",
+      "pre_cond": "server.normalizes_mailbox_name = true",
+      "post_cond": "server.sends_untagged_LIST_with_OLDNAME = true",
+      "actions": [
+        "send untagged LIST with OLDNAME extended data item"
+      ],
+      "modality": "should"
+    }
+  ]
+}

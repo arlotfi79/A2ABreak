@@ -1,0 +1,242 @@
+{
+  "section_id": "S036",
+  "title": "S036 3.2.3.2 PNS Incoming Call States",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S036 3.2.3.2 PNS Incoming Call States"
+  ],
+  "url_anchor": "#s036-3232-pns-incoming-call-states",
+  "word_count": 280,
+  "statement_count": 11,
+  "elapsed_seconds": 28.19,
+  "statements": [
+    {
+      "statement_id": "D-S036-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "idle - An Incoming-Call-Request message is received. If the request is not acceptable, an Incoming-Call-Reply is sent back to the PAC and the PNS remains in the idle state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "state_name": "idle",
+      "enum_name": "PNS_Incoming_Call_States",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.state = idle"
+    },
+    {
+      "statement_id": "D-S036-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "wait_connect - If the session is connected on the PAC, the PAC sends an incoming call connect message to the PNS which then moves into established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "state_name": "wait_connect",
+      "enum_name": "PNS_Incoming_Call_States",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = wait_connect"
+    },
+    {
+      "statement_id": "D-S036-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "established - The session is terminated either by receipt of a Call-Disconnect-Notify message from the PAC or by sending a Call-Clear-Request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "state_name": "established",
+      "enum_name": "PNS_Incoming_Call_States",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = established"
+    },
+    {
+      "statement_id": "D-S036-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "wait_disconnect - Once a Call-Disconnect-Notify is received the session moves back to the idle state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "state_name": "wait_disconnect",
+      "enum_name": "PNS_Incoming_Call_States",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = wait_disconnect"
+    },
+    {
+      "statement_id": "D-S036-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "If the Incoming-Call-Request message is not acceptable, an Incoming-Call-Reply is sent back to the PAC and the PNS remains in the idle state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "from_state": "idle",
+      "to_state": "idle",
+      "trigger": "Receive Incoming-Call-Request (not acceptable)",
+      "pre_cond": "session.state = idle & incoming_call_request.acceptable = false",
+      "post_cond": "session.state = idle",
+      "actions": [
+        "Send Incoming-Call-Reply (error/not accepting)"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "If the Incoming-Call-Request message is acceptable, an Incoming-Call-Reply is sent indicating accept in the result code. The session moves to the wait_connect state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "from_state": "idle",
+      "to_state": "wait_connect",
+      "trigger": "Receive Incoming-Call-Request (acceptable)",
+      "pre_cond": "session.state = idle & incoming_call_request.acceptable = true",
+      "post_cond": "session.state = wait_connect",
+      "actions": [
+        "Send Incoming-Call-Reply OK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "If the session is connected on the PAC, the PAC sends an incoming call connect message to the PNS which then moves into established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "from_state": "wait_connect",
+      "to_state": "established",
+      "trigger": "Receive Incoming Call Connect",
+      "pre_cond": "session.state = wait_connect",
+      "post_cond": "session.state = established",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "The PAC may send a Call-Disconnect-Notify to indicate that the incoming caller could not be connected. Session moves from wait_connect to idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "from_state": "wait_connect",
+      "to_state": "idle",
+      "trigger": "Receive Call-Disconnect-Notify",
+      "pre_cond": "session.state = wait_connect",
+      "post_cond": "session.state = idle",
+      "actions": [],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S036-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "The session is terminated by receipt of a Call-Disconnect-Notify message from the PAC; session moves from established to idle.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "Receive Call-Disconnect-Notify",
+      "pre_cond": "session.state = established",
+      "post_cond": "session.state = idle",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "The session is terminated by sending a Call-Clear-Request. Once a Call-Clear-Request has been sent, the session enters the wait_disconnect state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": "established",
+      "to_state": "wait_disconnect",
+      "trigger": "Local Terminate",
+      "pre_cond": "session.state = established",
+      "post_cond": "session.state = wait_disconnect",
+      "actions": [
+        "Send Call-Clear-Request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Once a Call-Disconnect-Notify is received the session moves back to the idle state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "from_state": "wait_disconnect",
+      "to_state": "idle",
+      "trigger": "Receive Call-Disconnect-Notify",
+      "pre_cond": "session.state = wait_disconnect",
+      "post_cond": "session.state = idle",
+      "actions": [],
+      "modality": "unspecified"
+    }
+  ]
+}

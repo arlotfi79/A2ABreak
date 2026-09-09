@@ -1,0 +1,238 @@
+{
+  "section_id": "S039",
+  "title": "S039 3.2.4.2 PNS Outgoing Call States",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S039 3.2.4.2 PNS Outgoing Call States"
+  ],
+  "url_anchor": "#s039-3242-pns-outgoing-call-states",
+  "word_count": 237,
+  "statement_count": 11,
+  "elapsed_seconds": 64.58,
+  "statements": [
+    {
+      "statement_id": "D-S039-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "idle - An Outgoing-Call-Request message is sent to the PAC and the session moves into the wait_reply state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "state_name": "idle",
+      "enum_name": "PNS_Outgoing_Call_State",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S039-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "wait_reply - An Outgoing-Call-Reply is received which indicates an error. The session returns to idle state. No telco call is active. If the Outgoing-Call-Reply does not indicate an error, the telco call is connected and the session moves to the established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "state_name": "wait_reply",
+      "enum_name": "PNS_Outgoing_Call_State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S039-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "established - If a Call-Disconnect-Notify is received, the telco call has been terminated for the reason indicated in the Result and Cause Codes. The session moves back to the idle state. If the PNS chooses to terminate the session, it sends a Call-Clear-Request to the PAC and then enters the wait_disconnect state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "state_name": "established",
+      "enum_name": "PNS_Outgoing_Call_State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S039-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "wait_disconnect - A session disconnection is waiting to be confirmed by the PAC. Once the PNS receives the Call-Disconnect-Notify message, the session enters idle state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "state_name": "wait_disconnect",
+      "enum_name": "PNS_Outgoing_Call_State",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S039-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Open Indication / Send Outgoing Call Request: session moves from idle to wait_reply",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": "idle",
+      "to_state": "wait_reply",
+      "trigger": "Open_Indication",
+      "pre_cond": "session.state = idle",
+      "post_cond": "session.state = wait_reply",
+      "actions": [
+        "send Outgoing-Call-Request to PAC"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Receive Outgoing Call Reply with Error: session returns to idle state. No telco call is active.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": "wait_reply",
+      "to_state": "idle",
+      "trigger": "Receive_Outgoing_Call_Reply_with_Error",
+      "pre_cond": "session.state = wait_reply",
+      "post_cond": "session.state = idle",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Receive Outgoing Call Reply No Error: the telco call is connected and the session moves to the established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": "wait_reply",
+      "to_state": "established",
+      "trigger": "Receive_Outgoing_Call_Reply_No_Error",
+      "pre_cond": "session.state = wait_reply",
+      "post_cond": "session.state = established",
+      "actions": [
+        "connect telco call"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Abort/Send Call Clear Request from wait_reply: session transitions to wait_disconnect.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S039",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": "wait_reply",
+      "to_state": "wait_disconnect",
+      "trigger": "Abort",
+      "pre_cond": "session.state = wait_reply",
+      "post_cond": "session.state = wait_disconnect",
+      "actions": [
+        "send Call-Clear-Request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "If a Call-Disconnect-Notify is received in established state, the telco call has been terminated and the session moves back to the idle state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "Receive_Call_Disconnect_Notify",
+      "pre_cond": "session.state = established",
+      "post_cond": "session.state = idle",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Local Terminate / Send Call Clear Request: If the PNS chooses to terminate the session, it sends a Call-Clear-Request to the PAC and then enters the wait_disconnect state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": "established",
+      "to_state": "wait_disconnect",
+      "trigger": "Local_Terminate",
+      "pre_cond": "session.state = established",
+      "post_cond": "session.state = wait_disconnect",
+      "actions": [
+        "send Call-Clear-Request to PAC"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S039-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Once the PNS receives the Call-Disconnect-Notify message in wait_disconnect, the session enters idle state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S039",
+      "actors": [
+        "PNS"
+      ],
+      "from_state": "wait_disconnect",
+      "to_state": "idle",
+      "trigger": "Receive_Call_Disconnect_Notify",
+      "pre_cond": "session.state = wait_disconnect",
+      "post_cond": "session.state = idle",
+      "actions": [],
+      "modality": "unspecified"
+    }
+  ]
+}

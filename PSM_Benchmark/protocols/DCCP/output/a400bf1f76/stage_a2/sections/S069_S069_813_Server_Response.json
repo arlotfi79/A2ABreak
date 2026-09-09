@@ -1,0 +1,256 @@
+{
+  "section_id": "S069",
+  "title": "S069 8.1.3 Server Response",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S069 8.1.3 Server Response"
+  ],
+  "url_anchor": "#s069-813-server-response",
+  "word_count": 443,
+  "statement_count": 10,
+  "elapsed_seconds": 125.97,
+  "statements": [
+    {
+      "statement_id": "N-S069-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server MAY respond to a DCCP-Request packet with a DCCP-Reset packet to refuse the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "LISTEN",
+      "to_state": null,
+      "trigger": "DCCP-Request_received",
+      "pre_cond": "server.state = LISTEN",
+      "post_cond": "connection.refused = true",
+      "actions": [
+        "send DCCP-Reset to refuse connection"
+      ],
+      "modality": "may",
+      "id": "N-S069-001"
+    },
+    {
+      "statement_id": "N-S069-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server SHOULD limit the rate at which it generates these resets; for example, to not more than 1024 per second.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S069-002"
+    },
+    {
+      "statement_id": "N-S069-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server SHOULD NOT retransmit DCCP-Response packets; the client will retransmit the DCCP-Request if necessary.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "RESPOND",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "server.state = RESPOND",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S069-003"
+    },
+    {
+      "statement_id": "N-S069-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Every valid DCCP-Request received while the server is in the RESPOND state MUST elicit a new DCCP-Response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "RESPOND",
+      "to_state": null,
+      "trigger": "valid_DCCP-Request_received",
+      "pre_cond": "server.state = RESPOND & DCCP-Request.valid = true",
+      "post_cond": "DCCP-Response.sent = true",
+      "actions": [
+        "send new DCCP-Response"
+      ],
+      "modality": "must",
+      "id": "N-S069-004"
+    },
+    {
+      "statement_id": "N-S069-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "Each new DCCP-Response MUST increment the server's Sequence Number by one and MUST include the same application data, if any, as the original DCCP-Response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "RESPOND",
+      "to_state": null,
+      "trigger": "valid_DCCP-Request_received",
+      "pre_cond": "server.state = RESPOND",
+      "post_cond": "DCCP-Response.sequence_number = prev_sequence_number + 1 & DCCP-Response.data = original_DCCP-Response.data",
+      "actions": [
+        "increment server Sequence Number by one",
+        "include same application data as original DCCP-Response"
+      ],
+      "modality": "must",
+      "id": "N-S069-005"
+    },
+    {
+      "statement_id": "N-S069-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The server MUST NOT accept more than one piece of DCCP-Request application data per connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "RESPOND",
+      "to_state": null,
+      "trigger": "DCCP-Request_with_application_data_received",
+      "pre_cond": "server.state = RESPOND & connection.request_data_accepted = true",
+      "post_cond": null,
+      "actions": [
+        "discard additional DCCP-Request application data"
+      ],
+      "modality": "must",
+      "id": "N-S069-006"
+    },
+    {
+      "statement_id": "N-S069-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "In particular, the DCCP-Response sent in reply to a retransmitted DCCP-Request with application data SHOULD contain a Data Dropped option, in which the retransmitted DCCP-Request data is reported with Drop Code 0, Protocol Constraints.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "RESPOND",
+      "to_state": null,
+      "trigger": "retransmitted_DCCP-Request_with_application_data_received",
+      "pre_cond": "server.state = RESPOND & DCCP-Request.retransmitted = true & DCCP-Request.application_data != null",
+      "post_cond": "DCCP-Response.contains_Data_Dropped_option = true",
+      "actions": [
+        "include Data Dropped option with retransmitted request data reported as Drop Code 0 (Protocol Constraints)"
+      ],
+      "modality": "should",
+      "id": "N-S069-007"
+    },
+    {
+      "statement_id": "N-S069-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "The original DCCP-Request SHOULD also be reported in the Data Dropped option, either in a Normal Block (if the server accepted the data or there was no data) or in a Drop Code 0 Drop Block (if the server refused the data the first time as well).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "RESPOND",
+      "to_state": null,
+      "trigger": "retransmitted_DCCP-Request_with_application_data_received",
+      "pre_cond": "server.state = RESPOND & DCCP-Request.retransmitted = true",
+      "post_cond": "Data_Dropped_option.original_request_reported = true",
+      "actions": [
+        "report original DCCP-Request in Data Dropped option as Normal Block if data was accepted or absent",
+        "report original DCCP-Request in Data Dropped option as Drop Code 0 Drop Block if data was refused"
+      ],
+      "modality": "should",
+      "id": "N-S069-008"
+    },
+    {
+      "statement_id": "N-S069-9",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "It MAY also leave the RESPOND state for CLOSED after a timeout of not less than 4MSL (8 minutes); when doing so, it SHOULD send a DCCP-Reset with Reset Code 2, \"Aborted\", to clean up state at the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server"
+      ],
+      "from_state": "RESPOND",
+      "to_state": "CLOSED",
+      "trigger": "timeout_not_less_than_4MSL",
+      "pre_cond": "server.state = RESPOND & timer.elapsed >= 4MSL",
+      "post_cond": "server.state = CLOSED",
+      "actions": [
+        "transition to CLOSED state"
+      ],
+      "modality": "may",
+      "id": "N-S069-009"
+    },
+    {
+      "statement_id": "N-S069-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "dccp_fsm",
+      "description": "It MAY also leave the RESPOND state for CLOSED after a timeout of not less than 4MSL (8 minutes); when doing so, it SHOULD send a DCCP-Reset with Reset Code 2, \"Aborted\", to clean up state at the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S069",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "RESPOND",
+      "to_state": "CLOSED",
+      "trigger": "timeout_not_less_than_4MSL",
+      "pre_cond": "server.state = RESPOND & timer.elapsed >= 4MSL",
+      "post_cond": "DCCP-Reset.sent = true & DCCP-Reset.reset_code = 2",
+      "actions": [
+        "send DCCP-Reset with Reset Code 2 (Aborted) to client"
+      ],
+      "modality": "should",
+      "id": "N-S069-010"
+    }
+  ]
+}

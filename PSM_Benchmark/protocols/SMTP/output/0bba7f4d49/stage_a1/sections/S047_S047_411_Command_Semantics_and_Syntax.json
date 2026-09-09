@@ -1,0 +1,138 @@
+{
+  "section_id": "S047",
+  "title": "S047 4.1.1 Command Semantics and Syntax",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S047 4.1.1 Command Semantics and Syntax"
+  ],
+  "url_anchor": "#s047-411-command-semantics-and-syntax",
+  "word_count": 261,
+  "statement_count": 6,
+  "elapsed_seconds": 41.41,
+  "statements": [
+    {
+      "statement_id": "D-S047-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "The reverse-path is the argument of the MAIL command... there is a reverse-path buffer... to hold the types of data objects",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "object_name": "mail transaction",
+      "field_name": "reverse-path buffer",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S047-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "the forward-path is the argument of the RCPT command... there is a... forward-path buffer... to hold the types of data objects",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "object_name": "mail transaction",
+      "field_name": "forward-path buffer",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S047-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "the mail data is the argument of the DATA command... there is a... mail data buffer... to hold the types of data objects",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S047",
+      "object_name": "mail transaction",
+      "field_name": "mail data buffer",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S047-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "These arguments or data objects must be transmitted and held, pending the confirmation communicated by the end of mail data indication that finalizes the transaction.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S047",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "transaction finalized",
+      "trigger": "end of mail data indication",
+      "pre_cond": "transaction.reverse_path_buffer != null & transaction.forward_path_buffer != null & transaction.mail_data_buffer != null",
+      "post_cond": "transaction.state = finalized",
+      "actions": [
+        "confirm mail transaction completion"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S047-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "Specific commands cause information to be appended to a specific buffer, or cause one or more buffers to be cleared.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S047",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SMTP command received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "append information to designated buffer",
+        "clear one or more buffers"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S047-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Several commands (RSET, DATA, QUIT) are specified as not permitting parameters. In the absence of specific extensions offered by the server and accepted by the client, clients MUST NOT send such parameters and servers SHOULD reject commands containing them as having invalid syntax.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S047",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RSET|DATA|QUIT command received with parameters",
+      "pre_cond": "session.extension_negotiated = false",
+      "post_cond": null,
+      "actions": [
+        "reject command with invalid syntax response"
+      ],
+      "modality": "should"
+    }
+  ]
+}

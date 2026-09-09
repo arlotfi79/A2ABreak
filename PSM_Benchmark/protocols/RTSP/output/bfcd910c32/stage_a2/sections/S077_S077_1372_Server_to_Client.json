@@ -1,0 +1,168 @@
+{
+  "section_id": "S077",
+  "title": "S077 13.7.2 Server to Client",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S077 13.7.2 Server to Client"
+  ],
+  "url_anchor": "#s077-1372-server-to-client",
+  "word_count": 466,
+  "statement_count": 6,
+  "elapsed_seconds": 77.87,
+  "statements": [
+    {
+      "statement_id": "1-S077-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "This MAY be done when the client has been inactive in the RTSP session for more than one Session Timeout period (Section 18.49).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S077",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "client_inactive_duration_exceeds_one_session_timeout_period",
+      "pre_cond": "session.inactive_duration > session_timeout_period",
+      "post_cond": null,
+      "actions": [
+        "send TEARDOWN request with Terminate-Reason: Session-Timeout"
+      ],
+      "modality": "may",
+      "id": "N-S077-001"
+    },
+    {
+      "statement_id": "2-S077-2",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "However, the server is NOT RECOMMENDED to perform this operation until an extended period of inactivity of 10 times the Session-Timeout period has passed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S077",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "client_inactive_duration_less_than_10x_session_timeout",
+      "pre_cond": "session.inactive_duration < (10 * session_timeout_period)",
+      "post_cond": null,
+      "actions": [
+        "do not send TEARDOWN to reclaim resources"
+      ],
+      "modality": "should",
+      "id": "N-S077-002"
+    },
+    {
+      "statement_id": "3-S077-3",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In case the server needs to stop providing service to the established sessions and there is no server to point at in a REDIRECT request, then TEARDOWN SHALL be used to terminate the session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S077",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Established",
+      "to_state": "Terminated",
+      "trigger": "server_needs_stop_service & no_redirect_server_available",
+      "pre_cond": "server.needs_stop_service & !server.redirect_available",
+      "post_cond": "session.state = Terminated",
+      "actions": [
+        "send TEARDOWN request to terminate session"
+      ],
+      "modality": "shall",
+      "id": "N-S077-003"
+    },
+    {
+      "statement_id": "4-S077-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The TEARDOWN request MUST be made only on the session aggregate control URI (i.e., it is not allowed to terminate individual media streams, if it is a session aggregate), and it MUST include the following headers: Session and Terminate-Reason.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S077",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "send_server_to_client_TEARDOWN",
+      "pre_cond": "session.is_aggregate",
+      "post_cond": null,
+      "actions": [
+        "send TEARDOWN on session aggregate control URI only",
+        "include Session header in TEARDOWN request",
+        "include Terminate-Reason header in TEARDOWN request"
+      ],
+      "modality": "must",
+      "id": "N-S077-004"
+    },
+    {
+      "statement_id": "5-S077-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Any intervening proxies SHOULD do all of the following in the order listed: 1. respond to the TEARDOWN request 2. disconnect the control channel from the requesting server 3. pass the TEARDOWN request to each applicable client (typically those clients with an active session or an unanswered request)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S077",
+      "actors": [
+        "proxy",
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_wildcard_TEARDOWN_from_server",
+      "pre_cond": "teardown.uri = \"*\" & teardown.session_header = null",
+      "post_cond": "connection.state = disconnected & session.state = Terminated",
+      "actions": [
+        "respond to TEARDOWN request",
+        "disconnect control channel from requesting server",
+        "pass TEARDOWN request to each applicable client with active session or unanswered request"
+      ],
+      "modality": "should",
+      "id": "N-S077-005"
+    },
+    {
+      "statement_id": "6-S077-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "these responses MUST NOT be passed on to either the original server or the target server in the redirect.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S077",
+      "actors": [
+        "proxy",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_client_TEARDOWN_response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "do not forward client TEARDOWN responses to original server",
+        "do not forward client TEARDOWN responses to target server in redirect"
+      ],
+      "modality": "must",
+      "id": "N-S077-006"
+    }
+  ]
+}

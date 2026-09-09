@@ -1,0 +1,206 @@
+{
+  "section_id": "S009",
+  "title": "S009 2.6 Session Maintenance and Termination",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S009 2.6 Session Maintenance and Termination"
+  ],
+  "url_anchor": "#s009-26-session-maintenance-and-termination",
+  "word_count": 395,
+  "statement_count": 8,
+  "elapsed_seconds": 175.84,
+  "statements": [
+    {
+      "statement_id": "N-S009-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "rtsp",
+      "stage": "rtsp_fsm",
+      "description": "RTP Control Protocol (RTCP) may be used when using RTP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S009-001"
+    },
+    {
+      "statement_id": "N-S009-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the client fails to show liveness for more than the established session timeout value (normally 60 seconds), the server may terminate the context.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_liveness_timeout",
+      "pre_cond": "client.liveness_elapsed > session.timeout_value",
+      "post_cond": "session.context = terminated",
+      "actions": [
+        "terminate session context"
+      ],
+      "modality": "may",
+      "id": "N-S009-002"
+    },
+    {
+      "statement_id": "N-S009-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Other values may be selected by the server through the inclusion of the timeout parameter in the session header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_establishment",
+      "pre_cond": null,
+      "post_cond": "session.timeout_value = server_selected_value",
+      "actions": [
+        "include timeout parameter in Session header"
+      ],
+      "modality": "may",
+      "id": "N-S009-003"
+    },
+    {
+      "statement_id": "N-S009-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A client may keep the session alive indefinitely if allowed by the server; however, a client is advised to release the session context when an extended period of time without media delivery activity has passed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "server.allows_indefinite_keepalive = true",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S009-004"
+    },
+    {
+      "statement_id": "N-S009-5",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "It is recommended that the client terminate the session before ten times the session timeout value has passed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_duration_approaching_10x_timeout",
+      "pre_cond": "session.elapsed_time < (10 * session.timeout_value)",
+      "post_cond": "session.context = terminated",
+      "actions": [
+        "terminate session before elapsed_time reaches 10 * session.timeout_value"
+      ],
+      "modality": "should",
+      "id": "N-S009-005"
+    },
+    {
+      "statement_id": "N-S009-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server may terminate the session after one session timeout period without any client activity beyond keep-alive.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_inactivity_exceeds_one_timeout_period",
+      "pre_cond": "client.activity = keep_alive_only & client.inactivity_elapsed >= session.timeout_value",
+      "post_cond": "session.context = terminated",
+      "actions": [
+        "terminate session"
+      ],
+      "modality": "may",
+      "id": "N-S009-006"
+    },
+    {
+      "statement_id": "N-S009-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The Location header indicates where it should connect if there is an alternative server available.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REDIRECT_received",
+      "pre_cond": "alternative_server.available = true & message.Location_header = present",
+      "post_cond": null,
+      "actions": [
+        "connect to alternative server indicated in Location header"
+      ],
+      "modality": "should",
+      "id": "N-S009-007"
+    },
+    {
+      "statement_id": "N-S009-8",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In case the server has no other server to redirect to, and it wants to close the session for maintenance, it shall use the TEARDOWN method with a Terminate-Reason header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_maintenance_close_without_redirect",
+      "pre_cond": "server.has_alternative_server = false & server.wants_maintenance_close = true",
+      "post_cond": "message.method = TEARDOWN & message.Terminate_Reason_header = present",
+      "actions": [
+        "send TEARDOWN request",
+        "include Terminate-Reason header in TEARDOWN"
+      ],
+      "modality": "shall",
+      "id": "N-S009-008"
+    }
+  ]
+}

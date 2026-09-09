@@ -1,0 +1,239 @@
+{
+  "section_id": "S060",
+  "title": "S060 3.10.5 ABORT Call",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S060 3.10.5 ABORT Call"
+  ],
+  "url_anchor": "#s060-3105-abort-call",
+  "word_count": 151,
+  "statement_count": 8,
+  "elapsed_seconds": 180.97,
+  "statements": [
+    {
+      "statement_id": "1-S060-1",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "tcp_fsm",
+      "description": "If the user should not have access to such a connection, return \"error: connection illegal for this process\".",
+      "is_inferred": false,
+      "confidence": 0.5,
+      "source_section": "S060",
+      "actors": [
+        "user",
+        "tcp"
+      ],
+      "from_state": "CLOSED",
+      "to_state": null,
+      "trigger": "ABORT call",
+      "pre_cond": "protocol.state = CLOSED & !user.has_connection_access",
+      "post_cond": null,
+      "actions": [
+        "return error: connection illegal for this process"
+      ],
+      "modality": "should",
+      "id": "N-S060-001"
+    },
+    {
+      "statement_id": "1-S060-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Any outstanding RECEIVEs should be returned with \"error: connection reset\" responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S060",
+      "actors": [
+        "tcp",
+        "user"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "CLOSED",
+      "trigger": "ABORT call",
+      "pre_cond": "protocol.state = LISTEN",
+      "post_cond": "protocol.state = CLOSED & connection.TCB = null",
+      "actions": [
+        "return outstanding RECEIVEs with error: connection reset",
+        "delete TCB",
+        "enter CLOSED state"
+      ],
+      "modality": "should",
+      "id": "N-S060-002"
+    },
+    {
+      "statement_id": "1-S060-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "All queued SENDs and RECEIVEs should be given \"connection reset\" notification.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S060",
+      "actors": [
+        "tcp",
+        "user"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "CLOSED",
+      "trigger": "ABORT call",
+      "pre_cond": "protocol.state = SYN-SENT",
+      "post_cond": "protocol.state = CLOSED & connection.TCB = null",
+      "actions": [
+        "notify all queued SENDs and RECEIVEs with connection reset",
+        "delete TCB",
+        "enter CLOSED state"
+      ],
+      "modality": "should",
+      "id": "N-S060-003"
+    },
+    {
+      "statement_id": "1-S060-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "All queued SENDs and RECEIVEs should be given \"connection reset\" notification; all segments queued for transmission (except for the RST formed above) or retransmission should be flushed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S060",
+      "actors": [
+        "tcp",
+        "user"
+      ],
+      "from_state": "SYN-RECEIVED",
+      "to_state": "CLOSED",
+      "trigger": "ABORT call",
+      "pre_cond": "protocol.state = SYN-RECEIVED",
+      "post_cond": "protocol.state = CLOSED & connection.TCB = null & connection.send_queue = empty",
+      "actions": [
+        "send reset segment <SEQ=SND.NXT><CTL=RST>",
+        "notify all queued SENDs and RECEIVEs with connection reset",
+        "flush all segments queued for transmission or retransmission except RST",
+        "delete TCB",
+        "enter CLOSED state"
+      ],
+      "modality": "should",
+      "id": "N-S060-004"
+    },
+    {
+      "statement_id": "1-S060-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "All queued SENDs and RECEIVEs should be given \"connection reset\" notification; all segments queued for transmission (except for the RST formed above) or retransmission should be flushed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S060",
+      "actors": [
+        "tcp",
+        "user"
+      ],
+      "from_state": "ESTABLISHED",
+      "to_state": "CLOSED",
+      "trigger": "ABORT call",
+      "pre_cond": "protocol.state = ESTABLISHED",
+      "post_cond": "protocol.state = CLOSED & connection.TCB = null & connection.send_queue = empty",
+      "actions": [
+        "send reset segment <SEQ=SND.NXT><CTL=RST>",
+        "notify all queued SENDs and RECEIVEs with connection reset",
+        "flush all segments queued for transmission or retransmission except RST",
+        "delete TCB",
+        "enter CLOSED state"
+      ],
+      "modality": "should",
+      "id": "N-S060-005"
+    },
+    {
+      "statement_id": "1-S060-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "All queued SENDs and RECEIVEs should be given \"connection reset\" notification; all segments queued for transmission (except for the RST formed above) or retransmission should be flushed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S060",
+      "actors": [
+        "tcp",
+        "user"
+      ],
+      "from_state": "FIN-WAIT-1",
+      "to_state": "CLOSED",
+      "trigger": "ABORT call",
+      "pre_cond": "protocol.state = FIN-WAIT-1",
+      "post_cond": "protocol.state = CLOSED & connection.TCB = null & connection.send_queue = empty",
+      "actions": [
+        "send reset segment <SEQ=SND.NXT><CTL=RST>",
+        "notify all queued SENDs and RECEIVEs with connection reset",
+        "flush all segments queued for transmission or retransmission except RST",
+        "delete TCB",
+        "enter CLOSED state"
+      ],
+      "modality": "should",
+      "id": "N-S060-006"
+    },
+    {
+      "statement_id": "1-S060-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "All queued SENDs and RECEIVEs should be given \"connection reset\" notification; all segments queued for transmission (except for the RST formed above) or retransmission should be flushed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S060",
+      "actors": [
+        "tcp",
+        "user"
+      ],
+      "from_state": "FIN-WAIT-2",
+      "to_state": "CLOSED",
+      "trigger": "ABORT call",
+      "pre_cond": "protocol.state = FIN-WAIT-2",
+      "post_cond": "protocol.state = CLOSED & connection.TCB = null & connection.send_queue = empty",
+      "actions": [
+        "send reset segment <SEQ=SND.NXT><CTL=RST>",
+        "notify all queued SENDs and RECEIVEs with connection reset",
+        "flush all segments queued for transmission or retransmission except RST",
+        "delete TCB",
+        "enter CLOSED state"
+      ],
+      "modality": "should",
+      "id": "N-S060-007"
+    },
+    {
+      "statement_id": "1-S060-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "All queued SENDs and RECEIVEs should be given \"connection reset\" notification; all segments queued for transmission (except for the RST formed above) or retransmission should be flushed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S060",
+      "actors": [
+        "tcp",
+        "user"
+      ],
+      "from_state": "CLOSE-WAIT",
+      "to_state": "CLOSED",
+      "trigger": "ABORT call",
+      "pre_cond": "protocol.state = CLOSE-WAIT",
+      "post_cond": "protocol.state = CLOSED & connection.TCB = null & connection.send_queue = empty",
+      "actions": [
+        "send reset segment <SEQ=SND.NXT><CTL=RST>",
+        "notify all queued SENDs and RECEIVEs with connection reset",
+        "flush all segments queued for transmission or retransmission except RST",
+        "delete TCB",
+        "enter CLOSED state"
+      ],
+      "modality": "should",
+      "id": "N-S060-008"
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "section_id": "S010",
+  "title": "S010 2.2 Dynamic allocation of network addresses",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S010 2.2 Dynamic allocation of network addresses"
+  ],
+  "url_anchor": "#s010-22-dynamic-allocation-of-network-addresses",
+  "word_count": 271,
+  "statement_count": 6,
+  "elapsed_seconds": 58.09,
+  "statements": [
+    {
+      "statement_id": "D-S010-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client may extend its lease with subsequent requests.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S010",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client sends subsequent lease extension request",
+      "pre_cond": null,
+      "post_cond": "lease.duration = extended",
+      "actions": [
+        "send lease extension request",
+        "server extends lease"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S010-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client may issue a message to release the address back to the server when the client no longer needs the address.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S010",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client no longer needs address",
+      "pre_cond": null,
+      "post_cond": "address.allocated = false",
+      "actions": [
+        "send release message",
+        "return address to server"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S010-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The allocation mechanism will reuse addresses whose lease has expired.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "lease expired",
+      "pre_cond": "lease.expired = true",
+      "post_cond": "address.available_for_reuse = true",
+      "actions": [
+        "mark expired-lease address as available for reuse"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "dhcp_fsm",
+      "description": "The allocating server SHOULD probe the reused address before allocating the address, e.g., with an ICMP echo request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S010",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "address selected for reuse",
+      "pre_cond": "address.reused = true",
+      "post_cond": null,
+      "actions": [
+        "probe reused address (e.g., ICMP echo request)"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S010-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client SHOULD probe the newly received address, e.g., with ARP.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S010",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "new address received from server",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "probe newly received address (e.g., ARP)"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S010-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "dhcp_fsm",
+      "description": "The period over which a network address is allocated to a client is referred to as a 'lease'. The allocation mechanism guarantees not to reallocate that address within the requested time.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S010",
+      "object_name": "lease",
+      "field_name": "lease_duration",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "address remains allocated to client for duration of lease; server must not reallocate before lease.expired = true"
+    }
+  ]
+}

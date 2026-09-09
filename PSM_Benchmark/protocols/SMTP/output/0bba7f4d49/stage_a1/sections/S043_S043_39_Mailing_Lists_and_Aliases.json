@@ -1,0 +1,75 @@
+{
+  "section_id": "S043",
+  "title": "S043 3.9 Mailing Lists and Aliases",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S043 3.9 Mailing Lists and Aliases"
+  ],
+  "url_anchor": "#s043-39-mailing-lists-and-aliases",
+  "word_count": 190,
+  "statement_count": 3,
+  "elapsed_seconds": 21.74,
+  "statements": [
+    {
+      "statement_id": "D-S043-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "When a message is delivered or forwarded to each address of an expanded list form, the return address in the envelope (\"MAIL FROM:\") MUST be changed to be the address of a person or other entity who administers the list.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S043",
+      "object_name": "envelope",
+      "field_name": "MAIL FROM",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": "list administrator address",
+      "guard_semantics": "message is being forwarded to expanded mailing list recipients"
+    },
+    {
+      "statement_id": "D-S043-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "In the case of list forwarding, the message header section MUST be left unchanged; in particular, the \"From\" field of the header section is unaffected.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S043",
+      "object_name": "message header",
+      "field_name": "From",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": "original sender value (unchanged)",
+      "guard_semantics": "message is being forwarded to expanded mailing list recipients"
+    },
+    {
+      "statement_id": "D-S043-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When a message is sent to a pseudo-mailbox (exploder), copies are forwarded or redistributed to each mailbox in the expanded list, with MAIL FROM changed to the list administrator and message headers left unchanged.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S043",
+      "actors": [
+        "server"
+      ],
+      "from_state": "MAIL FROM received",
+      "to_state": null,
+      "trigger": "recipient address resolves to mailing list or alias",
+      "pre_cond": "transaction.rcpt_to = <mailing_list_address>",
+      "post_cond": "transaction.mail_from = <list_administrator_address> & message.header_from = <original_value>",
+      "actions": [
+        "expand alias or list to individual recipient addresses",
+        "set MAIL FROM to list administrator address",
+        "forward copy of message to each expanded recipient",
+        "leave message header section unchanged"
+      ],
+      "modality": "must"
+    }
+  ]
+}

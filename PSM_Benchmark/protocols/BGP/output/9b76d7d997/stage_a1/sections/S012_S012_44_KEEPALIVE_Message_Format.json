@@ -1,0 +1,73 @@
+{
+  "section_id": "S012",
+  "title": "S012 4.4 KEEPALIVE Message Format",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S012 4.4 KEEPALIVE Message Format"
+  ],
+  "url_anchor": "#s012-44-keepalive-message-format",
+  "word_count": 115,
+  "statement_count": 3,
+  "elapsed_seconds": 46.4,
+  "statements": [
+    {
+      "statement_id": "D-S012-001",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "timer",
+      "stage": "bgp_fsm",
+      "description": "If the negotiated Hold Time interval is zero, then periodic KEEPALIVE messages MUST NOT be sent.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S012",
+      "object_name": "KEEPALIVE",
+      "field_name": "periodic_sending_enabled",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "timer.hold_time = 0 \u2192 periodic_keepalive = false"
+    },
+    {
+      "statement_id": "D-S012-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "KEEPALIVE messages MUST NOT be sent more frequently than one per second.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S012",
+      "object_name": "KEEPALIVE",
+      "field_name": "send_rate_limit",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "keepalive.send_interval >= 1"
+    },
+    {
+      "statement_id": "D-S012-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "timer",
+      "stage": "bgp_fsm",
+      "description": "KEEPALIVE messages are exchanged between peers often enough not to cause the Hold Timer to expire. A reasonable maximum time between KEEPALIVE messages would be one third of the Hold Time interval.",
+      "is_inferred": true,
+      "confidence": 0.6,
+      "source_section": "S012",
+      "actors": [
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "KeepaliveTimer_Expires",
+      "pre_cond": "timer.hold_time != 0",
+      "post_cond": null,
+      "actions": [
+        "send KEEPALIVE message",
+        "reset KeepaliveTimer"
+      ],
+      "modality": "should"
+    }
+  ]
+}

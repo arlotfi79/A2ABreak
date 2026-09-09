@@ -1,0 +1,113 @@
+{
+  "section_id": "S031",
+  "title": "S031 6.2 Handling Authorization Errors",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S031 6.2 Handling Authorization Errors"
+  ],
+  "url_anchor": "#s031-62-handling-authorization-errors",
+  "word_count": 284,
+  "statement_count": 4,
+  "elapsed_seconds": 31.85,
+  "statements": [
+    {
+      "statement_id": "D-S031-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "The tokenless CONNECT attempt MUST fail. The challenge-response-based PoP is not possible for MQTT v3.1.1.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S031",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "CONNECT_without_token",
+      "pre_cond": "connection.token = null",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "reject CONNECT attempt",
+        "deny connection establishment"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "In the case of an authorization error, the Broker MUST ignore the PUBLISH packet and disconnect the Client.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S031",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "PUBLISH_authorization_failure",
+      "pre_cond": "client.publish_authorized = false",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "ignore PUBLISH packet",
+        "disconnect Client below application layer"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "mqtt_fsm",
+      "description": "Token expirations MUST lead to disconnecting the Client rather than silently dropping messages when the Broker is forwarding PUBLISH packets to subscribed Clients.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S031",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "subscriber_token_expiration",
+      "pre_cond": "client.token.expired = true & broker.forwarding_publish = true",
+      "post_cond": "connection.state = Disconnected",
+      "actions": [
+        "disconnect Client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "mqtt_fsm",
+      "description": "The Broker will disconnect on almost any error and may not keep the Session State, necessitating that clients make a greater effort to ensure that tokens remain valid.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S031",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Disconnected",
+      "trigger": "authorization_error",
+      "pre_cond": null,
+      "post_cond": "session.state_preserved = false",
+      "actions": [
+        "disconnect connection",
+        "discard Session State"
+      ],
+      "modality": "may"
+    }
+  ]
+}

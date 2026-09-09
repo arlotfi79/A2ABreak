@@ -1,0 +1,64 @@
+digraph task_execution {
+    rankdir=LR;
+    size="10,6";
+    ratio=compress;
+    margin=0.05;
+    dpi=300;
+    nodesep=0.45;
+    ranksep=0.85;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=18];
+    edge [fontname="Helvetica", fontsize=12];
+    label="Task Execution FSM";
+    labelloc=t;
+    fontsize=24;
+
+    // States
+    "PUSH_NOTIFICATION_ACKNOWLEDGED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled,dashed", fillcolor="#f8d7da", color="#dc3545", label="PUSH_NOTIFICATION\nACKNOWLEDGED"];
+    "PUSH_NOTIFICATION_CONFIG_ACTIVE" [fontname="Helvetica", fontsize="18", shape="circle", style="dashed", label="PUSH_NOTIFICATION\nCONFIG_ACTIVE"];
+    "PUSH_NOTIFICATION_CONFIG_DELETED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled,dashed", fillcolor="#f8d7da", color="#dc3545", label="PUSH_NOTIFICATION\nCONFIG_DELETED"];
+    "PUSH_NOTIFICATION_DELIVERY_ABANDONED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled,dashed", fillcolor="#f8d7da", color="#dc3545", label="PUSH_NOTIFICATION\nDELIVERY_ABANDONED"];
+    "PUSH_NOTIFICATION_DELIVERY_RETRYING" [fontname="Helvetica", fontsize="18", shape="circle", style="dashed", label="PUSH_NOTIFICATION\nDELIVERY_RETRYING"];
+    "PUSH_NOTIFICATION_RECEIVED" [fontname="Helvetica", fontsize="18", shape="circle", style="dashed", label="PUSH_NOTIFICATION\nRECEIVED"];
+    "STREAM_ACTIVE" [fontname="Helvetica", fontsize="18", shape="circle", style="solid", label="STREAM_ACTIVE"];
+    "STREAM_CLOSED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled", fillcolor="#f8d7da", color="#dc3545", label="STREAM_CLOSED"];
+    "STREAM_STATE_OPEN" [fontname="Helvetica", fontsize="18", shape="doublecircle", style="filled", fillcolor="#d4edda", color="#28a745", label="STREAM_STATE_OPEN"];
+    "SUBSCRIBE_TO_TASK_REQUESTED" [fontname="Helvetica", fontsize="18", shape="circle", style="dashed", label="SUBSCRIBE_TO_TASK\nREQUESTED"];
+    "TASK_STATE_AUTH_REQUIRED" [fontname="Helvetica", fontsize="18", shape="ellipse", style="filled", fillcolor="#cce5ff", color="#004085", label="TASK_STATE_AUTH\nREQUIRED"];
+    "TASK_STATE_CANCELED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled,dashed", fillcolor="#f8d7da", color="#dc3545", label="TASK_STATE_CANCELED"];
+    "TASK_STATE_COMPLETED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled", fillcolor="#f8d7da", color="#dc3545", label="TASK_STATE_COMPLETED"];
+    "TASK_STATE_FAILED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled", fillcolor="#f8d7da", color="#dc3545", label="TASK_STATE_FAILED"];
+    "TASK_STATE_INPUT_REQUIRED" [fontname="Helvetica", fontsize="18", shape="ellipse", style="filled", fillcolor="#cce5ff", color="#004085", label="TASK_STATE_INPUT\nREQUIRED"];
+    "TASK_STATE_REJECTED" [fontname="Helvetica", fontsize="18", shape="rectangle", style="filled", fillcolor="#f8d7da", color="#dc3545", label="TASK_STATE_REJECTED"];
+    "TASK_STATE_SUBMITTED" [fontname="Helvetica", fontsize="18", shape="doublecircle", style="filled", fillcolor="#d4edda", color="#28a745", label="TASK_STATE_SUBMITTED"];
+    "TASK_STATE_WORKING" [fontname="Helvetica", fontsize="18", shape="circle", style="solid", label="TASK_STATE_WORKING"];
+
+    // Transitions
+    "TASK_STATE_SUBMITTED" -> "TASK_STATE_REJECTED" [label="agent_rejects_task\n[task.state = TASK_STATE_SUBMITTED]", style="solid", color="#5b21b6", fontcolor="#5b21b6", penwidth="2.2"];
+    "TASK_STATE_SUBMITTED" -> "TASK_STATE_WORKING" [label="agent_begins_processing\n[task.state = TASK_STATE_SUBMITTED]", style="dashed", color="#666666", fontcolor="#666666", penwidth="1.0"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_WORKING" [label="artifactUpdate\n[task.state = TASK_STATE_WORKING & stream.open = true]", style="solid", color="#333333", fontcolor="#333333", penwidth="1.0"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_COMPLETED" [label="statusUpdate\n[task.state = TASK_STATE_WORKING & stream.open = true]", style="solid", color="#5b21b6", fontcolor="#5b21b6", penwidth="2.2"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_INPUT_REQUIRED" [label="agent_requests_input\n[task.state = TASK_STATE_WORKING]", style="dashed", color="#9333ea", fontcolor="#9333ea", penwidth="2.2"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_REJECTED" [label="agent_rejects_task\n[task.state = TASK_STATE_WORKING]", style="dashed", color="#9333ea", fontcolor="#9333ea", penwidth="2.2"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_FAILED" [label="task_processing_failed\n[task.state = TASK_STATE_WORKING]", style="dashed", color="#9333ea", fontcolor="#9333ea", penwidth="2.2"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_CANCELED" [label="cancel_task\n[task.state = TASK_STATE_WORKING]", style="dashed", color="#9333ea", fontcolor="#9333ea", penwidth="2.2"];
+    "TASK_STATE_WORKING" -> "TASK_STATE_AUTH_REQUIRED" [label="authorization_required\n[!(authorization.negotiated_out_of_band = true |\nauthorization.negotiated_via_extension = true)]", style="solid", color="#5b21b6", fontcolor="#5b21b6", penwidth="2.2"];
+    "TASK_STATE_INPUT_REQUIRED" -> "TASK_STATE_WORKING" [label="message_received\n[task.state = TASK_STATE_INPUT_REQUIRED & message.taskId\n= task.taskId & message.contextId = task.contextId]", style="solid", color="#5b21b6", fontcolor="#5b21b6", penwidth="2.2"];
+    "TASK_STATE_AUTH_REQUIRED" -> "TASK_STATE_WORKING" [label="credential_received\n[task.state = TASK_STATE_AUTH_REQUIRED &\ncredential_received_out_of_band = true]", style="dashed", color="#9333ea", fontcolor="#9333ea", penwidth="2.2"];
+    "SUBSCRIBE_TO_TASK_REQUESTED" -> "STREAM_STATE_OPEN" [label="subscribe_to_task_requested\n[!task.state.is_terminal]", style="solid", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "STREAM_STATE_OPEN" -> "STREAM_ACTIVE" [label="stream_open", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "STREAM_ACTIVE" -> "STREAM_ACTIVE" [label="task_event_generated\n[stream.state = STREAM_ACTIVE]", style="solid", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "STREAM_ACTIVE" -> "STREAM_CLOSED" [label="task_reaches_terminal_or_interrupted_state\n[task.state IN (TASK_STATE_COMPLETED, TASK_STATE_FAILED,\nTASK_STATE_CANCELED, TASK_STATE_REJECTED,\nTASK_STATE_INPUT_REQUIRED, TASK_STATE_AUTH_REQUIRED)]", style="dashed", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "PUSH_NOTIFICATION_CONFIG_ACTIVE" -> "PUSH_NOTIFICATION_CONFIG_DELETED" [label="delete_push_notification_config_requested\n[push_notification_config.exists = true AND\nagent.supports_push_notifications = true]", style="solid", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "PUSH_NOTIFICATION_DELIVERY_RETRYING" -> "PUSH_NOTIFICATION_DELIVERY_ABANDONED" [label="consecutive_delivery_failures_threshold_reached\n[push_notification.consecutive_failures >=\npush_notification.configured_failure_limit]", style="solid", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "PUSH_NOTIFICATION_RECEIVED" -> "PUSH_NOTIFICATION_ACKNOWLEDGED" [label="webhook_request_received\n[webhook_request received with authentication credentials\npresent]", style="solid", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "TASK_STATE_SUBMITTED" -> "PUSH_NOTIFICATION_CONFIG_ACTIVE" [label="create_push_notification_config_requested\n[agent.capabilities.pushNotifications = true &\ntask.exists = true]", style="dashed", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "TASK_STATE_WORKING" -> "PUSH_NOTIFICATION_CONFIG_ACTIVE" [label="create_push_notification_config_requested\n[agent.capabilities.pushNotifications = true &\ntask.exists = true]", style="dashed", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+    "TASK_STATE_SUBMITTED" -> "SUBSCRIBE_TO_TASK_REQUESTED" [label="subscribe_to_task\n[task.exists = true & !task.state.is_terminal]", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "TASK_STATE_WORKING" -> "SUBSCRIBE_TO_TASK_REQUESTED" [label="subscribe_to_task\n[task.exists = true & !task.state.is_terminal]", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "TASK_STATE_INPUT_REQUIRED" -> "SUBSCRIBE_TO_TASK_REQUESTED" [label="subscribe_to_task\n[task.exists = true & !task.state.is_terminal]", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "TASK_STATE_AUTH_REQUIRED" -> "SUBSCRIBE_TO_TASK_REQUESTED" [label="subscribe_to_task\n[task.exists = true & !task.state.is_terminal]", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "PUSH_NOTIFICATION_CONFIG_ACTIVE" -> "PUSH_NOTIFICATION_DELIVERY_RETRYING" [label="push_notification_delivery_failed\n[push_notification_config.exists = true &\npush_notification.delivery_attempt_failed = true]", style="dashed", color="#28a745", fontcolor="#28a745", penwidth="1.0"];
+    "PUSH_NOTIFICATION_CONFIG_ACTIVE" -> "PUSH_NOTIFICATION_RECEIVED" [label="push_notification_delivered\n[push_notification_config.exists = true &\npush_notification.delivery_successful = true]", style="dashed", color="#dc3545", fontcolor="#dc3545", penwidth="1.0"];
+
+}

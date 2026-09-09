@@ -1,0 +1,218 @@
+{
+  "section_id": "13.3",
+  "title": "13.3. Extended Agent Card Access Control",
+  "depth": 3,
+  "parent_path": [
+    "13. Security Considerations",
+    "13.3. Extended Agent Card Access Control"
+  ],
+  "url_anchor": "#133-extended-agent-card-access-control",
+  "word_count": 261,
+  "statement_count": 10,
+  "elapsed_seconds": 117.2,
+  "statements": [
+    {
+      "statement_id": "D-13-3-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When capabilities.extendedAgentCard is false or not present, the operation MUST return UnsupportedOperationError",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "13.3",
+      "state_name": "EXTENDED_CARD_UNSUPPORTED",
+      "enum_name": "ExtendedAgentCardState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "agent_card.capabilities.extendedAgentCard = false | !agent_card.capabilities.extendedAgentCard.present"
+    },
+    {
+      "statement_id": "D-13-3-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When support is declared but no extended card is configured, the operation MUST return ExtendedAgentCardNotConfiguredError",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "13.3",
+      "state_name": "EXTENDED_CARD_NOT_CONFIGURED",
+      "enum_name": "ExtendedAgentCardState",
+      "semantic_type": "error",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "agent_card.capabilities.extendedAgentCard = true & !extended_card.configured"
+    },
+    {
+      "statement_id": "D-13-3-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Agents declare extended card support via AgentCard.capabilities.extendedAgentCard",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "object_name": "AgentCard.capabilities",
+      "field_name": "extendedAgentCard",
+      "field_type": "boolean",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-13-3-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "authentication",
+      "description": "Agents MUST authenticate requests using one of the schemes declared in the public AgentCard.securitySchemes and AgentCard.security fields",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "object_name": "AgentCard",
+      "field_name": "securitySchemes",
+      "field_type": null,
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-13-3-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "authentication",
+      "description": "Agents MUST authenticate requests using one of the schemes declared in the public AgentCard.securitySchemes and AgentCard.security fields",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.3",
+      "object_name": "AgentCard",
+      "field_name": "security",
+      "field_type": null,
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-13-3-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "authentication",
+      "description": "The Get Extended Agent Card operation MUST require authentication",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "13.3",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": "!client.authenticated",
+      "post_cond": "request.rejected = true",
+      "actions": [
+        "Reject unauthenticated Get Extended Agent Card request"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-13-3-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When capabilities.extendedAgentCard is false or not present, the operation MUST return UnsupportedOperationError",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "EXTENDED_CARD_UNSUPPORTED",
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": "agent_card.capabilities.extendedAgentCard = false | !agent_card.capabilities.extendedAgentCard.present",
+      "post_cond": "response.error_type = UnsupportedOperationError",
+      "actions": [
+        "Return UnsupportedOperationError to client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-13-3-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When support is declared but no extended card is configured, the operation MUST return ExtendedAgentCardNotConfiguredError",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "EXTENDED_CARD_NOT_CONFIGURED",
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": "agent_card.capabilities.extendedAgentCard = true & !extended_card.configured",
+      "post_cond": "response.error_type = ExtendedAgentCardNotConfiguredError",
+      "actions": [
+        "Return ExtendedAgentCardNotConfiguredError to client"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-13-3-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "authentication",
+      "description": "Agents MUST validate that clients have appropriate permissions before returning privileged information in extended cards",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "13.3",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "get_extended_agent_card_request",
+      "pre_cond": "client.authenticated",
+      "post_cond": "client.permissions_validated = true",
+      "actions": [
+        "Validate that client has appropriate permissions",
+        "Return privileged information only if permissions are confirmed"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-13-3-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Clients retrieving extended cards SHOULD replace their cached public Agent Card with the extended version for the duration of their authenticated session",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "13.3",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "extended_agent_card_received",
+      "pre_cond": "client.authenticated & extended_card.retrieved = true",
+      "post_cond": "client.cached_agent_card = extended_card & client.cache_scope = authenticated_session",
+      "actions": [
+        "Replace cached public Agent Card with the retrieved extended card",
+        "Maintain extended card as active cached card for duration of authenticated session"
+      ],
+      "modality": "should"
+    }
+  ]
+}

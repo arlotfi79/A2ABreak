@@ -1,0 +1,174 @@
+{
+  "section_id": "S048",
+  "title": "S048 10.3 Closing Connections",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S048 10.3 Closing Connections"
+  ],
+  "url_anchor": "#s048-103-closing-connections",
+  "word_count": 433,
+  "statement_count": 7,
+  "elapsed_seconds": 64.96,
+  "statements": [
+    {
+      "statement_id": "D-S048-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client MAY close a connection at any point when no outstanding request/response transactions exist for any RTSP session being managed through the connection.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S048",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Closed",
+      "trigger": "client initiates connection close",
+      "pre_cond": "connection.outstanding_transactions = 0",
+      "post_cond": "connection.state = Closed",
+      "actions": [
+        "close connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S048-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server SHOULD NOT close a connection until all RTSP sessions being managed through the connection have been timed out.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Closed",
+      "trigger": "all sessions timed out",
+      "pre_cond": "connection.all_sessions_timed_out = true",
+      "post_cond": "connection.state = Closed",
+      "actions": [
+        "close connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S048-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server SHOULD NOT close a connection immediately after responding to a session-level TEARDOWN request for the last RTSP session being controlled through the connection. The server SHOULD wait at least 10 seconds after sending the TEARDOWN response before closing the connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Closed",
+      "trigger": "10 seconds elapsed after TEARDOWN response sent for last session",
+      "pre_cond": "session.last_teardown_response_sent = true & timer.elapsed >= 10",
+      "post_cond": "connection.state = Closed",
+      "actions": [
+        "wait at least 10 seconds after TEARDOWN response",
+        "initiate connection closing"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S048-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MAY close a connection if it receives an incomplete message and if the message is not completed within a reasonable amount of time. It is RECOMMENDED that the server wait at least 10 seconds for the completion of a message.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Closed",
+      "trigger": "incomplete message timeout",
+      "pre_cond": "message.complete = false & timer.elapsed >= 10",
+      "post_cond": "connection.state = Closed",
+      "actions": [
+        "close connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S048-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If a server closes a connection while the client is attempting to send a new request, the client will have to close its current connection, establish a new connection, and send its request over the new connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server closes connection while client is sending new request",
+      "pre_cond": "connection.server_closed = true & client.sending_request = true",
+      "post_cond": "connection.state = Closed",
+      "actions": [
+        "close current connection",
+        "establish new connection",
+        "retransmit request over new connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S048-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "A server closes a connection after initiating the connection closing procedure following TEARDOWN or session timeout.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S048",
+      "state_name": "Closed",
+      "enum_name": "ConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "connection.state = Closed"
+    },
+    {
+      "statement_id": "D-S048-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server SHOULD NOT close the connection directly as a result of responding to a request with an error code.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "error response sent",
+      "pre_cond": "response.error_code != null",
+      "post_cond": null,
+      "actions": [
+        "keep connection open"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "section_id": "S040",
+  "title": "S040 6.6.3 Loss and Retransmission",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S040 6.6.3 Loss and Retransmission"
+  ],
+  "url_anchor": "#s040-663-loss-and-retransmission",
+  "word_count": 240,
+  "statement_count": 4,
+  "elapsed_seconds": 39.5,
+  "statements": [
+    {
+      "statement_id": "D-S040-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A CHANGING endpoint transmits another Change option once it realizes that it has not heard back from the other endpoint.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S040",
+      "state_name": "CHANGING",
+      "enum_name": "feature_negotiation_states",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = CHANGING"
+    },
+    {
+      "statement_id": "D-S040-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A CHANGING endpoint transmits another Change option once it realizes that it has not heard back from the other endpoint. Endpoints SHOULD use an exponential-backoff timer to decide when to retransmit Change options.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S040",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": "CHANGING",
+      "trigger": "retransmission_timer_expiry",
+      "pre_cond": "protocol.state = CHANGING & response_received = false",
+      "post_cond": "Change_option_sent = true",
+      "actions": [
+        "transmit Change option on new packet with new sequence number",
+        "apply exponential-backoff timer for next retransmission"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S040-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A CHANGING endpoint MUST continue retransmitting Change options until it gets some response or the connection terminates.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S040",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": null,
+      "trigger": "response_received",
+      "pre_cond": "protocol.state = CHANGING",
+      "post_cond": null,
+      "actions": [
+        "stop retransmitting Change options"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S040-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A CHANGING endpoint MUST continue retransmitting Change options until it gets some response or the connection terminates.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S040",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CHANGING",
+      "to_state": null,
+      "trigger": "connection_terminated",
+      "pre_cond": "protocol.state = CHANGING",
+      "post_cond": null,
+      "actions": [
+        "stop retransmitting Change options"
+      ],
+      "modality": "must"
+    }
+  ]
+}

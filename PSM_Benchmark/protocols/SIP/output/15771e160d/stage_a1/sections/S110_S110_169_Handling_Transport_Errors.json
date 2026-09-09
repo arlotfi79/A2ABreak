@@ -1,0 +1,86 @@
+{
+  "section_id": "S110",
+  "title": "S110 16.9 Handling Transport Errors",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S110 16.9 Handling Transport Errors"
+  ],
+  "url_anchor": "#s110-169-handling-transport-errors",
+  "word_count": 98,
+  "statement_count": 3,
+  "elapsed_seconds": 13.59,
+  "statements": [
+    {
+      "statement_id": "D-S110-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the transport layer notifies a proxy of an error when it tries to forward a request, the proxy MUST behave as if the forwarded request received a 503 (Service Unavailable) response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S110",
+      "actors": [
+        "proxy",
+        "transport_layer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transport_error_on_request_forward",
+      "pre_cond": "proxy.forwarding_request = true",
+      "post_cond": "transaction.response_code = 503",
+      "actions": [
+        "treat_forwarded_request_as_503_response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S110-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the proxy is notified of an error when forwarding a response, it drops the response.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S110",
+      "actors": [
+        "proxy",
+        "transport_layer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transport_error_on_response_forward",
+      "pre_cond": "proxy.forwarding_response = true",
+      "post_cond": null,
+      "actions": [
+        "drop_response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S110-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The proxy SHOULD NOT cancel any outstanding client transactions associated with this response context due to this notification.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S110",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transport_error_on_response_forward",
+      "pre_cond": "proxy.outstanding_client_transactions != null",
+      "post_cond": "transaction.cancelled = false",
+      "actions": [
+        "retain_outstanding_client_transactions"
+      ],
+      "modality": "should"
+    }
+  ]
+}

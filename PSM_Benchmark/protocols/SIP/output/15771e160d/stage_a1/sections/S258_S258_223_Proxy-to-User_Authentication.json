@@ -1,0 +1,176 @@
+{
+  "section_id": "S258",
+  "title": "S258 22.3 Proxy-to-User Authentication",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S258 22.3 Proxy-to-User Authentication"
+  ],
+  "url_anchor": "#s258-223-proxy-to-user-authentication",
+  "word_count": 938,
+  "statement_count": 7,
+  "elapsed_seconds": 34.57,
+  "statements": [
+    {
+      "statement_id": "D-S258-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If no credentials (in the Proxy-Authorization header field) are provided in the request, the proxy can challenge the originator to provide credentials by rejecting the request with a 407 (Proxy Authentication Required) status code.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S258",
+      "actors": [
+        "proxy",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received_without_proxy_authorization",
+      "pre_cond": "message.proxy_authorization = null",
+      "post_cond": "response.status_code = 407",
+      "actions": [
+        "send 407 Proxy Authentication Required",
+        "populate Proxy-Authenticate header field"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S258-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "All 407 (Proxy Authentication Required) responses MUST be forwarded upstream toward the UAC following the procedures for any other response.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S258",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "407_response_received",
+      "pre_cond": "response.status_code = 407",
+      "post_cond": null,
+      "actions": [
+        "forward 407 upstream toward UAC"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S258-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When the originating UAC receives the 407 (Proxy Authentication Required) it SHOULD, if it is able, re-originate the request with the proper credentials.",
+      "is_inferred": false,
+      "confidence": 0.92,
+      "source_section": "S258",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_407_proxy_authentication_required",
+      "pre_cond": "response.status_code = 407 & client.has_credentials = true",
+      "post_cond": "request.proxy_authorization != null",
+      "actions": [
+        "re-originate request with Proxy-Authorization credentials"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S258-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If no credentials for a realm can be located, UACs MAY attempt to retry the request with a username of 'anonymous' and no password (a password of '').",
+      "is_inferred": false,
+      "confidence": 0.82,
+      "source_section": "S258",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_407_no_credentials_for_realm",
+      "pre_cond": "response.status_code = 407 & client.has_credentials = false",
+      "post_cond": "request.proxy_authorization.username = 'anonymous' & request.proxy_authorization.password = ''",
+      "actions": [
+        "retry request with anonymous credentials"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S258-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a request is forked, the forking proxy server is responsible for aggregating these challenges into a single response. Each WWW-Authenticate and Proxy-Authenticate value received in responses to the forked request MUST be placed into the single response that is sent by the forking proxy to the UA.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S258",
+      "actors": [
+        "forking proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "multiple_challenges_received_on_forked_request",
+      "pre_cond": "transaction.forked = true & response.status_code = 401 | response.status_code = 407",
+      "post_cond": "response.www_authenticate_values = aggregated & response.proxy_authenticate_values = aggregated",
+      "actions": [
+        "aggregate all WWW-Authenticate values into single response",
+        "aggregate all Proxy-Authenticate values into single response",
+        "send single aggregated response to UAC"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S258-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When resubmitting its request in response to a 401 (Unauthorized) or 407 (Proxy Authentication Required) that contains multiple challenges, a UAC MAY include an Authorization value for each WWW-Authenticate value and a Proxy-Authorization value for each Proxy-Authenticate value.",
+      "is_inferred": false,
+      "confidence": 0.83,
+      "source_section": "S258",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_401_or_407_with_multiple_challenges",
+      "pre_cond": "response.status_code = 401 | response.status_code = 407 & response.www_authenticate_count > 1 | response.proxy_authenticate_count > 1",
+      "post_cond": "request.authorization_values = per_www_authenticate & request.proxy_authorization_values = per_proxy_authenticate",
+      "actions": [
+        "include Authorization value per WWW-Authenticate challenge",
+        "include Proxy-Authorization value per Proxy-Authenticate challenge",
+        "resubmit request"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S258-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The UAC SHOULD also cache the credentials used in the re-originated request.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S258",
+      "object_name": "UAC",
+      "field_name": "cached_credentials",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "after re-originating request with credentials"
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "section_id": "S038",
+  "title": "S038 3.2.4.1 PAC Outgoing Call States",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S038 3.2.4.1 PAC Outgoing Call States"
+  ],
+  "url_anchor": "#s038-3241-pac-outgoing-call-states",
+  "word_count": 244,
+  "statement_count": 9,
+  "elapsed_seconds": 33.27,
+  "statements": [
+    {
+      "statement_id": "D-S038-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "idle: Received Outgoing-Call-Request. If this is received in error, respond with an Outgoing-Call-Reply with error condition set. Otherwise, allocate physical channel to dial on. Place the outbound call, wait for a connection, and move to the wait_cs_ans state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S038",
+      "state_name": "idle",
+      "enum_name": "PAC_OutgoingCall_State",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "pac_outgoing_call.state = idle"
+    },
+    {
+      "statement_id": "D-S038-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "wait_cs_ans: If the call is incomplete, send an Outgoing-Call-Reply with a non-zero Error Code. If a timer expires on an outbound call, send back an Outgoing-Call-Reply with a non-zero Error Code. If a circuit switched connection is established, send an Outgoing-Call-Reply indicating success.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S038",
+      "state_name": "wait_cs_ans",
+      "enum_name": "PAC_OutgoingCall_State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "pac_outgoing_call.state = wait_cs_ans"
+    },
+    {
+      "statement_id": "D-S038-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "established: If a Call-Clear-Request is received, the telco call SHOULD be released via appropriate mechanisms and a Call-Disconnect-Notify message SHOULD BE sent to the PNS. If the call is disconnected by the client or by the telco interface, a Call-Disconnect-Notify message SHOULD be sent to the PNS.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S038",
+      "state_name": "established",
+      "enum_name": "PAC_OutgoingCall_State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "pac_outgoing_call.state = established"
+    },
+    {
+      "statement_id": "D-S038-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Receive Outgoing Call Request in Error / Send Outgoing Call Reply with Error (self-loop on idle)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S038",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "idle",
+      "to_state": "idle",
+      "trigger": "Receive Outgoing-Call-Request in Error",
+      "pre_cond": "pac_outgoing_call.state = idle",
+      "post_cond": "pac_outgoing_call.state = idle",
+      "actions": [
+        "Send Outgoing-Call-Reply with error condition set"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S038-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Receive Outgoing Call Request No Error / Off Hook; Dial -> move to wait_cs_ans",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S038",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "idle",
+      "to_state": "wait_cs_ans",
+      "trigger": "Receive Outgoing-Call-Request (no error)",
+      "pre_cond": "pac_outgoing_call.state = idle",
+      "post_cond": "pac_outgoing_call.state = wait_cs_ans",
+      "actions": [
+        "allocate physical channel",
+        "go off hook",
+        "dial outbound call"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S038-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Incomplete Call / Send Outgoing Call Reply with Error -> return to idle",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S038",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "wait_cs_ans",
+      "to_state": "idle",
+      "trigger": "Incomplete Call or timer expiry",
+      "pre_cond": "pac_outgoing_call.state = wait_cs_ans",
+      "post_cond": "pac_outgoing_call.state = idle",
+      "actions": [
+        "Send Outgoing-Call-Reply with non-zero Error Code"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S038-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Recv. Call Clear Req. / Send Disconnect Notify -> return to idle from wait_cs_ans",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S038",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "from_state": "wait_cs_ans",
+      "to_state": "idle",
+      "trigger": "Receive Call-Clear-Request",
+      "pre_cond": "pac_outgoing_call.state = wait_cs_ans",
+      "post_cond": "pac_outgoing_call.state = idle",
+      "actions": [
+        "Send Call-Disconnect-Notify"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S038-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Telco Answer / Send Outgoing Call Reply -> move to established",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S038",
+      "actors": [
+        "PAC"
+      ],
+      "from_state": "wait_cs_ans",
+      "to_state": "established",
+      "trigger": "Telco Answer (circuit switched connection established)",
+      "pre_cond": "pac_outgoing_call.state = wait_cs_ans",
+      "post_cond": "pac_outgoing_call.state = established",
+      "actions": [
+        "Send Outgoing-Call-Reply indicating success"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S038-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "Receive Call Clear Request or local terminate or telco disconnect / Hangup call and send Call Disconnect Notify -> return to idle",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S038",
+      "actors": [
+        "PAC",
+        "PNS"
+      ],
+      "from_state": "established",
+      "to_state": "idle",
+      "trigger": "Receive Call-Clear-Request or local terminate or telco disconnect",
+      "pre_cond": "pac_outgoing_call.state = established",
+      "post_cond": "pac_outgoing_call.state = idle",
+      "actions": [
+        "release telco call via appropriate mechanisms",
+        "Send Call-Disconnect-Notify to PNS"
+      ],
+      "modality": "should"
+    }
+  ]
+}

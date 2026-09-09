@@ -1,0 +1,139 @@
+{
+  "section_id": "S041",
+  "title": "S041 6. Client Commands",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S041 6. Client Commands"
+  ],
+  "url_anchor": "#s041-6-client-commands",
+  "word_count": 244,
+  "statement_count": 6,
+  "elapsed_seconds": 41.24,
+  "statements": [
+    {
+      "statement_id": "D-S041-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Commands are organized by the state in which the command is permitted. Commands valid in authenticated and selected states are listed in the authenticated state commands (minimum permitted state).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "state_name": "authenticated",
+      "enum_name": "connection_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S041-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Commands are organized by the state in which the command is permitted. Commands valid in authenticated and selected states are listed in the authenticated state commands (minimum permitted state).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "state_name": "selected",
+      "enum_name": "connection_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S041-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "The state of a connection is only changed by successful commands that are documented as changing state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_success",
+      "pre_cond": "command.documented_state_change = true",
+      "post_cond": "connection.state = next_documented_state",
+      "actions": [
+        "update connection state to documented target state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S041-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "A rejected command (BAD response) never changes the state of the connection or of the selected mailbox.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "BAD_response",
+      "pre_cond": null,
+      "post_cond": "connection.state = connection.state_prior & session.selected_mailbox = session.selected_mailbox_prior",
+      "actions": [],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S041-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "A failed command (NO response) generally does not change the state of the connection or of the selected mailbox, with the exception of the SELECT and EXAMINE commands.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S041",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "NO_response",
+      "pre_cond": "command.name != SELECT & command.name != EXAMINE",
+      "post_cond": "connection.state = connection.state_prior & session.selected_mailbox = session.selected_mailbox_prior",
+      "actions": [],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S041-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "A failed command (NO response) generally does not change the state of the connection or of the selected mailbox, with the exception of the SELECT and EXAMINE commands.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S041",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "NO_response",
+      "pre_cond": "command.name = SELECT | command.name = EXAMINE",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may"
+    }
+  ]
+}

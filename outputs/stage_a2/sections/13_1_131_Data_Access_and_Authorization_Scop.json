@@ -1,0 +1,259 @@
+{
+  "section_id": "13.1",
+  "title": "13.1. Data Access and Authorization Scoping",
+  "depth": 3,
+  "parent_path": [
+    "13. Security Considerations",
+    "13.1. Data Access and Authorization Scoping"
+  ],
+  "url_anchor": "#131-data-access-and-authorization-scoping",
+  "word_count": 254,
+  "statement_count": 10,
+  "elapsed_seconds": 48.96,
+  "statements": [
+    {
+      "statement_id": "N-13.1-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Implementations MUST ensure appropriate scope limitation based on the authenticated caller's authorization boundaries.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "response.scope = caller.authorization_boundaries",
+      "actions": [
+        "Ensure appropriate scope limitation based on the authenticated caller's authorization boundaries for all operations that access or list tasks and other resources"
+      ],
+      "modality": "must",
+      "id": "N-13-1-001"
+    },
+    {
+      "statement_id": "N-13.1-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Servers MUST implement authorization checks on every A2A Protocol Operations request",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "A2A_protocol_operations_request",
+      "pre_cond": null,
+      "post_cond": "authorization_check.performed = true",
+      "actions": [
+        "Implement authorization checks on every A2A Protocol Operations request"
+      ],
+      "modality": "must",
+      "id": "N-13-1-002"
+    },
+    {
+      "statement_id": "N-13.1-003",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Implementations MUST scope results to the caller's authorized access boundaries as defined by the agent's authorization model",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "response.results.scope = caller.authorized_access_boundaries",
+      "actions": [
+        "Scope results to the caller's authorized access boundaries as defined by the agent's authorization model"
+      ],
+      "modality": "must",
+      "id": "N-13-1-003"
+    },
+    {
+      "statement_id": "N-13.1-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Even when contextId or other filter parameters are not specified in requests, implementations MUST scope results to the caller's authorized access boundaries",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "request.contextId = null & request.filter_parameters = null",
+      "post_cond": "response.results.scope = caller.authorized_access_boundaries",
+      "actions": [
+        "Scope results to the caller's authorized access boundaries even when contextId or other filter parameters are absent from the request"
+      ],
+      "modality": "must",
+      "id": "N-13-1-004"
+    },
+    {
+      "statement_id": "N-13.1-005",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Authorization models are agent-defined and MAY be based on:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Base authorization model on user identity, organizational roles or groups, project or workspace membership, organizational or tenant boundaries, or custom authorization logic"
+      ],
+      "modality": "may",
+      "id": "N-13-1-005"
+    },
+    {
+      "statement_id": "N-13.1-006",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "List Tasks: MUST only return tasks visible to the authenticated client according to the agent's authorization model",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tasks_list_request",
+      "pre_cond": "client.authenticated = true",
+      "post_cond": "response.tasks = tasks_visible_to(client) & response.tasks.scope = caller.authorized_access_boundaries",
+      "actions": [
+        "Return only tasks visible to the authenticated client according to the agent's authorization model in response to List Tasks operations"
+      ],
+      "modality": "must",
+      "id": "N-13-1-006"
+    },
+    {
+      "statement_id": "N-13.1-007",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Get Task: MUST verify the authenticated client has access to the requested task according to the agent's authorization model",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tasks_get_request",
+      "pre_cond": "client.authenticated = true",
+      "post_cond": "client.task_access_verified = true",
+      "actions": [
+        "Verify the authenticated client has access to the requested task according to the agent's authorization model before returning task data"
+      ],
+      "modality": "must",
+      "id": "N-13-1-007"
+    },
+    {
+      "statement_id": "N-13.1-008",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Task-related operations (Cancel, Subscribe, Push Notification Config): MUST verify the client has appropriate access rights according to the agent's authorization model",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "client.access_rights_verified = true",
+      "actions": [
+        "Verify the client has appropriate access rights according to the agent's authorization model before executing Cancel, Subscribe, or Push Notification Config operations"
+      ],
+      "modality": "must",
+      "id": "N-13-1-008"
+    },
+    {
+      "statement_id": "N-13.1-009",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Authorization checks MUST occur before any database queries or operations that could leak information about the existence of resources outside the caller's authorization scope",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "A2A_protocol_operations_request",
+      "pre_cond": null,
+      "post_cond": "authorization_check.performed = true & authorization_check.timing = before_database_query",
+      "actions": [
+        "Perform authorization checks before any database queries or operations that could leak information about the existence of resources outside the caller's authorization scope"
+      ],
+      "modality": "must",
+      "id": "N-13-1-009"
+    },
+    {
+      "statement_id": "N-13.1-010",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "discovery",
+      "description": "Agents SHOULD document their authorization model and access control policies",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "agent.authorization_model.documented = true & agent.access_control_policies.documented = true",
+      "actions": [
+        "Document the agent's authorization model",
+        "Document the agent's access control policies"
+      ],
+      "modality": "should",
+      "id": "N-13-1-010"
+    }
+  ]
+}

@@ -1,0 +1,332 @@
+{
+  "section_id": "S097",
+  "title": "S097 14.2 UAS Behavior",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S097 14.2 UAS Behavior"
+  ],
+  "url_anchor": "#s097-142-uas-behavior",
+  "word_count": 450,
+  "statement_count": 13,
+  "elapsed_seconds": 141.47,
+  "statements": [
+    {
+      "statement_id": "N-S097-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS that receives a second INVITE before it sends the final response to a first INVITE with a lower CSeq sequence number on the same dialog MUST return a 500 (Server Internal Error) response to the second INVITE and MUST include a Retry-After header field with a randomly chosen value of between 0 and 10 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "second INVITE received before final response to first INVITE sent on same dialog",
+      "pre_cond": "uas.first_invite.final_response_sent = false & uas.first_invite.CSeq < uas.second_invite.CSeq & uas.dialog.same = true",
+      "post_cond": "uas.response.code = 500",
+      "actions": [
+        "return 500 (Server Internal Error) response to the second INVITE"
+      ],
+      "modality": "must",
+      "id": "N-S097-001"
+    },
+    {
+      "statement_id": "N-S097-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS that receives a second INVITE before it sends the final response to a first INVITE with a lower CSeq sequence number on the same dialog MUST return a 500 (Server Internal Error) response to the second INVITE and MUST include a Retry-After header field with a randomly chosen value of between 0 and 10 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "second INVITE received before final response to first INVITE sent on same dialog",
+      "pre_cond": "uas.first_invite.final_response_sent = false & uas.first_invite.CSeq < uas.second_invite.CSeq & uas.dialog.same = true",
+      "post_cond": "uas.response.retry_after_header.present = true & uas.response.retry_after_header.value >= 0 & uas.response.retry_after_header.value <= 10",
+      "actions": [
+        "include Retry-After header field with a randomly chosen value of between 0 and 10 seconds in the 500 response"
+      ],
+      "modality": "must",
+      "id": "N-S097-002"
+    },
+    {
+      "statement_id": "N-S097-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS that receives an INVITE on a dialog while an INVITE it had sent on that dialog is in progress MUST return a 491 (Request Pending) response to the received INVITE.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE received on dialog while UAS-sent INVITE on same dialog is in progress",
+      "pre_cond": "uas.sent_invite.in_progress = true & uas.dialog.established = true",
+      "post_cond": "uas.response.code = 491",
+      "actions": [
+        "return 491 (Request Pending) response to the received INVITE"
+      ],
+      "modality": "must",
+      "id": "N-S097-003"
+    },
+    {
+      "statement_id": "N-S097-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "If a UA receives a re-INVITE for an existing dialog, it MUST check any version identifiers in the session description or, if there are no version identifiers, the content of the session description to see if it has changed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "re-INVITE received for existing dialog",
+      "pre_cond": "ua.dialog.established = true & ua.received_message.type = re-INVITE",
+      "post_cond": "ua.session_description.changed_status_checked = true",
+      "actions": [
+        "check version identifiers in the session description",
+        "if no version identifiers exist, check content of session description to see if it has changed"
+      ],
+      "modality": "must",
+      "id": "N-S097-004"
+    },
+    {
+      "statement_id": "N-S097-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the session description has changed, the UAS MUST adjust the session parameters accordingly, possibly after asking the user for confirmation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session description changed in re-INVITE",
+      "pre_cond": "uas.session_description.changed = true",
+      "post_cond": "uas.session_parameters.adjusted = true",
+      "actions": [
+        "adjust session parameters accordingly",
+        "optionally ask user for confirmation before adjusting"
+      ],
+      "modality": "must",
+      "id": "N-S097-005"
+    },
+    {
+      "statement_id": "N-S097-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the new session description is not acceptable, the UAS can reject it by returning a 488 (Not Acceptable Here) response for the re-INVITE.  This response SHOULD include a Warning header field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS sending 488 response to re-INVITE",
+      "pre_cond": "uas.session_description.acceptable = false & uas.response.code = 488",
+      "post_cond": "uas.response.warning_header.present = true",
+      "actions": [
+        "include a Warning header field in the 488 response"
+      ],
+      "modality": "should",
+      "id": "N-S097-006"
+    },
+    {
+      "statement_id": "N-S097-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a UAS generates a 2xx response and never receives an ACK, it SHOULD generate a BYE to terminate the dialog.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "ACK not received after 2xx response sent",
+      "pre_cond": "uas.response.code = 2xx & uas.ack.received = false",
+      "post_cond": "uas.dialog.state = Terminated",
+      "actions": [
+        "generate a BYE to terminate the dialog"
+      ],
+      "modality": "should",
+      "id": "N-S097-007"
+    },
+    {
+      "statement_id": "N-S097-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS MAY choose not to generate 180 (Ringing) responses for a re-INVITE because UACs do not typically render this information to the user.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "re-INVITE received",
+      "pre_cond": "uas.received_message.type = re-INVITE",
+      "post_cond": null,
+      "actions": [
+        "optionally omit 180 (Ringing) provisional response for re-INVITE"
+      ],
+      "modality": "may",
+      "id": "N-S097-008"
+    },
+    {
+      "statement_id": "N-S097-9",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "For the same reason, UASs MAY choose not to use an Alert-Info header field or a body with Content-Disposition \"alert\" in responses to a re-INVITE.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "re-INVITE received",
+      "pre_cond": "uas.received_message.type = re-INVITE",
+      "post_cond": null,
+      "actions": [
+        "optionally omit Alert-Info header field in responses to re-INVITE",
+        "optionally omit body with Content-Disposition alert in responses to re-INVITE"
+      ],
+      "modality": "may",
+      "id": "N-S097-009"
+    },
+    {
+      "statement_id": "N-S097-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS providing an offer in a 2xx (because the INVITE did not contain an offer) SHOULD construct the offer as if the UAS were making a brand new call, subject to the constraints of sending an offer that updates an existing session, as described in [13] in the case of SDP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS generating offer in 2xx response to INVITE without offer",
+      "pre_cond": "uas.invite.contains_offer = false & uas.response.code = 2xx",
+      "post_cond": "uas.offer.constructed_as_new_call = true",
+      "actions": [
+        "construct offer as if making a brand new call, subject to constraints of updating an existing session"
+      ],
+      "modality": "should",
+      "id": "N-S097-010"
+    },
+    {
+      "statement_id": "N-S097-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Specifically, this means that it SHOULD include as many media formats and media types that the UA is willing to support.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS constructing offer in 2xx response to INVITE without offer",
+      "pre_cond": "uas.invite.contains_offer = false & uas.response.code = 2xx",
+      "post_cond": null,
+      "actions": [
+        "include as many media formats and media types that the UA is willing to support in the offer"
+      ],
+      "modality": "should",
+      "id": "N-S097-011"
+    },
+    {
+      "statement_id": "N-S097-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The UAS MUST ensure that the session description overlaps with its previous session description in media formats, transports, or other parameters that require support from the peer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "UAS constructing offer in 2xx response to INVITE without offer",
+      "pre_cond": "uas.invite.contains_offer = false & uas.response.code = 2xx",
+      "post_cond": "uas.new_session_description.overlaps_previous_in_media_formats = true | uas.new_session_description.overlaps_previous_in_transports = true | uas.new_session_description.overlaps_previous_in_other_params = true",
+      "actions": [
+        "ensure new session description overlaps with previous session description in media formats, transports, or other parameters requiring peer support"
+      ],
+      "modality": "must",
+      "id": "N-S097-012"
+    },
+    {
+      "statement_id": "N-S097-13",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If, however, it is unacceptable to the UAC, the UAC SHOULD generate an answer with a valid session description, and then send a BYE to terminate the session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S097",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "UAS offer in 2xx is unacceptable to UAC",
+      "pre_cond": "uac.uas_offer.acceptable = false",
+      "post_cond": "uac.session.state = Terminated",
+      "actions": [
+        "generate an answer with a valid session description",
+        "send a BYE to terminate the session"
+      ],
+      "modality": "should",
+      "id": "N-S097-013"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "section_id": "S026",
+  "title": "S026 3.4 Forwarding for Address Correction or Updating",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S026 3.4 Forwarding for Address Correction or Updating"
+  ],
+  "url_anchor": "#s026-34-forwarding-for-address-correction-or-updating",
+  "word_count": 326,
+  "statement_count": 4,
+  "elapsed_seconds": 33.35,
+  "statements": [
+    {
+      "statement_id": "D-S026-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Servers MAY forward messages when they are aware of an address change. When they do so, they MAY either provide address-updating information with a 251 code, or may forward 'silently' and return a 250 code.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT received with known address change",
+      "pre_cond": "server.aware_of_address_change = true",
+      "post_cond": "reply_code = 251 | reply_code = 250",
+      "actions": [
+        "send 251 with forwarding address",
+        "OR send 250 silent forward"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S026-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Servers MAY reject messages or return them as non-deliverable when they cannot be delivered precisely as addressed. When they do so, they MAY either provide address-updating information with a 551 code, or may reject the message as undeliverable with a 550 code and no address-specific information.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT received and address not deliverable as specified",
+      "pre_cond": "server.can_deliver_as_addressed = false",
+      "post_cond": "reply_code = 551 | reply_code = 550",
+      "actions": [
+        "send 551 with address-updating information",
+        "OR send 550 with no address-specific information"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S026-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "if a 251 code is used, they MUST NOT assume that the client will actually update address information or even return that information to the user.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S026",
+      "object_name": "251 reply",
+      "field_name": "client_address_update_guarantee",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "server MUST NOT assume client updates address after 251 reply"
+    },
+    {
+      "statement_id": "D-S026-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "if a 551 code is used, they MUST NOT assume that the client will actually update address information or even return that information to the user.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S026",
+      "object_name": "551 reply",
+      "field_name": "client_address_update_guarantee",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "server MUST NOT assume client updates address after 551 reply"
+    }
+  ]
+}

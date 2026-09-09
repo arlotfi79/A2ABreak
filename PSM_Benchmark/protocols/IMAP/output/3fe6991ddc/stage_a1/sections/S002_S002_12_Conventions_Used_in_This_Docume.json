@@ -1,0 +1,218 @@
+{
+  "section_id": "S002",
+  "title": "S002 1.2 Conventions Used in This Document",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S002 1.2 Conventions Used in This Document"
+  ],
+  "url_anchor": "#s002-12-conventions-used-in-this-document",
+  "word_count": 384,
+  "statement_count": 9,
+  "elapsed_seconds": 33.9,
+  "statements": [
+    {
+      "statement_id": "D-S002-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "\"Session\" refers to the sequence of client/server interaction from the time that a mailbox is selected (SELECT or EXAMINE command) until the time that selection ends (SELECT or EXAMINE of another mailbox, CLOSE command, UNSELECT command, or connection termination).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S002",
+      "state_name": "Session",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.mailbox_selected = true"
+    },
+    {
+      "statement_id": "D-S002-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "\"Connection\" refers to the entire sequence of client/server interaction from the initial establishment of the network connection until its termination.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S002",
+      "state_name": "Connection",
+      "enum_name": "IMAPConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.network_established = true"
+    },
+    {
+      "statement_id": "D-S002-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Session begins from the time that a mailbox is selected (SELECT or EXAMINE command).",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S002",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Session",
+      "trigger": "SELECT or EXAMINE command",
+      "pre_cond": null,
+      "post_cond": "session.mailbox_selected = true",
+      "actions": [
+        "select mailbox"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S002-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Selection ends upon SELECT or EXAMINE of another mailbox, terminating the current session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S002",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Session",
+      "to_state": null,
+      "trigger": "SELECT or EXAMINE of another mailbox",
+      "pre_cond": "session.mailbox_selected = true",
+      "post_cond": "session.mailbox_selected = false",
+      "actions": [
+        "end current selection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S002-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Selection ends upon CLOSE command, terminating the current session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S002",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Session",
+      "to_state": null,
+      "trigger": "CLOSE command",
+      "pre_cond": "session.mailbox_selected = true",
+      "post_cond": "session.mailbox_selected = false",
+      "actions": [
+        "end current selection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S002-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Selection ends upon UNSELECT command, terminating the current session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S002",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Session",
+      "to_state": null,
+      "trigger": "UNSELECT command",
+      "pre_cond": "session.mailbox_selected = true",
+      "post_cond": "session.mailbox_selected = false",
+      "actions": [
+        "end current selection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S002-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Selection ends upon connection termination, terminating the current session.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S002",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Session",
+      "to_state": null,
+      "trigger": "connection termination",
+      "pre_cond": "session.mailbox_selected = true",
+      "post_cond": "session.mailbox_selected = false & connection.network_established = false",
+      "actions": [
+        "terminate connection",
+        "end current selection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S002-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Connection begins at initial establishment of the network connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S002",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connection",
+      "trigger": "network connection established",
+      "pre_cond": null,
+      "post_cond": "connection.network_established = true",
+      "actions": [
+        "establish network connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S002-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "Connection ends at termination of the network connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S002",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Connection",
+      "to_state": null,
+      "trigger": "connection termination",
+      "pre_cond": "connection.network_established = true",
+      "post_cond": "connection.network_established = false",
+      "actions": [
+        "terminate network connection"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

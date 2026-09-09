@@ -1,0 +1,123 @@
+{
+  "section_id": "S024",
+  "title": "S024 5.5 Terminate-Request and Terminate-Ack",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S024 5.5 Terminate-Request and Terminate-Ack"
+  ],
+  "url_anchor": "#s024-55-terminate-request-and-terminate-ack",
+  "word_count": 268,
+  "statement_count": 5,
+  "elapsed_seconds": 27.23,
+  "statements": [
+    {
+      "statement_id": "D-S024-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "ppp_fsm",
+      "description": "Reception of an unelicited Terminate-Ack indicates that the peer is in the Closed or Stopped states, or is otherwise in need of re-negotiation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "state_name": "Closed",
+      "enum_name": "LCPState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = Closed"
+    },
+    {
+      "statement_id": "D-S024-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "ppp_fsm",
+      "description": "Reception of an unelicited Terminate-Ack indicates that the peer is in the Closed or Stopped states, or is otherwise in need of re-negotiation.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S024",
+      "state_name": "Stopped",
+      "enum_name": "LCPState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = Stopped"
+    },
+    {
+      "statement_id": "D-S024-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "An implementation wishing to close a connection SHOULD transmit a Terminate-Request. Terminate-Request packets SHOULD continue to be sent until Terminate-Ack is received, the lower layer indicates that it has gone down, or a sufficiently large number have been transmitted such that the peer is down with reasonable certainty.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S024",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "close_connection_requested",
+      "pre_cond": null,
+      "post_cond": "message.type = Terminate-Request & (message.Terminate-Ack_received = true | lower_layer.down = true | retransmit_limit_reached = true)",
+      "actions": [
+        "transmit Terminate-Request",
+        "retransmit Terminate-Request until Terminate-Ack received or lower layer goes down or retransmit limit reached"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S024-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "Upon reception of a Terminate-Request, a Terminate-Ack MUST be transmitted.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S024",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Terminate-Request received",
+      "pre_cond": null,
+      "post_cond": "message.type = Terminate-Ack & message.Identifier = received.Terminate-Request.Identifier",
+      "actions": [
+        "transmit Terminate-Ack",
+        "copy Identifier from Terminate-Request into Terminate-Ack"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S024-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "peer",
+      "stage": "ppp_fsm",
+      "description": "Reception of an unelicited Terminate-Ack indicates that the peer is in the Closed or Stopped states, or is otherwise in need of re-negotiation.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S024",
+      "actors": [
+        "endpoint",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unelicited Terminate-Ack received",
+      "pre_cond": "message.Terminate-Ack_solicited = false",
+      "post_cond": "peer.state = Closed | peer.state = Stopped | peer.needs_renegotiation = true",
+      "actions": [
+        "infer peer state is Closed or Stopped",
+        "initiate re-negotiation if required"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

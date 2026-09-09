@@ -1,0 +1,420 @@
+{
+  "section_id": "S025",
+  "title": "S025 3.3 Mail Transactions",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S025 3.3 Mail Transactions"
+  ],
+  "url_anchor": "#s025-33-mail-transactions",
+  "word_count": 1097,
+  "statement_count": 17,
+  "elapsed_seconds": 353.28,
+  "statements": [
+    {
+      "statement_id": "1-S025-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the mailbox specification is not acceptable for some reason, the server MUST return a reply indicating whether the failure is permanent (i.e., will occur again if the client tries to send the same address again) or temporary (i.e., the address might be accepted if the client tries again later).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "MAIL_command_received",
+      "pre_cond": "mailbox_specification.acceptable = false",
+      "post_cond": "reply.failure_type = permanent | reply.failure_type = temporary",
+      "actions": [
+        "return reply indicating whether failure is permanent or temporary"
+      ],
+      "modality": "must",
+      "id": "N-S025-001"
+    },
+    {
+      "statement_id": "1-S025-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "In those cases, the server MAY reasonably accept the reverse-path (with a 250 reply) and then report problems after the forward-paths are received and examined.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "MAIL_command_received",
+      "pre_cond": "reverse_path.acceptability_requires_rcpt_examination = true",
+      "post_cond": "reply.code = 250 & problem_reporting.deferred = true",
+      "actions": [
+        "send 250 reply accepting reverse-path",
+        "defer reverse-path problem reporting until RCPT examination"
+      ],
+      "modality": "may",
+      "id": "N-S025-002"
+    },
+    {
+      "statement_id": "1-S025-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "Historically, the <reverse-path> was permitted to contain more than just a mailbox; however, contemporary systems SHOULD NOT use source routing (see Appendix C).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S025-003"
+    },
+    {
+      "statement_id": "1-S025-4",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Historically, the <forward-path> was permitted to contain a source routing list of hosts and the destination mailbox; however, contemporary SMTP clients SHOULD NOT utilize source routes (see Appendix C).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S025-004"
+    },
+    {
+      "statement_id": "1-S025-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Servers MUST be prepared to encounter a list of source routes in the forward-path, but they SHOULD ignore the routes or MAY decline to support the relaying they imply.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_command_received",
+      "pre_cond": "forward_path.contains_source_routes = true",
+      "post_cond": null,
+      "actions": [
+        "accept and process RCPT command containing source routes in forward-path without rejecting solely for their presence"
+      ],
+      "modality": "must",
+      "id": "N-S025-005"
+    },
+    {
+      "statement_id": "1-S025-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Servers MUST be prepared to encounter a list of source routes in the forward-path, but they SHOULD ignore the routes or MAY decline to support the relaying they imply.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_command_received",
+      "pre_cond": "forward_path.contains_source_routes = true",
+      "post_cond": null,
+      "actions": [
+        "ignore source routes in forward-path"
+      ],
+      "modality": "should",
+      "id": "N-S025-006"
+    },
+    {
+      "statement_id": "1-S025-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Servers MUST be prepared to encounter a list of source routes in the forward-path, but they SHOULD ignore the routes or MAY decline to support the relaying they imply.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_command_received",
+      "pre_cond": "forward_path.contains_source_routes = true",
+      "post_cond": null,
+      "actions": [
+        "decline to support relaying implied by source routes"
+      ],
+      "modality": "may",
+      "id": "N-S025-007"
+    },
+    {
+      "statement_id": "1-S025-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Similarly, servers MAY decline to accept mail that is destined for other hosts or systems.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_command_received",
+      "pre_cond": "mail.destination = other_host | mail.destination = other_system",
+      "post_cond": null,
+      "actions": [
+        "decline to accept RCPT for mail destined to other hosts or systems"
+      ],
+      "modality": "may",
+      "id": "N-S025-008"
+    },
+    {
+      "statement_id": "1-S025-9",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Consequently, restricted-capability clients MUST NOT assume that any SMTP server on the Internet can be used as their mail processing (relaying) site.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S025-009"
+    },
+    {
+      "statement_id": "1-S025-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If a RCPT command appears without a previous MAIL command, the server MUST return a 503 \"Bad sequence of commands\" response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RCPT_command_received",
+      "pre_cond": "transaction.mail_command_accepted = false",
+      "post_cond": "reply.code = 503",
+      "actions": [
+        "send 503 Bad sequence of commands response"
+      ],
+      "modality": "must",
+      "id": "N-S025-010"
+    },
+    {
+      "statement_id": "1-S025-11",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If there was no MAIL, or no RCPT, command, or all such commands were rejected, the server MAY return a \"command out of sequence\" (503) or \"no valid recipients\" (554) reply in response to the DATA command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DATA_command_received",
+      "pre_cond": "transaction.mail_command_accepted = false | transaction.accepted_rcpt_count = 0",
+      "post_cond": "reply.code = 503 | reply.code = 554",
+      "actions": [
+        "send 503 command out of sequence reply or 554 no valid recipients reply"
+      ],
+      "modality": "may",
+      "id": "N-S025-011"
+    },
+    {
+      "statement_id": "1-S025-12",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "If one of those replies (or any other 5yz reply) is received, the client MUST NOT send the message data; more generally, message data MUST NOT be sent unless a 354 reply is received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DATA_reply_received",
+      "pre_cond": "reply.code >= 500 & reply.code <= 599",
+      "post_cond": "client.message_data_sent = false",
+      "actions": [
+        "do not send message data"
+      ],
+      "modality": "must",
+      "id": "N-S025-012"
+    },
+    {
+      "statement_id": "1-S025-13",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "If one of those replies (or any other 5yz reply) is received, the client MUST NOT send the message data; more generally, message data MUST NOT be sent unless a 354 reply is received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DATA_reply_received",
+      "pre_cond": "reply.code != 354",
+      "post_cond": "client.message_data_sent = false",
+      "actions": [
+        "do not send message data unless a 354 reply has been received"
+      ],
+      "modality": "must",
+      "id": "N-S025-013"
+    },
+    {
+      "statement_id": "1-S025-14",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "These servers SHOULD treat a failure for one or more recipients as a \"subsequent failure\" and return a mail message as discussed in Section 6 and, in particular, in Section 6.1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "end_of_mail_data_received",
+      "pre_cond": "server.recipient_verification_deferred_post_data = true & recipient.deliverable = false",
+      "post_cond": "failure.classification = subsequent_failure",
+      "actions": [
+        "classify recipient delivery failure as subsequent failure",
+        "return bounce mail message per Section 6"
+      ],
+      "modality": "should",
+      "id": "N-S025-014"
+    },
+    {
+      "statement_id": "1-S025-15",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Server SMTP systems SHOULD NOT reject messages based on perceived defects in the RFC 822 or MIME (RFC 2045 [21]) message header section or message body.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S025-015"
+    },
+    {
+      "statement_id": "1-S025-16",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "In particular, they MUST NOT reject messages in which the numbers of Resent-header fields do not match or Resent-to appears without Resent-from and/or Resent-date.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S025-016"
+    },
+    {
+      "statement_id": "1-S025-17",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "Mail transaction commands MUST be used in the order discussed above.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "command_order = MAIL_before_RCPT_before_DATA",
+      "actions": [
+        "issue MAIL before any RCPT command",
+        "issue RCPT before DATA command"
+      ],
+      "modality": "must",
+      "id": "N-S025-017"
+    }
+  ]
+}

@@ -1,0 +1,994 @@
+{
+  "section_id": "S202",
+  "title": "S202 18.54 Transport",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S202 18.54 Transport"
+  ],
+  "url_anchor": "#s202-1854-transport",
+  "word_count": 2512,
+  "statement_count": 42,
+  "elapsed_seconds": 684.53,
+  "statements": [
+    {
+      "statement_id": "N-S202-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A Transport request-header MAY contain a list of transport options acceptable to the client, in the form of multiple transport specification entries.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-001"
+    },
+    {
+      "statement_id": "N-S202-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A Transport request-header MAY contain multiple transport specifications using the same transport protocol identifier.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-002"
+    },
+    {
+      "statement_id": "N-S202-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MUST return a Transport response-header in the response to indicate the values actually chosen, if any.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request_received",
+      "pre_cond": null,
+      "post_cond": "response.Transport_header.present = true",
+      "actions": [
+        "include Transport response-header in SETUP response indicating chosen values"
+      ],
+      "modality": "must",
+      "id": "N-S202-003"
+    },
+    {
+      "statement_id": "N-S202-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If no transport specification is supported, no transport header is returned and the response MUST use the status code 461 (Unsupported Transport) (Section 17.4.25).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request_received",
+      "pre_cond": "transport_specification.supported = false",
+      "post_cond": "response.status_code = 461 & response.Transport_header.present = false",
+      "actions": [
+        "send 461 Unsupported Transport response",
+        "omit Transport header from response"
+      ],
+      "modality": "must",
+      "id": "N-S202-004"
+    },
+    {
+      "statement_id": "N-S202-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In case more than one transport specification was present in the request, the server MUST return the single transport specification (transport-spec) that was actually chosen, if any.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request_received",
+      "pre_cond": "request.Transport_header.transport_specs.count > 1",
+      "post_cond": "response.Transport_header.transport_spec.count = 1",
+      "actions": [
+        "return single chosen transport-spec in SETUP response"
+      ],
+      "modality": "must",
+      "id": "N-S202-005"
+    },
+    {
+      "statement_id": "N-S202-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The Transport header MAY also be used in subsequent SETUP requests to change transport parameters.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "subsequent_SETUP_request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-006"
+    },
+    {
+      "statement_id": "N-S202-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A server MAY refuse to change parameters of an existing stream.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "subsequent_SETUP_request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "refuse to change transport parameters of existing stream"
+      ],
+      "modality": "may",
+      "id": "N-S202-007"
+    },
+    {
+      "statement_id": "N-S202-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "Each transport protocol identifier defines the parameters that are required to occur; additional optional parameters MAY occur.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-008"
+    },
+    {
+      "statement_id": "N-S202-9",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "Parameters MAY be given in any order.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-009"
+    },
+    {
+      "statement_id": "N-S202-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "The transport protocol identifier, and all parameters, need to be understood in a transport specification; if not, the transport specification MUST be ignored.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transport_specification_processing",
+      "pre_cond": "transport_spec.identifier.understood = false | transport_spec.parameter.understood = false",
+      "post_cond": null,
+      "actions": [
+        "ignore transport specification with unknown identifier or parameters"
+      ],
+      "modality": "must",
+      "id": "N-S202-010"
+    },
+    {
+      "statement_id": "N-S202-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "An RTSP proxy of any type that uses or modifies the transport specification, e.g., access proxy or security proxy, MUST remove specifications with unknown parameters before forwarding the RTSP message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "RTSP proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_forwarding",
+      "pre_cond": "proxy.uses_or_modifies_transport_spec = true & transport_spec.parameter.known = false",
+      "post_cond": null,
+      "actions": [
+        "remove transport specifications with unknown parameters before forwarding message"
+      ],
+      "modality": "must",
+      "id": "N-S202-011"
+    },
+    {
+      "statement_id": "N-S202-12",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "If that results in no remaining transport specification, the proxy SHALL send a 461 (Unsupported Transport) (Section 17.4.25) response without any Transport header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "RTSP proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "message_forwarding",
+      "pre_cond": "remaining_transport_specs.count = 0",
+      "post_cond": "response.status_code = 461 & response.Transport_header.present = false",
+      "actions": [
+        "send 461 Unsupported Transport response without Transport header"
+      ],
+      "modality": "shall",
+      "id": "N-S202-012"
+    },
+    {
+      "statement_id": "N-S202-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The lack of the dest_addr parameter indicates that the server MUST send media to the same address from which the RTSP messages originates.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "media_delivery",
+      "pre_cond": "transport_spec.dest_addr.present = false",
+      "post_cond": null,
+      "actions": [
+        "send media to RTSP message originating address"
+      ],
+      "modality": "must",
+      "id": "N-S202-013"
+    },
+    {
+      "statement_id": "N-S202-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client MUST include the information if it is available in the session description.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request",
+      "pre_cond": "session_description.multicast_address_info.present = true",
+      "post_cond": null,
+      "actions": [
+        "include multicast address information from session description in Transport header"
+      ],
+      "modality": "must",
+      "id": "N-S202-014"
+    },
+    {
+      "statement_id": "N-S202-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "One of the two values MUST be specified.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S202-015"
+    },
+    {
+      "statement_id": "N-S202-16",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client originating the RTSP request MAY specify the destination address of the stream recipient with the host address as part of the tuple.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-016"
+    },
+    {
+      "statement_id": "N-S202-17",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "To avoid becoming the unwitting perpetrator of a remote-controlled DoS attack, a server MUST perform security checks (see Section 21.2.1) and SHOULD log such attempts before allowing the client to direct a media stream to a recipient address not chosen by the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request_received",
+      "pre_cond": "transport_spec.dest_addr.host.server_chosen = false",
+      "post_cond": null,
+      "actions": [
+        "perform security checks per Section 21.2.1 before allowing media delivery to non-server-chosen address"
+      ],
+      "modality": "must",
+      "id": "N-S202-017"
+    },
+    {
+      "statement_id": "N-S202-18",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "To avoid becoming the unwitting perpetrator of a remote-controlled DoS attack, a server MUST perform security checks (see Section 21.2.1) and SHOULD log such attempts before allowing the client to direct a media stream to a recipient address not chosen by the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request_received",
+      "pre_cond": "transport_spec.dest_addr.host.server_chosen = false",
+      "post_cond": null,
+      "actions": [
+        "log such attempts before allowing media delivery to non-server-chosen address"
+      ],
+      "modality": "should",
+      "id": "N-S202-018"
+    },
+    {
+      "statement_id": "N-S202-19",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the server does not allow the host address part of the tuple to be set, it MUST return 463 (Destination Prohibited).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request_received",
+      "pre_cond": "server.allows_dest_addr_host_override = false & transport_spec.dest_addr.host.present = true",
+      "post_cond": "response.status_code = 463",
+      "actions": [
+        "send 463 Destination Prohibited response"
+      ],
+      "modality": "must",
+      "id": "N-S202-019"
+    },
+    {
+      "statement_id": "N-S202-20",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The host address part of the tuple MAY be empty, for example \":58044\", in cases when it is desired to specify only the destination port.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-020"
+    },
+    {
+      "statement_id": "N-S202-21",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Responses to requests including the Transport header with a dest_addr parameter SHOULD include the full destination address that is actually used by the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response",
+      "pre_cond": "request.Transport_header.dest_addr.present = true",
+      "post_cond": null,
+      "actions": [
+        "include full destination address actually used by server in Transport response header"
+      ],
+      "modality": "should",
+      "id": "N-S202-021"
+    },
+    {
+      "statement_id": "N-S202-22",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MUST NOT remove address information that is already present in the request when responding, unless the protocol requires it.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response",
+      "pre_cond": "request.Transport_header.address_info.present = true",
+      "post_cond": null,
+      "actions": [
+        "preserve address information from request in Transport response header"
+      ],
+      "modality": "must",
+      "id": "N-S202-022"
+    },
+    {
+      "statement_id": "N-S202-23",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "This parameter MUST be specified by the server if it transmits media packets from an address other than the one RTSP messages are sent to.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response",
+      "pre_cond": "server.media_source_address != server.rtsp_message_address",
+      "post_cond": "response.Transport_header.src_addr.present = true",
+      "actions": [
+        "specify src_addr parameter in Transport response header"
+      ],
+      "modality": "must",
+      "id": "N-S202-023"
+    },
+    {
+      "statement_id": "N-S202-24",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The address or addresses indicated in the src_addr parameter SHOULD be used both for the sending and receiving of the media stream's data packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S202-024"
+    },
+    {
+      "statement_id": "N-S202-25",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The argument provides the channel number to be used in the $ block (see Section 14) and MUST be present.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S202-025"
+    },
+    {
+      "statement_id": "N-S202-26",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "This parameter MAY be specified as an interval, e.g., interleaved=4-5 in cases where the transport choice for the media stream requires it, e.g., for RTP with RTCP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-026"
+    },
+    {
+      "statement_id": "N-S202-27",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server MAY set any valid channel number in the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-027"
+    },
+    {
+      "statement_id": "N-S202-28",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "The declared channels are bidirectional, so both end parties MAY send data on the given channel.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-028"
+    },
+    {
+      "statement_id": "N-S202-29",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "The binary MIKEY message SHALL be Base64-encoded [RFC4648] before being included in the value part of the parameter, where the encoding adheres to the definition in Section 4 of RFC 4648 and where the padding bits are set to zero.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "shall",
+      "id": "N-S202-029"
+    },
+    {
+      "statement_id": "N-S202-30",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "These parameters MAY only be used if the media-transport protocol is RTP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-030"
+    },
+    {
+      "statement_id": "N-S202-31",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The ssrc parameter MUST NOT be specified in requests.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "omit ssrc parameter from SETUP request Transport header"
+      ],
+      "modality": "must",
+      "id": "N-S202-031"
+    },
+    {
+      "statement_id": "N-S202-32",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the parameter is included in the Transport header of a SETUP request, the server SHOULD ignore it, and choose appropriate SSRCs for the stream.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request_received",
+      "pre_cond": "request.Transport_header.ssrc.present = true",
+      "post_cond": null,
+      "actions": [
+        "ignore ssrc parameter in SETUP request",
+        "choose appropriate SSRCs for stream"
+      ],
+      "modality": "should",
+      "id": "N-S202-032"
+    },
+    {
+      "statement_id": "N-S202-33",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The server SHOULD set the ssrc parameter in the Transport header of the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response",
+      "pre_cond": null,
+      "post_cond": "response.Transport_header.ssrc.present = true",
+      "actions": [
+        "include ssrc parameter in Transport response header"
+      ],
+      "modality": "should",
+      "id": "N-S202-033"
+    },
+    {
+      "statement_id": "N-S202-34",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client SHALL only include one transport stream in the Transport header specification.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request",
+      "pre_cond": "transport_spec.RTCP_mux.present = true",
+      "post_cond": "request.Transport_header.transport_streams.count = 1",
+      "actions": [
+        "include only one transport stream in Transport header when RTCP-mux parameter is present"
+      ],
+      "modality": "shall",
+      "id": "N-S202-034"
+    },
+    {
+      "statement_id": "N-S202-35",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "The parameter setup and connection defined below MAY only be used if the media-transport protocol of the lower-level transport is connection oriented (such as TCP).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S202-035"
+    },
+    {
+      "statement_id": "N-S202-36",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "However, these parameters MUST NOT be used when interleaving data over the RTSP connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_request",
+      "pre_cond": "transport.interleaving = true",
+      "post_cond": null,
+      "actions": [
+        "omit setup and connection parameters from Transport header when interleaving data over RTSP connection"
+      ],
+      "modality": "must",
+      "id": "N-S202-036"
+    },
+    {
+      "statement_id": "N-S202-37",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In response to a client SETUP request where the setup parameter is set to \"active\", a server's 2xx reply MUST assign the setup parameter to \"passive\" on the Transport header line.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response_2xx",
+      "pre_cond": "request.Transport_header.setup = active",
+      "post_cond": "response.Transport_header.setup = passive",
+      "actions": [
+        "assign setup=passive in Transport response header"
+      ],
+      "modality": "must",
+      "id": "N-S202-037"
+    },
+    {
+      "statement_id": "N-S202-38",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In response to a client SETUP request where the setup parameter is set to \"passive\", a server's 2xx reply MUST assign the setup parameter to \"active\" on the Transport header line.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response_2xx",
+      "pre_cond": "request.Transport_header.setup = passive",
+      "post_cond": "response.Transport_header.setup = active",
+      "actions": [
+        "assign setup=active in Transport response header"
+      ],
+      "modality": "must",
+      "id": "N-S202-038"
+    },
+    {
+      "statement_id": "N-S202-39",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "In response to a client SETUP request where the setup parameter is set to \"actpass\", a server's 2xx reply MUST assign the setup parameter to \"active\" or \"passive\" on the Transport header line.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response_2xx",
+      "pre_cond": "request.Transport_header.setup = actpass",
+      "post_cond": "response.Transport_header.setup = active | response.Transport_header.setup = passive",
+      "actions": [
+        "assign setup=active or setup=passive in Transport response header"
+      ],
+      "modality": "must",
+      "id": "N-S202-039"
+    },
+    {
+      "statement_id": "N-S202-40",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "Note that the \"holdconn\" value for setup is not defined for RTSP use, and MUST NOT appear on a Transport line.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "prohibit use of holdconn value in Transport setup parameter"
+      ],
+      "modality": "must",
+      "id": "N-S202-040"
+    },
+    {
+      "statement_id": "N-S202-41",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If a client SETUP request assigns the \"new\" value to \"connection\", the server response MUST also assign the \"new\" value to \"connection\" on the Transport line.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response",
+      "pre_cond": "request.Transport_header.connection = new",
+      "post_cond": "response.Transport_header.connection = new",
+      "actions": [
+        "assign connection=new in Transport response header"
+      ],
+      "modality": "must",
+      "id": "N-S202-041"
+    },
+    {
+      "statement_id": "N-S202-42",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If a client SETUP request assigns the \"existing\" value to \"connection\", the server response MUST assign a value of \"existing\" or \"new\" to \"connection\" on the Transport line, at its discretion.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S202",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response",
+      "pre_cond": "request.Transport_header.connection = existing",
+      "post_cond": "response.Transport_header.connection = existing | response.Transport_header.connection = new",
+      "actions": [
+        "assign connection=existing or connection=new in Transport response header at server's discretion"
+      ],
+      "modality": "must",
+      "id": "N-S202-042"
+    }
+  ]
+}

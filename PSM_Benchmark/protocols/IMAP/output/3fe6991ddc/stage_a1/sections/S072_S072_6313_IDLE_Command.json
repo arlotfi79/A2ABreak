@@ -1,0 +1,124 @@
+{
+  "section_id": "S072",
+  "title": "S072 6.3.13 IDLE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S072 6.3.13 IDLE Command"
+  ],
+  "url_anchor": "#s072-6313-idle-command",
+  "word_count": 544,
+  "statement_count": 5,
+  "elapsed_seconds": 70.07,
+  "statements": [
+    {
+      "statement_id": "D-S072-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The IDLE command remains active until the client responds to the continuation, and as long as an IDLE command is active, the server is now free to send untagged EXISTS, EXPUNGE, FETCH, and other responses at any time.",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S072",
+      "state_name": "IDLE",
+      "enum_name": "CommandActiveState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.idle_active = true"
+    },
+    {
+      "statement_id": "D-S072-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The IDLE command is sent from the client to the server when the client is ready to accept unsolicited update messages. The server requests a response to the IDLE command using the continuation ('+') response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S072",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "IDLE",
+      "trigger": "IDLE command received",
+      "pre_cond": null,
+      "post_cond": "session.idle_active = true",
+      "actions": [
+        "server sends continuation response '+'"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S072-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The IDLE command is terminated by the receipt of a 'DONE' continuation from the client; such response satisfies the server's continuation request. At that point, the server MAY send any remaining queued untagged responses and then MUST immediately send the tagged response to the IDLE command and prepare to process other commands.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S072",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "IDLE",
+      "to_state": null,
+      "trigger": "DONE received",
+      "pre_cond": "session.idle_active = true",
+      "post_cond": "session.idle_active = false",
+      "actions": [
+        "server sends remaining queued untagged responses",
+        "server sends tagged OK response to IDLE command",
+        "server prepares to process other commands"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S072-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MAY consider a client inactive if it has an IDLE command running, and if such a server has an inactivity timeout, it MAY log the client off implicitly at the end of its timeout period.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S072",
+      "actors": [
+        "server"
+      ],
+      "from_state": "IDLE",
+      "to_state": null,
+      "trigger": "inactivity timeout expired",
+      "pre_cond": "session.idle_active = true & server.inactivity_timeout_expired = true",
+      "post_cond": null,
+      "actions": [
+        "server logs client off implicitly"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S072-005",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "The client MUST NOT send a command while the server is waiting for the DONE, since the server will not be able to distinguish a command from a continuation.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S072",
+      "object_name": "client_input",
+      "field_name": "client_response_while_idle",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "DONE"
+      ],
+      "guard_semantics": "session.idle_active = true"
+    }
+  ]
+}

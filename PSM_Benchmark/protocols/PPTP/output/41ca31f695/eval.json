@@ -1,0 +1,1342 @@
+{
+  "protocol": "PPTP",
+  "model": "a2a-pipeline",
+  "fingerprint": {
+    "evaluator_sha256": "c302bb6e01e8e95f5fa4f1147efd289e0cba243ca3a707eeb9ae731a6a83b668",
+    "ground_truth_sha256": "7992fdee7e875e278b61892c33e10afc7efc95c453a2fb494ac24e8d7ee92b84",
+    "exported_fsm_sha256": "cb303f817d43aaec2cd01c09149491a41d6b2a979503d7f64f78125f47af33ce",
+    "minilm": {
+      "found": true,
+      "snapshots": [
+        "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+      ]
+    },
+    "packages": {
+      "python": "3.13.2",
+      "numpy": "2.4.2",
+      "torch": "2.12.0",
+      "sentence-transformers": "5.5.1",
+      "pandas": "3.0.3",
+      "scikit-learn": "1.8.0",
+      "litellm": "1.83.14"
+    }
+  },
+  "official": {
+    "states": {
+      "Protocol": "PPTP",
+      "Model": "a2a-pipeline",
+      "Total Extracted": 11,
+      "Total GT": 9,
+      "Matched": 9,
+      "Precision": 0.818,
+      "Recall": 1.0,
+      "F1-Score": 0.9
+    },
+    "transitions": {
+      "Protocol": "PPTP",
+      "Model": "a2a-pipeline",
+      "TotalExtracted": 37,
+      "TotalGT": 19,
+      "Matched": 9,
+      "UnmatchedGT": 10,
+      "UnmatchedExtracted": 28,
+      "Precision": 0.243,
+      "Recall": 0.474,
+      "F1-Score": 0.321
+    },
+    "call": {
+      "match_all_states": {
+        "threshold": 0.5
+      },
+      "batch_evaluate_transitions_combined": {
+        "if_partial": false,
+        "state_threshold": 0.5,
+        "trans_threshold": 0.5
+      }
+    }
+  },
+  "diagnostics": {
+    "state_matches": [
+      {
+        "gt": "Idle",
+        "extracted": "idle",
+        "score": 1.0000003576278687
+      },
+      {
+        "gt": "Wait Control Reply",
+        "extracted": "wait_stop_reply",
+        "score": 0.6888766884803772
+      },
+      {
+        "gt": "Collision Handling",
+        "extracted": "collision",
+        "score": 0.8339923620223999
+      },
+      {
+        "gt": "Established",
+        "extracted": "established",
+        "score": 0.9999997019767761
+      },
+      {
+        "gt": "Wait Stop Reply",
+        "extracted": "wait_stop_reply",
+        "score": 1.0
+      },
+      {
+        "gt": "Wait Incoming Reply",
+        "extracted": "wait_stop_reply",
+        "score": 0.7110618352890015
+      },
+      {
+        "gt": "Wait Outgoing Reply",
+        "extracted": "wait_stop_reply",
+        "score": 0.6272245049476624
+      },
+      {
+        "gt": "Wait Connect",
+        "extracted": "wait_connect",
+        "score": 1.0000003576278687
+      },
+      {
+        "gt": "Wait Disconnect",
+        "extracted": "wait_disconnect",
+        "score": 1.0000001192092896
+      }
+    ],
+    "unmatched_gt_states": [],
+    "unselected_extracted_states": [
+      "wait_connect",
+      "wait_cs_ans",
+      "known_state",
+      "collision"
+    ],
+    "matched_transitions": [
+      {
+        "extracted": {
+          "from": "idle",
+          "event": "cond TCP established",
+          "action": "send StartCtlConnRequest",
+          "to": "wait_ctl_reply"
+        },
+        "gt": {
+          "from": "Idle",
+          "to": "Wait Control Reply",
+          "event": "TCP Open Indication",
+          "action": "Send Start Control Connection Request"
+        }
+      },
+      {
+        "extracted": {
+          "from": "wait_ctl_reply",
+          "event": "receive StartCtlReply ok",
+          "action": "establish control connection",
+          "to": "established"
+        },
+        "gt": {
+          "from": "Wait Control Reply",
+          "to": "Established",
+          "event": "Receive Start Control Connection Reply (Version OK)",
+          "action": "Establish control connection"
+        }
+      },
+      {
+        "extracted": {
+          "from": "wait_ctl_reply",
+          "event": "receive StartCtlReply unsupported",
+          "action": "send StopCtlConnRequest",
+          "to": "wait_stop_reply"
+        },
+        "gt": {
+          "from": "Wait Control Reply",
+          "to": "Wait Stop Reply",
+          "event": "Receive Start Control Connection Reply (Version Not OK)",
+          "action": "Send Stop Control Connection Request"
+        }
+      },
+      {
+        "extracted": {
+          "from": "established",
+          "event": "cond local terminate",
+          "action": "send StopCtlConnRequest",
+          "to": "wait_stop_reply"
+        },
+        "gt": {
+          "from": "Established",
+          "to": "Wait Disconnect",
+          "event": "Local Terminate",
+          "action": "Send Call Clear Request"
+        }
+      },
+      {
+        "extracted": {
+          "from": "wait_stop_reply",
+          "event": "receive StopCtlConnReply",
+          "action": "close TCP connection",
+          "to": "idle"
+        },
+        "gt": {
+          "from": "Wait Disconnect",
+          "to": "Idle",
+          "event": "Timeout (60s)",
+          "action": "Close TCP and release resources"
+        }
+      },
+      {
+        "extracted": {
+          "from": "wait_reply",
+          "event": "receive InCallReply reject",
+          "action": "",
+          "to": "idle"
+        },
+        "gt": {
+          "from": "Wait Incoming Reply",
+          "to": "Idle",
+          "event": "Receive Incoming Call Reply (Reject)",
+          "action": "Return to Idle"
+        }
+      },
+      {
+        "extracted": {
+          "from": "wait_reply",
+          "event": "receive InCallReply accept",
+          "action": "answer call; send IncomingCallConnected",
+          "to": "established"
+        },
+        "gt": {
+          "from": "Wait Connect",
+          "to": "Established",
+          "event": "Receive Incoming Call Connected",
+          "action": "Confirm session establishment"
+        }
+      },
+      {
+        "extracted": {
+          "from": "idle",
+          "event": "receive InCallReq accepted",
+          "action": "send IncomingCallReply ok",
+          "to": "wait_connect"
+        },
+        "gt": {
+          "from": "Idle",
+          "to": "Wait Incoming Reply",
+          "event": "Receive Incoming Call Request",
+          "action": "Send Incoming Call Reply"
+        }
+      },
+      {
+        "extracted": {
+          "from": "wait_reply",
+          "event": "receive OutCallReply ok",
+          "action": "connect telco call",
+          "to": "established"
+        },
+        "gt": {
+          "from": "Wait Outgoing Reply",
+          "to": "Established",
+          "event": "Receive Outgoing Call Reply (No Error)",
+          "action": "Establish call"
+        }
+      }
+    ],
+    "unmatched_gt_transitions": [
+      {
+        "from": "Wait Control Reply",
+        "to": "Collision Handling",
+        "event": "Collision Detected",
+        "action": "Handle collision (higher IP wins)"
+      },
+      {
+        "from": "Collision Handling",
+        "to": "Wait Control Reply",
+        "event": "TCP Termination from loser",
+        "action": "Accept winner request"
+      },
+      {
+        "from": "Collision Handling",
+        "to": "Established",
+        "event": "Receive Start Control Connection Reply (Version OK)",
+        "action": "Accept winner connection"
+      },
+      {
+        "from": "Wait Control Reply",
+        "to": "Idle",
+        "event": "Timeout (60s)",
+        "action": "Close TCP"
+      },
+      {
+        "from": "Established",
+        "to": "Wait Stop Reply",
+        "event": "Local Terminate",
+        "action": "Send Stop Control Connection Request"
+      },
+      {
+        "from": "Established",
+        "to": "Wait Stop Reply",
+        "event": "Receive Stop Control Connection Request",
+        "action": "Send Stop Control Connection Reply"
+      },
+      {
+        "from": "Wait Stop Reply",
+        "to": "Idle",
+        "event": "Receive Stop Control Connection Reply",
+        "action": "Close TCP, return to Idle"
+      },
+      {
+        "from": "Wait Incoming Reply",
+        "to": "Wait Connect",
+        "event": "Receive Incoming Call Reply (Accept)",
+        "action": "Wait for Incoming Call Connected"
+      },
+      {
+        "from": "Idle",
+        "to": "Wait Outgoing Reply",
+        "event": "Send Outgoing Call Request",
+        "action": "Wait for PAC response"
+      },
+      {
+        "from": "Wait Outgoing Reply",
+        "to": "Idle",
+        "event": "Receive Outgoing Call Reply (Error)",
+        "action": "Return to Idle"
+      }
+    ],
+    "unmatched_extracted_transitions": [
+      {
+        "from": "wait_ctl_reply",
+        "event": "cond collision detected",
+        "action": "close TCP",
+        "to": "idle"
+      },
+      {
+        "from": "established",
+        "event": "receive StopCtlConnRequest",
+        "action": "send StopCtlConnReply; close TCP connection",
+        "to": "idle"
+      },
+      {
+        "from": "idle",
+        "event": "receive StartCtlReq unsupported",
+        "action": "send StartCtlConnReply error; close TCP connection",
+        "to": "idle"
+      },
+      {
+        "from": "idle",
+        "event": "receive StartCtlConnReq ok",
+        "action": "send StartCtlConnReply",
+        "to": "established"
+      },
+      {
+        "from": "established",
+        "event": "timeout echo failure",
+        "action": "detect echo timeout",
+        "to": "idle"
+      },
+      {
+        "from": "established",
+        "event": "timeout echo reply",
+        "action": "close control connection",
+        "to": "closed"
+      },
+      {
+        "from": "established",
+        "event": "timeout no message",
+        "action": "send EchoRequest",
+        "to": "established"
+      },
+      {
+        "from": "established",
+        "event": "receive StartCtlReq duplicate",
+        "action": "send StopCtlConnReply; close TCP connection",
+        "to": "idle"
+      },
+      {
+        "from": "established",
+        "event": "receive SetLinkInfo",
+        "action": "update call information; perform PPP negotiation",
+        "to": "established"
+      },
+      {
+        "from": "idle",
+        "event": "cond ring detected",
+        "action": "send IncomingCallRequest",
+        "to": "wait_reply"
+      },
+      {
+        "from": "wait_reply",
+        "event": "cond abort",
+        "action": "send CallDisconnectNotify",
+        "to": "idle"
+      },
+      {
+        "from": "established",
+        "event": "receive CallClearRequest",
+        "action": "send CallDisconnectNotify",
+        "to": "idle"
+      },
+      {
+        "from": "established",
+        "event": "cond telco dropped",
+        "action": "send CallDisconnectNotify",
+        "to": "idle"
+      },
+      {
+        "from": "established",
+        "event": "cond local disconnect",
+        "action": "send CallDisconnectNotify",
+        "to": "idle"
+      },
+      {
+        "from": "idle",
+        "event": "receive InCallReq rejected",
+        "action": "send IncomingCallReply error",
+        "to": "idle"
+      },
+      {
+        "from": "wait_connect",
+        "event": "receive InCallConnected",
+        "action": "",
+        "to": "established"
+      },
+      {
+        "from": "wait_connect",
+        "event": "cond caller fail",
+        "action": "send CallDisconnectNotify",
+        "to": "idle"
+      },
+      {
+        "from": "established",
+        "event": "receive CallDisconnectNotify",
+        "action": "",
+        "to": "idle"
+      },
+      {
+        "from": "established",
+        "event": "cond local terminate",
+        "action": "send CallClearRequest",
+        "to": "wait_disconnect"
+      },
+      {
+        "from": "wait_disconnect",
+        "event": "receive CallDisconnectNotify",
+        "action": "",
+        "to": "idle"
+      },
+      {
+        "from": "idle",
+        "event": "receive OutCallReq error",
+        "action": "send OutgoingCallReply error",
+        "to": "idle"
+      },
+      {
+        "from": "idle",
+        "event": "receive OutCallReq valid",
+        "action": "allocate physical channel; dial outbound call",
+        "to": "wait_cs_ans"
+      },
+      {
+        "from": "wait_cs_ans",
+        "event": "cond incomplete call",
+        "action": "send OutgoingCallReply error",
+        "to": "idle"
+      },
+      {
+        "from": "wait_cs_ans",
+        "event": "receive CallClearRequest",
+        "action": "send CallDisconnectNotify",
+        "to": "idle"
+      },
+      {
+        "from": "wait_cs_ans",
+        "event": "cond telco answer",
+        "action": "send OutgoingCallReply ok",
+        "to": "established"
+      },
+      {
+        "from": "idle",
+        "event": "cond open indication",
+        "action": "send OutgoingCallRequest",
+        "to": "wait_reply"
+      },
+      {
+        "from": "wait_reply",
+        "event": "receive OutCallReply error",
+        "action": "",
+        "to": "idle"
+      },
+      {
+        "from": "wait_reply",
+        "event": "cond abort",
+        "action": "send CallClearRequest",
+        "to": "wait_disconnect"
+      }
+    ],
+    "precision": 0.818,
+    "recall": 1.0,
+    "f1_score": 0.9
+  },
+  "supplementary": {
+    "note": "Supplementary only — the official numbers above come from the benchmark's own entry points. The official state matcher is many-to-one and the official transition matcher is greedy and order-sensitive; these one-to-one numbers bound that effect.",
+    "one_to_one": {
+      "states": {
+        "threshold": 0.5,
+        "matched": 8,
+        "total_gt": 9,
+        "total_extracted": 11,
+        "precision": 0.7273,
+        "recall": 0.8889,
+        "f1": 0.8,
+        "pairs": [
+          {
+            "gt": "Idle",
+            "extracted": "idle",
+            "score": 1.0
+          },
+          {
+            "gt": "Collision Handling",
+            "extracted": "collision",
+            "score": 0.834
+          },
+          {
+            "gt": "Established",
+            "extracted": "established",
+            "score": 1.0
+          },
+          {
+            "gt": "Wait Stop Reply",
+            "extracted": "wait_stop_reply",
+            "score": 1.0
+          },
+          {
+            "gt": "Wait Incoming Reply",
+            "extracted": "wait_reply",
+            "score": 0.6904
+          },
+          {
+            "gt": "Wait Outgoing Reply",
+            "extracted": "wait_ctl_reply",
+            "score": 0.5294
+          },
+          {
+            "gt": "Wait Connect",
+            "extracted": "wait_connect",
+            "score": 1.0
+          },
+          {
+            "gt": "Wait Disconnect",
+            "extracted": "wait_disconnect",
+            "score": 1.0
+          }
+        ]
+      },
+      "transitions": {
+        "threshold": 0.5,
+        "matched": 10,
+        "total_gt": 19,
+        "total_extracted": 37,
+        "precision": 0.2703,
+        "recall": 0.5263,
+        "f1": 0.3571,
+        "pairs": [
+          {
+            "extracted": {
+              "from": "idle",
+              "event": "cond TCP established",
+              "action": "send StartCtlConnRequest",
+              "to": "wait_ctl_reply"
+            },
+            "gt": {
+              "from": "Idle",
+              "to": "Wait Control Reply",
+              "event": "TCP Open Indication",
+              "action": "Send Start Control Connection Request"
+            },
+            "label_score": 0.6823
+          },
+          {
+            "extracted": {
+              "from": "wait_ctl_reply",
+              "event": "receive StartCtlReply ok",
+              "action": "establish control connection",
+              "to": "established"
+            },
+            "gt": {
+              "from": "Wait Control Reply",
+              "to": "Established",
+              "event": "Receive Start Control Connection Reply (Version OK)",
+              "action": "Establish control connection"
+            },
+            "label_score": 0.7715
+          },
+          {
+            "extracted": {
+              "from": "wait_ctl_reply",
+              "event": "receive StartCtlReply unsupported",
+              "action": "send StopCtlConnRequest",
+              "to": "wait_stop_reply"
+            },
+            "gt": {
+              "from": "Wait Control Reply",
+              "to": "Wait Stop Reply",
+              "event": "Receive Start Control Connection Reply (Version Not OK)",
+              "action": "Send Stop Control Connection Request"
+            },
+            "label_score": 0.6461
+          },
+          {
+            "extracted": {
+              "from": "established",
+              "event": "cond local terminate",
+              "action": "send StopCtlConnRequest",
+              "to": "wait_stop_reply"
+            },
+            "gt": {
+              "from": "Established",
+              "to": "Wait Stop Reply",
+              "event": "Local Terminate",
+              "action": "Send Stop Control Connection Request"
+            },
+            "label_score": 0.7736
+          },
+          {
+            "extracted": {
+              "from": "wait_stop_reply",
+              "event": "receive StopCtlConnReply",
+              "action": "close TCP connection",
+              "to": "idle"
+            },
+            "gt": {
+              "from": "Wait Stop Reply",
+              "to": "Idle",
+              "event": "Receive Stop Control Connection Reply",
+              "action": "Close TCP, return to Idle"
+            },
+            "label_score": 0.7922
+          },
+          {
+            "extracted": {
+              "from": "wait_reply",
+              "event": "receive InCallReply reject",
+              "action": "",
+              "to": "idle"
+            },
+            "gt": {
+              "from": "Wait Incoming Reply",
+              "to": "Idle",
+              "event": "Receive Incoming Call Reply (Reject)",
+              "action": "Return to Idle"
+            },
+            "label_score": 0.561
+          },
+          {
+            "extracted": {
+              "from": "wait_reply",
+              "event": "receive InCallReply accept",
+              "action": "answer call; send IncomingCallConnected",
+              "to": "established"
+            },
+            "gt": {
+              "from": "Wait Outgoing Reply",
+              "to": "Established",
+              "event": "Receive Outgoing Call Reply (No Error)",
+              "action": "Establish call"
+            },
+            "label_score": 0.6719
+          },
+          {
+            "extracted": {
+              "from": "idle",
+              "event": "receive InCallReq accepted",
+              "action": "send IncomingCallReply ok",
+              "to": "wait_connect"
+            },
+            "gt": {
+              "from": "Idle",
+              "to": "Wait Incoming Reply",
+              "event": "Receive Incoming Call Request",
+              "action": "Send Incoming Call Reply"
+            },
+            "label_score": 0.5122
+          },
+          {
+            "extracted": {
+              "from": "established",
+              "event": "cond local terminate",
+              "action": "send CallClearRequest",
+              "to": "wait_disconnect"
+            },
+            "gt": {
+              "from": "Established",
+              "to": "Wait Disconnect",
+              "event": "Local Terminate",
+              "action": "Send Call Clear Request"
+            },
+            "label_score": 0.6455
+          },
+          {
+            "extracted": {
+              "from": "wait_reply",
+              "event": "receive OutCallReply ok",
+              "action": "connect telco call",
+              "to": "established"
+            },
+            "gt": {
+              "from": "Wait Connect",
+              "to": "Established",
+              "event": "Receive Incoming Call Connected",
+              "action": "Confirm session establishment"
+            },
+            "label_score": 0.5925
+          }
+        ]
+      }
+    },
+    "threshold_sensitivity": {
+      "0.4": {
+        "states_official_style": {
+          "matched": 9,
+          "precision": 0.818,
+          "recall": 1.0,
+          "f1": 0.9
+        },
+        "states_one_to_one": {
+          "threshold": 0.4,
+          "matched": 9,
+          "total_gt": 9,
+          "total_extracted": 11,
+          "precision": 0.8182,
+          "recall": 1.0,
+          "f1": 0.9,
+          "pairs": [
+            {
+              "gt": "Idle",
+              "extracted": "idle",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Control Reply",
+              "extracted": "wait_cs_ans",
+              "score": 0.4307
+            },
+            {
+              "gt": "Collision Handling",
+              "extracted": "collision",
+              "score": 0.834
+            },
+            {
+              "gt": "Established",
+              "extracted": "established",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Stop Reply",
+              "extracted": "wait_stop_reply",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Incoming Reply",
+              "extracted": "wait_reply",
+              "score": 0.6904
+            },
+            {
+              "gt": "Wait Outgoing Reply",
+              "extracted": "wait_ctl_reply",
+              "score": 0.5294
+            },
+            {
+              "gt": "Wait Connect",
+              "extracted": "wait_connect",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Disconnect",
+              "extracted": "wait_disconnect",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.4,
+          "matched": 13,
+          "total_gt": 19,
+          "total_extracted": 37,
+          "precision": 0.3514,
+          "recall": 0.6842,
+          "f1": 0.4643,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "idle",
+                "event": "cond TCP established",
+                "action": "send StartCtlConnRequest",
+                "to": "wait_ctl_reply"
+              },
+              "gt": {
+                "from": "Idle",
+                "to": "Wait Control Reply",
+                "event": "TCP Open Indication",
+                "action": "Send Start Control Connection Request"
+              },
+              "label_score": 0.6823
+            },
+            {
+              "extracted": {
+                "from": "wait_ctl_reply",
+                "event": "receive StartCtlReply ok",
+                "action": "establish control connection",
+                "to": "established"
+              },
+              "gt": {
+                "from": "Wait Control Reply",
+                "to": "Established",
+                "event": "Receive Start Control Connection Reply (Version OK)",
+                "action": "Establish control connection"
+              },
+              "label_score": 0.7715
+            },
+            {
+              "extracted": {
+                "from": "wait_ctl_reply",
+                "event": "cond collision detected",
+                "action": "close TCP",
+                "to": "idle"
+              },
+              "gt": {
+                "from": "Wait Control Reply",
+                "to": "Idle",
+                "event": "Timeout (60s)",
+                "action": "Close TCP"
+              },
+              "label_score": 0.4855
+            },
+            {
+              "extracted": {
+                "from": "wait_ctl_reply",
+                "event": "receive StartCtlReply unsupported",
+                "action": "send StopCtlConnRequest",
+                "to": "wait_stop_reply"
+              },
+              "gt": {
+                "from": "Wait Control Reply",
+                "to": "Wait Stop Reply",
+                "event": "Receive Start Control Connection Reply (Version Not OK)",
+                "action": "Send Stop Control Connection Request"
+              },
+              "label_score": 0.6461
+            },
+            {
+              "extracted": {
+                "from": "established",
+                "event": "cond local terminate",
+                "action": "send StopCtlConnRequest",
+                "to": "wait_stop_reply"
+              },
+              "gt": {
+                "from": "Established",
+                "to": "Wait Stop Reply",
+                "event": "Local Terminate",
+                "action": "Send Stop Control Connection Request"
+              },
+              "label_score": 0.7736
+            },
+            {
+              "extracted": {
+                "from": "wait_stop_reply",
+                "event": "receive StopCtlConnReply",
+                "action": "close TCP connection",
+                "to": "idle"
+              },
+              "gt": {
+                "from": "Wait Stop Reply",
+                "to": "Idle",
+                "event": "Receive Stop Control Connection Reply",
+                "action": "Close TCP, return to Idle"
+              },
+              "label_score": 0.7922
+            },
+            {
+              "extracted": {
+                "from": "wait_reply",
+                "event": "receive InCallReply reject",
+                "action": "",
+                "to": "idle"
+              },
+              "gt": {
+                "from": "Wait Incoming Reply",
+                "to": "Idle",
+                "event": "Receive Incoming Call Reply (Reject)",
+                "action": "Return to Idle"
+              },
+              "label_score": 0.561
+            },
+            {
+              "extracted": {
+                "from": "wait_reply",
+                "event": "receive InCallReply accept",
+                "action": "answer call; send IncomingCallConnected",
+                "to": "established"
+              },
+              "gt": {
+                "from": "Wait Outgoing Reply",
+                "to": "Established",
+                "event": "Receive Outgoing Call Reply (No Error)",
+                "action": "Establish call"
+              },
+              "label_score": 0.6719
+            },
+            {
+              "extracted": {
+                "from": "idle",
+                "event": "receive InCallReq accepted",
+                "action": "send IncomingCallReply ok",
+                "to": "wait_connect"
+              },
+              "gt": {
+                "from": "Idle",
+                "to": "Wait Incoming Reply",
+                "event": "Receive Incoming Call Request",
+                "action": "Send Incoming Call Reply"
+              },
+              "label_score": 0.5122
+            },
+            {
+              "extracted": {
+                "from": "established",
+                "event": "cond local terminate",
+                "action": "send CallClearRequest",
+                "to": "wait_disconnect"
+              },
+              "gt": {
+                "from": "Established",
+                "to": "Wait Disconnect",
+                "event": "Local Terminate",
+                "action": "Send Call Clear Request"
+              },
+              "label_score": 0.6455
+            },
+            {
+              "extracted": {
+                "from": "idle",
+                "event": "cond open indication",
+                "action": "send OutgoingCallRequest",
+                "to": "wait_reply"
+              },
+              "gt": {
+                "from": "Idle",
+                "to": "Wait Outgoing Reply",
+                "event": "Send Outgoing Call Request",
+                "action": "Wait for PAC response"
+              },
+              "label_score": 0.4307
+            },
+            {
+              "extracted": {
+                "from": "wait_reply",
+                "event": "receive OutCallReply error",
+                "action": "",
+                "to": "idle"
+              },
+              "gt": {
+                "from": "Wait Outgoing Reply",
+                "to": "Idle",
+                "event": "Receive Outgoing Call Reply (Error)",
+                "action": "Return to Idle"
+              },
+              "label_score": 0.496
+            },
+            {
+              "extracted": {
+                "from": "wait_reply",
+                "event": "receive OutCallReply ok",
+                "action": "connect telco call",
+                "to": "established"
+              },
+              "gt": {
+                "from": "Wait Connect",
+                "to": "Established",
+                "event": "Receive Incoming Call Connected",
+                "action": "Confirm session establishment"
+              },
+              "label_score": 0.5925
+            }
+          ]
+        }
+      },
+      "0.5": {
+        "states_official_style": {
+          "matched": 9,
+          "precision": 0.818,
+          "recall": 1.0,
+          "f1": 0.9
+        },
+        "states_one_to_one": {
+          "threshold": 0.5,
+          "matched": 8,
+          "total_gt": 9,
+          "total_extracted": 11,
+          "precision": 0.7273,
+          "recall": 0.8889,
+          "f1": 0.8,
+          "pairs": [
+            {
+              "gt": "Idle",
+              "extracted": "idle",
+              "score": 1.0
+            },
+            {
+              "gt": "Collision Handling",
+              "extracted": "collision",
+              "score": 0.834
+            },
+            {
+              "gt": "Established",
+              "extracted": "established",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Stop Reply",
+              "extracted": "wait_stop_reply",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Incoming Reply",
+              "extracted": "wait_reply",
+              "score": 0.6904
+            },
+            {
+              "gt": "Wait Outgoing Reply",
+              "extracted": "wait_ctl_reply",
+              "score": 0.5294
+            },
+            {
+              "gt": "Wait Connect",
+              "extracted": "wait_connect",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Disconnect",
+              "extracted": "wait_disconnect",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.5,
+          "matched": 10,
+          "total_gt": 19,
+          "total_extracted": 37,
+          "precision": 0.2703,
+          "recall": 0.5263,
+          "f1": 0.3571,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "idle",
+                "event": "cond TCP established",
+                "action": "send StartCtlConnRequest",
+                "to": "wait_ctl_reply"
+              },
+              "gt": {
+                "from": "Idle",
+                "to": "Wait Control Reply",
+                "event": "TCP Open Indication",
+                "action": "Send Start Control Connection Request"
+              },
+              "label_score": 0.6823
+            },
+            {
+              "extracted": {
+                "from": "wait_ctl_reply",
+                "event": "receive StartCtlReply ok",
+                "action": "establish control connection",
+                "to": "established"
+              },
+              "gt": {
+                "from": "Wait Control Reply",
+                "to": "Established",
+                "event": "Receive Start Control Connection Reply (Version OK)",
+                "action": "Establish control connection"
+              },
+              "label_score": 0.7715
+            },
+            {
+              "extracted": {
+                "from": "wait_ctl_reply",
+                "event": "receive StartCtlReply unsupported",
+                "action": "send StopCtlConnRequest",
+                "to": "wait_stop_reply"
+              },
+              "gt": {
+                "from": "Wait Control Reply",
+                "to": "Wait Stop Reply",
+                "event": "Receive Start Control Connection Reply (Version Not OK)",
+                "action": "Send Stop Control Connection Request"
+              },
+              "label_score": 0.6461
+            },
+            {
+              "extracted": {
+                "from": "established",
+                "event": "cond local terminate",
+                "action": "send StopCtlConnRequest",
+                "to": "wait_stop_reply"
+              },
+              "gt": {
+                "from": "Established",
+                "to": "Wait Stop Reply",
+                "event": "Local Terminate",
+                "action": "Send Stop Control Connection Request"
+              },
+              "label_score": 0.7736
+            },
+            {
+              "extracted": {
+                "from": "wait_stop_reply",
+                "event": "receive StopCtlConnReply",
+                "action": "close TCP connection",
+                "to": "idle"
+              },
+              "gt": {
+                "from": "Wait Stop Reply",
+                "to": "Idle",
+                "event": "Receive Stop Control Connection Reply",
+                "action": "Close TCP, return to Idle"
+              },
+              "label_score": 0.7922
+            },
+            {
+              "extracted": {
+                "from": "wait_reply",
+                "event": "receive InCallReply reject",
+                "action": "",
+                "to": "idle"
+              },
+              "gt": {
+                "from": "Wait Incoming Reply",
+                "to": "Idle",
+                "event": "Receive Incoming Call Reply (Reject)",
+                "action": "Return to Idle"
+              },
+              "label_score": 0.561
+            },
+            {
+              "extracted": {
+                "from": "wait_reply",
+                "event": "receive InCallReply accept",
+                "action": "answer call; send IncomingCallConnected",
+                "to": "established"
+              },
+              "gt": {
+                "from": "Wait Outgoing Reply",
+                "to": "Established",
+                "event": "Receive Outgoing Call Reply (No Error)",
+                "action": "Establish call"
+              },
+              "label_score": 0.6719
+            },
+            {
+              "extracted": {
+                "from": "idle",
+                "event": "receive InCallReq accepted",
+                "action": "send IncomingCallReply ok",
+                "to": "wait_connect"
+              },
+              "gt": {
+                "from": "Idle",
+                "to": "Wait Incoming Reply",
+                "event": "Receive Incoming Call Request",
+                "action": "Send Incoming Call Reply"
+              },
+              "label_score": 0.5122
+            },
+            {
+              "extracted": {
+                "from": "established",
+                "event": "cond local terminate",
+                "action": "send CallClearRequest",
+                "to": "wait_disconnect"
+              },
+              "gt": {
+                "from": "Established",
+                "to": "Wait Disconnect",
+                "event": "Local Terminate",
+                "action": "Send Call Clear Request"
+              },
+              "label_score": 0.6455
+            },
+            {
+              "extracted": {
+                "from": "wait_reply",
+                "event": "receive OutCallReply ok",
+                "action": "connect telco call",
+                "to": "established"
+              },
+              "gt": {
+                "from": "Wait Connect",
+                "to": "Established",
+                "event": "Receive Incoming Call Connected",
+                "action": "Confirm session establishment"
+              },
+              "label_score": 0.5925
+            }
+          ]
+        }
+      },
+      "0.6": {
+        "states_official_style": {
+          "matched": 9,
+          "precision": 0.818,
+          "recall": 1.0,
+          "f1": 0.9
+        },
+        "states_one_to_one": {
+          "threshold": 0.6,
+          "matched": 7,
+          "total_gt": 9,
+          "total_extracted": 11,
+          "precision": 0.6364,
+          "recall": 0.7778,
+          "f1": 0.7,
+          "pairs": [
+            {
+              "gt": "Idle",
+              "extracted": "idle",
+              "score": 1.0
+            },
+            {
+              "gt": "Collision Handling",
+              "extracted": "collision",
+              "score": 0.834
+            },
+            {
+              "gt": "Established",
+              "extracted": "established",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Stop Reply",
+              "extracted": "wait_stop_reply",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Incoming Reply",
+              "extracted": "wait_reply",
+              "score": 0.6904
+            },
+            {
+              "gt": "Wait Connect",
+              "extracted": "wait_connect",
+              "score": 1.0
+            },
+            {
+              "gt": "Wait Disconnect",
+              "extracted": "wait_disconnect",
+              "score": 1.0
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.6,
+          "matched": 6,
+          "total_gt": 19,
+          "total_extracted": 37,
+          "precision": 0.1622,
+          "recall": 0.3158,
+          "f1": 0.2143,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "idle",
+                "event": "cond TCP established",
+                "action": "send StartCtlConnRequest",
+                "to": "wait_ctl_reply"
+              },
+              "gt": {
+                "from": "Idle",
+                "to": "Wait Control Reply",
+                "event": "TCP Open Indication",
+                "action": "Send Start Control Connection Request"
+              },
+              "label_score": 0.6823
+            },
+            {
+              "extracted": {
+                "from": "wait_ctl_reply",
+                "event": "receive StartCtlReply ok",
+                "action": "establish control connection",
+                "to": "established"
+              },
+              "gt": {
+                "from": "Wait Control Reply",
+                "to": "Established",
+                "event": "Receive Start Control Connection Reply (Version OK)",
+                "action": "Establish control connection"
+              },
+              "label_score": 0.7715
+            },
+            {
+              "extracted": {
+                "from": "wait_ctl_reply",
+                "event": "receive StartCtlReply unsupported",
+                "action": "send StopCtlConnRequest",
+                "to": "wait_stop_reply"
+              },
+              "gt": {
+                "from": "Wait Control Reply",
+                "to": "Wait Stop Reply",
+                "event": "Receive Start Control Connection Reply (Version Not OK)",
+                "action": "Send Stop Control Connection Request"
+              },
+              "label_score": 0.6461
+            },
+            {
+              "extracted": {
+                "from": "established",
+                "event": "cond local terminate",
+                "action": "send StopCtlConnRequest",
+                "to": "wait_stop_reply"
+              },
+              "gt": {
+                "from": "Established",
+                "to": "Wait Stop Reply",
+                "event": "Local Terminate",
+                "action": "Send Stop Control Connection Request"
+              },
+              "label_score": 0.7736
+            },
+            {
+              "extracted": {
+                "from": "wait_stop_reply",
+                "event": "receive StopCtlConnReply",
+                "action": "close TCP connection",
+                "to": "idle"
+              },
+              "gt": {
+                "from": "Wait Stop Reply",
+                "to": "Idle",
+                "event": "Receive Stop Control Connection Reply",
+                "action": "Close TCP, return to Idle"
+              },
+              "label_score": 0.7922
+            },
+            {
+              "extracted": {
+                "from": "established",
+                "event": "cond local terminate",
+                "action": "send CallClearRequest",
+                "to": "wait_disconnect"
+              },
+              "gt": {
+                "from": "Established",
+                "to": "Wait Disconnect",
+                "event": "Local Terminate",
+                "action": "Send Call Clear Request"
+              },
+              "label_score": 0.6455
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,541 @@
+{
+  "section_id": "S100",
+  "title": "S100 5.1 Locating the Target Host",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S100 5.1 Locating the Target Host"
+  ],
+  "url_anchor": "#s100-51-locating-the-target-host",
+  "word_count": 912,
+  "statement_count": 22,
+  "elapsed_seconds": 400.34,
+  "statements": [
+    {
+      "statement_id": "N-S100-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Once an SMTP client lexically identifies a domain to which mail will be delivered for processing (as described in Sections 2.3.5 and 3.6), a DNS lookup MUST be performed to resolve the domain name (RFC 1035 [2]).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "domain_identified",
+      "to_state": "dns_lookup",
+      "trigger": "domain_lexically_identified",
+      "pre_cond": "client.domain_identified = true",
+      "post_cond": "client.dns_lookup_initiated = true",
+      "actions": [
+        "perform DNS lookup to resolve domain name"
+      ],
+      "modality": "must",
+      "id": "N-S100-001"
+    },
+    {
+      "statement_id": "N-S100-2",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Due to a history of problems, SMTP servers used for initial submission of messages SHOULD NOT make such inferences (Message Submission Servers [18] have somewhat more flexibility) and intermediate (relay) SMTP servers MUST NOT make them.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP servers",
+        "Message Submission Servers"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S100-002"
+    },
+    {
+      "statement_id": "N-S100-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Due to a history of problems, SMTP servers used for initial submission of messages SHOULD NOT make such inferences (Message Submission Servers [18] have somewhat more flexibility) and intermediate (relay) SMTP servers MUST NOT make them.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "intermediate (relay) SMTP servers"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S100-003"
+    },
+    {
+      "statement_id": "N-S100-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "If a non-existent domain error is returned, this situation MUST be reported as an error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "dns_lookup",
+      "to_state": "error",
+      "trigger": "dns_nonexistent_domain_returned",
+      "pre_cond": "dns.result = nonexistent_domain_error",
+      "post_cond": "session.error_reported = true",
+      "actions": [
+        "report non-existent domain as error"
+      ],
+      "modality": "must",
+      "id": "N-S100-004"
+    },
+    {
+      "statement_id": "N-S100-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If a temporary error is returned, the message MUST be queued and retried later (see Section 4.5.4.1).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "dns_lookup",
+      "to_state": "queued",
+      "trigger": "dns_temporary_error_returned",
+      "pre_cond": "dns.result = temporary_error",
+      "post_cond": "message.queued = true & message.retry_scheduled = true",
+      "actions": [
+        "queue message",
+        "schedule retry per Section 4.5.4.1"
+      ],
+      "modality": "must",
+      "id": "N-S100-005"
+    },
+    {
+      "statement_id": "N-S100-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "If MX records are present, but none of them are usable, or the implicit MX is unusable, this situation MUST be reported as an error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "mx_lookup",
+      "to_state": "error",
+      "trigger": "mx_records_unusable",
+      "pre_cond": "(mx_records.present = true & mx_records.usable = false) | implicit_mx.usable = false",
+      "post_cond": "session.error_reported = true",
+      "actions": [
+        "report unusable MX records or unusable implicit MX as error"
+      ],
+      "modality": "must",
+      "id": "N-S100-006"
+    },
+    {
+      "statement_id": "N-S100-7",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "If one or more MX RRs are found for a given name, SMTP systems MUST NOT utilize any address RRs associated with that name unless they are located using the MX RRs; the \"implicit MX\" rule above applies only if there are no MX records present.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP systems"
+      ],
+      "from_state": "mx_lookup",
+      "to_state": null,
+      "trigger": "mx_rrs_found",
+      "pre_cond": "dns.mx_rrs_found = true",
+      "post_cond": "client.address_source = mx_rrs_only",
+      "actions": [
+        "use only address RRs located via MX RRs"
+      ],
+      "modality": "must",
+      "id": "N-S100-007"
+    },
+    {
+      "statement_id": "N-S100-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "If MX records are present, but none of them are usable, this situation MUST be reported as an error.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP systems"
+      ],
+      "from_state": "mx_lookup",
+      "to_state": "error",
+      "trigger": "mx_records_present_but_unusable",
+      "pre_cond": "mx_records.present = true & mx_records.usable = false",
+      "post_cond": "session.error_reported = true",
+      "actions": [
+        "report unusable MX records as error"
+      ],
+      "modality": "must",
+      "id": "N-S100-008"
+    },
+    {
+      "statement_id": "N-S100-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "When a domain name associated with an MX RR is looked up and the associated data field obtained, the data field of that response MUST contain a domain name.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S100-009"
+    },
+    {
+      "statement_id": "N-S100-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "That domain name, when queried, MUST return at least one address record (e.g., A or AAAA RR) that gives the IP address of the SMTP server to which the message should be directed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S100-010"
+    },
+    {
+      "statement_id": "N-S100-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "To provide reliable mail transmission, the SMTP client MUST be able to try (and retry) each of the relevant addresses in this list in order, until a delivery attempt succeeds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "address_selection",
+      "to_state": "delivery_attempt",
+      "trigger": "delivery_address_list_available",
+      "pre_cond": "client.address_list.nonempty = true",
+      "post_cond": "client.delivery_attempted_in_order = true",
+      "actions": [
+        "try each address in list in order",
+        "retry next address on delivery failure",
+        "stop when delivery attempt succeeds"
+      ],
+      "modality": "must",
+      "id": "N-S100-011"
+    },
+    {
+      "statement_id": "N-S100-12",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "However, there MAY also be a configurable limit on the number of alternate addresses that can be tried.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S100-012"
+    },
+    {
+      "statement_id": "N-S100-13",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "In any case, the SMTP client SHOULD try at least two addresses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "delivery_attempt",
+      "to_state": null,
+      "trigger": "delivery_address_list_available",
+      "pre_cond": "client.address_list.multiple = true",
+      "post_cond": "client.min_two_addresses_tried = true",
+      "actions": [
+        "try at least two addresses from the list"
+      ],
+      "modality": "should",
+      "id": "N-S100-013"
+    },
+    {
+      "statement_id": "N-S100-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "MX records contain a preference indication that MUST be used in sorting if more than one such record appears (see below).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": "mx_lookup",
+      "to_state": "address_selection",
+      "trigger": "multiple_mx_records_returned",
+      "pre_cond": "dns.multiple_mx_records = true",
+      "post_cond": "client.mx_records_sorted_by_preference = true",
+      "actions": [
+        "sort MX records by preference value"
+      ],
+      "modality": "must",
+      "id": "N-S100-014"
+    },
+    {
+      "statement_id": "N-S100-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "If there are multiple destinations with the same preference and there is no clear reason to favor one (e.g., by recognition of an easily reached address), then the sender-SMTP MUST randomize them to spread the load across multiple mail exchangers for a specific organization.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "sender-SMTP"
+      ],
+      "from_state": "address_selection",
+      "to_state": null,
+      "trigger": "multiple_mx_same_preference_no_clear_favorite",
+      "pre_cond": "mx_records.same_preference_multiple = true & client.clear_preference_reason = false",
+      "post_cond": "client.same_preference_mx_randomized = true",
+      "actions": [
+        "randomize MX destinations with equal preference value"
+      ],
+      "modality": "must",
+      "id": "N-S100-015"
+    },
+    {
+      "statement_id": "N-S100-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "It is the responsibility of the domain name resolver interface to have ordered this list by decreasing preference if necessary, and the SMTP sender MUST try them in the order presented.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP sender",
+        "domain name resolver interface"
+      ],
+      "from_state": "address_selection",
+      "to_state": "delivery_attempt",
+      "trigger": "multihomed_address_list_returned",
+      "pre_cond": "resolver.address_list_available = true",
+      "post_cond": "client.addresses_tried_in_presented_order = true",
+      "actions": [
+        "try multihomed host addresses in the order presented by the resolver"
+      ],
+      "modality": "must",
+      "id": "N-S100-016"
+    },
+    {
+      "statement_id": "N-S100-17",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If an SMTP server receives a message with a destination for which it is a designated Mail eXchanger, it MAY relay the message (potentially after having rewritten the MAIL FROM and/or RCPT TO addresses), make final delivery of the message, or hand it off using some mechanism outside the SMTP-provided transport environment.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": "message_received",
+      "to_state": "relay_decision",
+      "trigger": "message_received_as_designated_mx",
+      "pre_cond": "server.is_designated_mx = true",
+      "post_cond": "server.disposition_selected = true",
+      "actions": [
+        "relay message",
+        "or make final delivery of message",
+        "or hand off via external mechanism"
+      ],
+      "modality": "may",
+      "id": "N-S100-017"
+    },
+    {
+      "statement_id": "N-S100-18",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If it determines that it should relay the message without rewriting the address, it MUST sort the MX records to determine candidates for delivery.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "relay host"
+      ],
+      "from_state": "relay_decision",
+      "to_state": "mx_sort",
+      "trigger": "relay_without_address_rewrite_decided",
+      "pre_cond": "server.relay_without_rewrite = true",
+      "post_cond": "server.mx_records_sorted = true",
+      "actions": [
+        "sort MX records by preference to determine delivery candidates"
+      ],
+      "modality": "must",
+      "id": "N-S100-018"
+    },
+    {
+      "statement_id": "N-S100-19",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "The relay host MUST then inspect the list for any of the names or addresses by which it might be known in mail transactions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "relay host"
+      ],
+      "from_state": "mx_sort",
+      "to_state": "mx_inspection",
+      "trigger": "mx_records_sorted",
+      "pre_cond": "server.mx_records_sorted = true",
+      "post_cond": "server.mx_self_check_performed = true",
+      "actions": [
+        "inspect sorted MX list for own names or addresses"
+      ],
+      "modality": "must",
+      "id": "N-S100-019"
+    },
+    {
+      "statement_id": "N-S100-20",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If a matching record is found, all records at that preference level and higher-numbered ones MUST be discarded from consideration.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "relay host"
+      ],
+      "from_state": "mx_inspection",
+      "to_state": null,
+      "trigger": "self_address_found_in_mx_list",
+      "pre_cond": "server.mx_self_match_found = true",
+      "post_cond": "server.mx_list_pruned = true",
+      "actions": [
+        "discard all MX records at matching preference level",
+        "discard all MX records at higher-numbered preference levels"
+      ],
+      "modality": "must",
+      "id": "N-S100-020"
+    },
+    {
+      "statement_id": "N-S100-21",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If there are no records left at that point, it is an error condition, and the message MUST be returned as undeliverable.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "relay host"
+      ],
+      "from_state": "mx_inspection",
+      "to_state": "error",
+      "trigger": "no_mx_records_remaining_after_pruning",
+      "pre_cond": "server.mx_list_after_pruning.empty = true",
+      "post_cond": "message.returned_as_undeliverable = true",
+      "actions": [
+        "return message as undeliverable"
+      ],
+      "modality": "must",
+      "id": "N-S100-021"
+    },
+    {
+      "statement_id": "N-S100-22",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If records do remain, they SHOULD be tried, best preference first, as described above.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S100",
+      "actors": [
+        "relay host"
+      ],
+      "from_state": "mx_inspection",
+      "to_state": "delivery_attempt",
+      "trigger": "mx_records_remain_after_pruning",
+      "pre_cond": "server.mx_list_after_pruning.nonempty = true",
+      "post_cond": "server.delivery_attempt_initiated = true",
+      "actions": [
+        "try remaining MX records in best-preference-first order"
+      ],
+      "modality": "should",
+      "id": "N-S100-022"
+    }
+  ]
+}

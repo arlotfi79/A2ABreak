@@ -1,0 +1,3248 @@
+{
+  "statements": [
+    {
+      "statement_id": "D-S003-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the TCP connection has been opened and the POP3 server has sent the greeting, the session enters the AUTHORIZATION state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "state_name": "AUTHORIZATION",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.state = AUTHORIZATION"
+    },
+    {
+      "statement_id": "D-S003-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the client has successfully done this [identified itself to the POP3 server], the server acquires resources associated with the client's maildrop, and the session enters the TRANSACTION state. In this state, the client requests actions on the part of the POP3 server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "state_name": "TRANSACTION",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S003-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the client has issued the QUIT command, the session enters the UPDATE state. In this state, the POP3 server releases any resources acquired during the TRANSACTION state and says goodbye. The TCP connection is then closed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "state_name": "UPDATE",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "session.state = UPDATE"
+    },
+    {
+      "statement_id": "D-S003-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the TCP connection has been opened and the POP3 server has sent the greeting, the session enters the AUTHORIZATION state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "AUTHORIZATION",
+      "trigger": "TCP_connection_established",
+      "pre_cond": null,
+      "post_cond": "session.state = AUTHORIZATION",
+      "actions": [
+        "server sends greeting"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S003-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the client has successfully done this [identified itself], the server acquires resources associated with the client's maildrop, and the session enters the TRANSACTION state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "TRANSACTION",
+      "trigger": "client_identification_success",
+      "pre_cond": "session.state = AUTHORIZATION",
+      "post_cond": "session.state = TRANSACTION",
+      "actions": [
+        "server acquires resources associated with client's maildrop"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S003-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the client has issued the QUIT command, the session enters the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "UPDATE",
+      "trigger": "QUIT",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": "session.state = UPDATE",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S003-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "In this state [UPDATE], the POP3 server releases any resources acquired during the TRANSACTION state and says goodbye. The TCP connection is then closed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": "UPDATE",
+      "to_state": null,
+      "trigger": "update_processing_complete",
+      "pre_cond": "session.state = UPDATE",
+      "post_cond": null,
+      "actions": [
+        "server releases resources acquired during TRANSACTION state",
+        "server sends goodbye",
+        "TCP connection closed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S003-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the timer expires, the session does NOT enter the UPDATE state--the server should close the TCP connection without removing any messages or sending any response to the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "inactivity_autologout_timer_expiry",
+      "pre_cond": null,
+      "post_cond": "session.state != UPDATE",
+      "actions": [
+        "server closes TCP connection without removing messages",
+        "server sends no response to client"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S003-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "A POP3 server MAY have an inactivity autologout timer. Such a timer MUST be of at least 10 minutes' duration. The receipt of any command from the client during that interval should suffice to reset the autologout timer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "object_name": "server",
+      "field_name": "inactivity_autologout_timer",
+      "field_type": "timer",
+      "required": false,
+      "allowed_values": "duration >= 10 minutes",
+      "guard_semantics": "reset on receipt of any client command"
+    },
+    {
+      "statement_id": "N-S003-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Servers MUST send the \"+OK\" and \"-ERR\" in upper case.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S003-001",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S003-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "A server MUST respond to an unrecognized, unimplemented, or syntactically invalid command by responding with a negative status indicator.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "invalid_command_received",
+      "pre_cond": "command.recognized = false | command.implemented = false | command.syntax_valid = false",
+      "post_cond": null,
+      "actions": [
+        "send -ERR response"
+      ],
+      "modality": "must",
+      "id": "N-S003-002"
+    },
+    {
+      "statement_id": "N-S003-003",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "A server MUST respond to a command issued when the session is in an incorrect state by responding with a negative status indicator.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_received_in_incorrect_state",
+      "pre_cond": "session.state != command.required_state",
+      "post_cond": null,
+      "actions": [
+        "send -ERR response"
+      ],
+      "modality": "must",
+      "id": "N-S003-003"
+    },
+    {
+      "statement_id": "N-S003-004",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "A POP3 server MAY have an inactivity autologout timer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "server.has_autologout_timer = true",
+      "actions": [],
+      "modality": "may",
+      "id": "N-S003-004"
+    },
+    {
+      "statement_id": "N-S003-005",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "pop3_fsm",
+      "description": "Such a timer MUST be of at least 10 minutes' duration.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S003",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "server.has_autologout_timer = true",
+      "post_cond": "timer.duration >= 600",
+      "actions": [],
+      "modality": "must",
+      "id": "N-S003-005"
+    },
+    {
+      "statement_id": "D-S004-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "The POP3 session is now in the AUTHORIZATION state. The client must now identify and authenticate itself to the POP3 server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "state_name": "AUTHORIZATION",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.state = AUTHORIZATION"
+    },
+    {
+      "statement_id": "D-S004-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "The POP3 session now enters the TRANSACTION state, with no messages marked as deleted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "state_name": "TRANSACTION",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S004-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the TCP connection has been opened by a POP3 client, the POP3 server issues a one line greeting. This can be any positive response. The POP3 session is now in the AUTHORIZATION state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "AUTHORIZATION",
+      "trigger": "TCP connection opened; server issues positive greeting",
+      "pre_cond": null,
+      "post_cond": "session.state = AUTHORIZATION",
+      "actions": [
+        "server sends positive one-line greeting"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the POP3 server has determined through the use of any authentication command that the client should be given access to the appropriate maildrop, the POP3 server then acquires an exclusive-access lock on the maildrop... If the lock is successfully acquired, the POP3 server responds with a positive status indicator. The POP3 session now enters the TRANSACTION state, with no messages marked as deleted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "TRANSACTION",
+      "trigger": "authentication success; maildrop lock successfully acquired",
+      "pre_cond": "session.state = AUTHORIZATION & authentication.result = success & maildrop.lock_acquired = true",
+      "post_cond": "session.state = TRANSACTION & messages.marked_deleted_count = 0",
+      "actions": [
+        "acquire exclusive-access lock on maildrop",
+        "respond with positive status indicator",
+        "assign message-number to each message starting at 1",
+        "note size of each message in octets"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "If the maildrop cannot be opened for some reason (for example, a lock can not be acquired, the client is denied access to the appropriate maildrop, or the maildrop cannot be parsed), the POP3 server responds with a negative status indicator. (If a lock was acquired but the POP3 server intends to respond with a negative status indicator, the POP3 server must release the lock prior to rejecting the command.) After returning a negative status indicator, the server may close the connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S004",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "authentication failure or maildrop inaccessible; server closes connection",
+      "pre_cond": "session.state = AUTHORIZATION & (maildrop.accessible = false | maildrop.lock_acquired = false | authentication.result = failure)",
+      "post_cond": null,
+      "actions": [
+        "release lock if previously acquired",
+        "respond with negative status indicator",
+        "close connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S004-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Here is the summary for the QUIT command when used in the AUTHORIZATION state. Possible Responses: +OK. C: QUIT S: +OK dewey POP3 server signing off",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "QUIT command received",
+      "pre_cond": "session.state = AUTHORIZATION",
+      "post_cond": null,
+      "actions": [
+        "server responds with +OK",
+        "server closes connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S004-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "the POP3 server then acquires an exclusive-access lock on the maildrop, as necessary to prevent messages from being modified or removed before the session enters the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "object_name": "maildrop",
+      "field_name": "exclusive_access_lock",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "must be held from AUTHORIZATION->TRANSACTION transition until UPDATE state is entered"
+    },
+    {
+      "statement_id": "N-S004-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "The client must now identify and authenticate itself to the POP3 server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "server_greeting_received",
+      "pre_cond": "protocol.state = AUTHORIZATION",
+      "post_cond": null,
+      "actions": [
+        "client identifies itself to POP3 server",
+        "client authenticates itself to POP3 server"
+      ],
+      "modality": "must",
+      "id": "N-S004-001"
+    },
+    {
+      "statement_id": "N-S004-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "While there is no single authentication mechanism that is required of all POP3 servers, a POP3 server must of course support at least one authentication mechanism.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "MUST",
+      "id": "N-S004-002",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S004-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "(If a lock was acquired but the POP3 server intends to respond with a negative status indicator, the POP3 server must release the lock prior to rejecting the command.)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "authentication_rejected_with_lock_held",
+      "pre_cond": "protocol.state = AUTHORIZATION & lock.acquired = true & server.response_intent = negative",
+      "post_cond": "lock.released = true",
+      "actions": [
+        "release maildrop lock",
+        "send negative status indicator"
+      ],
+      "modality": "must",
+      "id": "N-S004-004"
+    },
+    {
+      "statement_id": "N-S004-005",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "After returning a negative status indicator, the server may close the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "negative_status_indicator_sent",
+      "pre_cond": "protocol.state = AUTHORIZATION & server.last_response = negative",
+      "post_cond": null,
+      "actions": [
+        "close TCP connection"
+      ],
+      "modality": "may",
+      "id": "N-S004-005"
+    },
+    {
+      "statement_id": "N-S004-006",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "If the server does not close the connection, the client may either issue a new authentication command and start again, or the client may issue the QUIT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S004",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "authentication_failed_connection_still_open",
+      "pre_cond": "protocol.state = AUTHORIZATION & connection.open = true",
+      "post_cond": "session.state = AUTHORIZATION",
+      "actions": [
+        "issue new authentication command"
+      ],
+      "modality": "may",
+      "id": "N-S004-006"
+    },
+    {
+      "statement_id": "D-S005-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the client has successfully identified itself to the POP3 server and the POP3 server has locked and opened the appropriate maildrop, the POP3 session is now in the TRANSACTION state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "state_name": "TRANSACTION",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S005-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Once the client has successfully identified itself to the POP3 server and the POP3 server has locked and opened the appropriate maildrop, the POP3 session is now in the TRANSACTION state.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S005",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "TRANSACTION",
+      "trigger": "successful client identification and maildrop lock",
+      "pre_cond": "client.identified = true & server.maildrop.locked = true & server.maildrop.opened = true",
+      "post_cond": "protocol.state = TRANSACTION",
+      "actions": [
+        "lock maildrop",
+        "open maildrop"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Eventually, the client issues the QUIT command and the POP3 session enters the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "UPDATE",
+      "trigger": "QUIT",
+      "pre_cond": "protocol.state = TRANSACTION",
+      "post_cond": "protocol.state = UPDATE",
+      "actions": [
+        "enter UPDATE state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "STAT may only be given in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "object_name": "STAT",
+      "field_name": "protocol.state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "TRANSACTION"
+      ],
+      "guard_semantics": "protocol.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S005-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "LIST may only be given in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "object_name": "LIST",
+      "field_name": "protocol.state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "TRANSACTION"
+      ],
+      "guard_semantics": "protocol.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S005-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "RETR may only be given in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "object_name": "RETR",
+      "field_name": "protocol.state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "TRANSACTION"
+      ],
+      "guard_semantics": "protocol.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S005-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "DELE may only be given in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "object_name": "DELE",
+      "field_name": "protocol.state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "TRANSACTION"
+      ],
+      "guard_semantics": "protocol.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S005-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "NOOP may only be given in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "object_name": "NOOP",
+      "field_name": "protocol.state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "TRANSACTION"
+      ],
+      "guard_semantics": "protocol.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S005-009",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "RSET may only be given in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "object_name": "RSET",
+      "field_name": "protocol.state",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "TRANSACTION"
+      ],
+      "guard_semantics": "protocol.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S005-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "The POP3 server marks the message as deleted. The POP3 server does not actually delete the message until the POP3 session enters the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "DELE",
+      "pre_cond": "protocol.state = TRANSACTION & message.deleted = false",
+      "post_cond": "message.marked_deleted = true",
+      "actions": [
+        "mark message as deleted",
+        "reply +OK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S005-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "If any messages have been marked as deleted by the POP3 server, they are unmarked. The POP3 server then replies with a positive response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S005",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "RSET",
+      "pre_cond": "protocol.state = TRANSACTION",
+      "post_cond": "all_messages.marked_deleted = false",
+      "actions": [
+        "unmark all deleted messages",
+        "reply +OK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-S005-001",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "The client may now issue any of the following POP3 commands repeatedly.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "any_TRANSACTION_state_command_issued",
+      "pre_cond": "protocol.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S005-001"
+    },
+    {
+      "statement_id": "N-S005-002",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "may only be given in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "STAT_command_issued",
+      "pre_cond": "protocol.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must_not",
+      "id": "N-S005-002"
+    },
+    {
+      "statement_id": "N-S005-003",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "In order to simplify parsing, all POP3 servers are required to use a certain format for drop listings.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S005-003",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S005-004",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Minimal implementations should just end that line of the response with a CRLF pair.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S005-004",
+      "is_global_constraint": false
+    },
+    {
+      "statement_id": "N-S005-005",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "More advanced implementations may include other information.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S005-005",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S005-007",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "pop3_fsm",
+      "description": "a message-number (optional), which, if present, may NOT refer to a message marked as deleted",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "client"
+      ],
+      "from_state": "<TRANSACTION>",
+      "to_state": "<TRANSACTION>",
+      "trigger": "LIST [msg]",
+      "pre_cond": "protocol.state == <TRANSACTION> && msg.present == true && msg.deleted == false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "MUST NOT",
+      "id": "N-S005-007"
+    },
+    {
+      "statement_id": "N-S005-010",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "In order to simplify parsing, all POP3 servers are required to use a certain format for scan listings.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S005-010",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S005-012",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "More advanced implementations may include other information, as parsed from the message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "LIST_response",
+      "pre_cond": "protocol.state == TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S005-012"
+    },
+    {
+      "statement_id": "N-S005-014",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "pop3_fsm",
+      "description": "a message-number (required) which may NOT refer to a message marked as deleted",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S005",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "RETR msg",
+      "pre_cond": "protocol.state == TRANSACTION && message[msg].deleted == false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "MUST NOT",
+      "id": "N-S005-014"
+    },
+    {
+      "statement_id": "D-S006-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the client issues the QUIT command from the TRANSACTION state, the POP3 session enters the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "state_name": "UPDATE",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "protocol.state = UPDATE"
+    },
+    {
+      "statement_id": "D-S006-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "When the client issues the QUIT command from the TRANSACTION state, the POP3 session enters the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "UPDATE",
+      "trigger": "QUIT",
+      "pre_cond": "protocol.state = TRANSACTION",
+      "post_cond": "protocol.state = UPDATE",
+      "actions": [
+        "enter UPDATE state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "If the client issues the QUIT command from the AUTHORIZATION state, the POP3 session terminates but does NOT enter the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "QUIT",
+      "pre_cond": "protocol.state = AUTHORIZATION",
+      "post_cond": "session.terminated = true & protocol.state != UPDATE",
+      "actions": [
+        "terminate session"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S006-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "The POP3 server removes all messages marked as deleted from the maildrop and replies as to the status of this operation. Whether the removal was successful or not, the server then releases any exclusive-access lock on the maildrop and closes the TCP connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "server"
+      ],
+      "from_state": "UPDATE",
+      "to_state": null,
+      "trigger": "QUIT command processed",
+      "pre_cond": "protocol.state = UPDATE",
+      "post_cond": "session.terminated = true & maildrop.exclusive_lock = false & tcp.connection = closed",
+      "actions": [
+        "remove all messages marked as deleted from maildrop",
+        "send +OK or -ERR response",
+        "release exclusive-access lock on maildrop",
+        "close TCP connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-S006-001",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "If a session terminates for some reason other than a client-issued QUIT command, the POP3 session does NOT enter the UPDATE state and MUST not remove any messages from the maildrop.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "server",
+        "session"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_terminated_without_client_QUIT",
+      "pre_cond": "session.termination_cause != client_issued_QUIT",
+      "post_cond": "session.state != UPDATE & maildrop.messages_removed = false",
+      "actions": [
+        "do not transition to UPDATE state",
+        "do not remove any messages from the maildrop"
+      ],
+      "modality": "must",
+      "id": "N-S006-001"
+    },
+    {
+      "statement_id": "N-S006-002",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "In no case may the server remove any messages not marked as deleted.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S006",
+      "actors": [
+        "server"
+      ],
+      "from_state": "UPDATE",
+      "to_state": null,
+      "trigger": "processing_message_deletion",
+      "pre_cond": "protocol.state = UPDATE",
+      "post_cond": "server.removed_messages ⊆ maildrop.marked_as_deleted",
+      "actions": [
+        "remove only messages that are individually marked as deleted"
+      ],
+      "modality": "must",
+      "id": "N-S006-002"
+    },
+    {
+      "statement_id": "D-S007-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "TOP and UIDL may only be given in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "state_name": "TRANSACTION",
+      "enum_name": "POP3State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S007-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "USER, PASS, and APOP may only be given in the AUTHORIZATION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "state_name": "AUTHORIZATION",
+      "enum_name": "POP3State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = AUTHORIZATION"
+    },
+    {
+      "statement_id": "D-S007-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "unique-id persistence is required even if a session ends without entering the UPDATE state",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "state_name": "UPDATE",
+      "enum_name": "POP3State",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S007-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "TOP may only be given in the TRANSACTION state; server sends headers, blank line, and requested body lines",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "TOP",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [
+        "server sends message headers, blank separator line, and requested number of body lines"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S007-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "UIDL may only be given in the TRANSACTION state; server sends unique-id listing",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "TRANSACTION",
+      "trigger": "UIDL",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [
+        "server sends unique-id listing for specified message or all messages"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S007-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "APOP may only be given in the AUTHORIZATION state after the POP3 greeting or after an unsuccessful USER or PASS command",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "APOP",
+      "pre_cond": "session.state = AUTHORIZATION",
+      "post_cond": null,
+      "actions": [
+        "server verifies MD5 digest of banner timestamp and shared secret"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S007-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "If the digest is correct, the POP3 server issues a positive response, and the POP3 session enters the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "TRANSACTION",
+      "trigger": "APOP +OK",
+      "pre_cond": "session.state = AUTHORIZATION & apop.digest = correct",
+      "post_cond": "session.state = TRANSACTION",
+      "actions": [
+        "server issues +OK response",
+        "session enters TRANSACTION state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S007-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "Otherwise (digest incorrect), a negative response is issued and the POP3 session remains in the AUTHORIZATION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "APOP -ERR",
+      "pre_cond": "session.state = AUTHORIZATION & apop.digest != correct",
+      "post_cond": "session.state = AUTHORIZATION",
+      "actions": [
+        "server issues -ERR response",
+        "session remains in AUTHORIZATION state"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "N-S007-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "The POP3 commands discussed above must be supported by all minimal implementations of POP3 servers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-001",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S007-002",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "a message-number (required) which may NOT refer to to a message marked as deleted, and a non-negative number of lines (required)",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "TOP_command",
+      "pre_cond": "protocol.state = TRANSACTION & message.deleted = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-002"
+    },
+    {
+      "statement_id": "N-S007-005",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "may only be given in the TRANSACTION state.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "UIDL_command",
+      "pre_cond": "protocol.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "MUST NOT",
+      "id": "N-S007-005"
+    },
+    {
+      "statement_id": "N-S007-006",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "In order to simplify parsing, all POP3 servers are required to use a certain format for unique-id listings.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S007-006",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S007-007",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "This persistence is required even if a session ends without entering the UPDATE state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_end",
+      "pre_cond": "protocol.state != UPDATE",
+      "post_cond": "message.unique_id.persisted = true",
+      "actions": [
+        "maintain_unique_id_persistence_across_sessions"
+      ],
+      "modality": "must",
+      "id": "N-S007-007"
+    },
+    {
+      "statement_id": "N-S007-008",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "The server should never reuse an unique-id in a given maildrop, for as long as the entity using the unique-id exists.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S007-008",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S007-009",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "Clients should be able to handle a situation where two identical copies of a message in a maildrop have the same unique-id.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S007-009",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S007-010",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "The USER command argument is a string identifying a mailbox, which is of significance ONLY to the server; the command may only be given in the AUTHORIZATION state after the POP3 greeting or after an unsuccessful USER or PASS command.",
+      "is_inferred": false,
+      "confidence": 0.5,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "USER name",
+      "pre_cond": "protocol.state == AUTHORIZATION && (after_greeting || after_failed_USER || after_failed_PASS)",
+      "post_cond": null,
+      "actions": [],
+      "modality": "MAY",
+      "id": "N-S007-010"
+    },
+    {
+      "statement_id": "N-S007-011",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "may only be given in the AUTHORIZATION state after the POP3 greeting or after an unsuccessful USER or PASS command",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "USER_command",
+      "pre_cond": "protocol.state = AUTHORIZATION & (session.greeting_received = true | previous_USER_response = negative | previous_PASS_response = negative)",
+      "post_cond": "session.state = AUTHORIZATION",
+      "actions": [],
+      "modality": "MUST NOT",
+      "id": "N-S007-011"
+    },
+    {
+      "statement_id": "N-S007-012",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "To authenticate using the USER and PASS command combination, the client must first issue the USER command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "authentication_attempt",
+      "pre_cond": "protocol.state = AUTHORIZATION & auth.method = USER_PASS",
+      "post_cond": "USER_command.sent = true",
+      "actions": [
+        "send_USER_command_before_PASS"
+      ],
+      "modality": "must",
+      "id": "N-S007-012"
+    },
+    {
+      "statement_id": "N-S007-013",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "If the POP3 server responds with a positive status indicator (\"+OK\"), then the client may issue either the PASS command to complete the authentication, or the QUIT command to terminate the POP3 session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "USER_response_positive",
+      "pre_cond": "protocol.state = AUTHORIZATION & USER_command.sent = true & server.response = positive",
+      "post_cond": "session.state = AUTHORIZATION",
+      "actions": [
+        "send_PASS_command | send_QUIT_command"
+      ],
+      "modality": "may",
+      "id": "N-S007-013"
+    },
+    {
+      "statement_id": "N-S007-014",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "If the POP3 server responds with a negative status indicator (\"-ERR\") to the USER command, then the client may either issue a new authentication command or may issue the QUIT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "USER_response_negative",
+      "pre_cond": "protocol.state = AUTHORIZATION & USER_command.sent = true & server.response = negative",
+      "post_cond": "session.state = AUTHORIZATION",
+      "actions": [
+        "send_authentication_command | send_QUIT_command"
+      ],
+      "modality": "may",
+      "id": "N-S007-014"
+    },
+    {
+      "statement_id": "N-S007-015",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "The server may return a positive response even though no such mailbox exists.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "USER",
+      "pre_cond": "protocol.state == AUTHORIZATION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S007-015"
+    },
+    {
+      "statement_id": "N-S007-016",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "The server may return a negative response if mailbox exists, but does not permit plaintext password authentication.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "AUTHORIZATION",
+      "trigger": "USER",
+      "pre_cond": "protocol.state == AUTHORIZATION",
+      "post_cond": "protocol.state == AUTHORIZATION && response == -ERR",
+      "actions": [],
+      "modality": "may",
+      "id": "N-S007-016"
+    },
+    {
+      "statement_id": "N-S007-017",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "The PASS command argument must be a server/mailbox-specific password (required); may only be given in the AUTHORIZATION state immediately after a successful USER command",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "PASS",
+      "pre_cond": "protocol.state == AUTHORIZATION && last_command == USER && last_user_response == +OK",
+      "post_cond": null,
+      "actions": [],
+      "modality": "MUST",
+      "id": "N-S007-017",
+      "_verification_note": "vague_action"
+    },
+    {
+      "statement_id": "N-S007-018",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "may only be given in the AUTHORIZATION state immediately after a successful USER command",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S007",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "PASS_command",
+      "pre_cond": "protocol.state = AUTHORIZATION & USER_command.sent = true & USER_response = positive",
+      "post_cond": null,
+      "actions": [],
+      "modality": "MUST NOT",
+      "id": "N-S007-018"
+    },
+    {
+      "statement_id": "N-S007-019",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Since the PASS command has exactly one argument, a POP3 server may treat spaces in the argument as part of the password, instead of as argument separators.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S007-019",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S007-020",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "When the POP3 server receives the APOP command, it verifies the digest; if correct, the session enters TRANSACTION state, otherwise remains in AUTHORIZATION state.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": "TRANSACTION",
+      "trigger": "APOP name digest",
+      "pre_cond": "protocol.state == AUTHORIZATION && (after_greeting || after_unsuccessful_USER_or_PASS)",
+      "post_cond": "digest_correct ? protocol.state == TRANSACTION : protocol.state == AUTHORIZATION",
+      "actions": [
+        "verify_digest",
+        "issue_positive_response_if_correct",
+        "enter_TRANSACTION_state_if_correct",
+        "issue_negative_response_if_incorrect"
+      ],
+      "modality": "MUST",
+      "id": "N-S007-020"
+    },
+    {
+      "statement_id": "N-S007-022",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "The syntax of the timestamp corresponds to the `msg-id' in [RFC822], and MUST be different each time the POP3 server issues a banner greeting.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "AUTHORIZATION",
+      "trigger": "connection_accepted",
+      "pre_cond": "server.implements_APOP = true",
+      "post_cond": "session.banner_greeting.timestamp != previous_session.banner_greeting.timestamp",
+      "actions": [
+        "generate_unique_timestamp_per_session",
+        "include_timestamp_in_banner_greeting"
+      ],
+      "modality": "must",
+      "id": "N-S007-022"
+    },
+    {
+      "statement_id": "N-S007-023",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "pop3_fsm",
+      "description": "Great care should be taken to prevent unauthorized disclosure of the secret, as knowledge of the secret will allow any entity to successfully masquerade as the named user.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S007-023",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S007-024",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "pop3_fsm",
+      "description": "As such, shared secrets should be long strings (considerably longer than the 8-character example shown below).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S007",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S007-024",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "D-S008-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "following a POP3 login by a client which was ended by a QUIT, delete all messages downloaded during the session with the RETR command",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": "UPDATE",
+      "trigger": "QUIT",
+      "pre_cond": "session.quit_received = true",
+      "post_cond": "all messages downloaded via RETR during session are marked for deletion",
+      "actions": [
+        "delete all messages retrieved via RETR command during the session"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "N-S008-001",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Consequently, it is recommended that operators of large-scale multi-user servers, especially ones in which the user's only access to the maildrop is via POP3, consider such options as:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server operator"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S008-001",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S008-002",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Sites which choose this option should be sure to inform users of impending or current exhaustion of quota, perhaps by inserting an appropriate message into the user's maildrop.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server operator",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S008-002",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S008-003",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Server operators enforcing message deletion policies should take care to make all users aware of the policies in force.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server operator",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S008-003",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S008-004",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "Clients must not assume that a site policy will automate message deletions, and should continue to explicitly delete messages using the DELE command when appropriate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "do not rely on server-side policy to automate message deletions",
+        "explicitly issue DELE command for each message to be deleted"
+      ],
+      "modality": "MUST NOT",
+      "id": "N-S008-004",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S008-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "It should be noted that enforcing site message deletion policies may be confusing to the user community, since their POP3 client may contain configuration options to leave mail on the server which will not in fact be supported by the server.",
+      "is_inferred": true,
+      "confidence": 0.6,
+      "source_section": "S008",
+      "actors": [
+        "server operator",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S008-005",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S008-006",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "One special case of a site policy is that messages may only be downloaded once from the server, and are deleted after this has been accomplished.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S008-006",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S008-007",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "It is important not to delete messages in the event of abnormal connection termination (ie, if no QUIT was received from the client) because the client may not have successfully received or stored the messages.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "abnormal_connection_termination",
+      "pre_cond": "session.quit_received = false",
+      "post_cond": "session.messages_deleted = false",
+      "actions": [
+        "retain all messages downloaded via RETR during the session",
+        "do not perform UPDATE-phase deletions on abnormal termination"
+      ],
+      "modality": "should not",
+      "id": "N-S008-007"
+    },
+    {
+      "statement_id": "N-S008-008",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Servers implementing a download-and-delete policy may also wish to disable or limit the optional TOP command, since it could be used as an alternate mechanism to download entire messages.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S008-008",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "D-S009-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "USER name valid in the AUTHORIZATION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "state_name": "AUTHORIZATION",
+      "enum_name": "POP3State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = AUTHORIZATION"
+    },
+    {
+      "statement_id": "D-S009-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "STAT valid in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "state_name": "TRANSACTION",
+      "enum_name": "POP3State",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = TRANSACTION"
+    },
+    {
+      "statement_id": "D-S009-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "USER name valid in the AUTHORIZATION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "USER",
+      "pre_cond": "session.state = AUTHORIZATION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "PASS string listed under minimal POP3 commands grouped in AUTHORIZATION state",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "PASS",
+      "pre_cond": "session.state = AUTHORIZATION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "QUIT listed under minimal POP3 commands with no explicit state restriction (unlike USER which is marked valid in AUTHORIZATION state)",
+      "is_inferred": true,
+      "confidence": 0.4,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "QUIT",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "STAT valid in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "STAT",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "LIST [msg] listed under minimal POP3 commands grouped in TRANSACTION state",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "LIST",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "RETR msg listed under minimal POP3 commands grouped in TRANSACTION state",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "RETR",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "DELE msg listed under minimal POP3 commands grouped in TRANSACTION state",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "DELE",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "NOOP listed under minimal POP3 commands grouped in TRANSACTION state",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "NOOP",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "RSET listed under minimal POP3 commands grouped in TRANSACTION state",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "RSET",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "QUIT listed under minimal POP3 commands with no explicit state annotation; it appears twice in the list and is not grouped under or restricted to the TRANSACTION state",
+      "is_inferred": true,
+      "confidence": 0.4,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "QUIT",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "APOP name digest valid in the AUTHORIZATION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "APOP",
+      "pre_cond": "session.state = AUTHORIZATION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "TOP msg n valid in the TRANSACTION state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "TOP",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S009-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "UIDL [msg] listed under optional POP3 commands grouped in TRANSACTION state",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "TRANSACTION",
+      "to_state": null,
+      "trigger": "UIDL",
+      "pre_cond": "session.state = TRANSACTION",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "N-S009-001",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "Any text occurring after this reply may be ignored by the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_reply_received",
+      "pre_cond": "command != STAT & command != LIST & command != UIDL",
+      "post_cond": null,
+      "actions": [
+        "discard text following +OK or -ERR status indicator"
+      ],
+      "modality": "may",
+      "id": "N-S009-001"
+    },
+    {
+      "statement_id": "D-S010-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "S: <wait for connection on TCP port 110>",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S010",
+      "state_name": "wait for connection",
+      "enum_name": "POP3ServerState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S010-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pop3_fsm",
+      "description": "C: <open connection> S: +OK POP3 server ready <1896.697170952@dbc.mtview.ca.us>",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S010",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "wait for connection",
+      "to_state": null,
+      "trigger": "open connection",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send +OK greeting with server identifier"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "C: APOP mrose c4c9334bac560ecc979e58001b3e22fb S: +OK mrose's maildrop has 2 messages (320 octets)",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S010",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "APOP",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "authenticate user",
+        "send +OK with maildrop message count and size"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "C: DELE 1 S: +OK message 1 deleted ... C: DELE 2 S: +OK message 2 deleted",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S010",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "DELE",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "mark message as deleted",
+        "send +OK message deleted"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "C: QUIT S: +OK dewey POP3 server signing off (maildrop empty) C: <close connection> S: <wait for next connection>",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S010",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "wait for next connection",
+      "trigger": "QUIT",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send +OK signing off",
+        "close connection"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S010-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "S: <wait for next connection>",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S010",
+      "state_name": "wait for next connection",
+      "enum_name": "POP3ServerState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S011-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "during the AUTHORIZATION state of the POP3 session, the POP3 server can calculate the size of each message in octets when it opens the maildrop",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S011",
+      "state_name": "AUTHORIZATION",
+      "enum_name": "POP3SessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = AUTHORIZATION"
+    },
+    {
+      "statement_id": "D-S011-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "during the AUTHORIZATION state of the POP3 session, the POP3 server can calculate the size of each message in octets when it opens the maildrop",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S011",
+      "object_name": "maildrop",
+      "field_name": "message_octet_count",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "computed during AUTHORIZATION state when maildrop is opened"
+    },
+    {
+      "statement_id": "N-S011-001",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Note that lines in the message which start with the termination octet need not (and must not) be counted twice, since the POP3 client will remove all byte-stuffed termination characters when it receives a multi-line response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "actors": [
+        "POP3 server",
+        "POP3 client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S011-001",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S013-001",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "Accordingly, a POP3 server which implements both the PASS and APOP commands should not allow both methods of access for a given user; that is, for a given mailbox name, either the USER/PASS command sequence or the APOP command is allowed, but not both.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S013",
+      "actors": [
+        "server"
+      ],
+      "from_state": "AUTHORIZATION",
+      "to_state": null,
+      "trigger": "authentication_command_received",
+      "pre_cond": "server.implements_PASS = true & server.implements_APOP = true",
+      "post_cond": "session.permitted_auth_method = USER_PASS | session.permitted_auth_method = APOP",
+      "actions": [
+        "determine configured authentication method for the given mailbox name",
+        "reject authentication attempt that uses the non-permitted method for that mailbox"
+      ],
+      "modality": "should",
+      "id": "N-S013-001"
+    },
+    {
+      "statement_id": "N-S016-001",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "specifies that servers must send \"+OK\" and \"-ERR\" in upper case.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S016",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S016-001",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S016-002",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "specifies that the initial greeting is a positive response, instead of any string which should be a positive response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S016",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S016-002",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S016-003",
+      "normative_level": "OPTIONAL",
+      "category": "BEHAVIORAL",
+      "subject": "pop3",
+      "stage": "pop3_fsm",
+      "description": "makes the USER and PASS commands optional.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S016",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "other",
+      "id": "N-S016-003",
+      "is_global_constraint": true
+    },
+    {
+      "statement_id": "N-S016-004",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "pop3_fsm",
+      "description": "clarifies that the PASS command may only be given immediately after a successful USER command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S016",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PASS_command_issued",
+      "pre_cond": "USER_command.result = success",
+      "post_cond": null,
+      "actions": [
+        "issue PASS command only when immediately preceded by a successful USER command"
+      ],
+      "modality": "must",
+      "id": "N-S016-004"
+    },
+    {
+      "statement_id": "N-S016-005",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "changes the suggestion in the Security Considerations section for a server to not accept both PASS and APOP for a given user from a \"must\" to a \"should\".",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S016",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S016-005",
+      "is_global_constraint": true
+    }
+  ],
+  "verification_report": {
+    "input_file": "PSM_Benchmark/protocols/POP3/output/9d07692d30/stage_a12/final.json",
+    "spec_url": "PSM_Benchmark/protocols/POP3/input/segments.md",
+    "input_statements": 122,
+    "output_statements": 121,
+    "sections_checked": 11,
+    "verified": 99,
+    "corrected": 21,
+    "hallucinated_removed": 1,
+    "vague": 1,
+    "missing_added": 0,
+    "automated_issues": 71,
+    "corrections_applied": 62,
+    "llm_calls": 122,
+    "total_tokens": 336921,
+    "total_cost_usd": 1.412355,
+    "ready_for_stage_b": false
+  },
+  "merge_log": [
+    {
+      "kept": "N-S003-002",
+      "removed": "D-S003-010",
+      "action": "CODE_DEFINITE_DUPLICATE",
+      "similarity": 1.0,
+      "enriched_fields": [],
+      "llm_used": false,
+      "warning": null
+    },
+    {
+      "kept": "N-S003-003",
+      "removed": "D-S003-011",
+      "action": "CODE_DEFINITE_DUPLICATE",
+      "similarity": 1.0,
+      "enriched_fields": [],
+      "llm_used": false,
+      "warning": null
+    },
+    {
+      "kept": "N-S006-001",
+      "removed": "D-S006-004",
+      "action": "CODE_DEFINITE_DUPLICATE",
+      "similarity": 1.0,
+      "enriched_fields": [],
+      "llm_used": false,
+      "warning": null
+    },
+    {
+      "kept": "N-S008-007",
+      "removed": "D-S008-002",
+      "action": "CODE_DEFINITE_DUPLICATE",
+      "similarity": 1.0,
+      "enriched_fields": [],
+      "llm_used": false,
+      "warning": null
+    },
+    {
+      "kept": "N-S008-004",
+      "removed": "D-S008-003",
+      "action": "CODE_DEFINITE_DUPLICATE",
+      "similarity": 1.0,
+      "enriched_fields": [],
+      "llm_used": false,
+      "warning": null
+    },
+    {
+      "kept": "N-S007-014",
+      "removed": "D-S007-008",
+      "action": "CODE_DEFINITE_DUPLICATE",
+      "similarity": 0.9945,
+      "enriched_fields": [
+        "to_state",
+        "post_cond"
+      ],
+      "llm_used": false,
+      "warning": "REVIEW: enriched N-S007-014 with fields ['to_state', 'post_cond'] from D-S007-008 — verify correctness"
+    },
+    {
+      "kept": "N-S007-011",
+      "removed": "D-S007-006",
+      "action": "CODE_DEFINITE_DUPLICATE",
+      "similarity": 0.9785,
+      "enriched_fields": [
+        "to_state",
+        "post_cond"
+      ],
+      "llm_used": false,
+      "warning": "REVIEW: enriched N-S007-011 with fields ['to_state', 'post_cond'] from D-S007-006 — verify correctness"
+    },
+    {
+      "kept": "N-S007-018",
+      "removed": "D-S007-009",
+      "action": "CODE_DEFINITE_DUPLICATE",
+      "similarity": 0.9724,
+      "enriched_fields": [],
+      "llm_used": false,
+      "warning": null
+    },
+    {
+      "kept": "N-S007-013",
+      "removed": "D-S007-007",
+      "action": "CODE_DEFINITE_DUPLICATE",
+      "similarity": 0.9476,
+      "enriched_fields": [
+        "to_state",
+        "post_cond"
+      ],
+      "llm_used": false,
+      "warning": "REVIEW: enriched N-S007-013 with fields ['to_state', 'post_cond'] from D-S007-007 — verify correctness"
+    },
+    {
+      "kept": "N-S004-006",
+      "removed": "D-S004-006",
+      "action": "LLM_CONFIRMED_DUPLICATE",
+      "similarity": 0.8478,
+      "enriched_fields": [
+        "post_cond"
+      ],
+      "llm_used": true,
+      "llm_confidence": 0.9,
+      "llm_reason": "Both statements describe the same scenario: after authentication failure with connection still open, the client may issue a new authentication command.",
+      "warning": "LLM_MERGE: enriched N-S004-006 with ['post_cond'] (confidence=0.90)"
+    }
+  ],
+  "resolution_log": [
+    {
+      "statement_id": "N-S003-001",
+      "source_section": "S003",
+      "enriched_fields": [],
+      "llm_confidence": 0.97,
+      "llm_reason": "The spec states 'Servers MUST send the \"+OK\" and \"-ERR\" in upper case' as a general response format rule applying across all states.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S004-002",
+      "source_section": "S004",
+      "enriched_fields": [],
+      "llm_confidence": 0.95,
+      "llm_reason": "The requirement that a POP3 server must support at least one authentication mechanism is a server capability/configuration constraint independent of any specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S005-003",
+      "source_section": "S005",
+      "enriched_fields": [],
+      "llm_confidence": 0.9,
+      "llm_reason": "The drop listing format requirement is a schema/format rule applied to all STAT responses universally, not tied to a specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S005-004",
+      "source_section": "S005",
+      "enriched_fields": [],
+      "llm_confidence": 0.85,
+      "llm_reason": "The CRLF termination requirement for drop listings is a format/schema rule applying to the STAT response structure, not a state transition event.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S005-005",
+      "source_section": "S005",
+      "enriched_fields": [],
+      "llm_confidence": 0.85,
+      "llm_reason": "The statement describes an optional formatting capability for STAT drop listings that applies as a build-time/implementation-level choice, not a state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S005-006",
+      "source_section": "S005",
+      "enriched_fields": [],
+      "llm_confidence": 0.93,
+      "llm_reason": "The statement is a NOTE discouraging additional info in drop/scan listings and referencing optional facilities; it is a design/format guideline not tied to a specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S005-007",
+      "source_section": "S005",
+      "enriched_fields": [
+        "from_state",
+        "to_state",
+        "trigger",
+        "pre_cond"
+      ],
+      "llm_confidence": 0.88,
+      "llm_reason": "The LIST command is restricted to the TRANSACTION state, and the spec explicitly states the optional message-number argument 'may NOT refer to a message marked as deleted'.",
+      "action": "FSM_FIELDS_ENRICHED"
+    },
+    {
+      "statement_id": "N-S005-010",
+      "source_section": "S005",
+      "enriched_fields": [],
+      "llm_confidence": 0.9,
+      "llm_reason": "The scan listing format requirement applies universally to all POP3 servers for all LIST responses, not tied to a specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S005-012",
+      "source_section": "S005",
+      "enriched_fields": [
+        "from_state",
+        "to_state",
+        "trigger",
+        "pre_cond"
+      ],
+      "llm_confidence": 0.85,
+      "llm_reason": "The statement refers to the LIST command scan listing response format within the TRANSACTION state, where 'More advanced implementations may include other information, as parsed from the message.'",
+      "action": "FSM_FIELDS_ENRICHED"
+    },
+    {
+      "statement_id": "N-S005-014",
+      "source_section": "S005",
+      "enriched_fields": [
+        "from_state",
+        "trigger",
+        "pre_cond"
+      ],
+      "llm_confidence": 0.9,
+      "llm_reason": "RETR command arguments section states 'a message-number (required) which may NOT refer to a message marked as deleted' and is restricted to the TRANSACTION state.",
+      "action": "FSM_FIELDS_ENRICHED"
+    },
+    {
+      "statement_id": "N-S007-001",
+      "source_section": "S007",
+      "enriched_fields": [],
+      "llm_confidence": 0.95,
+      "llm_reason": "The statement 'must be supported by all minimal implementations of POP3 servers' is a capability/conformance requirement applying at implementation level, not tied to any specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S007-006",
+      "source_section": "S007",
+      "enriched_fields": [],
+      "llm_confidence": 0.93,
+      "llm_reason": "The unique-id listing format requirement applies universally to all POP3 servers regardless of state, as a formatting/schema rule for UIDL responses.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S007-008",
+      "source_section": "S007",
+      "enriched_fields": [],
+      "llm_confidence": 0.95,
+      "llm_reason": "The spec states unique-id persistence and non-reuse applies across sessions and regardless of state, making it a global maildrop-level constraint not tied to any specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S007-009",
+      "source_section": "S007",
+      "enriched_fields": [],
+      "llm_confidence": 0.9,
+      "llm_reason": "The spec states 'Clients should be able to handle a situation where two identical copies of a message in a maildrop have the same unique-id' as a general client robustness requirement, not tied to a specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S007-010",
+      "source_section": "S007",
+      "enriched_fields": [
+        "from_state",
+        "trigger",
+        "pre_cond"
+      ],
+      "llm_confidence": 0.88,
+      "llm_reason": "The USER command may only be given in the AUTHORIZATION state after the POP3 greeting or after an unsuccessful USER or PASS command, and its argument is a mailbox-identifying string significant only to the server.",
+      "action": "FSM_FIELDS_ENRICHED"
+    },
+    {
+      "statement_id": "N-S007-015",
+      "source_section": "S007",
+      "enriched_fields": [
+        "from_state",
+        "trigger",
+        "pre_cond"
+      ],
+      "llm_confidence": 0.93,
+      "llm_reason": "The USER command section states 'The server may return a positive response even though no such mailbox exists', scoped to the AUTHORIZATION state where USER is permitted.",
+      "action": "FSM_FIELDS_ENRICHED"
+    },
+    {
+      "statement_id": "N-S007-016",
+      "source_section": "S007",
+      "enriched_fields": [
+        "from_state",
+        "to_state",
+        "trigger",
+        "pre_cond",
+        "post_cond"
+      ],
+      "llm_confidence": 0.88,
+      "llm_reason": "The USER command section states 'The server may return a negative response if mailbox exists, but does not permit plaintext password authentication', occurring in the AUTHORIZATION state with the server remaining there on -ERR.",
+      "action": "FSM_FIELDS_ENRICHED"
+    },
+    {
+      "statement_id": "N-S007-017",
+      "source_section": "S007",
+      "enriched_fields": [
+        "from_state",
+        "trigger",
+        "pre_cond"
+      ],
+      "llm_confidence": 0.93,
+      "llm_reason": "The spec states PASS may only be given in the AUTHORIZATION state immediately after a successful USER command, with a server/mailbox-specific password as its required argument.",
+      "action": "FSM_FIELDS_ENRICHED"
+    },
+    {
+      "statement_id": "N-S007-019",
+      "source_section": "S007",
+      "enriched_fields": [],
+      "llm_confidence": 0.9,
+      "llm_reason": "The statement describes a server parsing rule for the PASS command argument (spaces may be treated as part of the password), which is a format/parsing constraint on command handling, not a state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S007-020",
+      "source_section": "S007",
+      "enriched_fields": [
+        "from_state",
+        "to_state",
+        "trigger",
+        "pre_cond",
+        "post_cond"
+      ],
+      "llm_confidence": 0.95,
+      "llm_reason": "Spec states APOP requires 'a string identifying a mailbox and a MD5 digest string (both required)' and may only be given in AUTHORIZATION state, transitioning to TRANSACTION on success.",
+      "action": "FSM_FIELDS_ENRICHED"
+    },
+    {
+      "statement_id": "N-S007-023",
+      "source_section": "S007",
+      "enriched_fields": [],
+      "llm_confidence": 0.93,
+      "llm_reason": "The obligation to protect the shared secret applies universally across all states and lifecycle stages, not tied to any specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S007-024",
+      "source_section": "S007",
+      "enriched_fields": [],
+      "llm_confidence": 0.95,
+      "llm_reason": "The shared secret length recommendation is a security configuration requirement that applies globally to APOP implementations, independent of any particular protocol state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S008-001",
+      "source_section": "S008",
+      "enriched_fields": [],
+      "llm_confidence": 0.95,
+      "llm_reason": "The recommendation applies to server operators at a deployment/operational level regardless of protocol state, covering storage quotas and retention policies outside the POP3 FSM.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S008-002",
+      "source_section": "S008",
+      "enriched_fields": [],
+      "llm_confidence": 0.93,
+      "llm_reason": "The quota notification recommendation is an operational/administrative guideline for site operators, not tied to any specific protocol state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S008-003",
+      "source_section": "S008",
+      "enriched_fields": [],
+      "llm_confidence": 0.95,
+      "llm_reason": "The obligation is an operational/administrative requirement for server operators to communicate deletion policies to users, independent of any specific protocol state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S008-005",
+      "source_section": "S008",
+      "enriched_fields": [],
+      "llm_confidence": 0.93,
+      "llm_reason": "This is an operational/informational note about user confusion from site deletion policies, not tied to any specific protocol state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S008-006",
+      "source_section": "S008",
+      "enriched_fields": [],
+      "llm_confidence": 0.9,
+      "llm_reason": "This is a site-level operational policy option (MAY), not a protocol state transition; the spec frames it as an administrative retention choice outside the scope of the POP3 protocol itself.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S008-008",
+      "source_section": "S008",
+      "enriched_fields": [],
+      "llm_confidence": 0.9,
+      "llm_reason": "This is an operational/policy recommendation for server operators implementing download-and-delete, not tied to a specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S011-001",
+      "source_section": "S011",
+      "enriched_fields": [],
+      "llm_confidence": 0.93,
+      "llm_reason": "The rule applies to octet counting during message size calculation (typically in AUTHORIZATION state) and is a formatting/counting constraint that applies regardless of a specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S016-001",
+      "source_section": "S016",
+      "enriched_fields": [],
+      "llm_confidence": 0.95,
+      "llm_reason": "The requirement applies to all server responses across all states, not tied to any specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S016-002",
+      "source_section": "S016",
+      "enriched_fields": [],
+      "llm_confidence": 0.85,
+      "llm_reason": "The spec text states the initial greeting must be a positive response as a format/schema requirement, not tied to a specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S016-003",
+      "source_section": "S016",
+      "enriched_fields": [],
+      "llm_confidence": 0.95,
+      "llm_reason": "This is a changelog entry stating USER and PASS commands are optional globally, not tied to any specific state transition.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    },
+    {
+      "statement_id": "N-S016-005",
+      "source_section": "S016",
+      "enriched_fields": [],
+      "llm_confidence": 0.95,
+      "llm_reason": "The security consideration applies globally to server configuration regardless of protocol state.",
+      "action": "MARKED_GLOBAL_CONSTRAINT"
+    }
+  ],
+  "review_resolution_log": [
+    {
+      "kept_id": "N-S007-014",
+      "removed_id": "D-S007-008",
+      "merge_correct": true,
+      "fields_correct": false,
+      "corrections": {},
+      "llm_confidence": 0.0,
+      "llm_reason": "LLM call failed: Expecting ',' delimiter: line 6 column 91 (char 186)",
+      "action": "KEPT_LOW_CONFIDENCE",
+      "applied_corrections": []
+    },
+    {
+      "kept_id": "N-S007-011",
+      "removed_id": "D-S007-006",
+      "merge_correct": true,
+      "fields_correct": true,
+      "corrections": {},
+      "llm_confidence": 0.91,
+      "llm_reason": "Spec states USER 'may only be given in the AUTHORIZATION state after the POP3 greeting or after an unsuccessful USER or PASS command', matching to_state=AUTHORIZATION and post_cond=session.state=AUTHORIZATION.",
+      "action": "AUTO_VERIFIED",
+      "applied_corrections": []
+    },
+    {
+      "kept_id": "N-S007-013",
+      "removed_id": "D-S007-007",
+      "merge_correct": true,
+      "fields_correct": true,
+      "corrections": {},
+      "llm_confidence": 0.9,
+      "llm_reason": "Spec states after +OK to USER the client may issue PASS or QUIT, remaining in AUTHORIZATION state; enriched to_state=AUTHORIZATION and post_cond=session.state=AUTHORIZATION are correct.",
+      "action": "AUTO_VERIFIED",
+      "applied_corrections": []
+    },
+    {
+      "kept_id": "N-S004-006",
+      "removed_id": "D-S004-006",
+      "merge_correct": true,
+      "fields_correct": true,
+      "corrections": {},
+      "llm_confidence": 0.9,
+      "llm_reason": "The spec explicitly states 'If the server does not close the connection, the client may either issue a new authentication command and start again, or the client may issue the QUIT command,' matching the kept description and AUTHORIZATION→AUTHORIZATION self-loop.",
+      "action": "AUTO_VERIFIED",
+      "applied_corrections": []
+    }
+  ],
+  "summary": {
+    "pipeline": {
+      "a1_input_count": 73,
+      "a2_input_count": 59,
+      "combined_before_dedup": 132,
+      "duplicates_removed": 10,
+      "llm_calls_made": 1,
+      "needs_human_review": 1,
+      "total_after_merge": 122,
+      "warnings_resolved_total": 33,
+      "warnings_marked_global": 25,
+      "warnings_fsm_enriched": 8,
+      "needs_review_auto_verified": 3,
+      "needs_review_corrected": 0
+    },
+    "by_prefix": {
+      "D": 63,
+      "N": 59
+    },
+    "by_category": {
+      "FSM_STATE": 15,
+      "FIELD_PRESENCE": 9,
+      "ONEOF_CONSTRAINT": 0,
+      "IMPLICIT_TRANSITION": 39,
+      "BEHAVIORAL": 59
+    },
+    "by_stage": {
+      "pop3_fsm": 122
+    },
+    "by_subject": {
+      "client": 20,
+      "connection": 1,
+      "endpoint": 0,
+      "message": 0,
+      "participant": 2,
+      "peer": 0,
+      "pop3": 3,
+      "server": 46,
+      "session": 49,
+      "state_machine": 0,
+      "timer": 1,
+      "transaction": 0,
+      "user": 0
+    },
+    "by_modality": {
+      "must": 25,
+      "should": 13,
+      "may": 27,
+      "other": 2,
+      "unspecified": 31
+    },
+    "validation": {
+      "error_count": 1,
+      "warning_count": 1,
+      "errors": [
+        "NL_IN_COND: D-S008-001.post_cond = 'all messages downloaded via RETR during session are marked for deletion'"
+      ],
+      "warnings": [
+        "FSM_STATE_SEMANTIC_MISMATCH: D-S006-001 is_final=true but semantic_type='closing'"
+      ],
+      "ready_for_verify": false
+    }
+  }
+}

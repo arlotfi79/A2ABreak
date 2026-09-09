@@ -1,0 +1,155 @@
+{
+  "section_id": "S291",
+  "title": "S291 26.3.2.3 Peer-to-Peer Requests",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S291 26.3.2.3 Peer-to-Peer Requests"
+  ],
+  "url_anchor": "#s291-26323-peer-to-peer-requests",
+  "word_count": 368,
+  "statement_count": 6,
+  "elapsed_seconds": 32.16,
+  "statements": [
+    {
+      "statement_id": "D-S291-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "a secure dialog begins after Bob replies authenticating himself to Carol",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S291",
+      "state_name": "secure dialog",
+      "enum_name": "DialogState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S291-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Carol's UA SHOULD initiate a TLS connection with the biloxi proxy directly when she wishes to send an INVITE, and when her UA receives a certificate from the biloxi proxy, it SHOULD be verified normally before she passes her INVITE across the TLS connection",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S291",
+      "actors": [
+        "UA",
+        "biloxi proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE to be sent",
+      "pre_cond": null,
+      "post_cond": "tls_connection.established = true & certificate.verified = true",
+      "actions": [
+        "initiate TLS connection with biloxi proxy",
+        "verify received certificate",
+        "send INVITE over TLS connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S291-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The biloxi proxy MAY have a strict policy that precludes it from even bothering to challenge requests that do not have biloxi.com in the domainname portion of the From header field - it treats these users as unauthenticated",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S291",
+      "actors": [
+        "biloxi proxy"
+      ],
+      "from_state": null,
+      "to_state": "unauthenticated",
+      "trigger": "request received without biloxi.com domain in From header",
+      "pre_cond": "from_header.domainname != \"biloxi.com\"",
+      "post_cond": "user.authentication_state = unauthenticated",
+      "actions": [
+        "treat user as unauthenticated"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S291-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The biloxi proxy has a policy for Bob that all non-authenticated requests should be redirected to the appropriate contact address registered against 'bob@biloxi.com'",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S291",
+      "actors": [
+        "biloxi proxy"
+      ],
+      "from_state": "unauthenticated",
+      "to_state": null,
+      "trigger": "non-authenticated request received for Bob",
+      "pre_cond": "user.authentication_state = unauthenticated",
+      "post_cond": null,
+      "actions": [
+        "send redirection response with registered contact address"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S291-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Carol SHOULD then establish a TCP connection with the designated address and send a new INVITE with a Request-URI containing the received contact address (recomputing the signature in the body as the request is readied)",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S291",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "redirection response received",
+      "pre_cond": null,
+      "post_cond": "tcp_connection.established = true",
+      "actions": [
+        "establish TCP connection with designated contact address",
+        "recompute signature",
+        "send new INVITE with contact address as Request-URI"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S291-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "Bob receives the INVITE, his UA inspects and recognizes the From header field and subsequently matches a locally cached certificate with the one presented in the signature of the body of the INVITE; he replies in similar fashion, authenticating himself to Carol, and a secure dialog begins",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S291",
+      "actors": [
+        "Bob UA",
+        "Carol UA"
+      ],
+      "from_state": null,
+      "to_state": "secure dialog",
+      "trigger": "INVITE received with matching signature certificate",
+      "pre_cond": "certificate.locally_cached_match = true",
+      "post_cond": "session.state = secure_dialog",
+      "actions": [
+        "inspect From header field",
+        "match locally cached certificate against body signature",
+        "reply authenticating self to Carol"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

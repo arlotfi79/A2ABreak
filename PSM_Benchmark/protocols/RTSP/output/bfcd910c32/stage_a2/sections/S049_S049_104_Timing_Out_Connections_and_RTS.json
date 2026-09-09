@@ -1,0 +1,305 @@
+{
+  "section_id": "S049",
+  "title": "S049 10.4 Timing Out Connections and RTSP Messages",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S049 10.4 Timing Out Connections and RTSP Messages"
+  ],
+  "url_anchor": "#s049-104-timing-out-connections-and-rtsp-messages",
+  "word_count": 486,
+  "statement_count": 12,
+  "elapsed_seconds": 98.91,
+  "statements": [
+    {
+      "statement_id": "N-S049-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "Receivers of a request (responders) SHOULD respond to requests in a timely manner even when a reliable transport such as TCP is used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "responder"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S049-001"
+    },
+    {
+      "statement_id": "N-S049-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "Similarly, the sender of a request (requester) SHOULD wait for a sufficient time for a response before concluding that the responder will not be acting upon its request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "requester"
+      ],
+      "from_state": "waiting_for_response",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "wait_sufficient_time_for_response"
+      ],
+      "modality": "should",
+      "id": "N-S049-002"
+    },
+    {
+      "statement_id": "N-S049-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A responder SHOULD respond to all requests within 5 seconds.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "responder"
+      ],
+      "from_state": "processing_request",
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": null,
+      "post_cond": "response_sent",
+      "actions": [
+        "send_response_within_5_seconds"
+      ],
+      "modality": "should",
+      "id": "N-S049-003"
+    },
+    {
+      "statement_id": "N-S049-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "If the responder recognizes that the processing of a request will take longer than 5 seconds, it SHOULD send a 100 (Continue) response as soon as possible.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "responder"
+      ],
+      "from_state": "processing_request",
+      "to_state": null,
+      "trigger": "processing_exceeds_5_seconds",
+      "pre_cond": "processing_time > 5s",
+      "post_cond": "100_response_sent = true",
+      "actions": [
+        "send_100_continue_immediately"
+      ],
+      "modality": "should",
+      "id": "N-S049-004"
+    },
+    {
+      "statement_id": "N-S049-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "It SHOULD continue sending a 100 response every 5 seconds thereafter until it is ready to send the final response to the requester.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "responder"
+      ],
+      "from_state": "processing_request",
+      "to_state": null,
+      "trigger": "5_second_timer_expiry",
+      "pre_cond": "100_response_sent = true & final_response_ready = false",
+      "post_cond": null,
+      "actions": [
+        "send_100_continue",
+        "restart_5_second_timer"
+      ],
+      "modality": "should",
+      "id": "N-S049-005"
+    },
+    {
+      "statement_id": "N-S049-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "After sending a 100 response, the responder MUST send a final response indicating the success or failure of the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "responder"
+      ],
+      "from_state": "processing_request",
+      "to_state": null,
+      "trigger": "final_response_ready",
+      "pre_cond": "100_response_sent = true",
+      "post_cond": "final_response_sent = true",
+      "actions": [
+        "send_final_response"
+      ],
+      "modality": "must",
+      "id": "N-S049-006"
+    },
+    {
+      "statement_id": "N-S049-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A requester SHOULD wait at least 10 seconds for a response before concluding that the responder will not be responding to its request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "requester"
+      ],
+      "from_state": "waiting_for_response",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "elapsed_time < 10s",
+      "post_cond": null,
+      "actions": [
+        "continue_waiting_for_response"
+      ],
+      "modality": "should",
+      "id": "N-S049-007"
+    },
+    {
+      "statement_id": "N-S049-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "After receiving a 100 response, the requester SHOULD continue waiting for further responses.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "requester"
+      ],
+      "from_state": "waiting_for_response",
+      "to_state": "waiting_for_final_response",
+      "trigger": "receive_100_response",
+      "pre_cond": null,
+      "post_cond": "requester.waiting_for_final_response = true",
+      "actions": [
+        "continue_waiting_for_further_responses"
+      ],
+      "modality": "should",
+      "id": "N-S049-008"
+    },
+    {
+      "statement_id": "N-S049-9",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "If more than 10 seconds elapse without receiving any response, the requester MAY assume that the responder is unresponsive and abort the connection by closing the TCP connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "requester"
+      ],
+      "from_state": "waiting_for_response",
+      "to_state": "connection_closed",
+      "trigger": "10_second_timeout_no_response",
+      "pre_cond": "elapsed_time > 10s & response_received = false",
+      "post_cond": "connection.state = closed",
+      "actions": [
+        "assume_responder_unresponsive",
+        "close_TCP_connection"
+      ],
+      "modality": "may",
+      "id": "N-S049-009"
+    },
+    {
+      "statement_id": "N-S049-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "the RTSP client or server SHOULD establish a new connection and send any requests that are queued up or that haven't received a response on this new connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "RTSP client",
+        "RTSP server"
+      ],
+      "from_state": "connection_closed",
+      "to_state": null,
+      "trigger": "old_connection_abandoned",
+      "pre_cond": "connection.state = closed | connection.abandoned = true",
+      "post_cond": "new_connection.established = true",
+      "actions": [
+        "establish_new_connection",
+        "retransmit_queued_and_unresponded_requests_on_new_connection"
+      ],
+      "modality": "should",
+      "id": "N-S049-010"
+    },
+    {
+      "statement_id": "N-S049-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "rtsp_fsm",
+      "description": "the RTSP agent SHOULD send a keep-alive request, if no other request will be sent immediately for that RTSP session, for each RTSP session on the old connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "RTSP agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "old_connection_abandoned",
+      "pre_cond": "!other_request_pending_for_session",
+      "post_cond": "keep_alive_sent = true",
+      "actions": [
+        "send_keep_alive_request_for_each_session_on_old_connection"
+      ],
+      "modality": "should",
+      "id": "N-S049-011"
+    },
+    {
+      "statement_id": "N-S049-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A requester SHOULD wait longer than 10 seconds for a response if it is experiencing significant transport delays on its connection to the responder.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S049",
+      "actors": [
+        "requester"
+      ],
+      "from_state": "waiting_for_response",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "significant_transport_delays = true",
+      "post_cond": null,
+      "actions": [
+        "extend_wait_timeout_beyond_10_seconds"
+      ],
+      "modality": "should",
+      "id": "N-S049-012"
+    }
+  ]
+}

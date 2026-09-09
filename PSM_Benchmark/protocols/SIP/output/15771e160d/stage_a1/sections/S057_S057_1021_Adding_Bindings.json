@@ -1,0 +1,107 @@
+{
+  "section_id": "S057",
+  "title": "S057 10.2.1 Adding Bindings",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S057 10.2.1 Adding Bindings"
+  ],
+  "url_anchor": "#s057-1021-adding-bindings",
+  "word_count": 287,
+  "statement_count": 4,
+  "elapsed_seconds": 28.09,
+  "statements": [
+    {
+      "statement_id": "D-S057-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The REGISTER request sent to a registrar includes the contact address(es) to which SIP requests for the address-of-record should be forwarded. The address-of-record is included in the To header field of the REGISTER request.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S057",
+      "actors": [
+        "client",
+        "registrar"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "REGISTER_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "include_contact_addresses_in_Contact_header",
+        "include_address_of_record_in_To_header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S057-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The 2xx response to the REGISTER request will contain, in a Contact header field, a complete list of bindings that have been registered for this address-of-record at this registrar.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S057",
+      "actors": [
+        "registrar",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "bindings_established",
+      "trigger": "2xx_received",
+      "pre_cond": null,
+      "post_cond": "response.Contact = complete_binding_list",
+      "actions": [
+        "return_complete_binding_list_in_Contact_header"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S057-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Once a client has established bindings at a registrar, it MAY send subsequent registrations containing new bindings or modifications to existing bindings as necessary.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S057",
+      "actors": [
+        "client",
+        "registrar"
+      ],
+      "from_state": "bindings_established",
+      "to_state": null,
+      "trigger": "subsequent_REGISTER_sent",
+      "pre_cond": "client.bindings_established = true",
+      "post_cond": null,
+      "actions": [
+        "send_REGISTER_with_new_or_modified_bindings"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S057-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If the address-of-record in the To header field of a REGISTER request is a SIPS URI, then any Contact header field values in the request SHOULD also be SIPS URIs.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S057",
+      "object_name": "REGISTER_request",
+      "field_name": "Contact",
+      "field_type": "header field",
+      "required": false,
+      "allowed_values": [
+        "SIPS URI"
+      ],
+      "guard_semantics": "message.To = SIPS_URI => message.Contact SHOULD be SIPS_URI"
+    }
+  ]
+}

@@ -1,0 +1,970 @@
+{
+  "protocol": "FTP",
+  "model": "a2a-pipeline",
+  "fingerprint": {
+    "evaluator_sha256": "c302bb6e01e8e95f5fa4f1147efd289e0cba243ca3a707eeb9ae731a6a83b668",
+    "ground_truth_sha256": "dd9b975f2f493b412150bec35ca18a2e1b9493657ecd50f61b7811a65f3aff29",
+    "exported_fsm_sha256": "add243cc4e27206bc3a3e51451ac8c2511d30d67e41506707787f26e96ffa772",
+    "minilm": {
+      "found": true,
+      "snapshots": [
+        "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+      ]
+    },
+    "packages": {
+      "python": "3.13.2",
+      "numpy": "2.4.2",
+      "torch": "2.12.0",
+      "sentence-transformers": "5.5.1",
+      "pandas": "3.0.3",
+      "scikit-learn": "1.8.0",
+      "litellm": "1.83.14"
+    }
+  },
+  "official": {
+    "states": {
+      "Protocol": "FTP",
+      "Model": "a2a-pipeline",
+      "Total Extracted": 24,
+      "Total GT": 10,
+      "Matched": 8,
+      "Precision": 0.333,
+      "Recall": 0.8,
+      "F1-Score": 0.47
+    },
+    "transitions": {
+      "Protocol": "FTP",
+      "Model": "a2a-pipeline",
+      "TotalExtracted": 52,
+      "TotalGT": 24,
+      "Matched": 2,
+      "UnmatchedGT": 22,
+      "UnmatchedExtracted": 50,
+      "Precision": 0.038,
+      "Recall": 0.083,
+      "F1-Score": 0.053
+    },
+    "call": {
+      "match_all_states": {
+        "threshold": 0.5
+      },
+      "batch_evaluate_transitions_combined": {
+        "if_partial": false,
+        "state_threshold": 0.5,
+        "trans_threshold": 0.5
+      }
+    }
+  },
+  "diagnostics": {
+    "state_matches": [
+      {
+        "gt": "Disconnected",
+        "extracted": "Closed",
+        "score": 0.5959762930870056
+      },
+      {
+        "gt": "Connected",
+        "extracted": "Closed",
+        "score": 0.5492459535598755
+      },
+      {
+        "gt": "Authenticated",
+        "extracted": "LoggedIn",
+        "score": 0.5204854011535645
+      },
+      {
+        "gt": "Need_Account",
+        "extracted": "NeedAccount",
+        "score": 0.6062747836112976
+      },
+      {
+        "gt": "Accounted",
+        "extracted": null,
+        "score": 0.4380652904510498
+      },
+      {
+        "gt": "Data_Connection_Ready",
+        "extracted": "DataConnClosed",
+        "score": 0.5841016173362732
+      },
+      {
+        "gt": "Data_Transfer",
+        "extracted": "DataTransfer",
+        "score": 0.5721065402030945
+      },
+      {
+        "gt": "Restart_Point_Set",
+        "extracted": "RestartPending",
+        "score": 0.6309945583343506
+      },
+      {
+        "gt": "Awaiting_RNTO",
+        "extracted": null,
+        "score": 0.4992554485797882
+      },
+      {
+        "gt": "Logged_Out",
+        "extracted": "LoggedIn",
+        "score": 0.7871982455253601
+      }
+    ],
+    "unmatched_gt_states": [
+      "Accounted",
+      "Awaiting_RNTO"
+    ],
+    "unselected_extracted_states": [
+      "DataTransfer",
+      "Closed",
+      "Active",
+      "Passive",
+      "Listen",
+      "DataConnClosed",
+      "B",
+      "W",
+      "S",
+      "F",
+      "E",
+      "End",
+      "Awaiting220",
+      "PASS_W"
+    ],
+    "matched_transitions": [
+      {
+        "extracted": {
+          "from": "NeedPassword",
+          "event": "receive PASS 332",
+          "action": "send 332 need account",
+          "to": "NeedAccount"
+        },
+        "gt": {
+          "from": "Need_Account",
+          "event": "receive ACCT",
+          "action": "reply 332",
+          "to": "Need_Account"
+        }
+      },
+      {
+        "extracted": {
+          "from": "LoggedIn",
+          "event": "receive REST 350",
+          "action": "send 350 restart marker",
+          "to": "RestartPending"
+        },
+        "gt": {
+          "from": "Authenticated",
+          "event": "receive REST",
+          "action": "reply 350",
+          "to": "Restart_Point_Set"
+        }
+      }
+    ],
+    "unmatched_gt_transitions": [
+      {
+        "from": "Disconnected",
+        "event": "receive USER",
+        "action": "reply 331",
+        "to": "Connected"
+      },
+      {
+        "from": "Connected",
+        "event": "receive PASS",
+        "action": "reply 230",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Connected",
+        "event": "receive PASS",
+        "action": "reply 530",
+        "to": "Disconnected"
+      },
+      {
+        "from": "Connected",
+        "event": "receive PASS",
+        "action": "reply 332",
+        "to": "Need_Account"
+      },
+      {
+        "from": "Need_Account",
+        "event": "receive ACCT",
+        "action": "reply 230",
+        "to": "Accounted"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive ACCT",
+        "action": "reply 230",
+        "to": "Accounted"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive ACCT",
+        "action": "reply 332",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive PASV",
+        "action": "reply 227",
+        "to": "Data_Connection_Ready"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive PORT",
+        "action": "reply 200",
+        "to": "Data_Connection_Ready"
+      },
+      {
+        "from": "Data_Connection_Ready",
+        "event": "receive RETR",
+        "action": "reply 150",
+        "to": "Data_Transfer"
+      },
+      {
+        "from": "Data_Connection_Ready",
+        "event": "receive STOR",
+        "action": "reply 150",
+        "to": "Data_Transfer"
+      },
+      {
+        "from": "Data_Connection_Ready",
+        "event": "receive APPE",
+        "action": "reply 150",
+        "to": "Data_Transfer"
+      },
+      {
+        "from": "Data_Transfer",
+        "event": "Transfer Complete",
+        "action": "reply 226",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Data_Transfer",
+        "event": "receive QUIT",
+        "action": "reply 221",
+        "to": "Logged_Out"
+      },
+      {
+        "from": "Restart_Point_Set",
+        "event": "receive RETR",
+        "action": "reply 150",
+        "to": "Data_Transfer"
+      },
+      {
+        "from": "Restart_Point_Set",
+        "event": "receive STOR",
+        "action": "reply 150",
+        "to": "Data_Transfer"
+      },
+      {
+        "from": "Restart_Point_Set",
+        "event": "receive APPE",
+        "action": "reply 150",
+        "to": "Data_Transfer"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive RNFR",
+        "action": "reply 350",
+        "to": "Awaiting_RNTO"
+      },
+      {
+        "from": "Awaiting_RNTO",
+        "event": "receive RNTO",
+        "action": "reply 250",
+        "to": "Authenticated"
+      },
+      {
+        "from": "Authenticated",
+        "event": "receive QUIT",
+        "action": "reply 221",
+        "to": "Logged_Out"
+      },
+      {
+        "from": "Accounted",
+        "event": "receive QUIT",
+        "action": "reply 221",
+        "to": "Logged_Out"
+      },
+      {
+        "from": "Restart_Point_Set",
+        "event": "receive QUIT",
+        "action": "reply 221",
+        "to": "Logged_Out"
+      }
+    ],
+    "unmatched_extracted_transitions": [
+      {
+        "from": "Listening",
+        "event": "receive TCP connect",
+        "action": "initiate control connection",
+        "to": "ControlConnEstablished"
+      },
+      {
+        "from": "ControlConnEstablished",
+        "event": "cond server ready",
+        "action": "send 220 awaiting input",
+        "to": "AwaitingInput"
+      },
+      {
+        "from": "ControlConnEstablished",
+        "event": "cond server unready",
+        "action": "send 120 expected delay",
+        "to": "ExpectedDelay"
+      },
+      {
+        "from": "ControlConnEstablished",
+        "event": "receive reply 421",
+        "action": "send 421 close connection",
+        "to": "Closed"
+      },
+      {
+        "from": "AwaitingInput",
+        "event": "receive USER 230",
+        "action": "send 230 user logged in",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "AwaitingInput",
+        "event": "receive USER 331",
+        "action": "send 331 need password",
+        "to": "NeedPassword"
+      },
+      {
+        "from": "AwaitingInput",
+        "event": "receive USER 332",
+        "action": "send 332 need account",
+        "to": "NeedAccount"
+      },
+      {
+        "from": "NeedPassword",
+        "event": "receive PASS 230",
+        "action": "send 230 user logged in",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "NeedPassword",
+        "event": "receive PASS 530",
+        "action": "send 530 login failed",
+        "to": "AwaitingInput"
+      },
+      {
+        "from": "NeedAccount",
+        "event": "receive ACCT 230",
+        "action": "send 230 user logged in",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive PASV 227",
+        "action": "send 227 entering passive",
+        "to": "EnteringPassiveMode"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive service command",
+        "action": "send 125 or 150",
+        "to": "DataTransfer"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "receive ABOR",
+        "action": "abort transfer close data",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive RNFR 350",
+        "action": "send 350 pending info",
+        "to": "RenamePending"
+      },
+      {
+        "from": "RenamePending",
+        "event": "receive RNTO 250",
+        "action": "rename file send 250",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive QUIT",
+        "action": "close control connection",
+        "to": "Closed"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "receive QUIT",
+        "action": "close connection after result",
+        "to": "Closed"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "receive reply 2yz",
+        "action": "close data connection",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive ABOR idle",
+        "action": "close data if open",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive TYPE",
+        "action": "send 200 command OK",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive STOR denied",
+        "action": "send 550 access denied",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive REIN 220",
+        "action": "reinitialize session defaults",
+        "to": "AwaitingInput"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive REIN 120",
+        "action": "send 120 then 220",
+        "to": "Awaiting220"
+      },
+      {
+        "from": "RestartPending",
+        "event": "send transfer command",
+        "action": "send transfer command",
+        "to": "DataTransfer"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive USER relogin",
+        "action": "flush credentials restart login",
+        "to": "NeedPassword"
+      },
+      {
+        "from": "LoggedIn",
+        "event": "receive MKD",
+        "action": "send access denied reply",
+        "to": "LoggedIn"
+      },
+      {
+        "from": "Active",
+        "event": "receive PASV",
+        "action": "listen on data port",
+        "to": "Passive"
+      },
+      {
+        "from": "Listen",
+        "event": "receive transfer request",
+        "action": "initiate data connection",
+        "to": "DataTransfer"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "cond sending completed",
+        "action": "close data connection",
+        "to": "DataConnClosed"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "receive ABOR data",
+        "action": "close data connection",
+        "to": "DataConnClosed"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "receive port change",
+        "action": "close data connection",
+        "to": "DataConnClosed"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "cond control closed",
+        "action": "close data connection",
+        "to": "DataConnClosed"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "cond irrecoverable error",
+        "action": "close data connection",
+        "to": "DataConnClosed"
+      },
+      {
+        "from": "DataTransfer",
+        "event": "cond server close",
+        "action": "close data send 250",
+        "to": "DataConnClosed"
+      },
+      {
+        "from": "DataConnClosed",
+        "event": "send transfer prep",
+        "action": "listen on data port",
+        "to": "Listen"
+      },
+      {
+        "from": "B",
+        "event": "send cmd",
+        "action": "send command",
+        "to": "W"
+      },
+      {
+        "from": "W",
+        "event": "receive reply 1xx",
+        "action": "",
+        "to": "W"
+      },
+      {
+        "from": "W",
+        "event": "receive reply 2xx",
+        "action": "",
+        "to": "S"
+      },
+      {
+        "from": "W",
+        "event": "receive reply 3xx",
+        "action": "",
+        "to": "E"
+      },
+      {
+        "from": "W",
+        "event": "receive reply 4xx5xx",
+        "action": "",
+        "to": "F"
+      },
+      {
+        "from": "B",
+        "event": "send RNFR",
+        "action": "send RNFR",
+        "to": "W"
+      },
+      {
+        "from": "W",
+        "event": "receive reply 1xx2xx",
+        "action": "",
+        "to": "E"
+      },
+      {
+        "from": "E",
+        "event": "send RNTO",
+        "action": "send RNTO",
+        "to": "W"
+      },
+      {
+        "from": "W",
+        "event": "receive reply 1xx3xx",
+        "action": "",
+        "to": "S"
+      },
+      {
+        "from": "B",
+        "event": "send REST",
+        "action": "send REST",
+        "to": "W"
+      },
+      {
+        "from": "E",
+        "event": "send transfer cmd",
+        "action": "send transfer command",
+        "to": "W"
+      },
+      {
+        "from": "W",
+        "event": "receive reply 3xx REST",
+        "action": "",
+        "to": "S"
+      },
+      {
+        "from": "B",
+        "event": "send USER",
+        "action": "send USER",
+        "to": "W"
+      },
+      {
+        "from": "W",
+        "event": "receive reply 1xx USER",
+        "action": "",
+        "to": "E"
+      },
+      {
+        "from": "W",
+        "event": "receive reply 3xx USER",
+        "action": "",
+        "to": "PASS_W"
+      }
+    ],
+    "precision": 0.333,
+    "recall": 0.8,
+    "f1_score": 0.47
+  },
+  "supplementary": {
+    "note": "Supplementary only — the official numbers above come from the benchmark's own entry points. The official state matcher is many-to-one and the official transition matcher is greedy and order-sensitive; these one-to-one numbers bound that effect.",
+    "one_to_one": {
+      "states": {
+        "threshold": 0.5,
+        "matched": 7,
+        "total_gt": 10,
+        "total_extracted": 24,
+        "precision": 0.2917,
+        "recall": 0.7,
+        "f1": 0.4118,
+        "pairs": [
+          {
+            "gt": "Disconnected",
+            "extracted": "Closed",
+            "score": 0.596
+          },
+          {
+            "gt": "Connected",
+            "extracted": "Active",
+            "score": 0.5208
+          },
+          {
+            "gt": "Need_Account",
+            "extracted": "NeedAccount",
+            "score": 0.6063
+          },
+          {
+            "gt": "Data_Connection_Ready",
+            "extracted": "DataConnClosed",
+            "score": 0.5841
+          },
+          {
+            "gt": "Data_Transfer",
+            "extracted": "DataTransfer",
+            "score": 0.5721
+          },
+          {
+            "gt": "Restart_Point_Set",
+            "extracted": "RestartPending",
+            "score": 0.631
+          },
+          {
+            "gt": "Logged_Out",
+            "extracted": "LoggedIn",
+            "score": 0.7872
+          }
+        ]
+      },
+      "transitions": {
+        "threshold": 0.5,
+        "matched": 2,
+        "total_gt": 24,
+        "total_extracted": 52,
+        "precision": 0.0385,
+        "recall": 0.0833,
+        "f1": 0.0526,
+        "pairs": [
+          {
+            "extracted": {
+              "from": "NeedPassword",
+              "event": "receive PASS 332",
+              "action": "send 332 need account",
+              "to": "NeedAccount"
+            },
+            "gt": {
+              "from": "Need_Account",
+              "event": "receive ACCT",
+              "action": "reply 332",
+              "to": "Need_Account"
+            },
+            "label_score": 0.6989
+          },
+          {
+            "extracted": {
+              "from": "LoggedIn",
+              "event": "receive REST 350",
+              "action": "send 350 restart marker",
+              "to": "RestartPending"
+            },
+            "gt": {
+              "from": "Authenticated",
+              "event": "receive REST",
+              "action": "reply 350",
+              "to": "Restart_Point_Set"
+            },
+            "label_score": 0.6722
+          }
+        ]
+      }
+    },
+    "threshold_sensitivity": {
+      "0.4": {
+        "states_official_style": {
+          "matched": 10,
+          "precision": 0.417,
+          "recall": 1.0,
+          "f1": 0.589
+        },
+        "states_one_to_one": {
+          "threshold": 0.4,
+          "matched": 9,
+          "total_gt": 10,
+          "total_extracted": 24,
+          "precision": 0.375,
+          "recall": 0.9,
+          "f1": 0.5294,
+          "pairs": [
+            {
+              "gt": "Disconnected",
+              "extracted": "Closed",
+              "score": 0.596
+            },
+            {
+              "gt": "Connected",
+              "extracted": "Active",
+              "score": 0.5208
+            },
+            {
+              "gt": "Need_Account",
+              "extracted": "NeedAccount",
+              "score": 0.6063
+            },
+            {
+              "gt": "Accounted",
+              "extracted": "B",
+              "score": 0.4381
+            },
+            {
+              "gt": "Data_Connection_Ready",
+              "extracted": "DataConnClosed",
+              "score": 0.5841
+            },
+            {
+              "gt": "Data_Transfer",
+              "extracted": "DataTransfer",
+              "score": 0.5721
+            },
+            {
+              "gt": "Restart_Point_Set",
+              "extracted": "RestartPending",
+              "score": 0.631
+            },
+            {
+              "gt": "Awaiting_RNTO",
+              "extracted": "Awaiting220",
+              "score": 0.4993
+            },
+            {
+              "gt": "Logged_Out",
+              "extracted": "LoggedIn",
+              "score": 0.7872
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.4,
+          "matched": 4,
+          "total_gt": 24,
+          "total_extracted": 52,
+          "precision": 0.0769,
+          "recall": 0.1667,
+          "f1": 0.1053,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "NeedPassword",
+                "event": "receive PASS 332",
+                "action": "send 332 need account",
+                "to": "NeedAccount"
+              },
+              "gt": {
+                "from": "Need_Account",
+                "event": "receive ACCT",
+                "action": "reply 332",
+                "to": "Need_Account"
+              },
+              "label_score": 0.6989
+            },
+            {
+              "extracted": {
+                "from": "LoggedIn",
+                "event": "receive REST 350",
+                "action": "send 350 restart marker",
+                "to": "RestartPending"
+              },
+              "gt": {
+                "from": "Authenticated",
+                "event": "receive REST",
+                "action": "reply 350",
+                "to": "Restart_Point_Set"
+              },
+              "label_score": 0.6722
+            },
+            {
+              "extracted": {
+                "from": "DataTransfer",
+                "event": "receive reply 2yz",
+                "action": "close data connection",
+                "to": "LoggedIn"
+              },
+              "gt": {
+                "from": "Data_Transfer",
+                "event": "receive QUIT",
+                "action": "reply 221",
+                "to": "Logged_Out"
+              },
+              "label_score": 0.4017
+            },
+            {
+              "extracted": {
+                "from": "LoggedIn",
+                "event": "receive TYPE",
+                "action": "send 200 command OK",
+                "to": "LoggedIn"
+              },
+              "gt": {
+                "from": "Connected",
+                "event": "receive PASS",
+                "action": "reply 230",
+                "to": "Authenticated"
+              },
+              "label_score": 0.4759
+            }
+          ]
+        }
+      },
+      "0.5": {
+        "states_official_style": {
+          "matched": 8,
+          "precision": 0.333,
+          "recall": 0.8,
+          "f1": 0.47
+        },
+        "states_one_to_one": {
+          "threshold": 0.5,
+          "matched": 7,
+          "total_gt": 10,
+          "total_extracted": 24,
+          "precision": 0.2917,
+          "recall": 0.7,
+          "f1": 0.4118,
+          "pairs": [
+            {
+              "gt": "Disconnected",
+              "extracted": "Closed",
+              "score": 0.596
+            },
+            {
+              "gt": "Connected",
+              "extracted": "Active",
+              "score": 0.5208
+            },
+            {
+              "gt": "Need_Account",
+              "extracted": "NeedAccount",
+              "score": 0.6063
+            },
+            {
+              "gt": "Data_Connection_Ready",
+              "extracted": "DataConnClosed",
+              "score": 0.5841
+            },
+            {
+              "gt": "Data_Transfer",
+              "extracted": "DataTransfer",
+              "score": 0.5721
+            },
+            {
+              "gt": "Restart_Point_Set",
+              "extracted": "RestartPending",
+              "score": 0.631
+            },
+            {
+              "gt": "Logged_Out",
+              "extracted": "LoggedIn",
+              "score": 0.7872
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.5,
+          "matched": 2,
+          "total_gt": 24,
+          "total_extracted": 52,
+          "precision": 0.0385,
+          "recall": 0.0833,
+          "f1": 0.0526,
+          "pairs": [
+            {
+              "extracted": {
+                "from": "NeedPassword",
+                "event": "receive PASS 332",
+                "action": "send 332 need account",
+                "to": "NeedAccount"
+              },
+              "gt": {
+                "from": "Need_Account",
+                "event": "receive ACCT",
+                "action": "reply 332",
+                "to": "Need_Account"
+              },
+              "label_score": 0.6989
+            },
+            {
+              "extracted": {
+                "from": "LoggedIn",
+                "event": "receive REST 350",
+                "action": "send 350 restart marker",
+                "to": "RestartPending"
+              },
+              "gt": {
+                "from": "Authenticated",
+                "event": "receive REST",
+                "action": "reply 350",
+                "to": "Restart_Point_Set"
+              },
+              "label_score": 0.6722
+            }
+          ]
+        }
+      },
+      "0.6": {
+        "states_official_style": {
+          "matched": 3,
+          "precision": 0.125,
+          "recall": 0.3,
+          "f1": 0.176
+        },
+        "states_one_to_one": {
+          "threshold": 0.6,
+          "matched": 3,
+          "total_gt": 10,
+          "total_extracted": 24,
+          "precision": 0.125,
+          "recall": 0.3,
+          "f1": 0.1765,
+          "pairs": [
+            {
+              "gt": "Need_Account",
+              "extracted": "NeedAccount",
+              "score": 0.6063
+            },
+            {
+              "gt": "Restart_Point_Set",
+              "extracted": "RestartPending",
+              "score": 0.631
+            },
+            {
+              "gt": "Logged_Out",
+              "extracted": "LoggedIn",
+              "score": 0.7872
+            }
+          ]
+        },
+        "transitions_one_to_one": {
+          "threshold": 0.6,
+          "matched": 0,
+          "total_gt": 24,
+          "total_extracted": 52,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "pairs": []
+        }
+      }
+    }
+  }
+}

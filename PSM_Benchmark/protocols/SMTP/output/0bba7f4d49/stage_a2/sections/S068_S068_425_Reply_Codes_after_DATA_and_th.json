@@ -1,0 +1,133 @@
+{
+  "section_id": "S068",
+  "title": "S068 4.2.5 Reply Codes after DATA and the Subsequent <CRLF>.<CRLF>",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S068 4.2.5 Reply Codes after DATA and the Subsequent <CRLF>.<CRLF>"
+  ],
+  "url_anchor": "#s068-425-reply-codes-after-data-and-the-subsequent-crlfcrlf",
+  "word_count": 286,
+  "statement_count": 5,
+  "elapsed_seconds": 77.91,
+  "statements": [
+    {
+      "statement_id": "N-S068-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When an SMTP server returns a temporary error status (4yz) code after the DATA command is completed with <CRLF>.<CRLF>, it MUST NOT make a subsequent attempt to deliver that message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S068",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "4yz_returned_after_DATA_terminator",
+      "pre_cond": "server.response_code = 4yz & data_command.completed_with_CRLF_dot_CRLF = true",
+      "post_cond": "server.delivery_attempted = false",
+      "actions": [
+        "do not make any subsequent delivery attempt for the message"
+      ],
+      "modality": "must",
+      "id": "N-S068-001"
+    },
+    {
+      "statement_id": "N-S068-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "The SMTP client retains responsibility for the delivery of that message and may either return it to the user or requeue it for a subsequent attempt (see Section 4.5.4.1).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S068",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_returned_4yz_after_DATA_terminator",
+      "pre_cond": "server.response_code = 4yz & data_command.completed_with_CRLF_dot_CRLF = true",
+      "post_cond": null,
+      "actions": [
+        "return message to user OR requeue message for subsequent delivery attempt"
+      ],
+      "modality": "may",
+      "id": "N-S068-002"
+    },
+    {
+      "statement_id": "N-S068-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "smtp_fsm",
+      "description": "The user who originated the message SHOULD be able to interpret the return of a transient failure status (by mail message or otherwise) as a non-delivery indication, just as a permanent failure would be interpreted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S068",
+      "actors": [
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S068-003"
+    },
+    {
+      "statement_id": "N-S068-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When an SMTP server returns a permanent error status (5yz) code after the DATA command is completed with <CRLF>.<CRLF>, it MUST NOT make any subsequent attempt to deliver the message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S068",
+      "actors": [
+        "SMTP server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "5yz_returned_after_DATA_terminator",
+      "pre_cond": "server.response_code = 5yz & data_command.completed_with_CRLF_dot_CRLF = true",
+      "post_cond": "server.delivery_attempted = false",
+      "actions": [
+        "do not make any subsequent delivery attempt for the message"
+      ],
+      "modality": "must",
+      "id": "N-S068-004"
+    },
+    {
+      "statement_id": "N-S068-5",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "the SMTP client retains responsibility for the message, but SHOULD not again attempt delivery to the same server without user review of the message and response and appropriate intervention.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S068",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_returned_5yz_after_DATA_terminator",
+      "pre_cond": "server.response_code = 5yz & data_command.completed_with_CRLF_dot_CRLF = true & user_review.completed = false",
+      "post_cond": null,
+      "actions": [
+        "do not reattempt delivery to the same server until user has reviewed message and response and provided appropriate intervention"
+      ],
+      "modality": "should",
+      "id": "N-S068-005"
+    }
+  ]
+}

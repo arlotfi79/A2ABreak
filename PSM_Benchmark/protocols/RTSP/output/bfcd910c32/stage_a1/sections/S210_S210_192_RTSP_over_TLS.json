@@ -1,0 +1,82 @@
+{
+  "section_id": "S210",
+  "title": "S210 19.2 RTSP over TLS",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S210 19.2 RTSP over TLS"
+  ],
+  "url_anchor": "#s210-192-rtsp-over-tls",
+  "word_count": 433,
+  "statement_count": 3,
+  "elapsed_seconds": 25.91,
+  "statements": [
+    {
+      "statement_id": "D-S210-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "When a client tries to set up an insecure channel to the server (using the 'rtsp' URI), and the policy for the resource requires a secure channel, the server MUST redirect the client to the secure service by sending a 301 redirect response code together with the correct Location URI (using the 'rtsps' scheme).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S210",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "insecure_connection_attempt_on_secure_resource",
+      "pre_cond": "request.scheme = 'rtsp' & resource.policy = secure_required",
+      "post_cond": "response.code = 301 & response.Location.scheme = 'rtsps'",
+      "actions": [
+        "send 301 redirect response",
+        "set Location URI with rtsps scheme"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S210-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A user or client MAY upgrade a non secured URI to a secured by changing the scheme from 'rtsp' to 'rtsps'. A server implementing support for 'rtsps' MUST allow this.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S210",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_upgrades_scheme_rtsp_to_rtsps",
+      "pre_cond": "connection.scheme = 'rtsp'",
+      "post_cond": "connection.scheme = 'rtsps'",
+      "actions": [
+        "change URI scheme from rtsp to rtsps",
+        "establish TLS connection"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S210-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "The RTSP agent having the TCP/TLS connection MUST verify that the server certificate associated with the connection has a SubjectAltName matching the hostname present in the URI for the resource an RTSP request is to be issued.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S210",
+      "object_name": "TCP/TLS connection",
+      "field_name": "SubjectAltName",
+      "field_type": "certificate field",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "SubjectAltName must match hostname in request URI before reusing existing TCP/TLS connection"
+    }
+  ]
+}

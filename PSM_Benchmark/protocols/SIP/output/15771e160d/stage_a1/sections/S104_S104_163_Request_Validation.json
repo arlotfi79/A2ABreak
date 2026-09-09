@@ -1,0 +1,180 @@
+{
+  "section_id": "S104",
+  "title": "S104 16.3 Request Validation",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S104 16.3 Request Validation"
+  ],
+  "url_anchor": "#s104-163-request-validation",
+  "word_count": 617,
+  "statement_count": 7,
+  "elapsed_seconds": 38.8,
+  "statements": [
+    {
+      "statement_id": "D-S104-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If any of these checks fail, the element MUST behave as a user agent server (see Section 8.2) and respond with an error code.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S104",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_validation_check_failed",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "behave_as_UAS",
+        "send_error_response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S104-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the Request-URI has a URI whose scheme is not understood by the proxy, the proxy SHOULD reject the request with a 416 (Unsupported URI Scheme) response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S104",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "URI_scheme_not_understood",
+      "pre_cond": "request.Request-URI.scheme = unknown",
+      "post_cond": null,
+      "actions": [
+        "send_416_Unsupported_URI_Scheme"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S104-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the request contains a Max-Forwards header field with a field value of zero (0), the element MUST NOT forward the request. If the request was for OPTIONS, the element MAY act as the final recipient and respond per Section 11.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S104",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Max_Forwards_equals_zero_and_method_OPTIONS",
+      "pre_cond": "request.Max-Forwards = 0 & request.method = OPTIONS",
+      "post_cond": null,
+      "actions": [
+        "act_as_final_recipient",
+        "respond_per_section_11"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S104-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the request contains a Max-Forwards header field with a field value of zero (0), the element MUST NOT forward the request. Otherwise, the element MUST return a 483 (Too many hops) response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S104",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Max_Forwards_equals_zero_and_method_not_OPTIONS",
+      "pre_cond": "request.Max-Forwards = 0 & request.method != OPTIONS",
+      "post_cond": null,
+      "actions": [
+        "send_483_Too_Many_Hops"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S104-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a loop is detected, the element MAY return a 482 (Loop Detected) response.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S104",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "loop_detected",
+      "pre_cond": "request.Via.branch_parameter = proxy.computed_branch_parameter",
+      "post_cond": null,
+      "actions": [
+        "send_482_Loop_Detected"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S104-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the request contains a Proxy-Require header field with one or more option-tags this element does not understand, the element MUST return a 420 (Bad Extension) response. The response MUST include an Unsupported header field listing those option-tags the element did not understand.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S104",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Proxy_Require_option_tag_not_understood",
+      "pre_cond": "request.Proxy-Require.option_tags != null & request.Proxy-Require.option_tags.understood = false",
+      "post_cond": null,
+      "actions": [
+        "send_420_Bad_Extension",
+        "include_Unsupported_header_with_unknown_option_tags"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S104-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "A valid message must pass the following checks: 1. Reasonable Syntax, 2. URI scheme, 3. Max-Forwards, 4. (Optional) Loop Detection, 5. Proxy-Require, 6. Proxy-Authorization",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S104",
+      "object_name": "proxy_request",
+      "field_name": "validation_checks",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "reasonable_syntax",
+        "URI_scheme",
+        "Max_Forwards",
+        "loop_detection",
+        "Proxy_Require",
+        "Proxy_Authorization"
+      ],
+      "guard_semantics": null
+    }
+  ]
+}

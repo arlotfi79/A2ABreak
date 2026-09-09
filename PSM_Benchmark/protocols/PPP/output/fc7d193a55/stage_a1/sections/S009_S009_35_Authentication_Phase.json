@@ -1,0 +1,147 @@
+{
+  "section_id": "S009",
+  "title": "S009 3.5 Authentication Phase",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S009 3.5 Authentication Phase"
+  ],
+  "url_anchor": "#s009-35-authentication-phase",
+  "word_count": 208,
+  "statement_count": 6,
+  "elapsed_seconds": 84.06,
+  "statements": [
+    {
+      "statement_id": "D-S009-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "ppp_fsm",
+      "description": "Authentication Phase - a phase during which a peer may be required to authenticate itself before allowing network-layer protocol packets to be exchanged.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "state_name": "Authentication Phase",
+      "enum_name": "PPP Phase",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.phase = Authentication"
+    },
+    {
+      "statement_id": "D-S009-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ppp_fsm",
+      "description": "Authentication SHOULD take place as soon as possible after link establishment.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S009",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "Link Establishment Phase",
+      "to_state": "Authentication Phase",
+      "trigger": "link established",
+      "pre_cond": null,
+      "post_cond": "protocol.phase = Authentication",
+      "actions": [
+        "begin authentication"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S009-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ppp_fsm",
+      "description": "Advancement from the Authentication phase to the Network-Layer Protocol phase MUST NOT occur until authentication has completed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "Authentication Phase",
+      "to_state": "Network-Layer Protocol Phase",
+      "trigger": "authentication completed",
+      "pre_cond": "protocol.phase = Authentication & authentication.completed = true",
+      "post_cond": "protocol.phase = Network-Layer Protocol",
+      "actions": [
+        "advance to Network-Layer Protocol phase"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ppp_fsm",
+      "description": "If authentication fails, the authenticator SHOULD proceed instead to the Link Termination phase.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "authenticator"
+      ],
+      "from_state": "Authentication Phase",
+      "to_state": "Link Termination Phase",
+      "trigger": "authentication fails",
+      "pre_cond": "protocol.phase = Authentication & authentication.failed = true",
+      "post_cond": "protocol.phase = Link Termination",
+      "actions": [
+        "proceed to Link Termination phase"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S009-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ppp_fsm",
+      "description": "All other packets received during this phase MUST be silently discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S009",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "Authentication Phase",
+      "to_state": "Authentication Phase",
+      "trigger": "receive non-LCP non-authentication non-link-quality packet",
+      "pre_cond": "protocol.phase = Authentication",
+      "post_cond": null,
+      "actions": [
+        "silently discard packet"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S009-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "ppp_fsm",
+      "description": "The authentication SHOULD allow some method of retransmission, and proceed to the Link Termination phase only after a number of authentication attempts has been exceeded.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S009",
+      "actors": [
+        "authenticator"
+      ],
+      "from_state": "Authentication Phase",
+      "to_state": "Link Termination Phase",
+      "trigger": "authentication attempts exceeded",
+      "pre_cond": "protocol.phase = Authentication & authentication.attempts_exceeded = true",
+      "post_cond": "protocol.phase = Link Termination",
+      "actions": [
+        "proceed to Link Termination phase"
+      ],
+      "modality": "should"
+    }
+  ]
+}

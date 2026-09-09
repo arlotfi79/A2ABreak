@@ -1,0 +1,118 @@
+{
+  "section_id": "S063",
+  "title": "S063 3.10.7.1 CLOSED STATE",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S063 3.10.7.1 CLOSED STATE"
+  ],
+  "url_anchor": "#s063-31071-closed-state",
+  "word_count": 88,
+  "statement_count": 5,
+  "elapsed_seconds": 23.95,
+  "statements": [
+    {
+      "statement_id": "D-S063-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the state is CLOSED (i.e., TCB does not exist)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "state_name": "CLOSED",
+      "enum_name": "TCPState",
+      "semantic_type": "terminal",
+      "is_initial": true,
+      "is_final": true,
+      "invariant_cond": "tcb.exists = false"
+    },
+    {
+      "statement_id": "D-S063-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An incoming segment containing a RST is discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CLOSED",
+      "to_state": "CLOSED",
+      "trigger": "recv RST segment",
+      "pre_cond": "protocol.state = CLOSED & segment.RST = true",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "discard segment"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S063-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An incoming segment not containing a RST causes a RST to be sent in response. If the ACK bit is off, sequence number zero is used: <SEQ=0><ACK=SEG.SEQ+SEG.LEN><CTL=RST,ACK>",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CLOSED",
+      "to_state": "CLOSED",
+      "trigger": "recv non-RST segment with ACK=off",
+      "pre_cond": "protocol.state = CLOSED & segment.RST = false & segment.ACK = false",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "send <SEQ=0><ACK=SEG.SEQ+SEG.LEN><CTL=RST,ACK>"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S063-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An incoming segment not containing a RST causes a RST to be sent in response. If the ACK bit is on: <SEQ=SEG.ACK><CTL=RST>",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": "CLOSED",
+      "to_state": "CLOSED",
+      "trigger": "recv non-RST segment with ACK=on",
+      "pre_cond": "protocol.state = CLOSED & segment.RST = false & segment.ACK = true",
+      "post_cond": "protocol.state = CLOSED",
+      "actions": [
+        "send <SEQ=SEG.ACK><CTL=RST>"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S063-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the state is CLOSED (i.e., TCB does not exist), then all data in the incoming segment is discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S063",
+      "object_name": "TCB",
+      "field_name": "TCB",
+      "field_type": "state variable",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "TCB non-existence defines the CLOSED state; all received data is discarded when TCB does not exist"
+    }
+  ]
+}

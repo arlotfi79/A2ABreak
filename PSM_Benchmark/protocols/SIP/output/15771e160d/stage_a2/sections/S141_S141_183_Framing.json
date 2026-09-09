@@ -1,0 +1,105 @@
+{
+  "section_id": "S141",
+  "title": "S141 18.3 Framing",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S141 18.3 Framing"
+  ],
+  "url_anchor": "#s141-183-framing",
+  "word_count": 144,
+  "statement_count": 4,
+  "elapsed_seconds": 20.97,
+  "statements": [
+    {
+      "statement_id": "N-S141-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If there are additional bytes in the transport packet beyond the end of the body, they MUST be discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S141",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "extra_bytes_received_beyond_body_end",
+      "pre_cond": "transport.type = message-oriented & message.content_length_present & bytes_beyond_body_end > 0",
+      "post_cond": "extra_bytes.discarded = true",
+      "actions": [
+        "discard_bytes_beyond_body_end"
+      ],
+      "modality": "must",
+      "id": "N-S141-001"
+    },
+    {
+      "statement_id": "N-S141-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "If the message is a response, it MUST be discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S141",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transport_packet_ends_before_body_end",
+      "pre_cond": "transport.type = message-oriented & packet.ends_before_body_end & message.type = response",
+      "post_cond": "message.discarded = true",
+      "actions": [
+        "discard_response_message"
+      ],
+      "modality": "must",
+      "id": "N-S141-002"
+    },
+    {
+      "statement_id": "N-S141-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the message is a request, the element SHOULD generate a 400 (Bad Request) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S141",
+      "actors": [
+        "element"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transport_packet_ends_before_body_end",
+      "pre_cond": "transport.type = message-oriented & packet.ends_before_body_end & message.type = request",
+      "post_cond": "response.status_code = 400",
+      "actions": [
+        "generate_400_Bad_Request_response"
+      ],
+      "modality": "should",
+      "id": "N-S141-003"
+    },
+    {
+      "statement_id": "N-S141-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The Content-Length header field MUST be used with stream oriented transports.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S141",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "transport.type = stream-oriented",
+      "post_cond": "message.content_length_header_present = true",
+      "actions": [
+        "include_Content-Length_header_in_message"
+      ],
+      "modality": "must",
+      "id": "N-S141-004"
+    }
+  ]
+}

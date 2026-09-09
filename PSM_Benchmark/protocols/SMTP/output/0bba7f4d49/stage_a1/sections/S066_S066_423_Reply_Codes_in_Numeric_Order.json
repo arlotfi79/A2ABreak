@@ -1,0 +1,201 @@
+{
+  "section_id": "S066",
+  "title": "S066 4.2.3 Reply Codes in Numeric Order",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S066 4.2.3 Reply Codes in Numeric Order"
+  ],
+  "url_anchor": "#s066-423-reply-codes-in-numeric-order",
+  "word_count": 265,
+  "statement_count": 9,
+  "elapsed_seconds": 110.66,
+  "statements": [
+    {
+      "statement_id": "D-S066-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "220 <domain> Service ready",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S066",
+      "state_name": "Service Ready",
+      "enum_name": "SessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S066-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "221 <domain> Service closing transmission channel",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S066",
+      "state_name": "Service Closing Transmission Channel",
+      "enum_name": "SessionState",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S066-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "354 Start mail input; end with <CRLF>.<CRLF>",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "state_name": "Mail Input",
+      "enum_name": "TransactionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S066-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "smtp_fsm",
+      "description": "220 <domain> Service ready",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Service Ready",
+      "trigger": "220 reply",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 220 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "221 <domain> Service closing transmission channel",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Service Closing Transmission Channel",
+      "trigger": "221 reply",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 221 reply",
+        "close transmission channel"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "354 Start mail input; end with <CRLF>.<CRLF>",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Mail Input",
+      "trigger": "354 reply",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 354 reply",
+        "accept mail data terminated by <CRLF>.<CRLF>"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "421 <domain> Service not available, closing transmission channel (This may be a reply to any command if the service knows it must shut down)",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Service Closing Transmission Channel",
+      "trigger": "421 reply",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 421 reply",
+        "close transmission channel"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S066-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "smtp_fsm",
+      "description": "554 Transaction failed (Or, in the case of a connection-opening response, \"No SMTP service here\")",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": "connection-opening",
+      "to_state": null,
+      "trigger": "554 reply at connection opening",
+      "pre_cond": "connection.state = connection-opening",
+      "post_cond": null,
+      "actions": [
+        "send 554 reply"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-009",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "session",
+      "stage": "smtp_fsm",
+      "description": "503 Bad sequence of commands",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S066",
+      "object_name": "command sequence",
+      "field_name": "command_order",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "Commands must be issued in a valid FSM-defined sequence; 503 is returned on sequence violation"
+    }
+  ]
+}

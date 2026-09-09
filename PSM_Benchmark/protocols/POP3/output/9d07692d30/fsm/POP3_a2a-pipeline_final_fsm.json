@@ -1,0 +1,134 @@
+{
+  "states": [
+    "WaitForConnection",
+    "AUTHORIZATION",
+    "TRANSACTION",
+    "UPDATE"
+  ],
+  "initial_state": "WaitForConnection",
+  "final_states": [
+    "UPDATE"
+  ],
+  "transitions": [
+    {
+      "from": "WaitForConnection",
+      "event": "receive connection",
+      "action": "send greeting",
+      "to": "AUTHORIZATION"
+    },
+    {
+      "from": "AUTHORIZATION",
+      "event": "cond auth success",
+      "action": "acquire maildrop lock; assign message numbers; send positive response",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "AUTHORIZATION",
+      "event": "receive APOP success",
+      "action": "send +OK response; enter TRANSACTION state",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "AUTHORIZATION",
+      "event": "receive APOP failure",
+      "action": "send -ERR response",
+      "to": "AUTHORIZATION"
+    },
+    {
+      "from": "AUTHORIZATION",
+      "event": "receive USER",
+      "action": "process USER command",
+      "to": "AUTHORIZATION"
+    },
+    {
+      "from": "AUTHORIZATION",
+      "event": "cond auth rejected lock",
+      "action": "release maildrop lock; send -ERR response",
+      "to": "AUTHORIZATION"
+    },
+    {
+      "from": "AUTHORIZATION",
+      "event": "cond auth failed retry",
+      "action": "issue new authentication command",
+      "to": "AUTHORIZATION"
+    },
+    {
+      "from": "AUTHORIZATION",
+      "event": "receive QUIT",
+      "action": "send +OK response; close TCP connection",
+      "to": "WaitForConnection"
+    },
+    {
+      "from": "AUTHORIZATION",
+      "event": "cond auth failure close",
+      "action": "release lock; send -ERR response; close connection",
+      "to": "WaitForConnection"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "receive QUIT",
+      "action": "enter UPDATE state",
+      "to": "UPDATE"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "receive STAT",
+      "action": "",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "receive LIST",
+      "action": "",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "receive RETR",
+      "action": "",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "receive DELE",
+      "action": "mark message as deleted; reply +OK",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "receive NOOP",
+      "action": "",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "receive RSET",
+      "action": "unmark all deleted messages; reply +OK",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "receive TOP",
+      "action": "send headers and body lines",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "receive UIDL",
+      "action": "send unique-id listing",
+      "to": "TRANSACTION"
+    },
+    {
+      "from": "UPDATE",
+      "event": "cond update complete",
+      "action": "remove deleted messages; release maildrop lock; send goodbye response; close TCP connection",
+      "to": "WaitForConnection"
+    },
+    {
+      "from": "TRANSACTION",
+      "event": "cond abnormal termination",
+      "action": "retain all messages; close TCP connection",
+      "to": "WaitForConnection"
+    }
+  ]
+}

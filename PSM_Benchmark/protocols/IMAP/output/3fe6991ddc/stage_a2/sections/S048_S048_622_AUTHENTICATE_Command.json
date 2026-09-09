@@ -1,0 +1,472 @@
+{
+  "section_id": "S048",
+  "title": "S048 6.2.2 AUTHENTICATE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S048 6.2.2 AUTHENTICATE Command"
+  ],
+  "url_anchor": "#s048-622-authenticate-command",
+  "word_count": 1141,
+  "statement_count": 19,
+  "elapsed_seconds": 258.98,
+  "statements": [
+    {
+      "statement_id": "N-S048-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "It MAY also negotiate an OPTIONAL security layer for subsequent protocol interactions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "AUTHENTICATE_exchange_complete",
+      "pre_cond": "protocol.state = \"Not Authenticated\"",
+      "post_cond": "session.security_layer_negotiated = true",
+      "actions": [
+        "negotiate optional security layer during AUTHENTICATE exchange"
+      ],
+      "modality": "may",
+      "id": "N-S048-001"
+    },
+    {
+      "statement_id": "N-S048-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the requested authentication mechanism is not supported, the server SHOULD reject the AUTHENTICATE command by sending a tagged NO response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "AUTHENTICATE_with_unsupported_mechanism",
+      "pre_cond": "protocol.state = \"Not Authenticated\" & auth_mechanism.supported = false",
+      "post_cond": "server.response = \"tagged NO\"",
+      "actions": [
+        "send tagged NO response"
+      ],
+      "modality": "should",
+      "id": "N-S048-002"
+    },
+    {
+      "statement_id": "N-S048-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the server receives such a response, or if it receives an invalid base64 string (e.g., characters outside the base64 alphabet or non-terminal \"=\"), it MUST reject the AUTHENTICATE command by sending a tagged BAD response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "client_cancels_auth | server_receives_invalid_base64",
+      "pre_cond": "protocol.state = \"Not Authenticated\" & (client_response = \"*\" | base64.valid = false)",
+      "post_cond": "server.response = \"tagged BAD\"",
+      "actions": [
+        "reject AUTHENTICATE command",
+        "send tagged BAD response"
+      ],
+      "modality": "must",
+      "id": "N-S048-003"
+    },
+    {
+      "statement_id": "N-S048-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "As with any other client response, the initial response MUST be encoded as base64.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S048-004"
+    },
+    {
+      "statement_id": "N-S048-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "It also MUST be transmitted outside of a quoted string or literal.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S048-005"
+    },
+    {
+      "statement_id": "N-S048-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "To send a zero-length initial response, the client MUST send a single pad character (\"=\").",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S048-006"
+    },
+    {
+      "statement_id": "N-S048-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "When decoding the base64 data in the initial response, decoding errors MUST be treated as in any normal SASL client response, i.e., with a tagged BAD response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "base64_decoding_error_in_initial_response",
+      "pre_cond": "protocol.state = \"Not Authenticated\" & base64.decode_error = true",
+      "post_cond": "server.response = \"tagged BAD\"",
+      "actions": [
+        "send tagged BAD response"
+      ],
+      "modality": "must",
+      "id": "N-S048-007"
+    },
+    {
+      "statement_id": "N-S048-8",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "If the client uses an initial response with a SASL mechanism that does not support an initial response, the server MUST reject the command with a tagged BAD response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "AUTHENTICATE_initial_response_with_non_supporting_mechanism",
+      "pre_cond": "protocol.state = \"Not Authenticated\" & client.initial_response_provided = true & mechanism.supports_initial_response = false",
+      "post_cond": "server.response = \"tagged BAD\"",
+      "actions": [
+        "reject AUTHENTICATE command",
+        "send tagged BAD response"
+      ],
+      "modality": "must",
+      "id": "N-S048-008"
+    },
+    {
+      "statement_id": "N-S048-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "imap_fsm",
+      "description": "While client and server implementations MUST implement the AUTHENTICATE command itself, it is not required to implement any authentication mechanisms other than the PLAIN mechanism described in [PLAIN].",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "protocol.state = \"Not Authenticated\"",
+      "post_cond": null,
+      "actions": [
+        "support AUTHENTICATE command"
+      ],
+      "modality": "must",
+      "id": "N-S048-009"
+    },
+    {
+      "statement_id": "N-S048-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "a server implementation MUST implement a configuration in which it does NOT permit any plaintext password mechanisms, unless the STARTTLS command has been negotiated, TLS has been negotiated on an Implicit TLS port, or some other mechanism that protects the session from password snooping has been provided.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "STARTTLS.negotiated = false & TLS.implicit_port = false & other_protection.active = false",
+      "post_cond": "server.plaintext_password_mechanisms_permitted = false",
+      "actions": [
+        "disallow plaintext password mechanisms when no protection layer is active"
+      ],
+      "modality": "must",
+      "id": "N-S048-010"
+    },
+    {
+      "statement_id": "N-S048-11",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Server sites SHOULD NOT use any configuration that permits a plaintext password mechanism without such a protection mechanism against password snooping.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "protection_mechanism.active = false",
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S048-011"
+    },
+    {
+      "statement_id": "N-S048-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "imap_fsm",
+      "description": "Client and server implementations SHOULD implement additional [SASL] mechanisms that do not use plaintext passwords, such as the GSSAPI mechanism described in [RFC4752], the SCRAM-SHA-256/SCRAM-SHA-256-PLUS [SCRAM-SHA-256] mechanisms, and/or the EXTERNAL [SASL] mechanism for mutual TLS authentication.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S048-012"
+    },
+    {
+      "statement_id": "N-S048-13",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server SHOULD list its supported authentication mechanisms in the response to the CAPABILITY command so that the client knows which authentication mechanisms to use.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "CAPABILITY_command_received",
+      "pre_cond": null,
+      "post_cond": "server.CAPABILITY_response.includes_auth_mechanisms = true",
+      "actions": [
+        "include supported authentication mechanisms in CAPABILITY response"
+      ],
+      "modality": "should",
+      "id": "N-S048-013"
+    },
+    {
+      "statement_id": "N-S048-14",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server MAY include a CAPABILITY response code in the tagged OK response of a successful AUTHENTICATE command in order to send capabilities automatically.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "AUTHENTICATE_success",
+      "pre_cond": "protocol.state = \"Not Authenticated\"",
+      "post_cond": "server.tagged_OK_includes_CAPABILITY = true",
+      "actions": [
+        "include CAPABILITY response code in tagged OK response"
+      ],
+      "modality": "may",
+      "id": "N-S048-014"
+    },
+    {
+      "statement_id": "N-S048-15",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The server MAY advertise different capabilities after a successful AUTHENTICATE command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": null,
+      "trigger": "post_AUTHENTICATE_success",
+      "pre_cond": "protocol.state = \"Authenticated\"",
+      "post_cond": null,
+      "actions": [
+        "advertise different capabilities than those advertised before AUTHENTICATE"
+      ],
+      "modality": "may",
+      "id": "N-S048-015"
+    },
+    {
+      "statement_id": "N-S048-16",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "If an AUTHENTICATE command fails with a NO response, the client MAY try another authentication mechanism by issuing another AUTHENTICATE command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "AUTHENTICATE_fails_with_NO",
+      "pre_cond": "protocol.state = \"Not Authenticated\" & server.response = \"tagged NO\"",
+      "post_cond": null,
+      "actions": [
+        "issue another AUTHENTICATE command with different mechanism"
+      ],
+      "modality": "may",
+      "id": "N-S048-016"
+    },
+    {
+      "statement_id": "N-S048-17",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "It MAY also attempt to authenticate by using the LOGIN command (see Section 6.2.3 for more detail).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "AUTHENTICATE_fails_with_NO",
+      "pre_cond": "protocol.state = \"Not Authenticated\" & server.response = \"tagged NO\"",
+      "post_cond": null,
+      "actions": [
+        "issue LOGIN command"
+      ],
+      "modality": "may",
+      "id": "N-S048-017"
+    },
+    {
+      "statement_id": "N-S048-18",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "In other words, the client MAY request authentication types in decreasing order of preference, with the LOGIN command as a last resort.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "AUTHENTICATE_fails",
+      "pre_cond": "protocol.state = \"Not Authenticated\"",
+      "post_cond": null,
+      "actions": [
+        "retry with next preferred authentication type",
+        "fall back to LOGIN command as last resort"
+      ],
+      "modality": "may",
+      "id": "N-S048-018"
+    },
+    {
+      "statement_id": "N-S048-19",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Note that because the initial response is optional, the following negotiation (which does not use the initial response) is still valid and MUST be supported by the server:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": null,
+      "trigger": "AUTHENTICATE_without_initial_response",
+      "pre_cond": "protocol.state = \"Not Authenticated\" & client.initial_response_provided = false",
+      "post_cond": null,
+      "actions": [
+        "accept and process AUTHENTICATE command without initial response"
+      ],
+      "modality": "must",
+      "id": "N-S048-019"
+    }
+  ]
+}

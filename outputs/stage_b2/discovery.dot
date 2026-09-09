@@ -1,0 +1,43 @@
+digraph discovery {
+    rankdir=LR;
+    size="4,8";
+    ratio=compress;
+    margin=0.05;
+    dpi=300;
+    nodesep=0.30;
+    ranksep=0.55;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=24];
+    edge [fontname="Helvetica", fontsize=18];
+
+    // States
+    "AGENT_CARD_RECEIVED" [fontname="Helvetica", fontsize="24", shape="doublecircle", style="filled,dashed", fillcolor="#d4edda", color="#28a745", label="AGENT_CARD_RECEIVED"];
+    "TRANSPORT_SELECTED" [fontname="Helvetica", fontsize="24", shape="circle", style="dashed", label="TRANSPORT_SELECTED"];
+    "TRANSPORT_CONNECTED" [fontname="Helvetica", fontsize="24", shape="circle", style="dashed", label="TRANSPORT_CONNECTED"];
+    "CLIENT_AUTH_DISCOVERY" [fontname="Helvetica", fontsize="24", shape="circle", style="solid", label="CLIENT_AUTH\nDISCOVERY"];
+    "CLIENT_CREDENTIAL_ACQUISITION" [fontname="Helvetica", fontsize="24", shape="circle", style="dashed", label="CLIENT_CREDENTIAL\nACQUISITION"];
+    "EXTENDED_CARD_UNSUPPORTED" [fontname="Helvetica", fontsize="24", shape="rectangle", style="filled", fillcolor="#f8d7da", color="#dc3545", label="EXTENDED_CARD\nUNSUPPORTED"];
+    "EXTENDED_CARD_NOT_CONFIGURED" [fontname="Helvetica", fontsize="24", shape="diamond", style="filled,dashed", fillcolor="#fff3cd", color="#fd7e14", label="EXTENDED_CARD_NOT\nCONFIGURED"];
+    "AGENT_CARD_CACHE_VALID" [fontname="Helvetica", fontsize="24", shape="circle", style="dashed", label="AGENT_CARD_CACHE\nVALID"];
+    "AGENT_CARD_CACHE_EXPIRED" [fontname="Helvetica", fontsize="24", shape="circle", style="dashed", label="AGENT_CARD_CACHE\nEXPIRED"];
+    "BINDING_VERSION_CURRENT" [fontname="Helvetica", fontsize="24", shape="circle", style="dashed", label="BINDING_VERSION\nCURRENT"];
+    "BINDING_VERSION_NEW" [fontname="Helvetica", fontsize="24", shape="circle", style="dashed", label="BINDING_VERSION_NEW"];
+
+    // Inter-stage: exit to next stage
+    "__EXIT__" [shape=hexagon, label="next stage →", style=filled, fillcolor="#fff3cd", color="#856404", fontname="Helvetica", fontsize=18];
+    "CLIENT_CREDENTIAL_ACQUISITION" -> "__EXIT__" [style=dotted, color="#856404", arrowsize=0.7, label="authentication"];
+
+    // Transitions
+    "AGENT_CARD_RECEIVED" -> "TRANSPORT_SELECTED" [label="supportedInterfaces_parsed\n[agent_card.supportedInterfaces != null]", style=solid, color="#dc3545", fontcolor="#dc3545"];
+    "AGENT_CARD_RECEIVED" -> "TRANSPORT_SELECTED" [label="protocol_selection\n[agent_card.supported_protocols != null]", style=dashed, color="#28a745", fontcolor="#28a745"];
+    "TRANSPORT_SELECTED" -> "TRANSPORT_CONNECTED" [label="transport_url_resolved\n[client.selectedTransport != null]", style=solid, color="#dc3545", fontcolor="#dc3545"];
+    "TRANSPORT_CONNECTED" -> "CLIENT_AUTH_DISCOVERY" [label="auth_discovery_initiated", style=dashed, color="#666666", fontcolor="#666666"];
+    "CLIENT_AUTH_DISCOVERY" -> "CLIENT_CREDENTIAL_ACQUISITION" [label="security_scheme_parsed\n[agent_card.securitySchemes != null]", style=dashed, color="#666666", fontcolor="#666666"];
+    "AGENT_CARD_RECEIVED" -> "EXTENDED_CARD_UNSUPPORTED" [label="get_extended_agent_card_request\n[agent_card.capabilities.extendedAgentCard = false |\n!agent_card.capabilities.extendedAgentCard]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "AGENT_CARD_RECEIVED" -> "EXTENDED_CARD_NOT_CONFIGURED" [label="get_extended_agent_card_request\n[agent_card.capabilities.extendedAgentCard = true &\nagent_card.extended_card_configured = false]", style=dashed, color="#dc3545", fontcolor="#dc3545"];
+    "AGENT_CARD_RECEIVED" -> "AGENT_CARD_CACHE_VALID" [label="agent_card_fetch", style=dashed, color="#fd7e14", fontcolor="#fd7e14"];
+    "AGENT_CARD_CACHE_VALID" -> "AGENT_CARD_CACHE_EXPIRED" [label="cache_ttl_expired\n[agent_card.cache_expired = true]", style=dashed, color="#666666", fontcolor="#666666"];
+    "AGENT_CARD_CACHE_EXPIRED" -> "AGENT_CARD_RECEIVED" [label="agent_card_cache_expired\n[agent_card.cached = true & agent_card.cache_expired = true]", style=dashed, color="#fd7e14", fontcolor="#fd7e14"];
+    "BINDING_VERSION_CURRENT" -> "BINDING_VERSION_NEW" [label="binding_breaking_change_introduced\n[binding.breaking_change = true]", style=solid, color="#dc3545", fontcolor="#dc3545"];
+
+}

@@ -1,0 +1,162 @@
+{
+  "section_id": "S213",
+  "title": "S213 19.3.2 User-Approved TLS Procedure",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S213 19.3.2 User-Approved TLS Procedure"
+  ],
+  "url_anchor": "#s213-1932-user-approved-tls-procedure",
+  "word_count": 430,
+  "statement_count": 6,
+  "elapsed_seconds": 83.15,
+  "statements": [
+    {
+      "statement_id": "N-S213-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "For the \"User\" method, each proxy MUST perform the following procedure for each RTSP request:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S213",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "RTSP_request_received",
+      "pre_cond": "accept_credentials.method = \"User\"",
+      "post_cond": null,
+      "actions": [
+        "setup_TLS_session_to_next_hop_if_not_present",
+        "extract_peer_certificate_chain",
+        "check_matching_identity_and_hash_in_Accept-Credentials_header",
+        "forward_request_or_respond_with_470_or_407"
+      ],
+      "modality": "must",
+      "id": "N-S213-001"
+    },
+    {
+      "statement_id": "N-S213-2",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "The 407 response code MAY be used when the proxy requires both user and connection authorization from user or client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S213",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "proxy_requires_user_and_connection_authorization",
+      "pre_cond": "proxy.requires_user_authorization = true & proxy.requires_connection_authorization = true",
+      "post_cond": "response.code = 407",
+      "actions": [
+        "send_407_response"
+      ],
+      "modality": "may",
+      "id": "N-S213-002"
+    },
+    {
+      "statement_id": "N-S213-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "In this message the proxy MUST include a Connection-Credentials header, see Section 18.13, with the next hop's identity and certificate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S213",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "sending_470_or_407_response",
+      "pre_cond": "response.code = 470 | response.code = 407",
+      "post_cond": "response.has_Connection_Credentials_header = true",
+      "actions": [
+        "include_Connection-Credentials_header_with_next_hop_identity_and_certificate"
+      ],
+      "modality": "must",
+      "id": "N-S213-003"
+    },
+    {
+      "statement_id": "N-S213-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The client MUST upon receiving a 470 (Connection Authorization Required) or 407 (Proxy Authentication Required) response with Connection-Credentials header take the decision on whether or not to accept the certificate (if it cannot do so, the user SHOULD be consulted).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S213",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_470_or_407_with_Connection_Credentials_header",
+      "pre_cond": "(response.code = 470 | response.code = 407) & response.has_Connection_Credentials_header = true",
+      "post_cond": "client.certificate_acceptance_decision_made = true",
+      "actions": [
+        "evaluate_peer_certificate",
+        "decide_to_accept_or_reject_certificate"
+      ],
+      "modality": "must",
+      "id": "N-S213-004"
+    },
+    {
+      "statement_id": "N-S213-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "rtsp_fsm",
+      "description": "The client MUST upon receiving a 470 (Connection Authorization Required) or 407 (Proxy Authentication Required) response with Connection-Credentials header take the decision on whether or not to accept the certificate (if it cannot do so, the user SHOULD be consulted).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S213",
+      "actors": [
+        "client",
+        "user"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "client_cannot_determine_certificate_acceptance",
+      "pre_cond": "client.can_determine_certificate_acceptance = false",
+      "post_cond": null,
+      "actions": [
+        "consult_user_for_certificate_acceptance_decision"
+      ],
+      "modality": "should",
+      "id": "N-S213-005"
+    },
+    {
+      "statement_id": "N-S213-6",
+      "normative_level": "RECOMMENDED",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Proxies are RECOMMENDED to use domain names to identify themselves in URIs and in the certificates.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S213",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S213-006"
+    }
+  ]
+}

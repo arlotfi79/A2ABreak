@@ -1,0 +1,114 @@
+{
+  "section_id": "S025",
+  "title": "S025 3.2 PUBLISH Packets from the Broker to the Subscriber Clients",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S025 3.2 PUBLISH Packets from the Broker to the Subscriber Clients"
+  ],
+  "url_anchor": "#s025-32-publish-packets-from-the-broker-to-the-subscriber-clients",
+  "word_count": 130,
+  "statement_count": 4,
+  "elapsed_seconds": 58.45,
+  "statements": [
+    {
+      "statement_id": "1-S025-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST NOT forward messages to unauthorized subscribers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "Broker",
+        "subscribers"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "PUBLISH_forward_attempt",
+      "pre_cond": "subscriber.authorization = unauthorized",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S025-001"
+    },
+    {
+      "statement_id": "2-S025-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "To avoid silently dropping messages, the Broker MUST close the Network Connection and SHOULD inform the affected subscribers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "Broker",
+        "subscribers"
+      ],
+      "from_state": "Connected",
+      "to_state": "Network Connection Closed",
+      "trigger": "unauthorized_subscriber_detected",
+      "pre_cond": "subscriber.authorization = unauthorized",
+      "post_cond": "connection.state = Closed",
+      "actions": [
+        "close Network Connection"
+      ],
+      "modality": "must",
+      "id": "N-S025-002"
+    },
+    {
+      "statement_id": "3-S025-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "To avoid silently dropping messages, the Broker MUST close the Network Connection and SHOULD inform the affected subscribers.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "Broker",
+        "subscribers"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unauthorized_subscriber_detected",
+      "pre_cond": "subscriber.authorization = unauthorized",
+      "post_cond": null,
+      "actions": [
+        "inform affected subscribers"
+      ],
+      "modality": "should",
+      "id": "N-S025-003"
+    },
+    {
+      "statement_id": "4-S025-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Therefore, the Broker SHOULD send a DISCONNECT packet with reason code 0x87 (Not authorized) before closing the Network Connection to these clients.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S025",
+      "actors": [
+        "Broker",
+        "clients"
+      ],
+      "from_state": "Connected",
+      "to_state": "Network Connection Closed",
+      "trigger": "unauthorized_subscriber_detected",
+      "pre_cond": "subscriber.authorization = unauthorized",
+      "post_cond": "connection.state = Closed",
+      "actions": [
+        "send DISCONNECT packet with reason code 0x87 (Not authorized)",
+        "close Network Connection"
+      ],
+      "modality": "should",
+      "id": "N-S025-004"
+    }
+  ]
+}

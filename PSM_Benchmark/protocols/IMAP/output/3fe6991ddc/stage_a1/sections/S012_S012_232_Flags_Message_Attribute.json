@@ -1,0 +1,76 @@
+{
+  "section_id": "S012",
+  "title": "S012 2.3.2 Flags Message Attribute",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S012 2.3.2 Flags Message Attribute"
+  ],
+  "url_anchor": "#s012-232-flags-message-attribute",
+  "word_count": 740,
+  "statement_count": 3,
+  "elapsed_seconds": 32.86,
+  "statements": [
+    {
+      "statement_id": "D-S012-001",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "$Junk and $NotJunk are mutually exclusive. If more than one of these is set for a message, the client MUST treat it as if none are set, and it SHOULD unset both of them on the IMAP server.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S012",
+      "object_name": "message flags",
+      "field_name": "$Junk | $NotJunk",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": [
+        "$Junk",
+        "$NotJunk",
+        "neither"
+      ],
+      "guard_semantics": "message.flag.$Junk = true & message.flag.$NotJunk = true => treat_as_if_neither_set"
+    },
+    {
+      "statement_id": "D-S012-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "\\Deleted: Message is 'deleted' for removal by later EXPUNGE.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S012",
+      "object_name": "message",
+      "field_name": "\\Deleted",
+      "field_type": "flag",
+      "required": false,
+      "allowed_values": [
+        "set",
+        "cleared"
+      ],
+      "guard_semantics": "message.flag.Deleted = true => eligible_for_EXPUNGE"
+    },
+    {
+      "statement_id": "D-S012-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "A flag can be permanent or session-only on a per-flag basis. Permanent flags are those that the client can add or remove from the message flags permanently; concurrent and subsequent sessions will see any change in permanent flags. Changes to session flags are valid only in that session.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S012",
+      "object_name": "message flag",
+      "field_name": "flag scope",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "permanent",
+        "session-only"
+      ],
+      "guard_semantics": "flag.scope = permanent => visible_across_sessions | flag.scope = session-only => visible_in_current_session_only"
+    }
+  ]
+}

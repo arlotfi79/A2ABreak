@@ -1,0 +1,158 @@
+{
+  "section_id": "S048",
+  "title": "S048 9. UPDATE Message Handling",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S048 9. UPDATE Message Handling"
+  ],
+  "url_anchor": "#s048-9-update-message-handling",
+  "word_count": 267,
+  "statement_count": 6,
+  "elapsed_seconds": 70.37,
+  "statements": [
+    {
+      "statement_id": "N-S048-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "An UPDATE message may be received only in the Established state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "UPDATE_message_received",
+      "pre_cond": "protocol.state = Established",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S048-001"
+    },
+    {
+      "statement_id": "N-S048-2",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the UPDATE message contains a non-empty WITHDRAWN ROUTES field, the previously advertised routes, whose destinations (expressed as IP prefixes) are contained in this field, SHALL be removed from the Adj-RIB-In.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "UPDATE_message_received_with_nonempty_WITHDRAWN_ROUTES",
+      "pre_cond": "protocol.state = Established & UPDATE.WITHDRAWN_ROUTES != empty",
+      "post_cond": "Adj-RIB-In.withdrawn_routes_removed = true",
+      "actions": [
+        "Remove previously advertised routes listed in WITHDRAWN ROUTES field from Adj-RIB-In"
+      ],
+      "modality": "shall",
+      "id": "N-S048-002"
+    },
+    {
+      "statement_id": "N-S048-3",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "This BGP speaker SHALL run its Decision Process because the previously advertised route is no longer available for use.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "WITHDRAWN_ROUTES_removed_from_Adj-RIB-In",
+      "pre_cond": "protocol.state = Established & UPDATE.WITHDRAWN_ROUTES != empty & Adj-RIB-In.routes_removed = true",
+      "post_cond": "Decision_Process.executed = true",
+      "actions": [
+        "Run Decision Process"
+      ],
+      "modality": "shall",
+      "id": "N-S048-003"
+    },
+    {
+      "statement_id": "N-S048-4",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the UPDATE message contains a feasible route, the Adj-RIB-In will be updated with this route as follows: if the NLRI of the new route is identical to the one the route currently has stored in the Adj-RIB-In, then the new route SHALL replace the older route in the Adj-RIB-In, thus implicitly withdrawing the older route from service.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "UPDATE_message_with_feasible_route_received",
+      "pre_cond": "protocol.state = Established & UPDATE.feasible_route = true & Adj-RIB-In.existing_route.NLRI = new_route.NLRI",
+      "post_cond": "Adj-RIB-In.route = new_route & old_route.withdrawn = true",
+      "actions": [
+        "Replace older route in Adj-RIB-In with new route",
+        "Implicitly withdraw older route from service"
+      ],
+      "modality": "shall",
+      "id": "N-S048-004"
+    },
+    {
+      "statement_id": "N-S048-5",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Otherwise, if the Adj-RIB-In has no route with NLRI identical to the new route, the new route SHALL be placed in the Adj-RIB-In.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "UPDATE_message_with_feasible_route_received",
+      "pre_cond": "protocol.state = Established & UPDATE.feasible_route = true & !Adj-RIB-In.has_route_with_matching_NLRI",
+      "post_cond": "Adj-RIB-In.contains_new_route = true",
+      "actions": [
+        "Place new route in Adj-RIB-In"
+      ],
+      "modality": "shall",
+      "id": "N-S048-005"
+    },
+    {
+      "statement_id": "N-S048-6",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Once the BGP speaker updates the Adj-RIB-In, the speaker SHALL run its Decision Process.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": "Established",
+      "to_state": null,
+      "trigger": "Adj-RIB-In_updated",
+      "pre_cond": "protocol.state = Established & Adj-RIB-In.updated = true",
+      "post_cond": "Decision_Process.executed = true",
+      "actions": [
+        "Run Decision Process"
+      ],
+      "modality": "shall",
+      "id": "N-S048-006"
+    }
+  ]
+}

@@ -1,0 +1,396 @@
+{
+  "section_id": "S062",
+  "title": "S062 6.2.1.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S062 6.2.1.2 Description"
+  ],
+  "url_anchor": "#s062-6212-description",
+  "word_count": 523,
+  "statement_count": 16,
+  "elapsed_seconds": 211.52,
+  "statements": [
+    {
+      "statement_id": "N-S062-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In this case, the server MUST NOT alter the currently selected newsgroup or current article number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command_with_message_id",
+      "pre_cond": "command.argument_type = message_id",
+      "post_cond": "session.selected_newsgroup = unchanged & session.current_article_number = unchanged",
+      "actions": [
+        "do not alter currently selected newsgroup",
+        "do not alter current article number"
+      ],
+      "modality": "must",
+      "id": "N-S062-001"
+    },
+    {
+      "statement_id": "N-S062-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In the response, the article number MUST be replaced with zero, unless there is a currently selected newsgroup and the article is present in that group, in which case the server MAY use the article's number in that group.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command_with_message_id_response",
+      "pre_cond": "command.argument_type = message_id & !(session.selected_newsgroup.valid = true & article.present_in_group = true)",
+      "post_cond": "response.article_number = 0",
+      "actions": [
+        "set article number to zero in 220 response"
+      ],
+      "modality": "must",
+      "id": "N-S062-002"
+    },
+    {
+      "statement_id": "N-S062-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "In the response, the article number MUST be replaced with zero, unless there is a currently selected newsgroup and the article is present in that group, in which case the server MAY use the article's number in that group.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command_with_message_id_response",
+      "pre_cond": "command.argument_type = message_id & session.selected_newsgroup.valid = true & article.present_in_group = true",
+      "post_cond": "response.article_number = article.number_in_selected_group",
+      "actions": [
+        "optionally set article number to article's number in currently selected newsgroup"
+      ],
+      "modality": "may",
+      "id": "N-S062-003"
+    },
+    {
+      "statement_id": "N-S062-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "nntp_fsm",
+      "description": "(The server is not required to determine whether the article is in the currently selected newsgroup or, if so, what article number it has; the client MUST always be prepared for zero to be specified.)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_response_received",
+      "pre_cond": "command.argument_type = message_id",
+      "post_cond": null,
+      "actions": [
+        "accept zero as a valid article number in any ARTICLE response"
+      ],
+      "modality": "must",
+      "id": "N-S062-004"
+    },
+    {
+      "statement_id": "N-S062-5",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST NOT provide an article number unless use of that number in a second ARTICLE command immediately following this one would return the same article.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command_with_message_id_response",
+      "pre_cond": "command.argument_type = message_id",
+      "post_cond": "response.article_number != 0 -> subsequent_ARTICLE_by_number(response.article_number).result = same_article",
+      "actions": [
+        "omit non-zero article number from response unless that number would identify the same article in an immediately following ARTICLE command"
+      ],
+      "modality": "must",
+      "id": "N-S062-005"
+    },
+    {
+      "statement_id": "N-S062-6",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "Even if the server chooses to return article numbers in these circumstances, it need not do so consistently; it MAY return zero to any such command (also see the STAT examples, Section 6.2.4.3).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command_with_message_id_response",
+      "pre_cond": "command.argument_type = message_id & session.selected_newsgroup.valid = true & article.present_in_group = true",
+      "post_cond": "response.article_number = 0",
+      "actions": [
+        "return zero as article number even when group context would permit a real article number"
+      ],
+      "modality": "may",
+      "id": "N-S062-006"
+    },
+    {
+      "statement_id": "N-S062-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If there is an article with that number in the currently selected newsgroup, the server MUST set the current article number to that number.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command_with_article_number",
+      "pre_cond": "command.argument_type = article_number & session.selected_newsgroup.valid = true & article.exists_in_selected_newsgroup = true",
+      "post_cond": "session.current_article_number = command.article_number",
+      "actions": [
+        "set current article number to the specified article number"
+      ],
+      "modality": "must",
+      "id": "N-S062-007"
+    },
+    {
+      "statement_id": "N-S062-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "nntp",
+      "stage": "nntp_fsm",
+      "description": "Note that a previously valid article number MAY become invalid if the article has been removed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "article_removed",
+      "pre_cond": "article_number.valid = true",
+      "post_cond": "article_number.valid = false",
+      "actions": [
+        "article number transitions to invalid when article is removed"
+      ],
+      "modality": "may",
+      "id": "N-S062-008"
+    },
+    {
+      "statement_id": "N-S062-9",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "nntp",
+      "stage": "nntp_fsm",
+      "description": "A previously invalid article number MAY become valid if the article has been reinstated, but this article number MUST be no less than the reported low water mark for that group.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "article_reinstated",
+      "pre_cond": "article_number.valid = false",
+      "post_cond": "article_number.valid = true",
+      "actions": [
+        "article number may transition to valid when article is reinstated"
+      ],
+      "modality": "may",
+      "id": "N-S062-009"
+    },
+    {
+      "statement_id": "N-S062-10",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "nntp",
+      "stage": "nntp_fsm",
+      "description": "A previously invalid article number MAY become valid if the article has been reinstated, but this article number MUST be no less than the reported low water mark for that group.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "article_reinstated",
+      "pre_cond": "article.reinstated = true & article_number.valid = true",
+      "post_cond": "article_number >= group.low_water_mark",
+      "actions": [
+        "ensure reinstated article number is no less than the reported low water mark for the group"
+      ],
+      "modality": "must",
+      "id": "N-S062-010"
+    },
+    {
+      "statement_id": "N-S062-11",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST NOT change the currently selected newsgroup as a result of this command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command",
+      "pre_cond": null,
+      "post_cond": "session.selected_newsgroup = unchanged",
+      "actions": [
+        "preserve currently selected newsgroup after ARTICLE command completes"
+      ],
+      "modality": "must",
+      "id": "N-S062-011"
+    },
+    {
+      "statement_id": "N-S062-12",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "The server MUST NOT change the current article number except when an article number argument was provided and the article exists; in particular, it MUST NOT change it following an unsuccessful response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command",
+      "pre_cond": "!(command.argument_type = article_number & article.exists = true)",
+      "post_cond": "session.current_article_number = unchanged",
+      "actions": [
+        "preserve current article number when article number argument was not provided or article does not exist",
+        "preserve current article number following any unsuccessful response"
+      ],
+      "modality": "must",
+      "id": "N-S062-012"
+    },
+    {
+      "statement_id": "N-S062-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a message-id and no such article exists, a 430 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command_with_message_id",
+      "pre_cond": "command.argument_type = message_id & article.exists = false",
+      "post_cond": "response.code = 430",
+      "actions": [
+        "send 430 response"
+      ],
+      "modality": "must",
+      "id": "N-S062-013"
+    },
+    {
+      "statement_id": "N-S062-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a number or is omitted and the currently selected newsgroup is invalid, a 412 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command",
+      "pre_cond": "(command.argument_type = number | command.argument_type = omitted) & session.selected_newsgroup.valid = false",
+      "post_cond": "response.code = 412",
+      "actions": [
+        "send 412 response"
+      ],
+      "modality": "must",
+      "id": "N-S062-014"
+    },
+    {
+      "statement_id": "N-S062-15",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is a number and that article does not exist in the currently selected newsgroup, a 423 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command_with_article_number",
+      "pre_cond": "command.argument_type = number & article.exists_in_selected_newsgroup = false",
+      "post_cond": "response.code = 423",
+      "actions": [
+        "send 423 response"
+      ],
+      "modality": "must",
+      "id": "N-S062-015"
+    },
+    {
+      "statement_id": "N-S062-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "If the argument is omitted and the current article number is invalid, a 420 response MUST be returned.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S062",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ARTICLE_command_no_argument",
+      "pre_cond": "command.argument_type = omitted & session.current_article_number.valid = false",
+      "post_cond": "response.code = 420",
+      "actions": [
+        "send 420 response"
+      ],
+      "modality": "must",
+      "id": "N-S062-016"
+    }
+  ]
+}

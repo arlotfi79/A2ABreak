@@ -1,0 +1,161 @@
+{
+  "section_id": "S076",
+  "title": "S076 13.7.1 Client to Server",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S076 13.7.1 Client to Server"
+  ],
+  "url_anchor": "#s076-1371-client-to-server",
+  "word_count": 251,
+  "statement_count": 6,
+  "elapsed_seconds": 37.48,
+  "statements": [
+    {
+      "statement_id": "N-S076-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The TEARDOWN request MUST contain a Session header indicating to what session the request applies.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_TEARDOWN",
+      "pre_cond": null,
+      "post_cond": "request.session_header_present = true",
+      "actions": [
+        "include Session header in TEARDOWN request"
+      ],
+      "modality": "must",
+      "id": "N-S076-001"
+    },
+    {
+      "statement_id": "N-S076-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "The TEARDOWN request MUST NOT include a Terminate-Reason header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_TEARDOWN",
+      "pre_cond": null,
+      "post_cond": "request.terminate_reason_header_present = false",
+      "actions": [
+        "omit Terminate-Reason header from TEARDOWN request"
+      ],
+      "modality": "must",
+      "id": "N-S076-002"
+    },
+    {
+      "statement_id": "N-S076-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "A TEARDOWN using the aggregated control URI or the media URI in a session under non-aggregated control (single media session) MAY be done in any state (Ready and Play).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "actors": [
+        "client"
+      ],
+      "from_state": "Ready | Play",
+      "to_state": null,
+      "trigger": "send_TEARDOWN",
+      "pre_cond": "session.control_uri = aggregated_control_URI | session.control_type = non_aggregated",
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S076-003"
+    },
+    {
+      "statement_id": "N-S076-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A successful request MUST result in that media delivery being immediately halted and the session state being destroyed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "actors": [
+        "server",
+        "session"
+      ],
+      "from_state": "Ready | Play",
+      "to_state": "destroyed",
+      "trigger": "TEARDOWN_success",
+      "pre_cond": "session.control_uri = aggregated_control_URI | session.control_type = non_aggregated",
+      "post_cond": "session.state = destroyed & media_delivery.active = false",
+      "actions": [
+        "immediately halt media delivery",
+        "destroy session state"
+      ],
+      "modality": "must",
+      "id": "N-S076-004"
+    },
+    {
+      "statement_id": "N-S076-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "This MUST be indicated through the lack of a Session header in the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "actors": [
+        "server"
+      ],
+      "from_state": "destroyed",
+      "to_state": null,
+      "trigger": "send_TEARDOWN_response",
+      "pre_cond": "session.state = destroyed",
+      "post_cond": "response.session_header_present = false",
+      "actions": [
+        "omit Session header from TEARDOWN response"
+      ],
+      "modality": "must",
+      "id": "N-S076-005"
+    },
+    {
+      "statement_id": "N-S076-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "A session that will exist after the processing of the TEARDOWN request MUST, in the response to that TEARDOWN request, contain a Session header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S076",
+      "actors": [
+        "server",
+        "session"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "TEARDOWN_partial_success",
+      "pre_cond": "session.control_type = aggregated & session.state = Ready & session.will_exist_after_teardown = true",
+      "post_cond": "response.session_header_present = true",
+      "actions": [
+        "include Session header in TEARDOWN response"
+      ],
+      "modality": "must",
+      "id": "N-S076-006"
+    }
+  ]
+}

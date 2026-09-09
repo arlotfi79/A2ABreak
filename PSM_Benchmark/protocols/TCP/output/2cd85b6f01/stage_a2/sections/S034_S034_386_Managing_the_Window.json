@@ -1,0 +1,184 @@
+{
+  "section_id": "S034",
+  "title": "S034 3.8.6 Managing the Window",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S034 3.8.6 Managing the Window"
+  ],
+  "url_anchor": "#s034-386-managing-the-window",
+  "word_count": 417,
+  "statement_count": 7,
+  "elapsed_seconds": 190.54,
+  "statements": [
+    {
+      "statement_id": "N-S034-1",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "A TCP receiver SHOULD NOT shrink the window, i.e., move the right window edge to the left (SHLD-14).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "TCP receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "RCV.WND.right_edge >= RCV.WND.right_edge.previous",
+      "actions": [
+        "do not move the right window edge to the left"
+      ],
+      "modality": "should",
+      "id": "N-S034-001"
+    },
+    {
+      "statement_id": "N-S034-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "peer",
+      "stage": "tcp_fsm",
+      "description": "However, a sending TCP peer MUST be robust against window shrinking, which may cause the \"usable window\" (see Section 3.8.6.2.1) to become negative (MUST-34).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "sending TCP peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "window_shrink_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "handle window shrinking without failure",
+        "tolerate usable_window becoming negative"
+      ],
+      "modality": "must",
+      "id": "N-S034-002"
+    },
+    {
+      "statement_id": "N-S034-3",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "If this happens, the sender SHOULD NOT send new data (SHLD-15), but SHOULD retransmit normally the old unacknowledged data between SND.UNA and SND.UNA+SND.WND (SHLD-16).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "usable_window_becomes_negative",
+      "pre_cond": "usable_window < 0",
+      "post_cond": null,
+      "actions": [
+        "do not send new data"
+      ],
+      "modality": "should",
+      "id": "N-S034-003"
+    },
+    {
+      "statement_id": "N-S034-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "If this happens, the sender SHOULD NOT send new data (SHLD-15), but SHOULD retransmit normally the old unacknowledged data between SND.UNA and SND.UNA+SND.WND (SHLD-16).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "usable_window_becomes_negative",
+      "pre_cond": "usable_window < 0",
+      "post_cond": null,
+      "actions": [
+        "retransmit unacknowledged data in range SND.UNA to SND.UNA+SND.WND"
+      ],
+      "modality": "should",
+      "id": "N-S034-004"
+    },
+    {
+      "statement_id": "N-S034-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "The sender MAY also retransmit old data beyond SND.UNA+SND.WND (MAY-7), but SHOULD NOT time out the connection if data beyond the right window edge is not acknowledged (SHLD-17).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "usable_window_becomes_negative",
+      "pre_cond": "usable_window < 0",
+      "post_cond": null,
+      "actions": [
+        "retransmit data beyond SND.UNA+SND.WND"
+      ],
+      "modality": "may",
+      "id": "N-S034-005"
+    },
+    {
+      "statement_id": "N-S034-6",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "The sender MAY also retransmit old data beyond SND.UNA+SND.WND (MAY-7), but SHOULD NOT time out the connection if data beyond the right window edge is not acknowledged (SHLD-17).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "data_beyond_right_window_edge_unacknowledged",
+      "pre_cond": "SND.NXT > SND.UNA + SND.WND",
+      "post_cond": null,
+      "actions": [
+        "do not time out the connection due to unacknowledged data beyond right window edge"
+      ],
+      "modality": "should",
+      "id": "N-S034-006"
+    },
+    {
+      "statement_id": "N-S034-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "If the window shrinks to zero, the TCP implementation MUST probe it in the standard way (described below) (MUST-35).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SND.WND_shrinks_to_zero",
+      "pre_cond": "SND.WND = 0",
+      "post_cond": null,
+      "actions": [
+        "initiate zero-window probing"
+      ],
+      "modality": "must",
+      "id": "N-S034-007"
+    }
+  ]
+}

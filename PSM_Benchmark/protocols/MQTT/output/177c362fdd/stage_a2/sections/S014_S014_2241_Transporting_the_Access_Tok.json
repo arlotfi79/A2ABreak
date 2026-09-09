@@ -1,0 +1,445 @@
+{
+  "section_id": "S014",
+  "title": "S014 2.2.4.1 Transporting the Access Token inside the MQTT CONNECT",
+  "depth": 3,
+  "parent_path": [
+    "MQTT",
+    "S014 2.2.4.1 Transporting the Access Token inside the MQTT CONNECT"
+  ],
+  "url_anchor": "#s014-2241-transporting-the-access-token-inside-the-mqtt-connect",
+  "word_count": 1156,
+  "statement_count": 18,
+  "elapsed_seconds": 245.62,
+  "statements": [
+    {
+      "statement_id": "N-S014-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "After sending the CONNECT packet, the Client MUST wait to receive the CONNACK packet from the Broker.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": "CONNECT_SENT",
+      "to_state": null,
+      "trigger": "CONNECT_packet_sent",
+      "pre_cond": "client.state = CONNECT_SENT",
+      "post_cond": null,
+      "actions": [
+        "await_CONNACK_from_broker"
+      ],
+      "modality": "must",
+      "id": "N-S014-001"
+    },
+    {
+      "statement_id": "N-S014-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Similarly, except for a DISCONNECT and AUTH response from the Client, the Broker MUST NOT process any packets before sending a CONNACK packet.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": null,
+      "trigger": "packet_received",
+      "pre_cond": "server.CONNACK_sent = false & received_packet.type != DISCONNECT & received_packet.type != AUTH",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S014-002"
+    },
+    {
+      "statement_id": "N-S014-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "Table 1 shows how the flags MUST be set to use AUTH packets for authentication and authorization, i.e., the User Name Flag and Password Flag MUST be set to 0.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S014-003"
+    },
+    {
+      "statement_id": "N-S014-4",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "An MQTT v5.0 Broker MAY also support token transport using the User Name and Password to provide a security option for MQTT v3.1.1 Clients, as described in Section 6.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S014-004"
+    },
+    {
+      "statement_id": "N-S014-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "The Client MAY set the Will Flag as desired (marked as \"X\" in Table 1).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S014-005"
+    },
+    {
+      "statement_id": "N-S014-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Will Flag is set to 1, the Broker MUST check that the token allows the publication of the Will Message (i.e., the Will Topic Filter is in the scope array).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": null,
+      "trigger": "CONNECT_received_with_Will_Flag_set",
+      "pre_cond": "server.state = CONNECT_RECEIVED & CONNECT.Will_Flag = 1",
+      "post_cond": "token.will_topic_publication_authorized = true",
+      "actions": [
+        "verify_token_scope_covers_will_topic_filter"
+      ],
+      "modality": "must",
+      "id": "N-S014-006"
+    },
+    {
+      "statement_id": "N-S014-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "In this profile, the Client SHOULD always start with a new Session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "initiating_connection",
+      "pre_cond": null,
+      "post_cond": "CONNECT.Clean_Start = 1",
+      "actions": [
+        "set_Clean_Start_flag_to_1_in_CONNECT"
+      ],
+      "modality": "should",
+      "id": "N-S014-007"
+    },
+    {
+      "statement_id": "N-S014-8",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MAY also signal that it does not support the continuation of an existing Session by setting the Session Expiry Interval to 0 in the CONNACK.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": null,
+      "trigger": "sending_CONNACK",
+      "pre_cond": "server.session_continuation_supported = false",
+      "post_cond": "CONNACK.Session_Expiry_Interval = 0",
+      "actions": [
+        "set_Session_Expiry_Interval_to_0_in_CONNACK"
+      ],
+      "modality": "may",
+      "id": "N-S014-008"
+    },
+    {
+      "statement_id": "N-S014-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the Broker starts a new Session, the Broker MUST set the Session Present flag to 0 in the CONNACK packet to signal this to the Client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": null,
+      "trigger": "new_session_started",
+      "pre_cond": "server.new_session_started = true",
+      "post_cond": "CONNACK.Session_Present = 0",
+      "actions": [
+        "set_Session_Present_flag_to_0_in_CONNACK"
+      ],
+      "modality": "must",
+      "id": "N-S014-009"
+    },
+    {
+      "statement_id": "N-S014-10",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MAY support continuing an existing Session, e.g., if the Broker requires it for QoS reasons.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S014-010"
+    },
+    {
+      "statement_id": "N-S014-11",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "In this case, if a CONNECT packet is received with Clean Start set to 0, and there is a Session associated with the Client Identifier, the Broker MUST resume communications with the Client based on the state from the existing Session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": null,
+      "trigger": "CONNECT_received_with_Clean_Start_0_and_existing_session",
+      "pre_cond": "CONNECT.Clean_Start = 0 & session.exists_for_client_identifier = true",
+      "post_cond": null,
+      "actions": [
+        "resume_communications_from_existing_session_state"
+      ],
+      "modality": "must",
+      "id": "N-S014-011"
+    },
+    {
+      "statement_id": "N-S014-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "In its response, the Broker MUST set the Session Present flag to 1 in the CONNACK packet to signal the continuation of an existing Session to the Client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": null,
+      "trigger": "existing_session_continued",
+      "pre_cond": "session.continuation = true",
+      "post_cond": "CONNACK.Session_Present = 1",
+      "actions": [
+        "set_Session_Present_flag_to_1_in_CONNACK"
+      ],
+      "modality": "must",
+      "id": "N-S014-012"
+    },
+    {
+      "statement_id": "N-S014-13",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "mqtt_fsm",
+      "description": "When reconnecting to a Broker that supports continuing existing Sessions, the Client MUST still provide a token in addition to using the same Client Identifier and setting the Clean Start to 0.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Client",
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "reconnecting_with_existing_session",
+      "pre_cond": "broker.supports_session_continuation = true & client.reconnecting = true",
+      "post_cond": "CONNECT.token_present = true & CONNECT.Clean_Start = 0",
+      "actions": [
+        "include_token_in_CONNECT",
+        "set_same_Client_Identifier_in_CONNECT",
+        "set_Clean_Start_to_0_in_CONNECT"
+      ],
+      "modality": "must",
+      "id": "N-S014-013"
+    },
+    {
+      "statement_id": "N-S014-14",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST still perform PoP validation on the provided token.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": null,
+      "trigger": "CONNECT_received_on_reconnect",
+      "pre_cond": "client.reconnecting = true",
+      "post_cond": "server.PoP_validation_performed = true",
+      "actions": [
+        "perform_PoP_validation_on_provided_token"
+      ],
+      "modality": "must",
+      "id": "N-S014-014"
+    },
+    {
+      "statement_id": "N-S014-15",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "If the token matches the stored state, the Broker MAY skip introspecting a token-by-reference and use the stored introspection result.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": null,
+      "trigger": "token_matches_stored_state",
+      "pre_cond": "token.matches_stored_state = true",
+      "post_cond": "server.introspection_skipped = true",
+      "actions": [
+        "use_stored_introspection_result"
+      ],
+      "modality": "may",
+      "id": "N-S014-015"
+    },
+    {
+      "statement_id": "N-S014-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "The Broker MUST also verify the Client is authorized to receive or send MQTT packets that are pending transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": "CONNECT_RECEIVED",
+      "to_state": null,
+      "trigger": "session_resumed_with_pending_packets",
+      "pre_cond": "client.reconnecting = true",
+      "post_cond": "server.client_authorized_for_pending_packets_verified = true",
+      "actions": [
+        "verify_client_authorization_for_pending_mqtt_packets"
+      ],
+      "modality": "must",
+      "id": "N-S014-016"
+    },
+    {
+      "statement_id": "N-S014-17",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Brokers SHOULD implement administrative policies to limit misuse.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S014-017"
+    },
+    {
+      "statement_id": "N-S014-18",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "mqtt_fsm",
+      "description": "Given that the Broker MUST associate the Client with a valid token, a Client will only send or receive messages to its authorized topics.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S014",
+      "actors": [
+        "Broker",
+        "Client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": "server.client_associated_with_valid_token = true",
+      "actions": [
+        "associate_client_with_valid_token"
+      ],
+      "modality": "must",
+      "id": "N-S014-018"
+    }
+  ]
+}

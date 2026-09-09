@@ -1,0 +1,206 @@
+{
+  "section_id": "S100",
+  "title": "S100 5.1 Locating the Target Host",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S100 5.1 Locating the Target Host"
+  ],
+  "url_anchor": "#s100-51-locating-the-target-host",
+  "word_count": 912,
+  "statement_count": 9,
+  "elapsed_seconds": 46.34,
+  "statements": [
+    {
+      "statement_id": "D-S100-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If a temporary error is returned, the message MUST be queued and retried later (see Section 4.5.4.1).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S100",
+      "actors": [
+        "client"
+      ],
+      "from_state": "DNS_LOOKUP",
+      "to_state": "QUEUED",
+      "trigger": "temporary_dns_error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "queue_message",
+        "schedule_retry"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S100-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If a non-existent domain error is returned, this situation MUST be reported as an error.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S100",
+      "actors": [
+        "client"
+      ],
+      "from_state": "DNS_LOOKUP",
+      "to_state": "ERROR",
+      "trigger": "nonexistent_domain_error",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "report_error"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S100-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If MX records are present, but none of them are usable, or the implicit MX is unusable, this situation MUST be reported as an error.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S100",
+      "actors": [
+        "client"
+      ],
+      "from_state": "DNS_LOOKUP",
+      "to_state": "ERROR",
+      "trigger": "no_usable_mx_records",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "report_error"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S100-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "When the lookup succeeds, the SMTP client MUST be able to try (and retry) each of the relevant addresses in this list in order, until a delivery attempt succeeds.",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "S100",
+      "actors": [
+        "client"
+      ],
+      "from_state": "DNS_LOOKUP",
+      "to_state": "DELIVERY_ATTEMPT",
+      "trigger": "dns_lookup_success",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "sort_mx_records",
+        "attempt_delivery_in_order"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S100-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If there are no records left at that point, it is an error condition, and the message MUST be returned as undeliverable.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S100",
+      "actors": [
+        "server"
+      ],
+      "from_state": "MX_RELAY_SELECTION",
+      "to_state": "UNDELIVERABLE",
+      "trigger": "no_valid_mx_records_after_relay_filtering",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "return_message_as_undeliverable"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S100-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If a temporary error is returned, the message MUST be queued and retried later.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S100",
+      "state_name": "QUEUED",
+      "enum_name": "MessageDeliveryState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S100-007",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "If a non-existent domain error is returned, or MX records are present but none are usable, this situation MUST be reported as an error.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S100",
+      "state_name": "ERROR",
+      "enum_name": "MessageDeliveryState",
+      "semantic_type": "error",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S100-008",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "message",
+      "stage": "smtp_fsm",
+      "description": "The message MUST be returned as undeliverable when no relay MX records remain after filtering.",
+      "is_inferred": true,
+      "confidence": 0.8,
+      "source_section": "S100",
+      "state_name": "UNDELIVERABLE",
+      "enum_name": "MessageDeliveryState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S100-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If a matching record is found [during relay MX inspection], all records at that preference level and higher-numbered ones MUST be discarded from consideration.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S100",
+      "actors": [
+        "server"
+      ],
+      "from_state": "MX_RELAY_SELECTION",
+      "to_state": "MX_RELAY_SELECTION",
+      "trigger": "self_address_found_in_mx_list",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "discard_mx_records_at_and_above_matched_preference"
+      ],
+      "modality": "must"
+    }
+  ]
+}

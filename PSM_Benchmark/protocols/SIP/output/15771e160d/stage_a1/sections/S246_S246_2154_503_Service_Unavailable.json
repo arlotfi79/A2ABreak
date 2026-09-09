@@ -1,0 +1,109 @@
+{
+  "section_id": "S246",
+  "title": "S246 21.5.4 503 Service Unavailable",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S246 21.5.4 503 Service Unavailable"
+  ],
+  "url_anchor": "#s246-2154-503-service-unavailable",
+  "word_count": 116,
+  "statement_count": 4,
+  "elapsed_seconds": 21.53,
+  "statements": [
+    {
+      "statement_id": "D-S246-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "A client (proxy or UAC) receiving a 503 (Service Unavailable) SHOULD attempt to forward the request to an alternate server.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S246",
+      "actors": [
+        "client",
+        "proxy",
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_503",
+      "pre_cond": null,
+      "post_cond": "request.forwarded_to_alternate_server = true",
+      "actions": [
+        "forward_request_to_alternate_server"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S246-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If no Retry-After is given, the client MUST act as if it had received a 500 (Server Internal Error) response.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S246",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_503",
+      "pre_cond": "response.retry_after = null",
+      "post_cond": "client.processing = as_if_500",
+      "actions": [
+        "treat_as_500"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S246-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "It SHOULD NOT forward any other requests to that server for the duration specified in the Retry-After header field, if present.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S246",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_503",
+      "pre_cond": "response.retry_after != null",
+      "post_cond": "client.server_blackout_duration = response.retry_after",
+      "actions": [
+        "suppress_forwarding_to_server_for_retry_after_duration"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S246-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Servers MAY refuse the connection or drop the request instead of responding with 503 (Service Unavailable).",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S246",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "service_unavailable",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "refuse_connection_or_drop_request"
+      ],
+      "modality": "may"
+    }
+  ]
+}

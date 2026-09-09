@@ -1,0 +1,482 @@
+{
+  "section_id": "S122",
+  "title": "S122 17.1.1.2 Formal Description",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S122 17.1.1.2 Formal Description"
+  ],
+  "url_anchor": "#s122-17112-formal-description",
+  "word_count": 1122,
+  "statement_count": 21,
+  "elapsed_seconds": 193.8,
+  "statements": [
+    {
+      "statement_id": "D-S122-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The initial state, 'calling', MUST be entered when the TU initiates a new client transaction with an INVITE request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "state_name": "Calling",
+      "enum_name": "INVITE_client_transaction_state",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Calling"
+    },
+    {
+      "statement_id": "D-S122-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the client transaction receives a provisional response while in the 'Calling' state, it transitions to the 'Proceeding' state. In the 'Proceeding' state, the client transaction SHOULD NOT retransmit the request any longer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "state_name": "Proceeding",
+      "enum_name": "INVITE_client_transaction_state",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Proceeding"
+    },
+    {
+      "statement_id": "D-S122-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Reception of a response with status code from 300-699 MUST cause the client transaction to transition to 'Completed'.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "state_name": "Completed",
+      "enum_name": "INVITE_client_transaction_state",
+      "semantic_type": "closing",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "transaction.state = Completed"
+    },
+    {
+      "statement_id": "D-S122-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The client transaction MUST be destroyed the instant it enters the 'Terminated' state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "state_name": "Terminated",
+      "enum_name": "INVITE_client_transaction_state",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "transaction.state = Terminated"
+    },
+    {
+      "statement_id": "D-S122-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The initial state, 'calling', MUST be entered when the TU initiates a new client transaction with an INVITE request. The client transaction MUST pass the request to the transport layer for transmission. If unreliable transport, start Timer A with T1; for any transport, start Timer B with 64*T1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "TU",
+        "client transaction"
+      ],
+      "from_state": null,
+      "to_state": "Calling",
+      "trigger": "INVITE from TU",
+      "pre_cond": null,
+      "post_cond": "transaction.state = Calling",
+      "actions": [
+        "pass INVITE to transport layer",
+        "start Timer A with T1 (unreliable transport only)",
+        "start Timer B with 64*T1"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When timer A fires, the client transaction MUST retransmit the request by passing it to the transport layer, and MUST reset the timer with a value of 2*T1. Retransmission intervals MUST double after each transmission.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Calling",
+      "to_state": "Calling",
+      "trigger": "Timer A fires",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "transaction.state = Calling",
+      "actions": [
+        "retransmit INVITE to transport layer",
+        "reset Timer A to 2*previous_interval"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the client transaction is still in the 'Calling' state when timer B fires, the client transaction SHOULD inform the TU that a timeout has occurred. The client transaction MUST NOT generate an ACK.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Calling",
+      "to_state": "Terminated",
+      "trigger": "Timer B fires",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU of timeout",
+        "destroy transaction"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S122-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Transport Error while in Calling state causes transition to Terminated; inform TU. (From Figure 5: right-side arrow from Calling labeled 'Timer B fires or Transport Err. / inform TU'.)",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Calling",
+      "to_state": "Terminated",
+      "trigger": "Transport Error",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU",
+        "destroy transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If the client transaction receives a provisional response while in the 'Calling' state, it transitions to the 'Proceeding' state. The provisional response MUST be passed to the TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Calling",
+      "to_state": "Proceeding",
+      "trigger": "1xx response received",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "pass provisional response to TU"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When in the 'Calling' state, reception of a response with status code from 300-699 MUST cause the client transaction to transition to 'Completed'. The client transaction MUST pass the received response up to the TU, and MUST generate an ACK request and pass it to the transport layer. Timer D SHOULD be started.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Calling",
+      "to_state": "Completed",
+      "trigger": "300-699 response received",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "pass response to TU",
+        "generate ACK",
+        "send ACK to transport layer",
+        "start Timer D"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When in the 'Calling' state, reception of a 2xx response MUST cause the client transaction to enter the 'Terminated' state, and the response MUST be passed up to the TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Calling",
+      "to_state": "Terminated",
+      "trigger": "2xx response received",
+      "pre_cond": "transaction.state = Calling",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "pass 2xx response to TU",
+        "destroy transaction"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Any further provisional responses MUST be passed up to the TU while in the 'Proceeding' state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Proceeding",
+      "trigger": "1xx response received",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Proceeding",
+      "actions": [
+        "pass provisional response to TU"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When in the 'Proceeding' state, reception of a response with status code from 300-699 MUST cause the client transaction to transition to 'Completed'. The client transaction MUST pass the received response up to the TU, and MUST generate an ACK request and pass it to the transport layer. Timer D SHOULD be started.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Completed",
+      "trigger": "300-699 response received",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "pass response to TU",
+        "generate ACK",
+        "send ACK to transport layer",
+        "start Timer D"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When in the 'Proceeding' state, reception of a 2xx response MUST cause the client transaction to enter the 'Terminated' state, and the response MUST be passed up to the TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Terminated",
+      "trigger": "2xx response received",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "pass 2xx response to TU",
+        "destroy transaction"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Transport Error while in Proceeding state causes transition to Terminated; inform TU. (Inferred from Figure 5 right-side column structure and symmetric treatment with Calling state.)",
+      "is_inferred": true,
+      "confidence": 0.85,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Proceeding",
+      "to_state": "Terminated",
+      "trigger": "Transport Error",
+      "pre_cond": "transaction.state = Proceeding",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU",
+        "destroy transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Any retransmissions of the final response that are received while in the 'Completed' state MUST cause the ACK to be re-passed to the transport layer for retransmission, but the newly received response MUST NOT be passed up to the TU.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": "Completed",
+      "trigger": "300-699 response retransmission received",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Completed",
+      "actions": [
+        "re-pass ACK to transport layer for retransmission"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-017",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "If timer D fires while the client transaction is in the 'Completed' state, the client transaction MUST move to the terminated state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "actors": [
+        "client transaction"
+      ],
+      "from_state": "Completed",
+      "to_state": "Terminated",
+      "trigger": "Timer D fires",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "destroy transaction"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S122-018",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Transport Error while in Completed state causes transition to Terminated; inform TU. (From Figure 5: arrow from Completed labeled 'Transport Err. / Inform TU'.)",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S122",
+      "actors": [
+        "client transaction",
+        "TU"
+      ],
+      "from_state": "Completed",
+      "to_state": "Terminated",
+      "trigger": "Transport Error",
+      "pre_cond": "transaction.state = Completed",
+      "post_cond": "transaction.state = Terminated",
+      "actions": [
+        "inform TU",
+        "destroy transaction"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S122-019",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "If an unreliable transport is being used, the client transaction MUST start timer A with a value of T1. If a reliable transport is being used, the client transaction SHOULD NOT start timer A (Timer A controls request retransmissions).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "object_name": "INVITE_client_transaction",
+      "field_name": "Timer A",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": "T1 initial value; doubles on each retransmission; unreliable transport only",
+      "guard_semantics": "transport.reliability = unreliable"
+    },
+    {
+      "statement_id": "D-S122-020",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "For any transport, the client transaction MUST start timer B with a value of 64*T1 seconds (Timer B controls transaction timeouts).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "object_name": "INVITE_client_transaction",
+      "field_name": "Timer B",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": "64*T1",
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S122-021",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "timer",
+      "stage": "sip_fsm",
+      "description": "The client transaction SHOULD start timer D when it enters the 'Completed' state, with a value of at least 32 seconds for unreliable transports, and a value of zero seconds for reliable transports.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S122",
+      "object_name": "INVITE_client_transaction",
+      "field_name": "Timer D",
+      "field_type": "timer",
+      "required": true,
+      "allowed_values": ">= 32s (unreliable transport); 0s (reliable transport)",
+      "guard_semantics": "transaction.state = Completed"
+    }
+  ]
+}

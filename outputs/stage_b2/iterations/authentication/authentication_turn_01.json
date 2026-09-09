@@ -1,0 +1,430 @@
+{
+  "pipeline_stage": "stage_b2",
+  "protocol_phase": "authentication",
+  "turn": 1,
+  "status": "complete",
+  "finish_reason": "stop",
+  "web_search": {
+    "executed": true,
+    "mode": "server_side_single_request",
+    "queries": [],
+    "tool_use_blocks": 0,
+    "result_blocks": 0,
+    "requests_billed": 5
+  },
+  "web_searches": [],
+  "raw_text_len": 11193,
+  "raw_text": "Looking at the input data and search results, I need to carefully analyze the A2A authentication flow from the specification to build a complete FSM. Let me search for one more critical detail about the auth-required task state flow.Now I have all the specification details needed. Let me synthesize everything into the complete FSM.\n\nBased on the spec, the authentication phase covers:\n- Production deployments MUST use encrypted communication; implementations SHOULD use modern TLS configurations (TLS 1.3+ recommended); clients SHOULD verify the server's identity by validating its TLS certificate.\n- The client discovers auth schemes from the AgentCard, obtains credentials through an out-of-band process, then includes them in protocol-appropriate headers.\n- The server MUST authenticate every incoming request based on provided credentials and declared authentication requirements.\n- Once authenticated, the A2A Server authorizes requests based on the authenticated identity and its own policies.\n- A2A provides the capability for agents to delegate authorization fulfillment to the client via TASK_STATE_AUTH_REQUIRED. The agent MUST transition the TaskState to TASK_STATE_AUTH_REQUIRED and MUST include a TaskStatus message explaining the required authorization.\n\n```json\n{\n  \"stage\": \"authentication\",\n  \"states\": [\n    {\n      \"state_name\": \"TLS_HANDSHAKE_INITIATED\",\n      \"semantic_type\": \"initial\",\n      \"actor\": \"shared\",\n      \"is_initial\": true,\n      \"is_final\": false,\n      \"invariant_cond\": null,\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-7-2-001\"]\n    },\n    {\n      \"state_name\": \"SERVER_IDENTITY_VERIFIED\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"client\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"client.server_identity_verified = true\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-7-2-001\"]\n    },\n    {\n      \"state_name\": \"CLIENT_CREDENTIAL_ACQUISITION\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"client\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": null,\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-7-3-002\"]\n    },\n    {\n      \"state_name\": \"CLIENT_CREDENTIAL_TRANSMISSION\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"client\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"client.credentials_acquired = true\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-7-3-003\"]\n    },\n    {\n      \"state_name\": \"SERVER_VALIDATING_REQUEST\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": null,\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"N-7-4-001\"]\n    },\n    {\n      \"state_name\": \"authenticated\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"client.authenticated = true\",\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"N-7-5-001\"]\n    },\n    {\n      \"state_name\": \"AUTHENTICATION_FAILED\",\n      \"semantic_type\": \"error\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"request.authenticated = false\",\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"N-3-3-005\", \"N-7-4-002\", \"N-7-4-003\"]\n    },\n    {\n      \"state_name\": \"AUTHORIZATION_DENIED\",\n      \"semantic_type\": \"error\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"client.authenticated = true & client.permissions.sufficient = false\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-3-3-008\"]\n    },\n    {\n      \"state_name\": \"REQUEST_AUTHORIZED\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"authorization_check.performed = true & client.permissions.sufficient = true\",\n      \"is_inferred\": true,\n      \"confidence\": 0.75,\n      \"source_ids\": [\"N-7-5-001\", \"N-13-1-002\", \"N-13-1-009\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_AUTH_REQUIRED\",\n      \"semantic_type\": \"interrupted\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": null,\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-4-1-009\"]\n    }\n  ],\n  \"transitions\": [\n    {\n      \"from_state\": \"TLS_HANDSHAKE_INITIATED\",\n      \"to_state\": \"SERVER_IDENTITY_VERIFIED\",\n      \"trigger\": \"tls_certificate_validated\",\n      \"guard\": \"client.server_identity_verified = true\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"should\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-7-2-001\"]\n    },\n    {\n      \"from_state\": \"SERVER_IDENTITY_VERIFIED\",\n      \"to_state\": \"CLIENT_CREDENTIAL_ACQUISITION\",\n      \"trigger\": \"auth_requirements_discovered\",\n      \"guard\": null,\n      \"actors\": [],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.75,\n      \"source_ids\": [\"D-7-3-002\"]\n    },\n    {\n      \"from_state\": \"CLIENT_CREDENTIAL_ACQUISITION\",\n      \"to_state\": \"CLIENT_CREDENTIAL_TRANSMISSION\",\n      \"trigger\": \"credentials_acquired\",\n      \"guard\": \"client.credentials_acquired = true\",\n      \"actors\": [\"client\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-7-3-005\"]\n    },\n    {\n      \"from_state\": \"CLIENT_CREDENTIAL_TRANSMISSION\",\n      \"to_state\": \"SERVER_VALIDATING_REQUEST\",\n      \"trigger\": \"request_received\",\n      \"guard\": null,\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-7-4-001\", \"N-3-3-005\"]\n    },\n    {\n      \"from_state\": \"CLIENT_CREDENTIAL_TRANSMISSION\",\n      \"to_state\": \"SERVER_VALIDATING_REQUEST\",\n      \"trigger\": \"get_extended_agent_card_request\",\n      \"guard\": \"request.auth_scheme matches agent_card.securitySchemes\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.7,\n      \"source_ids\": [\"N-13-3-001\", \"N-13-3-002\"]\n    },\n    {\n      \"from_state\": \"SERVER_VALIDATING_REQUEST\",\n      \"to_state\": \"authenticated\",\n      \"trigger\": \"credentials_validated\",\n      \"guard\": \"request.authenticated = true\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-7-4-001\"]\n    },\n    {\n      \"from_state\": \"SERVER_VALIDATING_REQUEST\",\n      \"to_state\": \"AUTHENTICATION_FAILED\",\n      \"trigger\": \"authentication_challenge_or_rejection\",\n      \"guard\": \"request.credentials.valid = false | request.credentials = null\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"N-3-3-005\", \"N-7-4-002\", \"N-7-4-003\"]\n    },\n    {\n      \"from_state\": \"SERVER_VALIDATING_REQUEST\",\n      \"to_state\": \"AUTHENTICATION_FAILED\",\n      \"trigger\": \"authentication_error\",\n      \"guard\": null,\n      \"actors\": [\"server\"],\n      \"modality\": \"should\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-3-3-006\", \"N-3-3-007\"]\n    },\n    {\n      \"from_state\": \"authenticated\",\n      \"to_state\": \"REQUEST_AUTHORIZED\",\n      \"trigger\": \"request_received\",\n      \"guard\": \"client.permissions.sufficient = true\",\n      \"actors\": [\"server\"],\n      \"modality\": \"may\",\n      \"is_inferred\": true,\n      \"confidence\": 0.75,\n      \"source_ids\": [\"N-7-5-001\"]\n    },\n    {\n      \"from_state\": \"authenticated\",\n      \"to_state\": \"AUTHORIZATION_DENIED\",\n      \"trigger\": \"request_received\",\n      \"guard\": \"client.authenticated = true & client.permissions.sufficient = false\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-3-3-008\"]\n    },\n    {\n      \"from_state\": \"authenticated\",\n      \"to_state\": \"REQUEST_AUTHORIZED\",\n      \"trigger\": \"A2A_protocol_operations_request\",\n      \"guard\": \"caller.authenticated = true\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.75,\n      \"source_ids\": [\"N-13-1-002\", \"N-13-1-009\"]\n    },\n    {\n      \"from_state\": \"authenticated\",\n      \"to_state\": \"REQUEST_AUTHORIZED\",\n      \"trigger\": \"get_extended_agent_card_request\",\n      \"guard\": \"client.authenticated = true\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.7,\n      \"source_ids\": [\"N-13-3-010\"]\n    },\n    {\n      \"from_state\": \"AUTHENTICATION_FAILED\",\n      \"to_state\": \"CLIENT_CREDENTIAL_ACQUISITION\",\n      \"trigger\": \"authentication_retry\",\n      \"guard\": \"response.authentication_challenge_info = present\",\n      \"actors\": [],\n      \"modality\": \"may\",\n      \"is_inferred\": true,\n      \"confidence\": 0.7,\n      \"source_ids\": [\"N-7-4-002\", \"N-7-4-003\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_AUTH_REQUIRED\",\n      \"to_state\": \"CLIENT_CREDENTIAL_ACQUISITION\",\n      \"trigger\": \"secondary_credentials_requested\",\n      \"guard\": null,\n      \"actors\": [],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.7,\n      \"source_ids\": [\"D-4-1-009\"]\n    }\n  ],\n  \"inter_stage\": {\n    \"entry_from_previous\": [\"TLS_HANDSHAKE_INITIATED\", \"TASK_STATE_AUTH_REQUIRED\"],\n    \"exit_to_next\": [\n      {\n        \"from_state\": \"REQUEST_AUTHORIZED\",\n        \"to_stage\": \"initiation\",\n        \"reason\": \"Client is authenticated and authorized; proceeds to send initial A2A message to agent endpoint\"\n      },\n      {\n        \"from_state\": \"REQUEST_AUTHORIZED\",\n        \"to_stage\": \"task_execution\",\n        \"reason\": \"Secondary credentials validated after TASK_STATE_AUTH_REQUIRED; task resumes execution from the interrupted state\"\n      }\n    ]\n  },\n  \"discarded_states\": [],\n  \"unresolved\": [\n    {\n      \"source_id\": \"D-13-3-004\",\n      \"issue\": \"All fields are null (from_state, to_state, trigger, pre_cond, post_cond, modality, actors). No useful information to derive a transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.0\n    },\n    {\n      \"source_id\": \"N-13-3-003\",\n      \"issue\": \"from_state inferred as 'authenticated' from pre_cond (client.authenticated = true), but post_cond is null and modality is 'may', making to_state indeterminate. Describes server optionally providing different capabilities to authenticated clients for extended agent card access, which is a behavioral note rather than a discrete state change.\",\n      \"reason_type\": \"null_to_state\",\n      \"confidence\": 0.5\n    },\n    {\n      \"source_id\": \"N-14-3-007\",\n      \"issue\": \"from_state inferred as 'authenticated' from pre_cond (endpoint.authenticated = true), but post_cond is null and modality is 'may', making to_state indeterminate. Describes optional server behavior for authenticated extended agent card requests. Searched sections 14.3 and 13.3; no explicit target state found.\",\n      \"reason_type\": \"null_to_state\",\n      \"confidence\": 0.5\n    }\n  ],\n  \"gaps\": []\n}\n```",
+  "fsm": {
+    "stage": "authentication",
+    "states": [
+      {
+        "state_name": "TLS_HANDSHAKE_INITIATED",
+        "semantic_type": "initial",
+        "actor": "shared",
+        "is_initial": true,
+        "is_final": false,
+        "invariant_cond": null,
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-7-2-001"
+        ]
+      },
+      {
+        "state_name": "SERVER_IDENTITY_VERIFIED",
+        "semantic_type": "active",
+        "actor": "client",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "client.server_identity_verified = true",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-7-2-001"
+        ]
+      },
+      {
+        "state_name": "CLIENT_CREDENTIAL_ACQUISITION",
+        "semantic_type": "active",
+        "actor": "client",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-7-3-002"
+        ]
+      },
+      {
+        "state_name": "CLIENT_CREDENTIAL_TRANSMISSION",
+        "semantic_type": "active",
+        "actor": "client",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "client.credentials_acquired = true",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-7-3-003"
+        ]
+      },
+      {
+        "state_name": "SERVER_VALIDATING_REQUEST",
+        "semantic_type": "active",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "N-7-4-001"
+        ]
+      },
+      {
+        "state_name": "authenticated",
+        "semantic_type": "active",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "client.authenticated = true",
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "N-7-5-001"
+        ]
+      },
+      {
+        "state_name": "AUTHENTICATION_FAILED",
+        "semantic_type": "error",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "request.authenticated = false",
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "N-3-3-005",
+          "N-7-4-002",
+          "N-7-4-003"
+        ]
+      },
+      {
+        "state_name": "AUTHORIZATION_DENIED",
+        "semantic_type": "error",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "client.authenticated = true & client.permissions.sufficient = false",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-3-3-008"
+        ]
+      },
+      {
+        "state_name": "REQUEST_AUTHORIZED",
+        "semantic_type": "active",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "authorization_check.performed = true & client.permissions.sufficient = true",
+        "is_inferred": true,
+        "confidence": 0.75,
+        "source_ids": [
+          "N-7-5-001",
+          "N-13-1-002",
+          "N-13-1-009"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_AUTH_REQUIRED",
+        "semantic_type": "interrupted",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": null,
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-4-1-009"
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "from_state": "TLS_HANDSHAKE_INITIATED",
+        "to_state": "SERVER_IDENTITY_VERIFIED",
+        "trigger": "tls_certificate_validated",
+        "guard": "client.server_identity_verified = true",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "should",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-7-2-001"
+        ]
+      },
+      {
+        "from_state": "SERVER_IDENTITY_VERIFIED",
+        "to_state": "CLIENT_CREDENTIAL_ACQUISITION",
+        "trigger": "auth_requirements_discovered",
+        "guard": null,
+        "actors": [],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.75,
+        "source_ids": [
+          "D-7-3-002"
+        ]
+      },
+      {
+        "from_state": "CLIENT_CREDENTIAL_ACQUISITION",
+        "to_state": "CLIENT_CREDENTIAL_TRANSMISSION",
+        "trigger": "credentials_acquired",
+        "guard": "client.credentials_acquired = true",
+        "actors": [
+          "client"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-7-3-005"
+        ]
+      },
+      {
+        "from_state": "CLIENT_CREDENTIAL_TRANSMISSION",
+        "to_state": "SERVER_VALIDATING_REQUEST",
+        "trigger": "request_received",
+        "guard": null,
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-7-4-001",
+          "N-3-3-005"
+        ]
+      },
+      {
+        "from_state": "CLIENT_CREDENTIAL_TRANSMISSION",
+        "to_state": "SERVER_VALIDATING_REQUEST",
+        "trigger": "get_extended_agent_card_request",
+        "guard": "request.auth_scheme matches agent_card.securitySchemes",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.7,
+        "source_ids": [
+          "N-13-3-001",
+          "N-13-3-002"
+        ]
+      },
+      {
+        "from_state": "SERVER_VALIDATING_REQUEST",
+        "to_state": "authenticated",
+        "trigger": "credentials_validated",
+        "guard": "request.authenticated = true",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-7-4-001"
+        ]
+      },
+      {
+        "from_state": "SERVER_VALIDATING_REQUEST",
+        "to_state": "AUTHENTICATION_FAILED",
+        "trigger": "authentication_challenge_or_rejection",
+        "guard": "request.credentials.valid = false | request.credentials = null",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "N-3-3-005",
+          "N-7-4-002",
+          "N-7-4-003"
+        ]
+      },
+      {
+        "from_state": "SERVER_VALIDATING_REQUEST",
+        "to_state": "AUTHENTICATION_FAILED",
+        "trigger": "authentication_error",
+        "guard": null,
+        "actors": [
+          "server"
+        ],
+        "modality": "should",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-3-3-006",
+          "N-3-3-007"
+        ]
+      },
+      {
+        "from_state": "authenticated",
+        "to_state": "REQUEST_AUTHORIZED",
+        "trigger": "request_received",
+        "guard": "client.permissions.sufficient = true",
+        "actors": [
+          "server"
+        ],
+        "modality": "may",
+        "is_inferred": true,
+        "confidence": 0.75,
+        "source_ids": [
+          "N-7-5-001"
+        ]
+      },
+      {
+        "from_state": "authenticated",
+        "to_state": "AUTHORIZATION_DENIED",
+        "trigger": "request_received",
+        "guard": "client.authenticated = true & client.permissions.sufficient = false",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-3-3-008"
+        ]
+      },
+      {
+        "from_state": "authenticated",
+        "to_state": "REQUEST_AUTHORIZED",
+        "trigger": "A2A_protocol_operations_request",
+        "guard": "caller.authenticated = true",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.75,
+        "source_ids": [
+          "N-13-1-002",
+          "N-13-1-009"
+        ]
+      },
+      {
+        "from_state": "authenticated",
+        "to_state": "REQUEST_AUTHORIZED",
+        "trigger": "get_extended_agent_card_request",
+        "guard": "client.authenticated = true",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.7,
+        "source_ids": [
+          "N-13-3-010"
+        ]
+      },
+      {
+        "from_state": "AUTHENTICATION_FAILED",
+        "to_state": "CLIENT_CREDENTIAL_ACQUISITION",
+        "trigger": "authentication_retry",
+        "guard": "response.authentication_challenge_info = present",
+        "actors": [],
+        "modality": "may",
+        "is_inferred": true,
+        "confidence": 0.7,
+        "source_ids": [
+          "N-7-4-002",
+          "N-7-4-003"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_AUTH_REQUIRED",
+        "to_state": "CLIENT_CREDENTIAL_ACQUISITION",
+        "trigger": "secondary_credentials_requested",
+        "guard": null,
+        "actors": [],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.7,
+        "source_ids": [
+          "D-4-1-009"
+        ]
+      }
+    ],
+    "inter_stage": {
+      "entry_from_previous": [
+        "TLS_HANDSHAKE_INITIATED",
+        "TASK_STATE_AUTH_REQUIRED"
+      ],
+      "exit_to_next": [
+        {
+          "from_state": "REQUEST_AUTHORIZED",
+          "to_stage": "initiation",
+          "reason": "Client is authenticated and authorized; proceeds to send initial A2A message to agent endpoint"
+        },
+        {
+          "from_state": "REQUEST_AUTHORIZED",
+          "to_stage": "task_execution",
+          "reason": "Secondary credentials validated after TASK_STATE_AUTH_REQUIRED; task resumes execution from the interrupted state"
+        }
+      ]
+    },
+    "discarded_states": [],
+    "unresolved": [
+      {
+        "source_id": "D-13-3-004",
+        "issue": "All fields are null (from_state, to_state, trigger, pre_cond, post_cond, modality, actors). No useful information to derive a transition.",
+        "reason_type": "both_null",
+        "confidence": 0.0
+      },
+      {
+        "source_id": "N-13-3-003",
+        "issue": "from_state inferred as 'authenticated' from pre_cond (client.authenticated = true), but post_cond is null and modality is 'may', making to_state indeterminate. Describes server optionally providing different capabilities to authenticated clients for extended agent card access, which is a behavioral note rather than a discrete state change.",
+        "reason_type": "null_to_state",
+        "confidence": 0.5
+      },
+      {
+        "source_id": "N-14-3-007",
+        "issue": "from_state inferred as 'authenticated' from pre_cond (endpoint.authenticated = true), but post_cond is null and modality is 'may', making to_state indeterminate. Describes optional server behavior for authenticated extended agent card requests. Searched sections 14.3 and 13.3; no explicit target state found.",
+        "reason_type": "null_to_state",
+        "confidence": 0.5
+      }
+    ],
+    "gaps": []
+  },
+  "cost": {
+    "pipeline_stage": "stage_b2",
+    "protocol_phase": "authentication",
+    "model": "anthropic/claude-opus-4-6",
+    "turn": 1,
+    "input_tokens": 219359,
+    "output_tokens": 38449,
+    "total_tokens": 257808,
+    "cumulative_input_tokens": 219359,
+    "cumulative_output_tokens": 38449,
+    "cumulative_total_tokens": 257808,
+    "elapsed_seconds": 630.19,
+    "timestamp": "2026-05-18T04:29:34Z",
+    "cost_usd": 2.10802,
+    "web_search_requests": 5,
+    "web_search_executed": true,
+    "web_search_queries": []
+  },
+  "timestamp": "2026-05-18T04:29:34Z"
+}

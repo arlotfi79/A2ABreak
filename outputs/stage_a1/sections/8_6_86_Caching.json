@@ -1,0 +1,146 @@
+{
+  "section_id": "8.6",
+  "title": "8.6. Caching",
+  "depth": 3,
+  "parent_path": [
+    "8. Agent Discovery: The Agent Card",
+    "8.6. Caching"
+  ],
+  "url_anchor": "#86-caching",
+  "word_count": 153,
+  "statement_count": 7,
+  "elapsed_seconds": 67.46,
+  "statements": [
+    {
+      "statement_id": "D-8-6-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Agent Card HTTP endpoints SHOULD include a Cache-Control response header with a max-age directive appropriate for the agent's expected update frequency",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6.1",
+      "object_name": "AgentCardHTTPResponse",
+      "field_name": "Cache-Control",
+      "field_type": "HTTP response header",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-8-6-002",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Agent Card HTTP endpoints SHOULD include an ETag response header derived from the Agent Card's version field or a hash of the card content",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6.1",
+      "object_name": "AgentCardHTTPResponse",
+      "field_name": "ETag",
+      "field_type": "HTTP response header",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-8-6-003",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "Agent Card HTTP endpoints MAY include a Last-Modified response header",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "8.6.1",
+      "object_name": "AgentCardHTTPResponse",
+      "field_name": "Last-Modified",
+      "field_type": "HTTP response header",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-8-6-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "A cached Agent Card that has not yet expired and from which a client operates without requiring revalidation",
+      "is_inferred": true,
+      "confidence": 0.7,
+      "source_section": "8.6.2",
+      "state_name": "AGENT_CARD_CACHE_VALID",
+      "enum_name": "AgentCardCacheState",
+      "semantic_type": "active",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "agent_card.cache.expired = false"
+    },
+    {
+      "statement_id": "D-8-6-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When a cached Agent Card has expired, clients SHOULD use conditional requests (If-None-Match with the stored ETag, or If-Modified-Since) to avoid re-downloading unchanged cards",
+      "is_inferred": true,
+      "confidence": 0.75,
+      "source_section": "8.6.2",
+      "state_name": "AGENT_CARD_CACHE_EXPIRED",
+      "enum_name": "AgentCardCacheState",
+      "semantic_type": "interrupted",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "agent_card.cache.expired = true"
+    },
+    {
+      "statement_id": "D-8-6-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When a cached Agent Card has expired, clients SHOULD use conditional requests (If-None-Match with the stored ETag, or If-Modified-Since) to avoid re-downloading unchanged cards",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "8.6.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "AGENT_CARD_CACHE_EXPIRED",
+      "to_state": null,
+      "trigger": "cache_expired",
+      "pre_cond": "agent_card.cache.expired = true",
+      "post_cond": "client.request.conditional = true & (client.request.if_none_match != null | client.request.if_modified_since != null)",
+      "actions": [
+        "Issue conditional HTTP request with If-None-Match header containing the stored ETag, or with If-Modified-Since header, to revalidate the cached Agent Card without re-downloading unchanged content"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-8-6-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "agent_card",
+      "stage": "discovery",
+      "description": "When the server does not include caching headers, clients MAY apply an implementation-specific default cache duration",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "8.6.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "AGENT_CARD_CACHE_VALID",
+      "trigger": "agent_card_fetched",
+      "pre_cond": "server.response.cache_control = null & server.response.etag = null & server.response.last_modified = null",
+      "post_cond": "agent_card.cache.duration = implementation_specific_default",
+      "actions": [
+        "Apply implementation-specific default cache duration to the fetched Agent Card"
+      ],
+      "modality": "may"
+    }
+  ]
+}

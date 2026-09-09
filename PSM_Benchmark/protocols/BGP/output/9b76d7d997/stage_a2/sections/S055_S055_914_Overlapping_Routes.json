@@ -1,0 +1,158 @@
+{
+  "section_id": "S055",
+  "title": "S055 9.1.4 Overlapping Routes",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S055 9.1.4 Overlapping Routes"
+  ],
+  "url_anchor": "#s055-914-overlapping-routes",
+  "word_count": 388,
+  "statement_count": 6,
+  "elapsed_seconds": 67.1,
+  "statements": [
+    {
+      "statement_id": "1-S055-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "A BGP speaker may transmit routes with overlapping Network Layer Reachability Information (NLRI) to another BGP speaker.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S055-001"
+    },
+    {
+      "statement_id": "2-S055-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If a BGP speaker receives overlapping routes, the Decision Process MUST consider both routes based on the configured acceptance policy.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "BGP speaker",
+        "Decision Process"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "overlapping_routes_received",
+      "pre_cond": "bgp.received_overlapping_routes = true",
+      "post_cond": null,
+      "actions": [
+        "Consider both routes based on configured acceptance policy"
+      ],
+      "modality": "must",
+      "id": "N-S055-002"
+    },
+    {
+      "statement_id": "3-S055-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If both a less and a more specific route are accepted, then the Decision Process MUST install, in Loc-RIB, either both the less and the more specific routes or aggregate the two routes and install, in Loc-RIB, the aggregated route, provided that both routes have the same value of the NEXT_HOP attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "Decision Process"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "both_routes_accepted",
+      "pre_cond": "route.less_specific.accepted = true & route.more_specific.accepted = true & route.less_specific.NEXT_HOP = route.more_specific.NEXT_HOP",
+      "post_cond": "Loc-RIB.contains(route.less_specific & route.more_specific) | Loc-RIB.contains(route.aggregated)",
+      "actions": [
+        "Install both less-specific and more-specific routes in Loc-RIB OR aggregate the two routes and install aggregated route in Loc-RIB"
+      ],
+      "modality": "must",
+      "id": "N-S055-003"
+    },
+    {
+      "statement_id": "4-S055-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If a BGP speaker chooses to aggregate, then it SHOULD either include all ASes used to form the aggregate in an AS_SET, or add the ATOMIC_AGGREGATE attribute to the route.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "aggregate_chosen",
+      "pre_cond": "bgp.aggregate_chosen = true",
+      "post_cond": null,
+      "actions": [
+        "Include all ASes used to form the aggregate in an AS_SET OR add ATOMIC_AGGREGATE attribute to the route"
+      ],
+      "modality": "should",
+      "id": "N-S055-004"
+    },
+    {
+      "statement_id": "5-S055-5",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Routes SHOULD NOT be de-aggregated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Do not de-aggregate routes"
+      ],
+      "modality": "should",
+      "id": "N-S055-005"
+    },
+    {
+      "statement_id": "6-S055-6",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "In particular, a route that carries the ATOMIC_AGGREGATE attribute MUST NOT be de-aggregated.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S055",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "route.ATOMIC_AGGREGATE = present",
+      "post_cond": null,
+      "actions": [
+        "Do not de-aggregate a route carrying the ATOMIC_AGGREGATE attribute"
+      ],
+      "modality": "must",
+      "id": "N-S055-006"
+    }
+  ]
+}

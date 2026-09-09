@@ -1,0 +1,112 @@
+{
+  "section_id": "S031",
+  "title": "S031 6.2 Authentication-Protocol",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S031 6.2 Authentication-Protocol"
+  ],
+  "url_anchor": "#s031-62-authentication-protocol",
+  "word_count": 336,
+  "statement_count": 4,
+  "elapsed_seconds": 30.3,
+  "statements": [
+    {
+      "statement_id": "N-S031-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "An implementation MUST NOT include multiple Authentication-Protocol Configuration Options in its Configure-Request packets.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send Configure-Request",
+      "pre_cond": null,
+      "post_cond": "configure_request.authentication_protocol_options.count <= 1",
+      "actions": [
+        "Include at most one Authentication-Protocol Configuration Option in Configure-Request"
+      ],
+      "modality": "must",
+      "id": "N-S031-001"
+    },
+    {
+      "statement_id": "N-S031-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "Instead, it SHOULD attempt to configure the most desirable protocol first.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send Configure-Request",
+      "pre_cond": null,
+      "post_cond": "configure_request.authentication_protocol = most_desirable_protocol",
+      "actions": [
+        "Select most desirable authentication protocol for inclusion in Configure-Request"
+      ],
+      "modality": "should",
+      "id": "N-S031-002"
+    },
+    {
+      "statement_id": "N-S031-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "If that protocol is Configure-Nak'd, then the implementation SHOULD attempt the next most desirable protocol in the next Configure-Request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive Configure-Nak for Authentication-Protocol option",
+      "pre_cond": "most_desirable_protocol.configure_nak_received = true",
+      "post_cond": "next_configure_request.authentication_protocol = next_most_desirable_protocol",
+      "actions": [
+        "Send new Configure-Request with next most desirable authentication protocol"
+      ],
+      "modality": "should",
+      "id": "N-S031-003"
+    },
+    {
+      "statement_id": "N-S031-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "An implementation receiving a Configure-Ack SHOULD expect the peer to authenticate with the acknowledged protocol.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "implementation",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive Configure-Ack",
+      "pre_cond": "configure_ack.authentication_protocol != null",
+      "post_cond": "peer.expected_authentication_protocol = configure_ack.authentication_protocol",
+      "actions": [
+        "Expect peer to authenticate using the protocol acknowledged in Configure-Ack"
+      ],
+      "modality": "should",
+      "id": "N-S031-004"
+    }
+  ]
+}

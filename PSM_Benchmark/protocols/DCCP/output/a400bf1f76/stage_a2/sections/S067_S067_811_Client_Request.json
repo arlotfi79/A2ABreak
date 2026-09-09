@@ -1,0 +1,187 @@
+{
+  "section_id": "S067",
+  "title": "S067 8.1.1 Client Request",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S067 8.1.1 Client Request"
+  ],
+  "url_anchor": "#s067-811-client-request",
+  "word_count": 246,
+  "statement_count": 7,
+  "elapsed_seconds": 149.56,
+  "statements": [
+    {
+      "statement_id": "N-S067-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "They may also carry application data, but the client should be aware that the server may not accept such data.",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S067",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S067-001"
+    },
+    {
+      "statement_id": "N-S067-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "A client in the REQUEST state SHOULD use an exponential-backoff timer to send new DCCP-Request packets if no response is received.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "no_response_received",
+      "pre_cond": "protocol.state = REQUEST & response_received = false",
+      "post_cond": null,
+      "actions": [
+        "use exponential-backoff timer to retransmit DCCP-Request packets"
+      ],
+      "modality": "should",
+      "id": "N-S067-002"
+    },
+    {
+      "statement_id": "N-S067-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "dccp_fsm",
+      "description": "The first retransmission should occur after approximately one second, backing off to not less than one packet every 64 seconds; or the endpoint can use whatever retransmission strategy is followed for retransmitting TCP SYNs.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S067",
+      "actors": [
+        "client",
+        "endpoint"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "retransmission_timer_expiry",
+      "pre_cond": "protocol.state = REQUEST",
+      "post_cond": null,
+      "actions": [
+        "set initial retransmission interval to approximately one second",
+        "apply exponential backoff with minimum interval of one packet per 64 seconds"
+      ],
+      "modality": "should",
+      "id": "N-S067-003"
+    },
+    {
+      "statement_id": "N-S067-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "Each new DCCP-Request MUST increment the Sequence Number by one and MUST contain the same Service Code and application data as the original DCCP-Request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "dccp_request_retransmission",
+      "pre_cond": "protocol.state = REQUEST & retransmitting_request = true",
+      "post_cond": "dccp_request.sequence_number = previous_sequence_number + 1 & dccp_request.service_code = original_dccp_request.service_code & dccp_request.application_data = original_dccp_request.application_data",
+      "actions": [
+        "increment Sequence Number by one relative to previous DCCP-Request",
+        "set Service Code to same value as original DCCP-Request",
+        "set application data to same value as original DCCP-Request"
+      ],
+      "modality": "must",
+      "id": "N-S067-004"
+    },
+    {
+      "statement_id": "N-S067-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "A client MAY give up on its DCCP-Requests after some time (3 minutes, for example).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "request_timeout",
+      "pre_cond": "protocol.state = REQUEST & elapsed_time >= timeout_threshold",
+      "post_cond": null,
+      "actions": [
+        "abandon DCCP-Request retransmission attempts"
+      ],
+      "modality": "may",
+      "id": "N-S067-005"
+    },
+    {
+      "statement_id": "N-S067-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "When it does, it SHOULD send a DCCP-Reset packet to the server with Reset Code 2, \"Aborted\", to clean up state in case one or more of the Requests actually arrived.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "client_gives_up_on_requests",
+      "pre_cond": "protocol.state = REQUEST & client_giving_up = true",
+      "post_cond": null,
+      "actions": [
+        "send DCCP-Reset to server with Reset Code 2 ('Aborted')"
+      ],
+      "modality": "should",
+      "id": "N-S067-006"
+    },
+    {
+      "statement_id": "N-S067-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "dccp_fsm",
+      "description": "A client in REQUEST state has never received an initial sequence number from its peer, so the DCCP-Reset's Acknowledgement Number MUST be set to zero.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "send_dccp_reset_from_request_state",
+      "pre_cond": "protocol.state = REQUEST & initial_sequence_number_from_peer_received = false",
+      "post_cond": "dccp_reset.acknowledgement_number = 0",
+      "actions": [
+        "set DCCP-Reset Acknowledgement Number to 0"
+      ],
+      "modality": "must",
+      "id": "N-S067-007"
+    }
+  ]
+}

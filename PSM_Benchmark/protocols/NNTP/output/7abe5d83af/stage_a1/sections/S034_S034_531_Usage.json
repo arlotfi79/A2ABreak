@@ -1,0 +1,157 @@
+{
+  "section_id": "S034",
+  "title": "S034 5.3.1 Usage",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S034 5.3.1 Usage"
+  ],
+  "url_anchor": "#s034-531-usage",
+  "word_count": 39,
+  "statement_count": 7,
+  "elapsed_seconds": 40.56,
+  "statements": [
+    {
+      "statement_id": "D-S034-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "200 Posting allowed \u2014 state entered after a successful MODE READER command where posting is permitted.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S034",
+      "state_name": "Posting Allowed",
+      "enum_name": "ModeReaderState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.posting_allowed = true"
+    },
+    {
+      "statement_id": "D-S034-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "201 Posting prohibited \u2014 state entered after a successful MODE READER command where posting is not permitted.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S034",
+      "state_name": "Posting Prohibited",
+      "enum_name": "ModeReaderState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.posting_allowed = false"
+    },
+    {
+      "statement_id": "D-S034-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Following a 502 response the server MUST immediately close the connection \u2014 terminal state after reading service is permanently unavailable.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "state_name": "Closed",
+      "enum_name": "ConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S034-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "MODE READER command yields 200; session transitions to Posting Allowed state.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S034",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Posting Allowed",
+      "trigger": "MODE READER / 200",
+      "pre_cond": null,
+      "post_cond": "session.posting_allowed = true",
+      "actions": [
+        "server sends 200 response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S034-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "MODE READER command yields 201; session transitions to Posting Prohibited state.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S034",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Posting Prohibited",
+      "trigger": "MODE READER / 201",
+      "pre_cond": null,
+      "post_cond": "session.posting_allowed = false",
+      "actions": [
+        "server sends 201 response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S034-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Following a 502 response the server MUST immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Closed",
+      "trigger": "MODE READER / 502",
+      "pre_cond": null,
+      "post_cond": "connection.state = Closed",
+      "actions": [
+        "server sends 502 response",
+        "server closes connection immediately"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S034-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "nntp_fsm",
+      "description": "This command MUST NOT be pipelined.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S034",
+      "object_name": "MODE READER",
+      "field_name": "pipelining_allowed",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        false
+      ],
+      "guard_semantics": "MODE READER must not be sent while another command is outstanding in the pipeline"
+    }
+  ]
+}

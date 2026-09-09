@@ -1,0 +1,83 @@
+{
+  "section_id": "S055",
+  "title": "S055 12. Pipelining Support",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S055 12. Pipelining Support"
+  ],
+  "url_anchor": "#s055-12-pipelining-support",
+  "word_count": 336,
+  "statement_count": 3,
+  "elapsed_seconds": 46.89,
+  "statements": [
+    {
+      "statement_id": "D-S055-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "The Pipelined-Request header allows a client to request that two or more requests be processed in the same RTSP session context that the first request creates.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S055",
+      "object_name": "session",
+      "field_name": "Pipelined-Request",
+      "field_type": "header",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "enables shared session context across pipelined requests"
+    },
+    {
+      "statement_id": "D-S055-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The responding agent MUST process the incoming requests in their sending order. The processing of the request MUST also have been finished before processing the next request from the same agent. The responses MUST be sent in the order the requests were processed.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S055",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "pipelined request received",
+      "pre_cond": "session.pending_requests != empty",
+      "post_cond": "session.response_order = session.request_processing_order",
+      "actions": [
+        "process request in CSeq order",
+        "complete current request before processing next",
+        "send response in processing order"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S055-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "rtsp_fsm",
+      "description": "In case one of the SETUP requests fails unexpectedly, the PLAY request can still be successfully executed. However, the resulting presentation will not be as expected by the requesting client, as only a single media instead of two will be played. In this case, the client can send a PAUSE request, correct the failing SETUP request, and then request it be played.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S055",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "pipelined SETUP failure detected after PLAY executed",
+      "pre_cond": "session.pipelined_setup_failed = true & session.play_executed = true",
+      "post_cond": "session.setup_corrected = true",
+      "actions": [
+        "send PAUSE request",
+        "send corrected SETUP request",
+        "send PLAY request"
+      ],
+      "modality": "can"
+    }
+  ]
+}

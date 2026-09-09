@@ -1,0 +1,152 @@
+{
+  "section_id": "S095",
+  "title": "S095 7.1.5 BYE Response",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S095 7.1.5 BYE Response"
+  ],
+  "url_anchor": "#s095-715-bye-response",
+  "word_count": 214,
+  "statement_count": 6,
+  "elapsed_seconds": 47.14,
+  "statements": [
+    {
+      "statement_id": "D-S095-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "As part of a normal logout sequence, the server will close the connection after sending the tagged OK response to the LOGOUT command.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S095",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Logout",
+      "to_state": "Connection Closed",
+      "trigger": "BYE sent during normal logout sequence",
+      "pre_cond": null,
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "send untagged BYE response",
+        "send tagged OK response to LOGOUT",
+        "close connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S095-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "As a panic shutdown announcement, the server closes the connection immediately after sending BYE.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S095",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connection Closed",
+      "trigger": "panic shutdown",
+      "pre_cond": null,
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "send untagged BYE response",
+        "close connection immediately"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S095-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "As an announcement of an inactivity autologout, the server closes the connection immediately after sending BYE.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S095",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connection Closed",
+      "trigger": "inactivity autologout",
+      "pre_cond": null,
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "send untagged BYE response",
+        "close connection immediately"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S095-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "As one of three possible greetings at connection startup, indicating that the server is not willing to accept a connection from this client, the server closes the connection immediately.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S095",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Connection Closed",
+      "trigger": "BYE greeting at connection startup",
+      "pre_cond": "server.willing_to_accept = false",
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "send untagged BYE response",
+        "close connection immediately"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S095-005",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "The BYE response is always untagged and indicates that the server is about to close the connection.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S095",
+      "state_name": "Connection Closed",
+      "enum_name": "ConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "connection.closed = true"
+    },
+    {
+      "statement_id": "D-S095-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "In all cases, the client SHOULD continue to read response data from the server until the connection is closed; this will ensure that any pending untagged or completion responses are read and processed.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S095",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "Connection Closed",
+      "trigger": "BYE response received",
+      "pre_cond": null,
+      "post_cond": "connection.closed = true",
+      "actions": [
+        "continue reading response data until connection is closed"
+      ],
+      "modality": "should"
+    }
+  ]
+}

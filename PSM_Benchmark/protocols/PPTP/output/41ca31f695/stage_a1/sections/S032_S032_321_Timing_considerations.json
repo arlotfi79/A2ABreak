@@ -1,0 +1,98 @@
+{
+  "section_id": "S032",
+  "title": "S032 3.2.1 Timing considerations",
+  "depth": 3,
+  "parent_path": [
+    "PPTP",
+    "S032 3.2.1 Timing considerations"
+  ],
+  "url_anchor": "#s032-321-timing-considerations",
+  "word_count": 179,
+  "statement_count": 4,
+  "elapsed_seconds": 17.9,
+  "statements": [
+    {
+      "statement_id": "D-S032-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "connections in the idle or established states",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S032",
+      "state_name": "idle",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = idle"
+    },
+    {
+      "statement_id": "D-S032-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "connections in the idle or established states",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S032",
+      "state_name": "established",
+      "enum_name": "ConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = established"
+    },
+    {
+      "statement_id": "D-S032-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "pptp_fsm",
+      "description": "If a state transition does not occur within 1 minute (except for connections in the idle or established states), the integrity of the protocol processing between the peers is suspect and the ENTIRE CONTROL CONNECTION should be closed and restarted.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S032",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "state_transition_timeout_1min",
+      "pre_cond": "connection.state != idle & connection.state != established",
+      "post_cond": "control_connection.state = closed",
+      "actions": [
+        "close entire control connection",
+        "restart control connection"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S032-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "pptp_fsm",
+      "description": "All Call IDs are logically released whenever a control connection is started.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S032",
+      "actors": [
+        "PNS",
+        "PAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "control_connection_started",
+      "pre_cond": null,
+      "post_cond": "all_call_ids.state = released",
+      "actions": [
+        "logically release all Call IDs"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

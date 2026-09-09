@@ -1,0 +1,186 @@
+{
+  "section_id": "S101",
+  "title": "S101 11.7.2 Particular Drop Codes",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S101 11.7.2 Particular Drop Codes"
+  ],
+  "url_anchor": "#s101-1172-particular-drop-codes",
+  "word_count": 421,
+  "statement_count": 7,
+  "elapsed_seconds": 99.51,
+  "statements": [
+    {
+      "statement_id": "N-S101-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Drop Code 0, Protocol Constraints, does not indicate any kind of congestion, so the sender's CCID SHOULD react to packets with Drop Code 0 as if they were received (with or without ECN Congestion Experienced marks, as appropriate).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S101",
+      "actors": [
+        "sender",
+        "CCID"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "packet_with_drop_code_0_received",
+      "pre_cond": "packet.drop_code = 0",
+      "post_cond": null,
+      "actions": [
+        "React to packet with Drop Code 0 as if it were received, with or without ECN Congestion Experienced marks as appropriate"
+      ],
+      "modality": "should",
+      "id": "N-S101-001"
+    },
+    {
+      "statement_id": "N-S101-2",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "However, the sending endpoint SHOULD NOT send data until it believes the protocol constraint no longer applies.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S101",
+      "actors": [
+        "sending endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "drop_code_0_received & !protocol_constraint_resolved",
+      "post_cond": null,
+      "actions": [
+        "Suppress data transmission until protocol constraint is believed resolved"
+      ],
+      "modality": "should",
+      "id": "N-S101-002"
+    },
+    {
+      "statement_id": "N-S101-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "A Data Dropped option containing Drop Code 1 SHOULD be sent whenever received data is ignored due to a non-listening application.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S101",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "received_data_ignored_non_listening_application",
+      "pre_cond": "data.received & application.listening = false",
+      "post_cond": null,
+      "actions": [
+        "Send Data Dropped option containing Drop Code 1"
+      ],
+      "modality": "should",
+      "id": "N-S101-003"
+    },
+    {
+      "statement_id": "N-S101-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Once an endpoint reports Drop Code 1 for a packet, it SHOULD report Drop Code 1 for every succeeding data packet on that half-connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S101",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "drop_code_1_reported",
+      "pre_cond": "endpoint.drop_code_1_reported = true",
+      "post_cond": null,
+      "actions": [
+        "Report Drop Code 1 for every succeeding data packet on that half-connection"
+      ],
+      "modality": "should",
+      "id": "N-S101-004"
+    },
+    {
+      "statement_id": "N-S101-5",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "once an endpoint receives a Drop State 1 report, it SHOULD expect that no more data will ever be delivered to the other endpoint's application, so it SHOULD NOT send more data.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S101",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "drop_code_1_report_received",
+      "pre_cond": "endpoint.drop_code_1_report_received = true",
+      "post_cond": null,
+      "actions": [
+        "Expect that no more data will ever be delivered to the remote endpoint's application",
+        "Stop sending data on that half-connection"
+      ],
+      "modality": "should",
+      "id": "N-S101-005"
+    },
+    {
+      "statement_id": "N-S101-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "Every packet newly acknowledged as Drop Code 2 SHOULD reduce the sender's instantaneous rate by one packet per round-trip time, unless the sender is already sending one packet per RTT or less.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S101",
+      "actors": [
+        "sender",
+        "CCID"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "packet_acknowledged_as_drop_code_2",
+      "pre_cond": "packet.drop_code = 2 & sender.rate > 1_packet_per_RTT",
+      "post_cond": null,
+      "actions": [
+        "Reduce sender instantaneous rate by one packet per round-trip time"
+      ],
+      "modality": "should",
+      "id": "N-S101-006"
+    },
+    {
+      "statement_id": "N-S101-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "dccp",
+      "stage": "dccp_fsm",
+      "description": "Currently, the other Drop Codes (namely Drop Code 3, Corrupt; Drop Code 7, Delivered Corrupt; and reserved Drop Codes 4-6) MUST cause the relevant CCID to behave as if the relevant packets were ECN marked (ECN Congestion Experienced).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S101",
+      "actors": [
+        "CCID"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "packet_acknowledged_with_drop_code_3_4_5_6_7",
+      "pre_cond": "packet.drop_code = 3 | packet.drop_code = 4 | packet.drop_code = 5 | packet.drop_code = 6 | packet.drop_code = 7",
+      "post_cond": "ccid.behavior = ECN_Congestion_Experienced",
+      "actions": [
+        "Cause relevant CCID to behave as if relevant packets were ECN Congestion Experienced marked"
+      ],
+      "modality": "must",
+      "id": "N-S101-007"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "section_id": "S089",
+  "title": "S089 7. Server Responses",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S089 7. Server Responses"
+  ],
+  "url_anchor": "#s089-7-server-responses",
+  "word_count": 393,
+  "statement_count": 5,
+  "elapsed_seconds": 29.96,
+  "statements": [
+    {
+      "statement_id": "D-S089-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "An example of unilateral untagged server data occurs when the IMAP connection is in the selected state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S089",
+      "state_name": "selected",
+      "enum_name": "ImapConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "connection.state = selected"
+    },
+    {
+      "statement_id": "D-S089-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "In the selected state, the server checks the mailbox for new messages as part of command execution. If new messages are found, the server sends an untagged EXISTS response reflecting the new size of the mailbox.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S089",
+      "actors": [
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": "selected",
+      "trigger": "new_messages_found_during_command_execution",
+      "pre_cond": "connection.state = selected",
+      "post_cond": null,
+      "actions": [
+        "send untagged EXISTS response with new mailbox size"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S089-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Server implementations that offer multiple simultaneous access to the same mailbox SHOULD also send appropriate unilateral untagged FETCH and EXPUNGE responses if another agent changes the state of any message flags or expunges any messages.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S089",
+      "actors": [
+        "server"
+      ],
+      "from_state": "selected",
+      "to_state": "selected",
+      "trigger": "external_agent_modifies_mailbox",
+      "pre_cond": "connection.state = selected & server.simultaneous_access = true",
+      "post_cond": null,
+      "actions": [
+        "send untagged FETCH response",
+        "send untagged EXPUNGE response"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S089-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Command continuation request responses use the token '+' instead of a tag. These responses are sent by the server to indicate acceptance of an incomplete client command and readiness for the remainder of the command.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S089",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "incomplete_client_command_received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send '+' continuation request response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S089-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Tagged status responses indicate the completion result (OK, NO, or BAD status) of a client command and have a tag matching the command.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S089",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "command_completion",
+      "pre_cond": null,
+      "post_cond": "session.command_result = OK | session.command_result = NO | session.command_result = BAD",
+      "actions": [
+        "send tagged status response (OK|NO|BAD) with matching command tag"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

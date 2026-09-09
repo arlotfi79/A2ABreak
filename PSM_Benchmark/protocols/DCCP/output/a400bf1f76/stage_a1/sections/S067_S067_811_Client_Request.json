@@ -1,0 +1,125 @@
+{
+  "section_id": "S067",
+  "title": "S067 8.1.1 Client Request",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S067 8.1.1 Client Request"
+  ],
+  "url_anchor": "#s067-811-client-request",
+  "word_count": 246,
+  "statement_count": 5,
+  "elapsed_seconds": 26.07,
+  "statements": [
+    {
+      "statement_id": "D-S067-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "When a client decides to initiate a connection, it enters the REQUEST state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "state_name": "REQUEST",
+      "enum_name": "DCCP_CLIENT_STATES",
+      "semantic_type": "active",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "protocol.state = REQUEST"
+    },
+    {
+      "statement_id": "D-S067-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "When a client decides to initiate a connection, it enters the REQUEST state, chooses an initial sequence number, and sends a DCCP-Request packet using that sequence number to the intended server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": "REQUEST",
+      "trigger": "client_initiates_connection",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "choose_initial_sequence_number",
+        "send_DCCP-Request"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S067-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "A client in the REQUEST state SHOULD use an exponential-backoff timer to send new DCCP-Request packets if no response is received.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S067",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REQUEST",
+      "to_state": "REQUEST",
+      "trigger": "retransmit_timer_expired & no_response_received",
+      "pre_cond": "protocol.state = REQUEST",
+      "post_cond": null,
+      "actions": [
+        "increment_sequence_number_by_one",
+        "send_DCCP-Request"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S067-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "A client MAY give up on its DCCP-Requests after some time (3 minutes, for example). When it does, it SHOULD send a DCCP-Reset packet to the server with Reset Code 2, 'Aborted', to clean up state in case one or more of the Requests actually arrived.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S067",
+      "actors": [
+        "client"
+      ],
+      "from_state": "REQUEST",
+      "to_state": null,
+      "trigger": "give_up_timeout",
+      "pre_cond": "protocol.state = REQUEST",
+      "post_cond": null,
+      "actions": [
+        "send_DCCP-Reset(Reset_Code=2_Aborted, Acknowledgement_Number=0)"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S067-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dccp_fsm",
+      "description": "The client leaves the REQUEST state for PARTOPEN when it receives a DCCP-Response from the server.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S067",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "REQUEST",
+      "to_state": "PARTOPEN",
+      "trigger": "receive_DCCP-Response",
+      "pre_cond": "protocol.state = REQUEST",
+      "post_cond": null,
+      "actions": [],
+      "modality": "unspecified"
+    }
+  ]
+}

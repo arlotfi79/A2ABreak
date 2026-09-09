@@ -1,0 +1,88 @@
+{
+  "section_id": "S154",
+  "title": "S154 18.6 Allow",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S154 18.6 Allow"
+  ],
+  "url_anchor": "#s154-186-allow",
+  "word_count": 125,
+  "statement_count": 3,
+  "elapsed_seconds": 33.29,
+  "statements": [
+    {
+      "statement_id": "N-S154-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "An Allow header field MUST be present in a 405 (Method Not Allowed) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S154",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "405_response_sent",
+      "pre_cond": "response.status_code = 405",
+      "post_cond": "response.allow_header.present = true",
+      "actions": [
+        "include Allow header listing supported methods in 405 response"
+      ],
+      "modality": "must",
+      "id": "N-S154-001"
+    },
+    {
+      "statement_id": "N-S154-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The Allow header MUST also be present in all OPTIONS responses where the content of the header will not include exactly the same methods as listed in the Public header.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S154",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "OPTIONS_response_sent",
+      "pre_cond": "response.allow_header.methods != response.public_header.methods",
+      "post_cond": "response.allow_header.present = true",
+      "actions": [
+        "include Allow header in OPTIONS response when allowed methods differ from Public header methods"
+      ],
+      "modality": "must",
+      "id": "N-S154-002"
+    },
+    {
+      "statement_id": "N-S154-3",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "rtsp_fsm",
+      "description": "The Allow message body header MUST also be included in SETUP and DESCRIBE responses, if the methods allowed for the resource are different from the complete set of methods defined in this memo.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S154",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "SETUP_response_sent | DESCRIBE_response_sent",
+      "pre_cond": "resource.allowed_methods != spec.complete_method_set",
+      "post_cond": "response.allow_header.present = true",
+      "actions": [
+        "include Allow header in SETUP response when resource allowed methods differ from spec",
+        "include Allow header in DESCRIBE response when resource allowed methods differ from spec"
+      ],
+      "modality": "must",
+      "id": "N-S154-003"
+    }
+  ]
+}

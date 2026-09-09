@@ -1,0 +1,134 @@
+{
+  "section_id": "S031",
+  "title": "S031 4.4.2 Initialization with known network address",
+  "depth": 3,
+  "parent_path": [
+    "DHCP",
+    "S031 4.4.2 Initialization with known network address"
+  ],
+  "url_anchor": "#s031-442-initialization-with-known-network-address",
+  "word_count": 169,
+  "statement_count": 6,
+  "elapsed_seconds": 19.37,
+  "statements": [
+    {
+      "statement_id": "D-S031-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client begins in INIT-REBOOT state and sends a DHCPREQUEST message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "state_name": "INIT-REBOOT",
+      "enum_name": "ClientState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "client.state = INIT-REBOOT"
+    },
+    {
+      "statement_id": "D-S031-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Once a DHCPACK message with an 'xid' field matching that in the client's DHCPREQUEST message arrives from any server, the client is initialized and moves to BOUND state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "state_name": "BOUND",
+      "enum_name": "ClientState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "client.state = BOUND"
+    },
+    {
+      "statement_id": "D-S031-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "The client begins in INIT-REBOOT state and sends a DHCPREQUEST message broadcast on the local hardware broadcast address to the 'DHCP server' UDP port.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "client"
+      ],
+      "from_state": "INIT-REBOOT",
+      "to_state": "INIT-REBOOT",
+      "trigger": "initialization_with_known_address",
+      "pre_cond": "client.state = INIT-REBOOT & client.network_address != null",
+      "post_cond": "client.xid_recorded = true & client.local_time_recorded = true",
+      "actions": [
+        "insert known network address as 'requested IP address' option in DHCPREQUEST",
+        "generate and record random transaction identifier into 'xid' field",
+        "record local time for lease expiration computation",
+        "omit 'server identifier' from DHCPREQUEST",
+        "broadcast DHCPREQUEST to DHCP server UDP port on local hardware broadcast address"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S031-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "dhcp_fsm",
+      "description": "Once a DHCPACK message with an 'xid' field matching that in the client's DHCPREQUEST message arrives from any server, the client is initialized and moves to BOUND state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "INIT-REBOOT",
+      "to_state": "BOUND",
+      "trigger": "receive_DHCPACK",
+      "pre_cond": "client.state = INIT-REBOOT & message.type = DHCPACK & message.xid = client.xid",
+      "post_cond": "client.state = BOUND & client.lease_expiration = client.dhcprequest_sent_time + dhcpack.lease_duration",
+      "actions": [
+        "record lease expiration time as sum of DHCPREQUEST send time and lease duration from DHCPACK"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S031-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "dhcp_fsm",
+      "description": "The client MUST insert its known network address as a 'requested IP address' option in the DHCPREQUEST message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "object_name": "DHCPREQUEST",
+      "field_name": "requested IP address",
+      "field_type": "option",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "client.state = INIT-REBOOT"
+    },
+    {
+      "statement_id": "D-S031-006",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "dhcp_fsm",
+      "description": "The client MUST NOT include a 'server identifier' in the DHCPREQUEST message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "object_name": "DHCPREQUEST",
+      "field_name": "server identifier",
+      "field_type": "option",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "client.state = INIT-REBOOT"
+    }
+  ]
+}

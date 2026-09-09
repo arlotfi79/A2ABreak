@@ -1,0 +1,99 @@
+{
+  "section_id": "S103",
+  "title": "S103 12.1 ECN Incapable Feature",
+  "depth": 3,
+  "parent_path": [
+    "DCCP",
+    "S103 12.1 ECN Incapable Feature"
+  ],
+  "url_anchor": "#s103-121-ecn-incapable-feature",
+  "word_count": 289,
+  "statement_count": 4,
+  "elapsed_seconds": 36.27,
+  "statements": [
+    {
+      "statement_id": "D-S103-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "connection",
+      "stage": "dccp_fsm",
+      "description": "New connections start with ECN Incapable 0 (that is, ECN capable) for both endpoints.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S103",
+      "object_name": "ECN Incapable",
+      "field_name": "ECN Incapable",
+      "field_type": "feature",
+      "required": true,
+      "allowed_values": [
+        0
+      ],
+      "guard_semantics": "Initial value at connection start for both endpoints"
+    },
+    {
+      "statement_id": "D-S103-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "If a DCCP is not ECN capable, it MUST send Mandatory 'Change L(ECN Incapable, 1)' options to the other endpoint until acknowledged (by 'Confirm R(ECN Incapable, 1)') or the connection closes.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S103",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Confirm R(ECN Incapable, 1) received | connection closes",
+      "pre_cond": "endpoint.ecn_capable = false",
+      "post_cond": null,
+      "actions": [
+        "send Mandatory Change L(ECN Incapable, 1)"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S103-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "it MUST NOT accept any data until the other endpoint sends 'Confirm R(ECN Incapable, 1)'. It SHOULD send Data Dropped options on its acknowledgements, with Drop Code 0 ('protocol constraints'), if the other endpoint does send data inappropriately.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S103",
+      "actors": [
+        "endpoint"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "Confirm R(ECN Incapable, 1) received",
+      "pre_cond": "endpoint.ecn_capable = false & ecn_confirm_received = false",
+      "post_cond": "data_acceptance = enabled",
+      "actions": [
+        "accept data"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S103-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "endpoint",
+      "stage": "dccp_fsm",
+      "description": "If the ECN Incapable/A feature is one, then all of DCCP B's packets MUST be sent as ECN incapable.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S103",
+      "object_name": "ECN Incapable",
+      "field_name": "ECN Incapable",
+      "field_type": "feature",
+      "required": true,
+      "allowed_values": [
+        1
+      ],
+      "guard_semantics": "When ECN Incapable/A = 1, peer MUST send all packets as ECN incapable"
+    }
+  ]
+}

@@ -1,0 +1,509 @@
+{
+  "pipeline_stage": "stage_b2",
+  "protocol_phase": "initiation",
+  "turn": 1,
+  "status": "complete",
+  "finish_reason": "stop",
+  "web_search": {
+    "executed": true,
+    "mode": "server_side_single_request",
+    "queries": [],
+    "tool_use_blocks": 0,
+    "result_blocks": 0,
+    "requests_billed": 5
+  },
+  "web_searches": [],
+  "raw_text_len": 16111,
+  "raw_text": "Based on my analysis of the input data and extensive spec research, here is the formal FSM for the initiation phase:\n\n```json\n{\n  \"stage\": \"initiation\",\n  \"states\": [\n    {\n      \"state_name\": \"TASK_STATE_NONEXISTENT\",\n      \"semantic_type\": \"initial\",\n      \"actor\": \"client\",\n      \"is_initial\": true,\n      \"is_final\": false,\n      \"invariant_cond\": \"task.exists = false\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-3-1-044\", \"D-3-7-003\"]\n    },\n    {\n      \"state_name\": \"VERSION_NEGOTIATION_ERROR\",\n      \"semantic_type\": \"error\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"response.status = 400 & response.error_type = version_not_supported\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-6-4-001\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_SUBMITTED\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"task.status.state = TASK_STATE_SUBMITTED\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-6-6-001\", \"D-4-1-044\", \"D-6-6-011\", \"N-3-4-012\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_WORKING\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"task.status.state = TASK_STATE_WORKING\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-3-1-044\", \"D-6-2-009\", \"D-3-2-015\"]\n    },\n    {\n      \"state_name\": \"TASK_STATE_REJECTED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"task.status.state = TASK_STATE_REJECTED\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-4-1-044\"]\n    },\n    {\n      \"state_name\": \"STREAM_STATE_OPEN\",\n      \"semantic_type\": \"active\",\n      \"actor\": \"shared\",\n      \"is_initial\": false,\n      \"is_final\": false,\n      \"invariant_cond\": \"stream.open = true\",\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"D-11-7-007\", \"D-3-1-037\"]\n    },\n    {\n      \"state_name\": \"STREAM_CLOSED\",\n      \"semantic_type\": \"terminal\",\n      \"actor\": \"server\",\n      \"is_initial\": false,\n      \"is_final\": true,\n      \"invariant_cond\": \"stream.open = false & stream.mode = MESSAGE_ONLY\",\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"D-3-1-037\"]\n    }\n  ],\n  \"transitions\": [\n    {\n      \"from_state\": \"TASK_STATE_NONEXISTENT\",\n      \"to_state\": \"TASK_STATE_WORKING\",\n      \"trigger\": \"send_message_requested\",\n      \"guard\": null,\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"may\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-3-1-044\"]\n    },\n    {\n      \"from_state\": \"STREAM_STATE_OPEN\",\n      \"to_state\": \"STREAM_CLOSED\",\n      \"trigger\": \"message_delivered\",\n      \"guard\": \"stream.open = true & stream.mode = MESSAGE_ONLY\",\n      \"actors\": [\"server\", \"client\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.9,\n      \"source_ids\": [\"D-3-1-037\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_NONEXISTENT\",\n      \"to_state\": \"TASK_STATE_WORKING\",\n      \"trigger\": \"send_message_request_received\",\n      \"guard\": \"configuration.returnImmediately = true\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-3-2-015\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_NONEXISTENT\",\n      \"to_state\": \"TASK_STATE_NONEXISTENT\",\n      \"trigger\": \"agent_sends_clarification_message\",\n      \"guard\": \"task.created = false\",\n      \"actors\": [\"agent\", \"client\"],\n      \"modality\": \"may\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-3-7-003\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_SUBMITTED\",\n      \"to_state\": \"TASK_STATE_REJECTED\",\n      \"trigger\": \"agent_rejects_task\",\n      \"guard\": \"task.state = TASK_STATE_SUBMITTED\",\n      \"actors\": [\"server\"],\n      \"modality\": \"may\",\n      \"is_inferred\": false,\n      \"confidence\": 1.0,\n      \"source_ids\": [\"D-4-1-044\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_NONEXISTENT\",\n      \"to_state\": \"TASK_STATE_WORKING\",\n      \"trigger\": \"POST /message:stream\",\n      \"guard\": null,\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"D-6-2-009\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_NONEXISTENT\",\n      \"to_state\": \"VERSION_NEGOTIATION_ERROR\",\n      \"trigger\": \"message_send_request_received\",\n      \"guard\": \"request.A2A_Version != null & server.version_supported = false\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"D-6-4-002\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_NONEXISTENT\",\n      \"to_state\": \"TASK_STATE_SUBMITTED\",\n      \"trigger\": \"message_send\",\n      \"guard\": \"configuration.pushNotificationConfig != null & configuration.pushNotificationConfig.url != null\",\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"D-6-6-011\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_NONEXISTENT\",\n      \"to_state\": \"STREAM_STATE_OPEN\",\n      \"trigger\": \"POST_message_stream\",\n      \"guard\": null,\n      \"actors\": [\"client\", \"server\"],\n      \"modality\": \"unspecified\",\n      \"is_inferred\": true,\n      \"confidence\": 0.85,\n      \"source_ids\": [\"D-11-7-007\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_NONEXISTENT\",\n      \"to_state\": \"VERSION_NEGOTIATION_ERROR\",\n      \"trigger\": \"request_received\",\n      \"guard\": \"!server.version_supported\",\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"D-3-6-006\", \"N-3-6-006\", \"D-14-2-003\"]\n    },\n    {\n      \"from_state\": \"TASK_STATE_NONEXISTENT\",\n      \"to_state\": \"TASK_STATE_SUBMITTED\",\n      \"trigger\": \"task_creation\",\n      \"guard\": null,\n      \"actors\": [\"server\"],\n      \"modality\": \"must\",\n      \"is_inferred\": true,\n      \"confidence\": 0.8,\n      \"source_ids\": [\"N-3-4-012\"]\n    }\n  ],\n  \"inter_stage\": {\n    \"entry_from_previous\": [\"TASK_STATE_NONEXISTENT\"],\n    \"exit_to_next\": [\n      {\n        \"from_state\": \"TASK_STATE_WORKING\",\n        \"to_stage\": \"task_execution\",\n        \"reason\": \"Task is in working state after initiation; no outgoing transitions within initiation phase. task_execution phase manages ongoing processing, state progression, and artifact generation.\"\n      }\n    ]\n  },\n  \"discarded_states\": [\n    {\n      \"state_name\": \"LEGACY_NAME_INTRODUCED\",\n      \"reason\": \"Deprecation lifecycle state from Appendix A migration guide; not a protocol session state. Describes documentation aliasing during version transitions, not runtime protocol behavior.\"\n    }\n  ],\n  \"unresolved\": [\n    {\n      \"source_id\": \"D-3-7-002\",\n      \"issue\": \"from_state inferred as TASK_STATE_NONEXISTENT (client_sends_message trigger, section 3.7). to_state is ambiguous: server may respond with Task (SUBMITTED/WORKING), Message, or error. Multiple destination states possible; cannot resolve to single transition.\",\n      \"reason_type\": \"null_to_state\",\n      \"confidence\": 0.5\n    },\n    {\n      \"source_id\": \"D-9-4-011\",\n      \"issue\": \"Generic SendMessage operation reference (section 9.4.1). from_state inferred as TASK_STATE_NONEXISTENT but to_state cannot be determined — the operation may yield Task, Message, or error depending on server behavior.\",\n      \"reason_type\": \"null_to_state\",\n      \"confidence\": 0.5\n    },\n    {\n      \"source_id\": \"D-Appendix A- Migratio-005\",\n      \"issue\": \"Transition targets LEGACY_NAME_INTRODUCED which was discarded as a deprecation lifecycle state. The trigger version_0_3_x_release describes spec versioning, not runtime protocol state.\",\n      \"reason_type\": \"semantic_mismatch\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-3-001\",\n      \"issue\": \"Behavioral constraint: server MAY send_message. Describes server messaging capability, not a state transition. Searched section 3.3 — describes Messages vs Artifacts distinction, no FSM state change identified.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-4-001\",\n      \"issue\": \"Behavioral constraint: server MAY receive_message without contextId. Describes context handling rules, not a state transition. Searched section 3.4.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-4-002\",\n      \"issue\": \"Behavioral constraint: server MUST include contextId in response when generated. Protocol formatting rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-4-003\",\n      \"issue\": \"Behavioral constraint: server MAY receive_message with contextId. Context management rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-4-004\",\n      \"issue\": \"Behavioral constraint: server MUST reject message when contextId not acceptable. Implies error response path but no explicit error state for context rejection exists in input data. Searched section 3.4 — maps to request-level error, not task state.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.4\n    },\n    {\n      \"source_id\": \"N-3-4-006\",\n      \"issue\": \"Behavioral constraint: client SHOULD send_message without contextId if processing unknown. Guidance constraint, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-4-013\",\n      \"issue\": \"Behavioral constraint: server MUST include taskId in response when task is created. Response formatting rule supporting TASK_STATE_SUBMITTED transitions.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-4-018\",\n      \"issue\": \"Behavioral constraint: client MAY send_message with contextId without taskId. Multi-turn interaction pattern rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-6-003\",\n      \"issue\": \"Behavioral constraint: client MUST include A2A-Version header with each request. Protocol formatting requirement supporting version negotiation transitions.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-6-004\",\n      \"issue\": \"Behavioral constraint: client MAY include A2A-Version as query parameter. Alternative version signaling mechanism, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-6-007\",\n      \"issue\": \"Behavioral constraint: server MUST interpret empty A2A-Version as 0.3. Default version interpretation rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-3-6-009\",\n      \"issue\": \"Behavioral constraint: client SHOULD request specific versions to avoid automatic fallback. Guidance for version pinning, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-9-3-001\",\n      \"issue\": \"Behavioral constraint: JSON-RPC request MUST include jsonrpc, id, method, params fields. Wire format requirement, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-10-2-001\",\n      \"issue\": \"Behavioral constraint: gRPC requests MUST carry service parameters in metadata. Transport-specific formatting rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-10-2-002\",\n      \"issue\": \"Behavioral constraint: gRPC service parameter names MUST map to metadata keys. Transport-specific formatting rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-10-2-003\",\n      \"issue\": \"Behavioral constraint: gRPC multiple values SHOULD use comma-separated encoding. Transport-specific formatting rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-10-4-001\",\n      \"issue\": \"Behavioral constraint: sendMessage response MUST return either Task or Message exclusively. Response structure rule supporting existing transitions.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-14-2-001\",\n      \"issue\": \"Behavioral constraint: HTTP A2A-Version header MUST use Major.Minor format. Version formatting rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-5-6-001\",\n      \"issue\": \"Behavioral constraint: JSON timestamps MUST use ISO 8601 UTC format. Data serialization rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-5-6-004\",\n      \"issue\": \"Behavioral constraint: millisecond precision MAY be omitted. Timestamp formatting rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-5-7-002\",\n      \"issue\": \"Behavioral constraint: message_received handling guidance. General message processing rule, not a state transition.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    },\n    {\n      \"source_id\": \"N-12-2-001\",\n      \"issue\": \"Behavioral constraint: custom binding definitions MUST define type mappings. Extension framework requirement, not relevant to initiation phase state transitions.\",\n      \"reason_type\": \"both_null\",\n      \"confidence\": 0.3\n    }\n  ],\n  \"gaps\": [\n    {\n      \"state_name\": \"TASK_STATE_WORKING\",\n      \"issue\": \"No outgoing transitions within initiation phase. TASK_STATE_WORKING is reached via three paths (send_message_requested, send_message_request_received, POST /message:stream) but has no transitions within this stage. Exits to task_execution as inter-stage connection. Searched sections 3.1 and 6.x — confirmed processing continues in task_execution phase.\",\n      \"type\": \"no_outgoing_non_terminal\"\n    },\n    {\n      \"state_name\": \"STREAM_STATE_OPEN\",\n      \"issue\": \"Only outgoing transition is to STREAM_CLOSED for message-only streams (stream.mode = MESSAGE_ONLY). No outgoing transition modeled for task lifecycle streams where the stream begins with a Task object and continues with status/artifact events. Spec section 3.1.2 confirms task lifecycle streams follow a different closure pattern (close on terminal task state), which belongs to the task_execution phase.\",\n      \"type\": \"no_outgoing_non_terminal\"\n    },\n    {\n      \"state_name\": null,\n      \"issue\": \"Missing state coverage for direct Message response (non-streaming, no task created). Spec section 3.1.1 states 'Clients send a message to an agent and receive either a task... or a direct response message.' The message-only non-streaming response path has no FSM state to represent the terminal outcome where agent returns a Message without creating a Task. D-3-1-044 post_cond acknowledges this alternative (message.returned = true) but the to_state only models the task creation path.\",\n      \"type\": \"missing_state_coverage\"\n    },\n    {\n      \"state_name\": \"TASK_STATE_SUBMITTED\",\n      \"issue\": \"No transition from TASK_STATE_SUBMITTED to TASK_STATE_WORKING within initiation phase. The task lifecycle diagram shows submitted → working: Start processing as a standard transition. This transition is expected in the task_execution phase, but its absence creates an apparent dead-end for TASK_STATE_SUBMITTED within initiation (only outgoing is to TASK_STATE_REJECTED). TASK_STATE_SUBMITTED effectively serves as a boundary state between initiation and task_execution.\",\n      \"type\": \"no_outgoing_non_terminal\"\n    }\n  ]\n}\n```",
+  "fsm": {
+    "stage": "initiation",
+    "states": [
+      {
+        "state_name": "TASK_STATE_NONEXISTENT",
+        "semantic_type": "initial",
+        "actor": "client",
+        "is_initial": true,
+        "is_final": false,
+        "invariant_cond": "task.exists = false",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-3-1-044",
+          "D-3-7-003"
+        ]
+      },
+      {
+        "state_name": "VERSION_NEGOTIATION_ERROR",
+        "semantic_type": "error",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "response.status = 400 & response.error_type = version_not_supported",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-6-4-001"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_SUBMITTED",
+        "semantic_type": "active",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "task.status.state = TASK_STATE_SUBMITTED",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-6-6-001",
+          "D-4-1-044",
+          "D-6-6-011",
+          "N-3-4-012"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_WORKING",
+        "semantic_type": "active",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "task.status.state = TASK_STATE_WORKING",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-3-1-044",
+          "D-6-2-009",
+          "D-3-2-015"
+        ]
+      },
+      {
+        "state_name": "TASK_STATE_REJECTED",
+        "semantic_type": "terminal",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "task.status.state = TASK_STATE_REJECTED",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-4-1-044"
+        ]
+      },
+      {
+        "state_name": "STREAM_STATE_OPEN",
+        "semantic_type": "active",
+        "actor": "shared",
+        "is_initial": false,
+        "is_final": false,
+        "invariant_cond": "stream.open = true",
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "D-11-7-007",
+          "D-3-1-037"
+        ]
+      },
+      {
+        "state_name": "STREAM_CLOSED",
+        "semantic_type": "terminal",
+        "actor": "server",
+        "is_initial": false,
+        "is_final": true,
+        "invariant_cond": "stream.open = false & stream.mode = MESSAGE_ONLY",
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "D-3-1-037"
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "send_message_requested",
+        "guard": null,
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "may",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-3-1-044"
+        ]
+      },
+      {
+        "from_state": "STREAM_STATE_OPEN",
+        "to_state": "STREAM_CLOSED",
+        "trigger": "message_delivered",
+        "guard": "stream.open = true & stream.mode = MESSAGE_ONLY",
+        "actors": [
+          "server",
+          "client"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.9,
+        "source_ids": [
+          "D-3-1-037"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "send_message_request_received",
+        "guard": "configuration.returnImmediately = true",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-3-2-015"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "TASK_STATE_NONEXISTENT",
+        "trigger": "agent_sends_clarification_message",
+        "guard": "task.created = false",
+        "actors": [
+          "agent",
+          "client"
+        ],
+        "modality": "may",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-3-7-003"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_SUBMITTED",
+        "to_state": "TASK_STATE_REJECTED",
+        "trigger": "agent_rejects_task",
+        "guard": "task.state = TASK_STATE_SUBMITTED",
+        "actors": [
+          "server"
+        ],
+        "modality": "may",
+        "is_inferred": false,
+        "confidence": 1.0,
+        "source_ids": [
+          "D-4-1-044"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "TASK_STATE_WORKING",
+        "trigger": "POST /message:stream",
+        "guard": null,
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "D-6-2-009"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "VERSION_NEGOTIATION_ERROR",
+        "trigger": "message_send_request_received",
+        "guard": "request.A2A_Version != null & server.version_supported = false",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "D-6-4-002"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "TASK_STATE_SUBMITTED",
+        "trigger": "message_send",
+        "guard": "configuration.pushNotificationConfig != null & configuration.pushNotificationConfig.url != null",
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "D-6-6-011"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "STREAM_STATE_OPEN",
+        "trigger": "POST_message_stream",
+        "guard": null,
+        "actors": [
+          "client",
+          "server"
+        ],
+        "modality": "unspecified",
+        "is_inferred": true,
+        "confidence": 0.85,
+        "source_ids": [
+          "D-11-7-007"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "VERSION_NEGOTIATION_ERROR",
+        "trigger": "request_received",
+        "guard": "!server.version_supported",
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "D-3-6-006",
+          "N-3-6-006",
+          "D-14-2-003"
+        ]
+      },
+      {
+        "from_state": "TASK_STATE_NONEXISTENT",
+        "to_state": "TASK_STATE_SUBMITTED",
+        "trigger": "task_creation",
+        "guard": null,
+        "actors": [
+          "server"
+        ],
+        "modality": "must",
+        "is_inferred": true,
+        "confidence": 0.8,
+        "source_ids": [
+          "N-3-4-012"
+        ]
+      }
+    ],
+    "inter_stage": {
+      "entry_from_previous": [
+        "TASK_STATE_NONEXISTENT"
+      ],
+      "exit_to_next": [
+        {
+          "from_state": "TASK_STATE_WORKING",
+          "to_stage": "task_execution",
+          "reason": "Task is in working state after initiation; no outgoing transitions within initiation phase. task_execution phase manages ongoing processing, state progression, and artifact generation."
+        }
+      ]
+    },
+    "discarded_states": [
+      {
+        "state_name": "LEGACY_NAME_INTRODUCED",
+        "reason": "Deprecation lifecycle state from Appendix A migration guide; not a protocol session state. Describes documentation aliasing during version transitions, not runtime protocol behavior."
+      }
+    ],
+    "unresolved": [
+      {
+        "source_id": "D-3-7-002",
+        "issue": "from_state inferred as TASK_STATE_NONEXISTENT (client_sends_message trigger, section 3.7). to_state is ambiguous: server may respond with Task (SUBMITTED/WORKING), Message, or error. Multiple destination states possible; cannot resolve to single transition.",
+        "reason_type": "null_to_state",
+        "confidence": 0.5
+      },
+      {
+        "source_id": "D-9-4-011",
+        "issue": "Generic SendMessage operation reference (section 9.4.1). from_state inferred as TASK_STATE_NONEXISTENT but to_state cannot be determined — the operation may yield Task, Message, or error depending on server behavior.",
+        "reason_type": "null_to_state",
+        "confidence": 0.5
+      },
+      {
+        "source_id": "D-Appendix A- Migratio-005",
+        "issue": "Transition targets LEGACY_NAME_INTRODUCED which was discarded as a deprecation lifecycle state. The trigger version_0_3_x_release describes spec versioning, not runtime protocol state.",
+        "reason_type": "semantic_mismatch",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-3-001",
+        "issue": "Behavioral constraint: server MAY send_message. Describes server messaging capability, not a state transition. Searched section 3.3 — describes Messages vs Artifacts distinction, no FSM state change identified.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-4-001",
+        "issue": "Behavioral constraint: server MAY receive_message without contextId. Describes context handling rules, not a state transition. Searched section 3.4.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-4-002",
+        "issue": "Behavioral constraint: server MUST include contextId in response when generated. Protocol formatting rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-4-003",
+        "issue": "Behavioral constraint: server MAY receive_message with contextId. Context management rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-4-004",
+        "issue": "Behavioral constraint: server MUST reject message when contextId not acceptable. Implies error response path but no explicit error state for context rejection exists in input data. Searched section 3.4 — maps to request-level error, not task state.",
+        "reason_type": "both_null",
+        "confidence": 0.4
+      },
+      {
+        "source_id": "N-3-4-006",
+        "issue": "Behavioral constraint: client SHOULD send_message without contextId if processing unknown. Guidance constraint, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-4-013",
+        "issue": "Behavioral constraint: server MUST include taskId in response when task is created. Response formatting rule supporting TASK_STATE_SUBMITTED transitions.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-4-018",
+        "issue": "Behavioral constraint: client MAY send_message with contextId without taskId. Multi-turn interaction pattern rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-6-003",
+        "issue": "Behavioral constraint: client MUST include A2A-Version header with each request. Protocol formatting requirement supporting version negotiation transitions.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-6-004",
+        "issue": "Behavioral constraint: client MAY include A2A-Version as query parameter. Alternative version signaling mechanism, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-6-007",
+        "issue": "Behavioral constraint: server MUST interpret empty A2A-Version as 0.3. Default version interpretation rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-3-6-009",
+        "issue": "Behavioral constraint: client SHOULD request specific versions to avoid automatic fallback. Guidance for version pinning, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-9-3-001",
+        "issue": "Behavioral constraint: JSON-RPC request MUST include jsonrpc, id, method, params fields. Wire format requirement, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-10-2-001",
+        "issue": "Behavioral constraint: gRPC requests MUST carry service parameters in metadata. Transport-specific formatting rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-10-2-002",
+        "issue": "Behavioral constraint: gRPC service parameter names MUST map to metadata keys. Transport-specific formatting rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-10-2-003",
+        "issue": "Behavioral constraint: gRPC multiple values SHOULD use comma-separated encoding. Transport-specific formatting rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-10-4-001",
+        "issue": "Behavioral constraint: sendMessage response MUST return either Task or Message exclusively. Response structure rule supporting existing transitions.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-14-2-001",
+        "issue": "Behavioral constraint: HTTP A2A-Version header MUST use Major.Minor format. Version formatting rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-5-6-001",
+        "issue": "Behavioral constraint: JSON timestamps MUST use ISO 8601 UTC format. Data serialization rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-5-6-004",
+        "issue": "Behavioral constraint: millisecond precision MAY be omitted. Timestamp formatting rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-5-7-002",
+        "issue": "Behavioral constraint: message_received handling guidance. General message processing rule, not a state transition.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      },
+      {
+        "source_id": "N-12-2-001",
+        "issue": "Behavioral constraint: custom binding definitions MUST define type mappings. Extension framework requirement, not relevant to initiation phase state transitions.",
+        "reason_type": "both_null",
+        "confidence": 0.3
+      }
+    ],
+    "gaps": [
+      {
+        "state_name": "TASK_STATE_WORKING",
+        "issue": "No outgoing transitions within initiation phase. TASK_STATE_WORKING is reached via three paths (send_message_requested, send_message_request_received, POST /message:stream) but has no transitions within this stage. Exits to task_execution as inter-stage connection. Searched sections 3.1 and 6.x — confirmed processing continues in task_execution phase.",
+        "type": "no_outgoing_non_terminal"
+      },
+      {
+        "state_name": "STREAM_STATE_OPEN",
+        "issue": "Only outgoing transition is to STREAM_CLOSED for message-only streams (stream.mode = MESSAGE_ONLY). No outgoing transition modeled for task lifecycle streams where the stream begins with a Task object and continues with status/artifact events. Spec section 3.1.2 confirms task lifecycle streams follow a different closure pattern (close on terminal task state), which belongs to the task_execution phase.",
+        "type": "no_outgoing_non_terminal"
+      },
+      {
+        "state_name": null,
+        "issue": "Missing state coverage for direct Message response (non-streaming, no task created). Spec section 3.1.1 states 'Clients send a message to an agent and receive either a task... or a direct response message.' The message-only non-streaming response path has no FSM state to represent the terminal outcome where agent returns a Message without creating a Task. D-3-1-044 post_cond acknowledges this alternative (message.returned = true) but the to_state only models the task creation path.",
+        "type": "missing_state_coverage"
+      },
+      {
+        "state_name": "TASK_STATE_SUBMITTED",
+        "issue": "No transition from TASK_STATE_SUBMITTED to TASK_STATE_WORKING within initiation phase. The task lifecycle diagram shows submitted → working: Start processing as a standard transition. This transition is expected in the task_execution phase, but its absence creates an apparent dead-end for TASK_STATE_SUBMITTED within initiation (only outgoing is to TASK_STATE_REJECTED). TASK_STATE_SUBMITTED effectively serves as a boundary state between initiation and task_execution.",
+        "type": "no_outgoing_non_terminal"
+      }
+    ]
+  },
+  "cost": {
+    "pipeline_stage": "stage_b2",
+    "protocol_phase": "initiation",
+    "model": "anthropic/claude-opus-4-6",
+    "turn": 1,
+    "input_tokens": 187100,
+    "output_tokens": 48301,
+    "total_tokens": 235401,
+    "cumulative_input_tokens": 187100,
+    "cumulative_output_tokens": 48301,
+    "cumulative_total_tokens": 235401,
+    "elapsed_seconds": 843.42,
+    "timestamp": "2026-05-18T04:43:42Z",
+    "cost_usd": 2.193025,
+    "web_search_requests": 5,
+    "web_search_executed": true,
+    "web_search_queries": []
+  },
+  "timestamp": "2026-05-18T04:43:42Z"
+}

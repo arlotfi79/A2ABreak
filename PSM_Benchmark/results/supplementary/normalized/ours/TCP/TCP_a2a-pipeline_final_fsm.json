@@ -1,0 +1,471 @@
+{
+ "states": [
+  "CLOSED",
+  "LISTEN",
+  "SYN_SENT",
+  "SYN_RCVD",
+  "ESTAB",
+  "FIN_WAIT-1",
+  "FIN_WAIT-2",
+  "CLOSE_WAIT",
+  "CLOSING",
+  "LAST-ACK",
+  "TIME-WAIT"
+ ],
+ "initial_state": "CLOSED",
+ "final_states": [
+  "CLOSED"
+ ],
+ "transitions": [
+  {
+   "from": "CLOSED",
+   "event": "passive OPEN",
+   "action": "create TCB",
+   "to": "LISTEN"
+  },
+  {
+   "from": "CLOSED",
+   "event": "active OPEN",
+   "action": "create TCB; send SYN",
+   "to": "SYN_SENT"
+  },
+  {
+   "from": "CLOSED",
+   "event": "receive RST",
+   "action": "discard segment",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSED",
+   "event": "receive segment noACK",
+   "action": "send RST_ACK",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSED",
+   "event": "receive segment ACK",
+   "action": "send RST",
+   "to": "CLOSED"
+  },
+  {
+   "from": "LISTEN",
+   "event": "CLOSE",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive SYN",
+   "action": "send SYN, ACK",
+   "to": "SYN_RCVD"
+  },
+  {
+   "from": "LISTEN",
+   "event": "send SYN",
+   "action": "send SYN",
+   "to": "SYN_SENT"
+  },
+  {
+   "from": "LISTEN",
+   "event": "active OPEN",
+   "action": "select ISS; send SYN",
+   "to": "SYN_SENT"
+  },
+  {
+   "from": "LISTEN",
+   "event": "ABORT",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive RST",
+   "action": "discard segment",
+   "to": "LISTEN"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive ACK",
+   "action": "send RST",
+   "to": "LISTEN"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive SYN",
+   "action": "send RST_ACK",
+   "to": "LISTEN"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive SYN ACK",
+   "action": "send RST",
+   "to": "LISTEN"
+  },
+  {
+   "from": "SYN_SENT",
+   "event": "receive SYN",
+   "action": "send SYN, ACK",
+   "to": "SYN_RCVD"
+  },
+  {
+   "from": "SYN_SENT",
+   "event": "receive SYN, ACK",
+   "action": "send ACK",
+   "to": "ESTAB"
+  },
+  {
+   "from": "SYN_SENT",
+   "event": "receive RST",
+   "action": "signal connection reset; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "SYN_SENT",
+   "event": "receive RST",
+   "action": "return to LISTEN",
+   "to": "LISTEN"
+  },
+  {
+   "from": "SYN_SENT",
+   "event": "CLOSE",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "SYN_SENT",
+   "event": "ABORT",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "SYN_SENT",
+   "event": "receive unacceptable ACK",
+   "action": "send RST; discard segment",
+   "to": "SYN_SENT"
+  },
+  {
+   "from": "SYN_SENT",
+   "event": "SEND",
+   "action": "queue data for transmission",
+   "to": "SYN_SENT"
+  },
+  {
+   "from": "SYN_SENT",
+   "event": "cond SYN retransmit exceeded",
+   "action": "close connection; notify application",
+   "to": "CLOSED"
+  },
+  {
+   "from": "SYN_RCVD",
+   "event": "rcv RST (note1)",
+   "action": "",
+   "to": "LISTEN"
+  },
+  {
+   "from": "SYN_RCVD",
+   "event": "receive RST",
+   "action": "signal connection refused; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "SYN_RCVD",
+   "event": "receive ACK of SYN",
+   "action": "",
+   "to": "ESTAB"
+  },
+  {
+   "from": "SYN_RCVD",
+   "event": "receive SYN ACK",
+   "action": "complete simultaneous open",
+   "to": "ESTAB"
+  },
+  {
+   "from": "SYN_RCVD",
+   "event": "CLOSE",
+   "action": "send FIN",
+   "to": "FIN_WAIT-1"
+  },
+  {
+   "from": "SYN_RCVD",
+   "event": "ABORT",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "SYN_RCVD",
+   "event": "SEND",
+   "action": "queue data for transmission",
+   "to": "SYN_RCVD"
+  },
+  {
+   "from": "SYN_RCVD",
+   "event": "receive FIN",
+   "action": "send ACK for FIN; signal connection closing",
+   "to": "CLOSE_WAIT"
+  },
+  {
+   "from": "SYN_RCVD",
+   "event": "receive SYN",
+   "action": "return to LISTEN",
+   "to": "LISTEN"
+  },
+  {
+   "from": "ESTAB",
+   "event": "CLOSE",
+   "action": "send FIN",
+   "to": "FIN_WAIT-1"
+  },
+  {
+   "from": "ESTAB",
+   "event": "receive FIN",
+   "action": "send ACK",
+   "to": "CLOSE_WAIT"
+  },
+  {
+   "from": "ESTAB",
+   "event": "receive RST",
+   "action": "signal connection reset; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "ESTAB",
+   "event": "ABORT",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "ESTAB",
+   "event": "receive SYN",
+   "action": "send ACK",
+   "to": "ESTAB"
+  },
+  {
+   "from": "ESTAB",
+   "event": "receive SYN",
+   "action": "send RST; signal connection reset; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "ESTAB",
+   "event": "segment transmitted",
+   "action": "advance SND.NXT",
+   "to": "ESTAB"
+  },
+  {
+   "from": "ESTAB",
+   "event": "segment accepted",
+   "action": "advance RCV.NXT; send ACK",
+   "to": "ESTAB"
+  },
+  {
+   "from": "ESTAB",
+   "event": "receive ACK",
+   "action": "advance SND.UNA",
+   "to": "ESTAB"
+  },
+  {
+   "from": "ESTAB",
+   "event": "cond security mismatch",
+   "action": "send RST; signal connection reset; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "FIN_WAIT-1",
+   "event": "receive ACK of FIN",
+   "action": "",
+   "to": "FIN_WAIT-2"
+  },
+  {
+   "from": "FIN_WAIT-1",
+   "event": "receive FIN",
+   "action": "send ACK",
+   "to": "CLOSING"
+  },
+  {
+   "from": "FIN_WAIT-1",
+   "event": "receive FIN ACK",
+   "action": "send ACK; start time_wait timer",
+   "to": "TIME-WAIT"
+  },
+  {
+   "from": "FIN_WAIT-1",
+   "event": "receive RST",
+   "action": "signal connection reset; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "FIN_WAIT-1",
+   "event": "ABORT",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "FIN_WAIT-1",
+   "event": "SEND",
+   "action": "return error connection closing",
+   "to": "FIN_WAIT-1"
+  },
+  {
+   "from": "FIN_WAIT-1",
+   "event": "cond security mismatch",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "FIN_WAIT-2",
+   "event": "receive FIN",
+   "action": "send ACK",
+   "to": "TIME-WAIT"
+  },
+  {
+   "from": "FIN_WAIT-2",
+   "event": "receive RST",
+   "action": "signal connection reset; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "FIN_WAIT-2",
+   "event": "ABORT",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "FIN_WAIT-2",
+   "event": "cond security mismatch",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSE_WAIT",
+   "event": "CLOSE",
+   "action": "send FIN",
+   "to": "LAST-ACK"
+  },
+  {
+   "from": "CLOSE_WAIT",
+   "event": "receive RST",
+   "action": "signal connection reset; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSE_WAIT",
+   "event": "ABORT",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSE_WAIT",
+   "event": "cond security mismatch",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSE_WAIT",
+   "event": "receive FIN",
+   "action": "send ACK for FIN",
+   "to": "CLOSE_WAIT"
+  },
+  {
+   "from": "CLOSING",
+   "event": "receive ACK of FIN",
+   "action": "",
+   "to": "TIME-WAIT"
+  },
+  {
+   "from": "CLOSING",
+   "event": "receive RST",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSING",
+   "event": "ABORT",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSING",
+   "event": "cond security mismatch",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSING",
+   "event": "receive FIN",
+   "action": "send ACK for FIN",
+   "to": "CLOSING"
+  },
+  {
+   "from": "LAST-ACK",
+   "event": "receive ACK of FIN",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "LAST-ACK",
+   "event": "receive RST",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "LAST-ACK",
+   "event": "ABORT",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "LAST-ACK",
+   "event": "cond security mismatch",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "LAST-ACK",
+   "event": "receive FIN",
+   "action": "send ACK for FIN",
+   "to": "LAST-ACK"
+  },
+  {
+   "from": "LAST-ACK",
+   "event": "timeout user",
+   "action": "abort connection; notify user",
+   "to": "CLOSED"
+  },
+  {
+   "from": "TIME-WAIT",
+   "event": "Timeout=2MSL",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "TIME-WAIT",
+   "event": "receive RST",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "TIME-WAIT",
+   "event": "ABORT",
+   "action": "delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "TIME-WAIT",
+   "event": "cond security mismatch",
+   "action": "send RST; delete TCB",
+   "to": "CLOSED"
+  },
+  {
+   "from": "TIME-WAIT",
+   "event": "receive FIN",
+   "action": "send ACK for FIN; restart 2MSL timeout",
+   "to": "TIME-WAIT"
+  },
+  {
+   "from": "TIME-WAIT",
+   "event": "receive SYN",
+   "action": "return to TIME_WAIT",
+   "to": "TIME-WAIT"
+  }
+ ]
+}

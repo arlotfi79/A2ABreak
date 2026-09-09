@@ -1,0 +1,65 @@
+{
+  "section_id": "S008",
+  "title": "S008 2.2.3 Special Issues with Extensions",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S008 2.2.3 Special Issues with Extensions"
+  ],
+  "url_anchor": "#s008-223-special-issues-with-extensions",
+  "word_count": 169,
+  "statement_count": 2,
+  "elapsed_seconds": 34.02,
+  "statements": [
+    {
+      "statement_id": "1-S008-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "In particular, if an extension implies that the delivery path normally supports special features of that extension, and an intermediate SMTP system finds a next hop that does not support the required extension, it MAY choose, based on the specific extension and circumstances, to requeue the message and try later and/or try an alternate MX host.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "intermediate SMTP system"
+      ],
+      "from_state": null,
+      "to_state": "REQUEUED",
+      "trigger": "next_hop_extension_not_supported",
+      "pre_cond": "extension.requires_special_features = true & next_hop.supports_extension = false",
+      "post_cond": "message.requeued = true | next_hop.alternate_mx_selected = true",
+      "actions": [
+        "requeue message for later retry",
+        "and/or select alternate MX host"
+      ],
+      "modality": "may",
+      "id": "N-S008-001"
+    },
+    {
+      "statement_id": "2-S008-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "timer",
+      "stage": "smtp_fsm",
+      "description": "If this strategy is employed, the timeout to fall back to an unextended format (if one is available) SHOULD be less than the normal timeout for bouncing as undeliverable (e.g., if normal timeout is three days, the requeue timeout before attempting to transmit the mail without the extension might be one day).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S008",
+      "actors": [
+        "intermediate SMTP system"
+      ],
+      "from_state": "REQUEUED",
+      "to_state": null,
+      "trigger": "fallback_timeout_expires",
+      "pre_cond": "requeue_strategy.employed = true & unextended_format.available = true",
+      "post_cond": "timer.fallback_timeout < timer.bounce_undeliverable_timeout",
+      "actions": [
+        "configure fallback-to-unextended timeout to be less than bounce-as-undeliverable timeout",
+        "attempt transmission without extension upon timeout expiry"
+      ],
+      "modality": "should",
+      "id": "N-S008-002"
+    }
+  ]
+}

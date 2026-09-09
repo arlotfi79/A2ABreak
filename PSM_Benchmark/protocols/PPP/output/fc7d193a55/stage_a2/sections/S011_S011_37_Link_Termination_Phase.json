@@ -1,0 +1,159 @@
+{
+  "section_id": "S011",
+  "title": "S011 3.7 Link Termination Phase",
+  "depth": 3,
+  "parent_path": [
+    "PPP",
+    "S011 3.7 Link Termination Phase"
+  ],
+  "url_anchor": "#s011-37-link-termination-phase",
+  "word_count": 222,
+  "statement_count": 6,
+  "elapsed_seconds": 64.58,
+  "statements": [
+    {
+      "statement_id": "1-S011-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "ppp",
+      "stage": "ppp_fsm",
+      "description": "After the exchange of Terminate packets, the implementation SHOULD signal the physical-layer to disconnect in order to enforce the termination of the link, particularly in the case of an authentication failure.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": null,
+      "trigger": "Terminate packets exchanged",
+      "pre_cond": null,
+      "post_cond": "physical_layer.disconnect_signaled = true",
+      "actions": [
+        "Signal physical-layer to disconnect"
+      ],
+      "modality": "should",
+      "id": "N-S011-001"
+    },
+    {
+      "statement_id": "2-S011-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "The sender of the Terminate-Request SHOULD disconnect after receiving a Terminate-Ack, or after the Restart counter expires.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "actors": [
+        "sender"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": null,
+      "trigger": "Terminate-Ack received | restart_counter.expired = true",
+      "pre_cond": null,
+      "post_cond": "endpoint.disconnected = true",
+      "actions": [
+        "Disconnect"
+      ],
+      "modality": "should",
+      "id": "N-S011-002"
+    },
+    {
+      "statement_id": "3-S011-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "The receiver of a Terminate-Request SHOULD wait for the peer to disconnect, and MUST NOT disconnect until at least one Restart time has passed after sending a Terminate-Ack.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": null,
+      "trigger": "Terminate-Request received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "Wait for peer to disconnect"
+      ],
+      "modality": "should",
+      "id": "N-S011-003"
+    },
+    {
+      "statement_id": "4-S011-4",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "ppp_fsm",
+      "description": "The receiver of a Terminate-Request SHOULD wait for the peer to disconnect, and MUST NOT disconnect until at least one Restart time has passed after sending a Terminate-Ack.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": null,
+      "trigger": "disconnect attempt",
+      "pre_cond": "endpoint.terminate_ack_sent = true & restart_time_elapsed = false",
+      "post_cond": "endpoint.disconnected = false",
+      "actions": [
+        "Suppress disconnect until at least one Restart time has elapsed since Terminate-Ack was sent"
+      ],
+      "modality": "must",
+      "id": "N-S011-004"
+    },
+    {
+      "statement_id": "5-S011-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "ppp",
+      "stage": "ppp_fsm",
+      "description": "PPP SHOULD proceed to the Link Dead phase.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "actors": [
+        "ppp"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": "Link Dead",
+      "trigger": "link termination complete",
+      "pre_cond": null,
+      "post_cond": "protocol.state = Link Dead",
+      "actions": [
+        "Transition to Link Dead phase"
+      ],
+      "modality": "should",
+      "id": "N-S011-005"
+    },
+    {
+      "statement_id": "6-S011-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "ppp_fsm",
+      "description": "Any non-LCP packets received during this phase MUST be silently discarded.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S011",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": "Link Termination Phase",
+      "to_state": null,
+      "trigger": "non-LCP packet received",
+      "pre_cond": "protocol.state = Link Termination Phase & packet.type != LCP",
+      "post_cond": null,
+      "actions": [
+        "Silently discard packet"
+      ],
+      "modality": "must",
+      "id": "N-S011-006"
+    }
+  ]
+}

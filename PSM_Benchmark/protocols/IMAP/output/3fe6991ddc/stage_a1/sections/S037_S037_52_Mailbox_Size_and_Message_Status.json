@@ -1,0 +1,97 @@
+{
+  "section_id": "S037",
+  "title": "S037 5.2 Mailbox Size and Message Status Updates",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S037 5.2 Mailbox Size and Message Status Updates"
+  ],
+  "url_anchor": "#s037-52-mailbox-size-and-message-status-updates",
+  "word_count": 211,
+  "statement_count": 4,
+  "elapsed_seconds": 28.27,
+  "statements": [
+    {
+      "statement_id": "D-S037-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server MUST send mailbox size updates automatically if a mailbox size change is observed during the processing of a command.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S037",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "mailbox_size_change_observed_during_command_processing",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "client.mailbox_size = server.mailbox_size",
+      "actions": [
+        "send EXISTS response with updated mailbox size"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S037-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "A server SHOULD send message flag updates automatically, without requiring the client to request such updates explicitly.",
+      "is_inferred": false,
+      "confidence": 0.75,
+      "source_section": "S037",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "message_flag_change_observed",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "client.message_flags = server.message_flags",
+      "actions": [
+        "send unsolicited message flag update response"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S037-003",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "It is NOT permitted to send an EXISTS response that would reduce the number of messages in the mailbox; only the EXPUNGE response can do this.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S037",
+      "object_name": "mailbox",
+      "field_name": "message_count_reduction_response",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": [
+        "EXPUNGE"
+      ],
+      "guard_semantics": "Only EXPUNGE response may reduce mailbox message count; EXISTS response must not reduce message count"
+    },
+    {
+      "statement_id": "D-S037-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "imap_fsm",
+      "description": "A client implementation MUST remember mailbox size updates. It MUST NOT assume that any command after the initial mailbox selection will return the size of the mailbox.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S037",
+      "object_name": "client_session",
+      "field_name": "mailbox_size",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "client.mailbox_size must be maintained and updated from unsolicited server responses"
+    }
+  ]
+}

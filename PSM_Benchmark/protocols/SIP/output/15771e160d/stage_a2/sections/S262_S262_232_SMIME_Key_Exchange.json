@@ -1,0 +1,643 @@
+{
+  "section_id": "S262",
+  "title": "S262 23.2 S/MIME Key Exchange",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S262 23.2 S/MIME Key Exchange"
+  ],
+  "url_anchor": "#s262-232-smime-key-exchange",
+  "word_count": 1218,
+  "statement_count": 26,
+  "elapsed_seconds": 262.19,
+  "statements": [
+    {
+      "statement_id": "N-S262-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "Whenever the CMS SignedData message is used in S/MIME for SIP, it MUST contain the certificate bearing the public key necessary to verify the signature.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S262-001"
+    },
+    {
+      "statement_id": "N-S262-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When a UAC sends a request containing an S/MIME body that initiates a dialog, or sends a non-INVITE request outside the context of a dialog, the UAC SHOULD structure the body as an S/MIME 'multipart/signed' CMS SignedData body.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_dialog_initiating_request_with_S/MIME_body | send_non_INVITE_request_outside_dialog_with_S/MIME_body",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "structure body as S/MIME 'multipart/signed' CMS SignedData body"
+      ],
+      "modality": "should",
+      "id": "N-S262-002"
+    },
+    {
+      "statement_id": "N-S262-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the desired CMS service is EnvelopedData (and the public key of the target user is known), the UAC SHOULD send the EnvelopedData message encapsulated within a SignedData message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "desired_CMS_service = EnvelopedData & target_user.public_key.known = true",
+      "post_cond": null,
+      "actions": [
+        "send EnvelopedData message encapsulated within SignedData message"
+      ],
+      "modality": "should",
+      "id": "N-S262-003"
+    },
+    {
+      "statement_id": "N-S262-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When a UAS receives a request containing an S/MIME CMS body that includes a certificate, the UAS SHOULD first validate the certificate, if possible, with any available root certificates for certificate authorities.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request_with_S/MIME_CMS_body_including_certificate",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "validate certificate against available root certificates for certificate authorities"
+      ],
+      "modality": "should",
+      "id": "N-S262-004"
+    },
+    {
+      "statement_id": "N-S262-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "The UAS SHOULD also determine the subject of the certificate (for S/MIME, the SubjectAltName will contain the appropriate identity) and compare this value to the From header field of the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "determine certificate subject",
+        "compare certificate subject to request From header field"
+      ],
+      "modality": "should",
+      "id": "N-S262-005"
+    },
+    {
+      "statement_id": "N-S262-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the certificate cannot be verified, because it is self-signed, or signed by no known authority, or if it is verifiable but its subject does not correspond to the From header field of request, the UAS MUST notify its user of the status of the certificate (including the subject of the certificate, its signer, and any key fingerprint information) and request explicit permission before proceeding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "certificate.verified = false | (certificate.verified = true & certificate.subject != request.From)",
+      "post_cond": null,
+      "actions": [
+        "notify user of certificate status including subject, signer, and key fingerprint",
+        "request explicit user permission before proceeding"
+      ],
+      "modality": "must",
+      "id": "N-S262-006"
+    },
+    {
+      "statement_id": "N-S262-7",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the certificate was successfully verified and the subject of the certificate corresponds to the From header field of the SIP request, or if the user (after notification) explicitly authorizes the use of the certificate, the UAS SHOULD add this certificate to a local keyring, indexed by the address-of-record of the holder of the certificate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "(certificate.verified = true & certificate.subject = request.From) | user.authorization = true",
+      "post_cond": "keyring.contains(certificate) = true",
+      "actions": [
+        "add certificate to local keyring indexed by address-of-record of certificate holder"
+      ],
+      "modality": "should",
+      "id": "N-S262-007"
+    },
+    {
+      "statement_id": "N-S262-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "When a UAS sends a response containing an S/MIME body that answers the first request in a dialog, or a response to a non-INVITE request outside the context of a dialog, the UAS SHOULD structure the body as an S/MIME 'multipart/signed' CMS SignedData body.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_response_to_first_dialog_request_with_S/MIME_body | send_response_to_non_INVITE_request_outside_dialog_with_S/MIME_body",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "structure body as S/MIME 'multipart/signed' CMS SignedData body"
+      ],
+      "modality": "should",
+      "id": "N-S262-008"
+    },
+    {
+      "statement_id": "N-S262-9",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the desired CMS service is EnvelopedData, the UAS SHOULD send the EnvelopedData message encapsulated within a SignedData message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "desired_CMS_service = EnvelopedData",
+      "post_cond": null,
+      "actions": [
+        "send EnvelopedData message encapsulated within SignedData message"
+      ],
+      "modality": "should",
+      "id": "N-S262-009"
+    },
+    {
+      "statement_id": "N-S262-10",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "When a UAC receives a response containing an S/MIME CMS body that includes a certificate, the UAC SHOULD first validate the certificate, if possible, with any appropriate root certificate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_response_with_S/MIME_CMS_body_including_certificate",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "validate certificate against appropriate root certificates"
+      ],
+      "modality": "should",
+      "id": "N-S262-010"
+    },
+    {
+      "statement_id": "N-S262-11",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "The UAC SHOULD also determine the subject of the certificate and compare this value to the To field of the response; although the two may very well be different, and this is not necessarily indicative of a security breach.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "determine certificate subject",
+        "compare certificate subject to response To header field"
+      ],
+      "modality": "should",
+      "id": "N-S262-011"
+    },
+    {
+      "statement_id": "N-S262-12",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the certificate cannot be verified because it is self-signed, or signed by no known authority, the UAC MUST notify its user of the status of the certificate (including the subject of the certificate, its signator, and any key fingerprint information) and request explicit permission before proceeding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "certificate.verified = false",
+      "post_cond": null,
+      "actions": [
+        "notify user of certificate status including subject, signator, and key fingerprint",
+        "request explicit user permission before proceeding"
+      ],
+      "modality": "must",
+      "id": "N-S262-012"
+    },
+    {
+      "statement_id": "N-S262-13",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the certificate was successfully verified, and the subject of the certificate corresponds to the To header field in the response, or if the user (after notification) explicitly authorizes the use of the certificate, the UAC SHOULD add this certificate to a local keyring, indexed by the address-of-record of the holder of the certificate.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "(certificate.verified = true & certificate.subject = response.To) | user.authorization = true",
+      "post_cond": "keyring.contains(certificate) = true",
+      "actions": [
+        "add certificate to local keyring indexed by address-of-record of certificate holder"
+      ],
+      "modality": "should",
+      "id": "N-S262-013"
+    },
+    {
+      "statement_id": "N-S262-14",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the UAC had not transmitted its own certificate to the UAS in any previous transaction, it SHOULD use a CMS SignedData body for its next request or response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAC",
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send_next_request_or_response",
+      "pre_cond": "UAC.certificate_transmitted_to_UAS = false",
+      "post_cond": null,
+      "actions": [
+        "use CMS SignedData body for next request or response"
+      ],
+      "modality": "should",
+      "id": "N-S262-014"
+    },
+    {
+      "statement_id": "N-S262-15",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "On future occasions, when the UA receives requests or responses that contain a From header field corresponding to a value in its keyring, the UA SHOULD compare the certificate offered in these messages with the existing certificate in its keyring.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_message_with_From_matching_keyring_entry",
+      "pre_cond": "keyring.contains(message.From) = true",
+      "post_cond": null,
+      "actions": [
+        "compare offered certificate with existing keyring certificate"
+      ],
+      "modality": "should",
+      "id": "N-S262-015"
+    },
+    {
+      "statement_id": "N-S262-16",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "If there is a discrepancy, the UA MUST notify its user of a change of the certificate (preferably in terms that indicate that this is a potential security breach) and acquire the user's permission before continuing to process the signaling.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "offered_certificate != keyring.certificate",
+      "post_cond": null,
+      "actions": [
+        "notify user of certificate change indicating potential security breach",
+        "acquire user permission before continuing to process signaling"
+      ],
+      "modality": "must",
+      "id": "N-S262-016"
+    },
+    {
+      "statement_id": "N-S262-17",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "If the user authorizes this certificate, it SHOULD be added to the keyring alongside any previous value(s) for this address-of-record.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "user.authorization = true",
+      "post_cond": "keyring.contains(certificate) = true",
+      "actions": [
+        "add certificate to keyring alongside previous values for this address-of-record"
+      ],
+      "modality": "should",
+      "id": "N-S262-017"
+    },
+    {
+      "statement_id": "N-S262-18",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "If a UA receives an S/MIME body that has been encrypted with a public key unknown to the recipient, it MUST reject the request with a 493 (Undecipherable) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request_with_S/MIME_body_encrypted_with_unknown_public_key",
+      "pre_cond": "received_body.encrypted = true & recipient.public_key.known = false",
+      "post_cond": null,
+      "actions": [
+        "reject request with 493 Undecipherable response"
+      ],
+      "modality": "must",
+      "id": "N-S262-018"
+    },
+    {
+      "statement_id": "N-S262-19",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "This response SHOULD contain a valid certificate for the respondent (corresponding, if possible, to any address of record given in the To header field of the rejected request) within a MIME body with a 'certs-only' \"smime-type\" parameter.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S262-019"
+    },
+    {
+      "statement_id": "N-S262-20",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "Note that a user agent that receives a request containing an S/MIME body that is not optional (with a Content-Disposition header \"handling\" parameter of \"required\") MUST reject the request with a 415 Unsupported Media Type response if the MIME type is not understood.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "user agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request_with_required_S/MIME_body_with_unsupported_MIME_type",
+      "pre_cond": "request.S/MIME_body.handling = required & MIME_type.understood = false",
+      "post_cond": null,
+      "actions": [
+        "reject request with 415 Unsupported Media Type response"
+      ],
+      "modality": "must",
+      "id": "N-S262-020"
+    },
+    {
+      "statement_id": "N-S262-21",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "A user agent that receives such a response when S/MIME is sent SHOULD notify its user that the remote device does not support S/MIME, and it MAY subsequently resend the request without S/MIME, if appropriate; however, this 415 response may constitute a downgrade attack.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "user agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_415_response_when_S/MIME_body_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "notify user that remote device does not support S/MIME"
+      ],
+      "modality": "should",
+      "id": "N-S262-021"
+    },
+    {
+      "statement_id": "N-S262-22",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "A user agent that receives such a response when S/MIME is sent SHOULD notify its user that the remote device does not support S/MIME, and it MAY subsequently resend the request without S/MIME, if appropriate; however, this 415 response may constitute a downgrade attack.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "user agent"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_415_response_when_S/MIME_body_sent",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "resend request without S/MIME"
+      ],
+      "modality": "may",
+      "id": "N-S262-022"
+    },
+    {
+      "statement_id": "N-S262-23",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If a user agent sends an S/MIME body in a request, but receives a response that contains a MIME body that is not secured, the UAC SHOULD notify its user that the session could not be secured.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_unsecured_MIME_response_after_sending_S/MIME_request",
+      "pre_cond": "request.body.S/MIME = true & response.body.secured = false",
+      "post_cond": null,
+      "actions": [
+        "notify user that session could not be secured"
+      ],
+      "modality": "should",
+      "id": "N-S262-023"
+    },
+    {
+      "statement_id": "N-S262-24",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "However, if a user agent that supports S/MIME receives a request with an unsecured body, it SHOULD NOT respond with a secured body, but if it expects S/MIME from the sender (for example, because the sender's From header field value corresponds to an identity on its keychain), the UAS SHOULD notify its user that the session could not be secured.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "user agent",
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request_with_unsecured_body",
+      "pre_cond": "ua.supports_S/MIME = true & request.body.secured = false",
+      "post_cond": null,
+      "actions": [
+        "do not respond with secured body"
+      ],
+      "modality": "should",
+      "id": "N-S262-024"
+    },
+    {
+      "statement_id": "N-S262-25",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "However, if a user agent that supports S/MIME receives a request with an unsecured body, it SHOULD NOT respond with a secured body, but if it expects S/MIME from the sender (for example, because the sender's From header field value corresponds to an identity on its keychain), the UAS SHOULD notify its user that the session could not be secured.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_request_with_unsecured_body_when_S/MIME_expected_from_sender",
+      "pre_cond": "ua.supports_S/MIME = true & request.body.secured = false & sender.keychain_entry.exists = true",
+      "post_cond": null,
+      "actions": [
+        "notify user that session could not be secured"
+      ],
+      "modality": "should",
+      "id": "N-S262-025"
+    },
+    {
+      "statement_id": "N-S262-26",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "sip_fsm",
+      "description": "Finally, if during the course of a dialog a UA receives a certificate in a CMS SignedData message that does not correspond with the certificates previously exchanged during a dialog, the UA MUST notify its user of the change, preferably in terms that indicate that this is a potential security breach.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S262",
+      "actors": [
+        "UA"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_certificate_in_dialog_not_matching_previously_exchanged_certificates",
+      "pre_cond": "dialog.in_progress = true & received_certificate != dialog.previously_exchanged_certificate",
+      "post_cond": null,
+      "actions": [
+        "notify user of certificate change indicating potential security breach"
+      ],
+      "modality": "must",
+      "id": "N-S262-026"
+    }
+  ]
+}

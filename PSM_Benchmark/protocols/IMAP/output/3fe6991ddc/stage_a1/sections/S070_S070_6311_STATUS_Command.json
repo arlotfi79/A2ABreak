@@ -1,0 +1,133 @@
+{
+  "section_id": "S070",
+  "title": "S070 6.3.11 STATUS Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S070 6.3.11 STATUS Command"
+  ],
+  "url_anchor": "#s070-6311-status-command",
+  "word_count": 442,
+  "statement_count": 5,
+  "elapsed_seconds": 31.95,
+  "statements": [
+    {
+      "statement_id": "D-S070-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The STATUS command requests the status of the indicated mailbox. It does not change the currently selected mailbox, nor does it affect the state of any messages in the queried mailbox. Result: OK - status completed.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S070",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "STATUS command",
+      "pre_cond": "protocol.state = Authenticated",
+      "post_cond": "protocol.state = Authenticated & selected_mailbox.unchanged = true",
+      "actions": [
+        "send untagged STATUS response",
+        "send tagged OK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S070-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The STATUS command does not change the currently selected mailbox; servers MUST be able to execute the STATUS command on the selected mailbox.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S070",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "STATUS command",
+      "pre_cond": "protocol.state = Selected",
+      "post_cond": "protocol.state = Selected & selected_mailbox.unchanged = true",
+      "actions": [
+        "send untagged STATUS response",
+        "send tagged OK"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S070-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: NO - status failure: no status for that name. The STATUS command fails without changing state.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S070",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "STATUS command with unresolvable mailbox name",
+      "pre_cond": "protocol.state = Authenticated | protocol.state = Selected",
+      "post_cond": "protocol.state = Authenticated | protocol.state = Selected",
+      "actions": [
+        "send tagged NO"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S070-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Result: BAD - command unknown or arguments invalid. The STATUS command fails without changing state.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S070",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "STATUS command with unknown command or invalid arguments",
+      "pre_cond": "protocol.state = Authenticated | protocol.state = Selected",
+      "post_cond": "protocol.state = Authenticated | protocol.state = Selected",
+      "actions": [
+        "send tagged BAD"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S070-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The STATUS command SHOULD NOT be used on the currently selected mailbox, but servers MUST be able to execute the STATUS command on the selected mailbox.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S070",
+      "object_name": "STATUS command",
+      "field_name": "applicable_states",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "Authenticated",
+        "Selected"
+      ],
+      "guard_semantics": "STATUS is permitted in both Authenticated and Selected states; SHOULD NOT target currently selected mailbox but server MUST support it"
+    }
+  ]
+}

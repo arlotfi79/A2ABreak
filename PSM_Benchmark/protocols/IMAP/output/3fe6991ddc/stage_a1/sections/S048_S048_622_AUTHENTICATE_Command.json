@@ -1,0 +1,154 @@
+{
+  "section_id": "S048",
+  "title": "S048 6.2.2 AUTHENTICATE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S048 6.2.2 AUTHENTICATE Command"
+  ],
+  "url_anchor": "#s048-622-authenticate-command",
+  "word_count": 1141,
+  "statement_count": 6,
+  "elapsed_seconds": 55.91,
+  "statements": [
+    {
+      "statement_id": "D-S048-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "OK - authenticate completed, now in authenticated state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "state_name": "Authenticated",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.state = Authenticated"
+    },
+    {
+      "statement_id": "D-S048-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "OK - authenticate completed, now in authenticated state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "AUTHENTICATE OK",
+      "pre_cond": "session.state = Not Authenticated",
+      "post_cond": "session.state = Authenticated",
+      "actions": [
+        "server sends tagged OK response",
+        "security layer takes effect immediately if negotiated"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S048-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "NO - authenticate failure: unsupported authentication mechanism, credentials rejected. If an AUTHENTICATE command fails with a NO response, the client MAY try another authentication mechanism by issuing another AUTHENTICATE command.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "AUTHENTICATE NO",
+      "pre_cond": "session.state = Not Authenticated",
+      "post_cond": "session.state = Not Authenticated",
+      "actions": [
+        "server sends tagged NO response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S048-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "BAD - command unknown or arguments invalid, authentication exchange canceled",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "AUTHENTICATE BAD",
+      "pre_cond": "session.state = Not Authenticated",
+      "post_cond": "session.state = Not Authenticated",
+      "actions": [
+        "server sends tagged BAD response",
+        "authentication exchange canceled"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S048-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "If the client wishes to cancel an authentication exchange, it issues a line consisting of a single \"*\". If the server receives such a response, ... it MUST reject the AUTHENTICATE command by sending a tagged BAD response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "client sends authentication cancellation (\"*\")",
+      "pre_cond": "session.state = Not Authenticated & authentication_exchange.active = true",
+      "post_cond": "session.state = Not Authenticated & authentication_exchange.active = false",
+      "actions": [
+        "server sends tagged BAD response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S048-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "If the server receives an invalid base64 string (e.g., characters outside the base64 alphabet or non-terminal \"=\"), it MUST reject the AUTHENTICATE command by sending a tagged BAD response.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S048",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Not Authenticated",
+      "trigger": "server receives invalid base64 in authentication exchange",
+      "pre_cond": "session.state = Not Authenticated & authentication_exchange.active = true",
+      "post_cond": "session.state = Not Authenticated & authentication_exchange.active = false",
+      "actions": [
+        "server sends tagged BAD response"
+      ],
+      "modality": "must"
+    }
+  ]
+}

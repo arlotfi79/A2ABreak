@@ -1,0 +1,354 @@
+{
+  "section_id": "S018",
+  "title": "S018 5.1.3 NEXT_HOP",
+  "depth": 3,
+  "parent_path": [
+    "BGP",
+    "S018 5.1.3 NEXT_HOP"
+  ],
+  "url_anchor": "#s018-513-next_hop",
+  "word_count": 732,
+  "statement_count": 14,
+  "elapsed_seconds": 127.55,
+  "statements": [
+    {
+      "statement_id": "1-S018-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "bgp_fsm",
+      "description": "The NEXT_HOP is a well-known mandatory attribute that defines the IP address of the router that SHOULD be used as the next hop to the destinations listed in the UPDATE message.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S018-001"
+    },
+    {
+      "statement_id": "2-S018-2",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "When sending a message to an internal peer, if the route is not locally originated, the BGP speaker SHOULD NOT modify the NEXT_HOP attribute unless it has been explicitly configured to announce its own IP address as the NEXT_HOP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker",
+        "internal peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send UPDATE to internal peer",
+      "pre_cond": "peer.type = internal & route.locally_originated = false & !speaker.configured_to_announce_own_ip",
+      "post_cond": null,
+      "actions": [
+        "do not modify NEXT_HOP attribute"
+      ],
+      "modality": "should",
+      "id": "N-S018-002"
+    },
+    {
+      "statement_id": "3-S018-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "When announcing a locally-originated route to an internal peer, the BGP speaker SHOULD use the interface address of the router through which the announced network is reachable for the speaker as the NEXT_HOP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker",
+        "internal peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "announce locally-originated route to internal peer",
+      "pre_cond": "route.locally_originated = true & peer.type = internal",
+      "post_cond": null,
+      "actions": [
+        "set NEXT_HOP to interface address of router through which announced network is reachable for the speaker"
+      ],
+      "modality": "should",
+      "id": "N-S018-003"
+    },
+    {
+      "statement_id": "4-S018-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the route is directly connected to the speaker, or if the interface address of the router through which the announced network is reachable for the speaker is the internal peer's address, then the BGP speaker SHOULD use its own IP address for the NEXT_HOP attribute (the address of the interface that is used to reach the peer).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker",
+        "internal peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "announce route to internal peer",
+      "pre_cond": "route.directly_connected = true | interface_address_to_network = internal_peer.address",
+      "post_cond": null,
+      "actions": [
+        "set NEXT_HOP to speaker's own IP address (address of interface used to reach peer)"
+      ],
+      "modality": "should",
+      "id": "N-S018-004"
+    },
+    {
+      "statement_id": "5-S018-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "Otherwise, if the external peer to which the route is being advertised shares a common subnet with one of the interfaces of the announcing BGP speaker, the speaker MAY use the IP address associated with such an interface in the NEXT_HOP attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker",
+        "external peer X"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send UPDATE to external peer one hop away",
+      "pre_cond": "peer.type = external & peer.ip_hops = 1 & peer.shares_common_subnet_with_speaker_interface = true & !prior_conditions_apply",
+      "post_cond": null,
+      "actions": [
+        "optionally set NEXT_HOP to IP address of speaker interface sharing common subnet with peer X"
+      ],
+      "modality": "may",
+      "id": "N-S018-005"
+    },
+    {
+      "statement_id": "6-S018-6",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "By default (if none of the above conditions apply), the BGP speaker SHOULD use the IP address of the interface that the speaker uses to establish the BGP connection to peer X in the NEXT_HOP attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker",
+        "external peer X"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send UPDATE to external peer X one hop away",
+      "pre_cond": "peer.type = external & peer.ip_hops = 1 & !third_party_nexthop_conditions_apply",
+      "post_cond": null,
+      "actions": [
+        "set NEXT_HOP to IP address of interface used to establish BGP connection to peer X"
+      ],
+      "modality": "should",
+      "id": "N-S018-006"
+    },
+    {
+      "statement_id": "7-S018-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "The speaker MAY be configured to propagate the NEXT_HOP attribute.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send UPDATE to multihop external peer X",
+      "pre_cond": "peer.type = external & peer.ip_hops > 1",
+      "post_cond": null,
+      "actions": [
+        "propagate NEXT_HOP attribute unchanged from learned route"
+      ],
+      "modality": "may",
+      "id": "N-S018-007"
+    },
+    {
+      "statement_id": "8-S018-8",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "By default, the BGP speaker SHOULD use the IP address of the interface that the speaker uses in the NEXT_HOP attribute to establish the BGP connection to peer X.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker",
+        "external peer X"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "send UPDATE to multihop external peer X",
+      "pre_cond": "peer.type = external & peer.ip_hops > 1 & !speaker.configured_to_propagate_nexthop",
+      "post_cond": null,
+      "actions": [
+        "set NEXT_HOP to IP address of interface used to establish BGP connection to peer X"
+      ],
+      "modality": "should",
+      "id": "N-S018-008"
+    },
+    {
+      "statement_id": "9-S018-9",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "A BGP speaker MUST be able to support the disabling advertisement of third party NEXT_HOP attributes in order to handle imperfectly bridged media.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "support configuration option to disable advertisement of third party NEXT_HOP attributes"
+      ],
+      "modality": "must",
+      "id": "N-S018-009"
+    },
+    {
+      "statement_id": "10-S018-10",
+      "normative_level": "SHALL NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "A route originated by a BGP speaker SHALL NOT be advertised to a peer using an address of that peer as NEXT_HOP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker",
+        "peer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "advertise originated route to peer",
+      "pre_cond": "route.originated_by_speaker = true",
+      "post_cond": null,
+      "actions": [
+        "do not set NEXT_HOP attribute to peer's own address"
+      ],
+      "modality": "shall",
+      "id": "N-S018-010"
+    },
+    {
+      "statement_id": "11-S018-11",
+      "normative_level": "SHALL NOT",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "A BGP speaker SHALL NOT install a route with itself as the next hop.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "install route into routing table",
+      "pre_cond": "route.next_hop = speaker.own_address",
+      "post_cond": null,
+      "actions": [
+        "do not install route whose next hop resolves to speaker's own address"
+      ],
+      "modality": "shall",
+      "id": "N-S018-011"
+    },
+    {
+      "statement_id": "12-S018-12",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "The NEXT_HOP attribute is used by the BGP speaker to determine the actual outbound interface and immediate next-hop address that SHOULD be used to forward transit packets to the associated destinations.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S018-012"
+    },
+    {
+      "statement_id": "13-S018-13",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the entry specifies an attached subnet, but does not specify a next-hop address, then the address in the NEXT_HOP attribute SHOULD be used as the immediate next-hop address.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "resolve NEXT_HOP via routing table",
+      "pre_cond": "routing_entry.specifies_attached_subnet = true & routing_entry.next_hop_address = null",
+      "post_cond": null,
+      "actions": [
+        "use NEXT_HOP attribute address as immediate next-hop address"
+      ],
+      "modality": "should",
+      "id": "N-S018-013"
+    },
+    {
+      "statement_id": "14-S018-14",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "bgp",
+      "stage": "bgp_fsm",
+      "description": "If the entry also specifies the next-hop address, this address SHOULD be used as the immediate next-hop address for packet forwarding.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S018",
+      "actors": [
+        "BGP speaker"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "resolve NEXT_HOP via routing table",
+      "pre_cond": "routing_entry.next_hop_address != null",
+      "post_cond": null,
+      "actions": [
+        "use routing entry's next-hop address as immediate next-hop address for packet forwarding"
+      ],
+      "modality": "should",
+      "id": "N-S018-014"
+    }
+  ]
+}

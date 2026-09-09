@@ -1,0 +1,162 @@
+{
+  "section_id": "S111",
+  "title": "S111 16.10 CANCEL Processing",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S111 16.10 CANCEL Processing"
+  ],
+  "url_anchor": "#s111-1610-cancel-processing",
+  "word_count": 238,
+  "statement_count": 6,
+  "elapsed_seconds": 30.34,
+  "statements": [
+    {
+      "statement_id": "N-S111-1",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy MAY generate a CANCEL to any other request it has generated at any time (subject to receiving a provisional response to that request as described in section 9.1).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "provisional_response_received",
+      "pre_cond": "provisional_response.received = true",
+      "post_cond": "CANCEL.generated = true",
+      "actions": [
+        "generate CANCEL request for previously sent request"
+      ],
+      "modality": "may",
+      "id": "N-S111-001"
+    },
+    {
+      "statement_id": "N-S111-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A proxy MUST cancel any pending client transactions associated with a response context when it receives a matching CANCEL request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "matching_CANCEL_received",
+      "pre_cond": "response_context.exists = true & response_context.match = true",
+      "post_cond": "client_transactions.pending.cancelled = true",
+      "actions": [
+        "cancel all pending client transactions associated with the matching response context"
+      ],
+      "modality": "must",
+      "id": "N-S111-002"
+    },
+    {
+      "statement_id": "N-S111-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A stateful proxy MAY generate CANCEL requests for pending INVITE client transactions based on the period specified in the INVITE's Expires header field elapsing.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "INVITE_Expires_period_elapsed",
+      "pre_cond": "INVITE.client_transaction.pending = true & INVITE.Expires.elapsed = true",
+      "post_cond": "CANCEL.generated = true",
+      "actions": [
+        "generate CANCEL requests for pending INVITE client transactions"
+      ],
+      "modality": "may",
+      "id": "N-S111-003"
+    },
+    {
+      "statement_id": "N-S111-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a matching response context is found, the element MUST immediately return a 200 (OK) response to the CANCEL request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "element",
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "matching_response_context_found",
+      "pre_cond": "response_context.match = true",
+      "post_cond": "response.status = 200 & response.sent = true",
+      "actions": [
+        "immediately return 200 (OK) response to the CANCEL request"
+      ],
+      "modality": "must",
+      "id": "N-S111-004"
+    },
+    {
+      "statement_id": "N-S111-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Furthermore, the element MUST generate CANCEL requests for all pending client transactions in the context as described in Section 16.7 step 10.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "element",
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "matching_response_context_found",
+      "pre_cond": "response_context.match = true & client_transactions.pending.count > 0",
+      "post_cond": "CANCEL.generated_for_all_pending_client_transactions = true",
+      "actions": [
+        "generate CANCEL requests for all pending client transactions in the context per Section 16.7 step 10"
+      ],
+      "modality": "must",
+      "id": "N-S111-005"
+    },
+    {
+      "statement_id": "N-S111-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "It MUST statelessly forward the CANCEL request (it may have statelessly forwarded the associated request previously).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S111",
+      "actors": [
+        "element",
+        "stateful proxy"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "no_matching_response_context_found",
+      "pre_cond": "response_context.match = false",
+      "post_cond": "CANCEL.forwarded_statelessly = true",
+      "actions": [
+        "statelessly forward the CANCEL request"
+      ],
+      "modality": "must",
+      "id": "N-S111-006"
+    }
+  ]
+}

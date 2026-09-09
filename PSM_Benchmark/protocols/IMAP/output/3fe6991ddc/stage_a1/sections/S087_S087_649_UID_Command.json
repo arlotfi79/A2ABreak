@@ -1,0 +1,108 @@
+{
+  "section_id": "S087",
+  "title": "S087 6.4.9 UID Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S087 6.4.9 UID Command"
+  ],
+  "url_anchor": "#s087-649-uid-command",
+  "word_count": 675,
+  "statement_count": 4,
+  "elapsed_seconds": 27.03,
+  "statements": [
+    {
+      "statement_id": "D-S087-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "UID command with COPY, MOVE, FETCH, or STORE arguments using unique identifiers instead of message sequence numbers; a non-existent unique identifier is ignored without error. Result: OK - UID command completed; NO - UID command error; BAD - command unknown or arguments invalid.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S087",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "UID COPY | UID MOVE | UID FETCH | UID STORE",
+      "pre_cond": "session.state = Selected",
+      "post_cond": null,
+      "actions": [
+        "process command using UIDs instead of sequence numbers",
+        "send tagged OK | NO | BAD"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S087-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "UID EXPUNGE command permanently removes all messages that have both the \\Deleted flag set and a UID included in the specified sequence set from the currently selected mailbox.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S087",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "UID EXPUNGE",
+      "pre_cond": "session.state = Selected",
+      "post_cond": "message.flag = \\Deleted & message.uid IN sequence_set => message.permanently_removed = true",
+      "actions": [
+        "send untagged EXPUNGE responses",
+        "remove matching messages from mailbox",
+        "send tagged OK | NO | BAD"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S087-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "UID SEARCH command returns unique identifiers instead of message sequence numbers in the ESEARCH response; the corresponding ESEARCH response MUST include the UID indicator.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S087",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Selected",
+      "trigger": "UID SEARCH",
+      "pre_cond": "session.state = Selected",
+      "post_cond": "esearch_response.uid_indicator = true",
+      "actions": [
+        "send untagged ESEARCH response with UID indicator and UIDs",
+        "send tagged OK | NO | BAD"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S087-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Server implementations MUST implicitly include the UID message data item as part of any FETCH response caused by a UID command, regardless of whether a UID was specified as a message data item to the FETCH.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S087",
+      "object_name": "FETCH response",
+      "field_name": "UID message data item",
+      "field_type": "flag",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "response triggered by UID command"
+    }
+  ]
+}

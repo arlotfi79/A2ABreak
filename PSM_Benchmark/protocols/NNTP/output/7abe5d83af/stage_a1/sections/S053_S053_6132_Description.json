@@ -1,0 +1,115 @@
+{
+  "section_id": "S053",
+  "title": "S053 6.1.3.2 Description",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S053 6.1.3.2 Description"
+  ],
+  "url_anchor": "#s053-6132-description",
+  "word_count": 192,
+  "statement_count": 4,
+  "elapsed_seconds": 18.89,
+  "statements": [
+    {
+      "statement_id": "D-S053-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "If the currently selected newsgroup is valid, the current article number MUST be set to the previous article in that newsgroup (the highest existing article number less than the current article number). If successful, a response indicating the new current article number and the message-id of that article MUST be returned.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "ARTICLE_SELECTED",
+      "to_state": "ARTICLE_SELECTED",
+      "trigger": "LAST command",
+      "pre_cond": "session.newsgroup_valid = true & session.article_number_valid = true & session.article_number > session.low_water_mark",
+      "post_cond": "session.current_article_number = previous_existing_article_number",
+      "actions": [
+        "set current article number to highest existing article number less than current",
+        "return success response with new article number and message-id"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "If the current article number is already the first article of the newsgroup, a 422 response MUST be returned. The currently selected newsgroup and current article number MUST NOT be altered.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "ARTICLE_SELECTED",
+      "to_state": "ARTICLE_SELECTED",
+      "trigger": "LAST command",
+      "pre_cond": "session.newsgroup_valid = true & session.article_number = session.low_water_mark",
+      "post_cond": "session.current_article_number = session.current_article_number",
+      "actions": [
+        "return 422 response",
+        "leave newsgroup and article number unchanged"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "If the current article number is invalid, a 420 response MUST be returned. The currently selected newsgroup and current article number MUST NOT be altered.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "NEWSGROUP_SELECTED",
+      "to_state": "NEWSGROUP_SELECTED",
+      "trigger": "LAST command",
+      "pre_cond": "session.newsgroup_valid = true & session.article_number_valid = false",
+      "post_cond": "session.current_article_number = session.current_article_number",
+      "actions": [
+        "return 420 response",
+        "leave newsgroup and article number unchanged"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S053-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "If the currently selected newsgroup is invalid, a 412 response MUST be returned. The currently selected newsgroup and current article number MUST NOT be altered.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S053",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "READING",
+      "to_state": "READING",
+      "trigger": "LAST command",
+      "pre_cond": "session.newsgroup_valid = false",
+      "post_cond": "session.newsgroup_valid = false",
+      "actions": [
+        "return 412 response",
+        "leave newsgroup and article number unchanged"
+      ],
+      "modality": "must"
+    }
+  ]
+}

@@ -1,0 +1,935 @@
+{
+  "section_id": "S283",
+  "title": "S283 Appendix B. RTSP Protocol State Machine",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S283 Appendix B. RTSP Protocol State Machine"
+  ],
+  "url_anchor": "#s283-appendix-b-rtsp-protocol-state-machine",
+  "word_count": 2097,
+  "statement_count": 40,
+  "elapsed_seconds": 227.33,
+  "statements": [
+    {
+      "statement_id": "D-S283-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Init: Initial state, no session exists.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "state_name": "Init",
+      "enum_name": "RTSPSessionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "session.exists = false"
+    },
+    {
+      "statement_id": "D-S283-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Ready: Session is ready to start playing.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "state_name": "Ready",
+      "enum_name": "RTSPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S283-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Play: Session is playing, i.e., sending media-stream data in the direction S->C.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "state_name": "Play",
+      "enum_name": "RTSPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S283-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "NRM: The number of media streams that are part of this session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "object_name": "RTSPSession",
+      "field_name": "NRM",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S283-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "RP: Resume point, the point in the presentation time line at which a request to continue playing will resume from.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "object_name": "RTSPSession",
+      "field_name": "RP",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-S283-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP in Init state (no redirect needed): transitions to Ready; sets NRM=1, RP=0.0.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Init",
+      "to_state": "Ready",
+      "trigger": "SETUP",
+      "pre_cond": "session.state = Init & redirect.needed = false",
+      "post_cond": "session.state = Ready & session.NRM = 1 & session.RP = 0.0",
+      "actions": [
+        "NRM=1",
+        "RP=0.0"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP in Init state where Needs Redirect: state remains Init, 3rr Redirect response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Init",
+      "to_state": "Init",
+      "trigger": "SETUP",
+      "pre_cond": "session.state = Init & redirect.needed = true",
+      "post_cond": "session.state = Init",
+      "actions": [
+        "send 3rr Redirect"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "S->C: REDIRECT with No Session header in Init state: terminate all sessions, state remains Init.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Init",
+      "to_state": "Init",
+      "trigger": "S->C:REDIRECT",
+      "pre_cond": "session.state = Init & message.session_header = absent",
+      "post_cond": "session.state = Init",
+      "actions": [
+        "Terminate all SES"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP with New URI in Ready state: state remains Ready, NRM+=1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "SETUP",
+      "pre_cond": "session.state = Ready & request.uri = new_uri",
+      "post_cond": "session.state = Ready & session.NRM = session.NRM + 1",
+      "actions": [
+        "NRM+=1"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP with URI already set up prior in Ready state: state remains Ready, change transport param.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "SETUP",
+      "pre_cond": "session.state = Ready & request.uri.setup_prior = true",
+      "post_cond": "session.state = Ready",
+      "actions": [
+        "Change transport param"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-011",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "TEARDOWN with Prs URI in Ready state: transitions to Init, no session hdr, NRM=0.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "TEARDOWN",
+      "pre_cond": "session.state = Ready & request.uri = presentation_uri",
+      "post_cond": "session.state = Init & session.NRM = 0",
+      "actions": [
+        "No session hdr",
+        "NRM=0"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-012",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "TEARDOWN with md URI and NRM=1 in Ready state: transitions to Init, no session hdr, NRM=0.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "TEARDOWN",
+      "pre_cond": "session.state = Ready & request.uri = media_uri & session.NRM = 1",
+      "post_cond": "session.state = Init & session.NRM = 0",
+      "actions": [
+        "No Session hdr",
+        "NRM=0"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-013",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "TEARDOWN with md URI and NRM>1 in Ready state: state remains Ready, Session hdr, NRM-=1.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "TEARDOWN",
+      "pre_cond": "session.state = Ready & request.uri = media_uri & session.NRM > 1",
+      "post_cond": "session.state = Ready & session.NRM = session.NRM - 1",
+      "actions": [
+        "Session hdr",
+        "NRM-=1"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-014",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY with Prs URI and No range in Ready state: transitions to Play, play from RP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Play",
+      "trigger": "PLAY",
+      "pre_cond": "session.state = Ready & request.uri = presentation_uri & request.range = absent",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "Play from RP"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-015",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY with Prs URI and Range in Ready state: transitions to Play, according to range.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Play",
+      "trigger": "PLAY",
+      "pre_cond": "session.state = Ready & request.uri = presentation_uri & request.range = present",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "Play according to range"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-016",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY with md URI, NRM=1, Range in Ready state: transitions to Play, according to range.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Play",
+      "trigger": "PLAY",
+      "pre_cond": "session.state = Ready & request.uri = media_uri & session.NRM = 1 & request.range = present",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "Play according to range"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-017",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY with md URI and NRM=1 (no range) in Ready state: transitions to Play, play from RP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Play",
+      "trigger": "PLAY",
+      "pre_cond": "session.state = Ready & request.uri = media_uri & session.NRM = 1 & request.range = absent",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "Play from RP"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-018",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PAUSE with Prs URI in Ready state: state remains Ready, return PP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "PAUSE",
+      "pre_cond": "session.state = Ready & request.uri = presentation_uri",
+      "post_cond": "session.state = Ready",
+      "actions": [
+        "Return PP"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-019",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SC:REDIRECT with Terminate-Reason in Ready state: state remains Ready, Set RedP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Ready",
+      "to_state": "Ready",
+      "trigger": "SC:REDIRECT",
+      "pre_cond": "session.state = Ready & message.terminate_reason = present",
+      "post_cond": "session.state = Ready",
+      "actions": [
+        "Set RedP"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-020",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SC:REDIRECT with No Terminate-Reason time parameter in Ready state: transitions to Init, session is removed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "SC:REDIRECT",
+      "pre_cond": "session.state = Ready & message.terminate_reason.time_parameter = absent",
+      "post_cond": "session.state = Init",
+      "actions": [
+        "Session is removed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-021",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Timeout in Ready state: transitions to Init.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "Timeout",
+      "pre_cond": "session.state = Ready",
+      "post_cond": "session.state = Init",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-022",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "RedP reached in Ready state: transitions to Init, TEARDOWN of session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Ready",
+      "to_state": "Init",
+      "trigger": "RedP reached",
+      "pre_cond": "session.state = Ready",
+      "post_cond": "session.state = Init",
+      "actions": [
+        "TEARDOWN of session"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-023",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PAUSE with Prs URI in Play state: transitions to Ready, set RP to present point.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Ready",
+      "trigger": "PAUSE",
+      "pre_cond": "session.state = Play & request.uri = presentation_uri",
+      "post_cond": "session.state = Ready & session.RP = present_point",
+      "actions": [
+        "Set RP to present point"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-024",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "End of media (all media finished) in Play state: state remains Play, set RP = End of media.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "End of media",
+      "pre_cond": "session.state = Play & all_media_finished = true",
+      "post_cond": "session.state = Play & session.RP = end_of_media",
+      "actions": [
+        "Set RP = End of media"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-025",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "End of range in Play state: state remains Play, set RP = End of range.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "End of range",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Play & session.RP = end_of_range",
+      "actions": [
+        "Set RP = End of range"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-026",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY with Prs URI, No range in Play state: state remains Play, play from present point.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY",
+      "pre_cond": "session.state = Play & request.uri = presentation_uri & request.range = absent",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "Play from present point"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-027",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "PLAY with Prs URI, Range in Play state: state remains Play, according to range.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "PLAY",
+      "pre_cond": "session.state = Play & request.uri = presentation_uri & request.range = present",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "Play according to range"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-028",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SC:PLAY_NOTIFY in Play state: state remains Play, response 200.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "SC:PLAY_NOTIFY",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "send 200"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-029",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP with New URI in Play state: state remains Play, response 455.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "SETUP",
+      "pre_cond": "session.state = Play & request.uri = new_uri",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "send 455"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-030",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP with md URI (not IFI) in Play state: state remains Play, response 455.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "SETUP",
+      "pre_cond": "session.state = Play & request.uri = media_uri & feature.implemented = false",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "send 455"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-031",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SETUP with md URI, IFI (If Implemented) in Play state: state remains Play, change transport param.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "SETUP",
+      "pre_cond": "session.state = Play & request.uri = media_uri & feature.implemented = true",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "Change transport param."
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-032",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "TEARDOWN with Prs URI in Play state: transitions to Init, no session hdr.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "TEARDOWN",
+      "pre_cond": "session.state = Play & request.uri = presentation_uri",
+      "post_cond": "session.state = Init",
+      "actions": [
+        "No session hdr"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-033",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "TEARDOWN with md URI and NRM=1 in Play state: transitions to Init, no session hdr, NRM=0.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "TEARDOWN",
+      "pre_cond": "session.state = Play & request.uri = media_uri & session.NRM = 1",
+      "post_cond": "session.state = Init & session.NRM = 0",
+      "actions": [
+        "No Session hdr",
+        "NRM=0"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-034",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "TEARDOWN with md URI (NRM>1) in Play state: state remains Play, response 455.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "TEARDOWN",
+      "pre_cond": "session.state = Play & request.uri = media_uri & session.NRM > 1",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "send 455"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-035",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SC:REDIRECT with Terminate Reason with Time parameter in Play state: state remains Play, Set RedP.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": "Play",
+      "trigger": "SC:REDIRECT",
+      "pre_cond": "session.state = Play & message.terminate_reason.time_parameter = present",
+      "post_cond": "session.state = Play",
+      "actions": [
+        "Set RedP"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-036",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "SC:REDIRECT without Terminate Reason time parameter in Play state: transitions to Init, session is removed.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "SC:REDIRECT",
+      "pre_cond": "session.state = Play & message.terminate_reason.time_parameter = absent",
+      "post_cond": "session.state = Init",
+      "actions": [
+        "Session is removed"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-037",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "RedP reached in Play state: transitions to Init, TEARDOWN of session.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "RedP reached",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Init",
+      "actions": [
+        "TEARDOWN of session"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-038",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "Timeout in Play state: transitions to Init, stop media playout.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Play",
+      "to_state": "Init",
+      "trigger": "Timeout",
+      "pre_cond": "session.state = Play",
+      "post_cond": "session.state = Init",
+      "actions": [
+        "Stop Media playout"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-039",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "A response code of 3rr will result in the session being ended and its state changed to Init.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S283",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Init",
+      "trigger": "3rr response",
+      "pre_cond": null,
+      "post_cond": "session.state = Init",
+      "actions": [
+        "session ended"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S283-040",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "rtsp_fsm",
+      "description": "An unrecoverable error results in the ending of the session.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S283",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Init",
+      "trigger": "unrecoverable error",
+      "pre_cond": null,
+      "post_cond": "session.state = Init",
+      "actions": [
+        "session ended"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}

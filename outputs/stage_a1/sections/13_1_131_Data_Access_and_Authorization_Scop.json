@@ -1,0 +1,113 @@
+{
+  "section_id": "13.1",
+  "title": "13.1. Data Access and Authorization Scoping",
+  "depth": 3,
+  "parent_path": [
+    "13. Security Considerations",
+    "13.1. Data Access and Authorization Scoping"
+  ],
+  "url_anchor": "#131-data-access-and-authorization-scoping",
+  "word_count": 254,
+  "statement_count": 4,
+  "elapsed_seconds": 87.27,
+  "statements": [
+    {
+      "statement_id": "D-13-1-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "authentication",
+      "description": "Authorization checks MUST occur before any database queries or operations that could leak information about the existence of resources outside the caller's authorization scope",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "13.1",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "A2A_operation_request",
+      "pre_cond": "caller.authenticated = true",
+      "post_cond": "authorization_check_complete = true",
+      "actions": [
+        "Perform authorization check against caller's authorization boundaries before any database query or resource-accessing operation",
+        "Reject request if caller lacks authorization",
+        "Proceed with operation only if authorization check passes"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-13-1-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "List Tasks: MUST only return tasks visible to the authenticated client according to the agent's authorization model",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "13.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tasks/list",
+      "pre_cond": "caller.authenticated = true & authorization_check_complete = true & caller.authorized = true",
+      "post_cond": "response.tasks = caller.authorized_visible_tasks",
+      "actions": [
+        "Scope task result set to caller's authorized access boundaries",
+        "Exclude tasks outside caller's authorization scope from response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-13-1-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Get Task: MUST verify the authenticated client has access to the requested task according to the agent's authorization model",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "13.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "tasks/get",
+      "pre_cond": "caller.authenticated = true & authorization_check_complete = true",
+      "post_cond": "caller.authorized_for_task = true",
+      "actions": [
+        "Verify authenticated client has access to the specifically requested task per the agent's authorization model"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-13-1-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "task_execution",
+      "description": "Task-related operations (Cancel, Subscribe, Push Notification Config): MUST verify the client has appropriate access rights according to the agent's authorization model",
+      "is_inferred": true,
+      "confidence": 0.6,
+      "source_section": "13.1",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "task_operation_request",
+      "pre_cond": "caller.authenticated = true & authorization_check_complete = true",
+      "post_cond": "caller.has_appropriate_access_rights = true",
+      "actions": [
+        "Verify client has appropriate access rights per authorization model before executing cancel, subscribe, or push notification config operations"
+      ],
+      "modality": "must"
+    }
+  ]
+}

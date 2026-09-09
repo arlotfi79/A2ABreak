@@ -1,0 +1,159 @@
+{
+  "section_id": "S097",
+  "title": "S097 14.2 UAS Behavior",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S097 14.2 UAS Behavior"
+  ],
+  "url_anchor": "#s097-142-uas-behavior",
+  "word_count": 450,
+  "statement_count": 6,
+  "elapsed_seconds": 38.42,
+  "statements": [
+    {
+      "statement_id": "D-S097-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS that receives a second INVITE before it sends the final response to a first INVITE with a lower CSeq sequence number on the same dialog MUST return a 500 (Server Internal Error) response to the second INVITE and MUST include a Retry-After header field with a randomly chosen value of between 0 and 10 seconds.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_second_INVITE_before_final_response_to_first_INVITE",
+      "pre_cond": "transaction.first_INVITE_final_response_sent = false & transaction.second_INVITE_received = true & transaction.first_INVITE.CSeq < transaction.second_INVITE.CSeq",
+      "post_cond": "response.status_code = 500 & response.Retry-After = random(0,10)",
+      "actions": [
+        "send_500_Server_Internal_Error",
+        "include_Retry-After_header_0_to_10_seconds"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S097-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS that receives an INVITE on a dialog while an INVITE it had sent on that dialog is in progress MUST return a 491 (Request Pending) response to the received INVITE.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_INVITE_while_UAS_INVITE_in_progress",
+      "pre_cond": "dialog.outgoing_INVITE.in_progress = true & dialog.incoming_INVITE_received = true",
+      "post_cond": "response.status_code = 491",
+      "actions": [
+        "send_491_Request_Pending"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S097-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a UA receives a re-INVITE for an existing dialog, it MUST check any version identifiers in the session description or, if there are no version identifiers, the content of the session description to see if it has changed. If the session description has changed, the UAS MUST adjust the session parameters accordingly.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_re-INVITE_with_changed_session_description",
+      "pre_cond": "dialog.established = true & session_description.changed = true",
+      "post_cond": "session.parameters_adjusted = true",
+      "actions": [
+        "check_session_description_version",
+        "adjust_session_parameters"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S097-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the new session description is not acceptable, the UAS can reject it by returning a 488 (Not Acceptable Here) response for the re-INVITE. This response SHOULD include a Warning header field.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receive_re-INVITE_with_unacceptable_session_description",
+      "pre_cond": "dialog.established = true & session_description.acceptable = false",
+      "post_cond": "response.status_code = 488",
+      "actions": [
+        "send_488_Not_Acceptable_Here",
+        "include_Warning_header"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S097-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If a UAS generates a 2xx response and never receives an ACK, it SHOULD generate a BYE to terminate the dialog.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S097",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "ACK_not_received_after_2xx",
+      "pre_cond": "transaction.response_2xx_sent = true & transaction.ACK_received = false",
+      "post_cond": "dialog.terminated = true",
+      "actions": [
+        "send_BYE",
+        "terminate_dialog"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S097-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "sip_fsm",
+      "description": "If, however, it is unacceptable to the UAC, the UAC SHOULD generate an answer with a valid session description, and then send a BYE to terminate the session.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S097",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Terminated",
+      "trigger": "receive_unacceptable_session_description_offer_in_2xx",
+      "pre_cond": "session_description.acceptable_to_UAC = false",
+      "post_cond": "session.terminated = true",
+      "actions": [
+        "send_answer_with_valid_session_description",
+        "send_BYE",
+        "terminate_session"
+      ],
+      "modality": "should"
+    }
+  ]
+}

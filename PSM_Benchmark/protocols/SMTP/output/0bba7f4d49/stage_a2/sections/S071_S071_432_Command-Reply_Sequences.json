@@ -1,0 +1,135 @@
+{
+  "section_id": "S071",
+  "title": "S071 4.3.2 Command-Reply Sequences",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S071 4.3.2 Command-Reply Sequences"
+  ],
+  "url_anchor": "#s071-432-command-reply-sequences",
+  "word_count": 452,
+  "statement_count": 5,
+  "elapsed_seconds": 73.3,
+  "statements": [
+    {
+      "statement_id": "N-S071-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Since some servers may generate other replies under special circumstances, and to allow for future extension, SMTP clients SHOULD, when possible, interpret only the first digit of the reply and MUST be prepared to deal with unrecognized reply codes by interpreting the first digit only.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "SMTP client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_reply",
+      "pre_cond": null,
+      "post_cond": "client.reply_interpretation = first_digit_only",
+      "actions": [
+        "interpret only first digit of reply code when determining next state"
+      ],
+      "modality": "should",
+      "id": "N-S071-001"
+    },
+    {
+      "statement_id": "N-S071-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "Since some servers may generate other replies under special circumstances, and to allow for future extension, SMTP clients SHOULD, when possible, interpret only the first digit of the reply and MUST be prepared to deal with unrecognized reply codes by interpreting the first digit only.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "SMTP client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_unrecognized_reply_code",
+      "pre_cond": "reply.code.recognized = false",
+      "post_cond": "client.reply_interpretation = first_digit_only",
+      "actions": [
+        "interpret first digit of unrecognized reply code to determine state transition"
+      ],
+      "modality": "must",
+      "id": "N-S071-002"
+    },
+    {
+      "statement_id": "N-S071-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Unless extended using the mechanisms described in Section 2.2, SMTP servers MUST NOT transmit reply codes to an SMTP client that are other than three digits or that do not start in a digit between 2 and 5 inclusive.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "SMTP server",
+        "SMTP client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "transmit_reply_code",
+      "pre_cond": "session.extended_reply_codes = false",
+      "post_cond": "reply.length = 3 & reply.first_digit >= 2 & reply.first_digit <= 5",
+      "actions": [
+        "transmit only 3-digit reply codes whose first digit is in the range 2\u20135"
+      ],
+      "modality": "must",
+      "id": "N-S071-003"
+    },
+    {
+      "statement_id": "N-S071-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "smtp",
+      "stage": "smtp_fsm",
+      "description": "However, if the target is more precise granularity in the codes, rather than codes for completely new purposes, the system described in RFC 3463 [25] SHOULD be used in preference to the invention of new codes.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "SMTP"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S071-004"
+    },
+    {
+      "statement_id": "N-S071-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "In order to provide for future extensions, commands that are specified in this document as not accepting arguments (DATA, RSET, QUIT) SHOULD return a 501 message if arguments are supplied in the absence of EHLO-advertised extensions.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S071",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "receipt_of_no_arg_command_with_arguments",
+      "pre_cond": "(command.name = DATA | command.name = RSET | command.name = QUIT) & command.has_arguments = true & ehlo.advertised_extension = false",
+      "post_cond": "reply.code = 501",
+      "actions": [
+        "send 501 reply rejecting command with unexpected arguments"
+      ],
+      "modality": "should",
+      "id": "N-S071-005"
+    }
+  ]
+}

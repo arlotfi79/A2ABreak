@@ -1,0 +1,175 @@
+{
+  "section_id": "S042",
+  "title": "S042 3.8 Terminating Sessions and Connections",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S042 3.8 Terminating Sessions and Connections"
+  ],
+  "url_anchor": "#s042-38-terminating-sessions-and-connections",
+  "word_count": 269,
+  "statement_count": 7,
+  "elapsed_seconds": 73.94,
+  "statements": [
+    {
+      "statement_id": "D-S042-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "smtp_fsm",
+      "description": "An SMTP connection is terminated when the client sends a QUIT command. The server responds with a positive reply code, after which it closes the connection.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S042",
+      "state_name": "Connection Closed",
+      "enum_name": "ConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S042-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "smtp_fsm",
+      "description": "An SMTP connection is terminated when the client sends a QUIT command. The server responds with a positive reply code (221), after which it closes the connection.",
+      "is_inferred": false,
+      "confidence": 0.97,
+      "source_section": "S042",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connection Closed",
+      "trigger": "client sends QUIT command",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "server sends 221 reply",
+        "server closes connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S042-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "After detecting the need to shut down the SMTP service and returning a 421 response code. This response code can be issued after the server receives any command or, if necessary, asynchronously from command receipt.",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S042",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connection Closed",
+      "trigger": "SMTP service shutdown detected",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 421 response code",
+        "close connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S042-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "After a timeout, as specified in Section 4.5.3.2, occurs waiting for the client to send a command or data.",
+      "is_inferred": false,
+      "confidence": 0.93,
+      "source_section": "S042",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connection Closed",
+      "trigger": "timeout waiting for client command or data",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "close connection"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S042-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "Servers are expected to be tolerant of unknown commands, issuing a 500 reply and awaiting further instructions from the client.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S042",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "unknown command received",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 500 reply",
+        "await further instructions from client"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S042-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "An SMTP server that is forcibly shut down via external means SHOULD attempt to send a line containing a 421 response code to the SMTP client before exiting.",
+      "is_inferred": false,
+      "confidence": 0.88,
+      "source_section": "S042",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": "Connection Closed",
+      "trigger": "forcible external shutdown",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "send 421 response code",
+        "exit"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S042-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "SMTP clients that experience a connection close, reset, or other communications failure due to circumstances not under their control SHOULD treat the mail transaction as if a 451 response had been received and act accordingly.",
+      "is_inferred": false,
+      "confidence": 0.87,
+      "source_section": "S042",
+      "actors": [
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection close, reset, or communications failure not under client control",
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "treat mail transaction as if 451 response received"
+      ],
+      "modality": "should"
+    }
+  ]
+}

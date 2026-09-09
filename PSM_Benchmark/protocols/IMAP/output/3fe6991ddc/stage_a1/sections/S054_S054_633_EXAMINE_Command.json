@@ -1,0 +1,106 @@
+{
+  "section_id": "S054",
+  "title": "S054 6.3.3 EXAMINE Command",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S054 6.3.3 EXAMINE Command"
+  ],
+  "url_anchor": "#s054-633-examine-command",
+  "word_count": 155,
+  "statement_count": 4,
+  "elapsed_seconds": 14.87,
+  "statements": [
+    {
+      "statement_id": "D-S054-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Result: OK - examine completed, now in selected state",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S054",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "selected",
+      "trigger": "EXAMINE command / tagged OK response",
+      "pre_cond": "protocol.state = authenticated",
+      "post_cond": "protocol.state = selected & mailbox.access = read-only",
+      "actions": [
+        "open mailbox as read-only",
+        "send untagged FLAGS response",
+        "send untagged EXISTS response",
+        "send untagged LIST response",
+        "send untagged OK PERMANENTFLAGS response",
+        "send untagged OK UIDNEXT response",
+        "send untagged OK UIDVALIDITY response",
+        "send tagged OK [READ-ONLY] response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S054-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "Result: NO - examine failure, now in authenticated state: no such mailbox, can't access mailbox",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S054",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "authenticated",
+      "to_state": "authenticated",
+      "trigger": "EXAMINE command / tagged NO response",
+      "pre_cond": "protocol.state = authenticated",
+      "post_cond": "protocol.state = authenticated",
+      "actions": [
+        "send tagged NO response"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S054-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "examine completed, now in selected state; selected mailbox is identified as read-only",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S054",
+      "state_name": "selected",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = selected"
+    },
+    {
+      "statement_id": "D-S054-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "message",
+      "stage": "imap_fsm",
+      "description": "The text of the tagged OK response to the EXAMINE command MUST begin with the '[READ-ONLY]' response code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S054",
+      "object_name": "tagged OK response to EXAMINE",
+      "field_name": "[READ-ONLY]",
+      "field_type": "response code",
+      "required": true,
+      "allowed_values": [
+        "[READ-ONLY]"
+      ],
+      "guard_semantics": "trigger = EXAMINE & result = OK"
+    }
+  ]
+}

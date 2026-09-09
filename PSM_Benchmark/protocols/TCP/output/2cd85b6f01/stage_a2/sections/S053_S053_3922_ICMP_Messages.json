@@ -1,0 +1,138 @@
+{
+  "section_id": "S053",
+  "title": "S053 3.9.2.2 ICMP Messages",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S053 3.9.2.2 ICMP Messages"
+  ],
+  "url_anchor": "#s053-3922-icmp-messages",
+  "word_count": 246,
+  "statement_count": 5,
+  "elapsed_seconds": 39.12,
+  "statements": [
+    {
+      "statement_id": "1-S053-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "TCP implementations MUST act on an ICMP error message passed up from the IP layer, directing it to the connection that created the error (MUST-54).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "TCP implementation",
+        "IP layer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ICMP_error_received_from_IP_layer",
+      "pre_cond": null,
+      "post_cond": "icmp.error_directed_to_originating_connection = true",
+      "actions": [
+        "demultiplex ICMP error using IP header contained within ICMP message",
+        "direct ICMP error to the connection that created the error"
+      ],
+      "modality": "must",
+      "id": "N-S053-001"
+    },
+    {
+      "statement_id": "2-S053-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "TCP implementations MUST silently discard any received ICMP Source Quench messages (MUST-55).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ICMP_Source_Quench_received",
+      "pre_cond": "icmp.type = Source_Quench",
+      "post_cond": "icmp.message_discarded = true",
+      "actions": [
+        "silently discard ICMP Source Quench message"
+      ],
+      "modality": "must",
+      "id": "N-S053-002"
+    },
+    {
+      "statement_id": "3-S053-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Since these Unreachable messages indicate soft error conditions, a TCP implementation MUST NOT abort the connection (MUST-56), and it SHOULD make the information available to the application (SHLD-25).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ICMP_soft_error_received",
+      "pre_cond": "icmp.error_class = soft_error",
+      "post_cond": "connection.aborted = false",
+      "actions": [
+        "do not abort the connection"
+      ],
+      "modality": "must",
+      "id": "N-S053-003"
+    },
+    {
+      "statement_id": "4-S053-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "Since these Unreachable messages indicate soft error conditions, a TCP implementation MUST NOT abort the connection (MUST-56), and it SHOULD make the information available to the application (SHLD-25).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "TCP implementation",
+        "application"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "ICMP_soft_error_received",
+      "pre_cond": "icmp.error_class = soft_error",
+      "post_cond": "application.icmp_soft_error_info_available = true",
+      "actions": [
+        "make soft ICMP error information available to the application"
+      ],
+      "modality": "should",
+      "id": "N-S053-004"
+    },
+    {
+      "statement_id": "5-S053-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "These are hard error conditions, so TCP implementations SHOULD abort the connection (SHLD-26).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S053",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "ICMP_hard_error_received",
+      "pre_cond": "icmp.error_class = hard_error",
+      "post_cond": "connection.aborted = true",
+      "actions": [
+        "abort the connection"
+      ],
+      "modality": "should",
+      "id": "N-S053-005"
+    }
+  ]
+}

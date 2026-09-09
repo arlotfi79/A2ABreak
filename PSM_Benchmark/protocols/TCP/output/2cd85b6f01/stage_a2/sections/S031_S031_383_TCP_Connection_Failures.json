@@ -1,0 +1,187 @@
+{
+  "section_id": "S031",
+  "title": "S031 3.8.3 TCP Connection Failures",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S031 3.8.3 TCP Connection Failures"
+  ],
+  "url_anchor": "#s031-383-tcp-connection-failures",
+  "word_count": 362,
+  "statement_count": 7,
+  "elapsed_seconds": 106.49,
+  "statements": [
+    {
+      "statement_id": "N-S031-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "endpoint",
+      "stage": "tcp_fsm",
+      "description": "The following procedure MUST be used to handle excessive retransmissions of data segments (MUST-20):",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "TCP endpoint"
+      ],
+      "from_state": null,
+      "to_state": "CLOSED",
+      "trigger": "retransmission_count >= R2",
+      "pre_cond": "retransmission_count >= R1",
+      "post_cond": "connection.state = CLOSED",
+      "actions": [
+        "pass_negative_advice_to_IP_layer_when_retransmissions_reach_R1",
+        "close_connection_when_retransmissions_reach_R2"
+      ],
+      "modality": "must",
+      "id": "N-S031-001"
+    },
+    {
+      "statement_id": "N-S031-2",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "user",
+      "stage": "tcp_fsm",
+      "description": "An application MUST (MUST-21) be able to set the value for R2 for a particular connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "application"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "expose_R2_configuration_to_application_per_connection"
+      ],
+      "modality": "must",
+      "id": "N-S031-002"
+    },
+    {
+      "statement_id": "N-S031-3",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "TCP implementations SHOULD inform the application of the delivery problem (unless such information has been disabled by the application; see the \"Asynchronous Reports\" section (Section 3.9.1.8)), when R1 is reached and before R2 (SHLD-9).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "TCP implementation",
+        "application"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "retransmission_count >= R1 & retransmission_count < R2",
+      "pre_cond": "retransmission_count >= R1 & retransmission_count < R2 & !application.asynchronous_reports_disabled",
+      "post_cond": null,
+      "actions": [
+        "inform_application_of_delivery_problem"
+      ],
+      "modality": "should",
+      "id": "N-S031-003"
+    },
+    {
+      "statement_id": "N-S031-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "The value of R1 SHOULD correspond to at least 3 retransmissions, at the current RTO (SHLD-10).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "set_R1_to_minimum_3_retransmissions_at_current_RTO"
+      ],
+      "modality": "should",
+      "id": "N-S031-004"
+    },
+    {
+      "statement_id": "N-S031-5",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "The value of R2 SHOULD correspond to at least 100 seconds (SHLD-11).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [
+        "set_R2_to_minimum_100_seconds"
+      ],
+      "modality": "should",
+      "id": "N-S031-005"
+    },
+    {
+      "statement_id": "N-S031-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "SYN retransmissions MUST be handled in the general way just described for data retransmissions, including notification of the application layer.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": "CLOSED",
+      "trigger": "syn_retransmission_count >= R2",
+      "pre_cond": "connection.state = SYN-SENT & syn_retransmission_count >= R2",
+      "post_cond": "connection.state = CLOSED",
+      "actions": [
+        "pass_negative_advice_to_IP_layer_when_syn_retransmissions_reach_R1",
+        "close_connection_when_syn_retransmissions_reach_R2",
+        "notify_application_layer"
+      ],
+      "modality": "must",
+      "id": "N-S031-006"
+    },
+    {
+      "statement_id": "N-S031-7",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "tcp",
+      "stage": "tcp_fsm",
+      "description": "In particular, R2 for a SYN segment MUST be set large enough to provide retransmission of the segment for at least 3 minutes (MUST-23).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S031",
+      "actors": [
+        "TCP implementation"
+      ],
+      "from_state": "SYN-SENT",
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "connection.state = SYN-SENT",
+      "post_cond": "R2_for_SYN >= 180_seconds",
+      "actions": [
+        "set_R2_for_SYN_segment_to_at_least_3_minutes"
+      ],
+      "modality": "must",
+      "id": "N-S031-007"
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+{
+  "section_id": "S057",
+  "title": "S057 4.1.1.10 QUIT (QUIT)",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S057 4.1.1.10 QUIT (QUIT)"
+  ],
+  "url_anchor": "#s057-41110-quit-quit",
+  "word_count": 154,
+  "statement_count": 7,
+  "elapsed_seconds": 89.09,
+  "statements": [
+    {
+      "statement_id": "1-S057-1",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "This command specifies that the receiver MUST send a \"221 OK\" reply, and then close the transmission channel.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "QUIT_command_received",
+      "pre_cond": null,
+      "post_cond": "transmission_channel.state = CLOSED",
+      "actions": [
+        "send_221_OK_reply",
+        "close_transmission_channel"
+      ],
+      "modality": "must",
+      "id": "N-S057-001"
+    },
+    {
+      "statement_id": "2-S057-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "The receiver MUST NOT intentionally close the transmission channel until it receives and replies to a QUIT command (even if there was an error).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "!quit_command_received | !quit_reply_sent",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S057-002"
+    },
+    {
+      "statement_id": "3-S057-3",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "The sender MUST NOT intentionally close the transmission channel until it sends a QUIT command, and it SHOULD wait until it receives the reply (even if there was an error response to a previous command).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": "!quit_command_sent",
+      "post_cond": null,
+      "actions": [],
+      "modality": "must",
+      "id": "N-S057-003"
+    },
+    {
+      "statement_id": "4-S057-4",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "The sender MUST NOT intentionally close the transmission channel until it sends a QUIT command, and it SHOULD wait until it receives the reply (even if there was an error response to a previous command).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "QUIT_command_sent",
+      "pre_cond": "quit_command_sent",
+      "post_cond": null,
+      "actions": [
+        "wait_for_221_reply"
+      ],
+      "modality": "should",
+      "id": "N-S057-004"
+    },
+    {
+      "statement_id": "5-S057-5",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the connection is closed prematurely due to violations of the above or system or network failure, the server MUST cancel any pending transaction, but not undo any previously completed transaction, and generally MUST act as if the command or transaction in progress had received a temporary error (i.e., a 4yz response).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_closed_prematurely",
+      "pre_cond": "connection.closed_prematurely = true",
+      "post_cond": "pending_transaction.state = CANCELLED",
+      "actions": [
+        "cancel_pending_transaction"
+      ],
+      "modality": "must",
+      "id": "N-S057-005"
+    },
+    {
+      "statement_id": "6-S057-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "If the connection is closed prematurely due to violations of the above or system or network failure, the server MUST cancel any pending transaction, but not undo any previously completed transaction, and generally MUST act as if the command or transaction in progress had received a temporary error (i.e., a 4yz response).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_closed_prematurely",
+      "pre_cond": "connection.closed_prematurely = true",
+      "post_cond": "in_progress_command_or_transaction.response_class = 4yz",
+      "actions": [
+        "treat_in_progress_command_or_transaction_as_temporary_error_4yz"
+      ],
+      "modality": "must",
+      "id": "N-S057-006"
+    },
+    {
+      "statement_id": "7-S057-7",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "client",
+      "stage": "smtp_fsm",
+      "description": "The QUIT command may be issued at any time.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S057",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "may",
+      "id": "N-S057-007"
+    }
+  ]
+}

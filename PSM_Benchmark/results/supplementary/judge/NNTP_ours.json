@@ -1,0 +1,606 @@
+{
+ "proto": "NNTP",
+ "system": "ours",
+ "gt_states": 10,
+ "gt_transitions": 16,
+ "cand_states": 27,
+ "cand_transitions": 60,
+ "states_matched": 6,
+ "states_P": 0.2222,
+ "states_R": 0.6,
+ "states_F1": 0.3243,
+ "trans_matched": 6,
+ "trans_P": 0.1,
+ "trans_R": 0.375,
+ "trans_F1": 0.1579,
+ "unmatched_classes": {
+  "real_behavior_not_in_gt": 48,
+  "wrong_or_unsupported": 2,
+  "duplicate_or_alias": 2
+ },
+ "tokens_in": 4841,
+ "tokens_out": 4986,
+ "cost": 0.14885500000000002,
+ "seconds": 66.9,
+ "raw": {
+  "state_matches": [
+   {
+    "gt": "Initial_Connection",
+    "candidate": "Established",
+    "confidence": 0.95,
+    "reason": "Both represent the initial state upon TCP connection before greeting is processed."
+   },
+   {
+    "gt": "Service_Available",
+    "candidate": "TransitMode",
+    "confidence": 0.5,
+    "reason": "Service_Available after receiving 200 could map to TransitMode (server in transit/general mode before MODE READER), but it's a weak match since TransitMode is not directly reached from Established via 200 in the candidate."
+   },
+   {
+    "gt": "Connection_Closed",
+    "candidate": "Closed",
+    "confidence": 1.0,
+    "reason": "Both represent the terminal closed connection state."
+   },
+   {
+    "gt": "Posting_Allowed",
+    "candidate": "PostingAllowed",
+    "confidence": 0.75,
+    "reason": "Both represent a state where posting is allowed. In GT it's reached after MODE READER; in candidate it's reached directly from greeting 200."
+   },
+   {
+    "gt": "Posting_Prohibited",
+    "candidate": "PostingProhibited",
+    "confidence": 0.85,
+    "reason": "Both represent a state where posting is prohibited, reached after 201 greeting."
+   },
+   {
+    "gt": "Group_Selected",
+    "candidate": "GroupSelected",
+    "confidence": 0.95,
+    "reason": "Both represent the state where a newsgroup has been selected."
+   },
+   {
+    "gt": "Article_Selected",
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate state corresponds to a state after fetching an article but before reading headers/body."
+   },
+   {
+    "gt": "Reading_Headers",
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate state corresponds to reading article headers."
+   },
+   {
+    "gt": "Reading_Body",
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate state corresponds to reading article body."
+   },
+   {
+    "gt": "Posting_Article",
+    "candidate": "ArticleInput",
+    "confidence": 0.85,
+    "reason": "Both represent the state where an article is being submitted/posted, awaiting the result (240 or 441)."
+   }
+  ],
+  "transition_matches": [
+   {
+    "gt_index": 0,
+    "gt": {
+     "from": "Initial_Connection",
+     "event": "Receive 200",
+     "action": "Set service available",
+     "to": "Service_Available"
+    },
+    "candidate_index": 0,
+    "candidate": {
+     "from": "Established",
+     "event": "receive 200 greeting",
+     "action": "send 200 response",
+     "to": "PostingAllowed"
+    },
+    "confidence": 0.6,
+    "reason": "Both transition from initial state on receiving 200 greeting. Destination states differ in naming but both represent an active service state. However GT goes to Service_Available (pre-MODE READER) while candidate goes directly to PostingAllowed."
+   },
+   {
+    "gt_index": 1,
+    "gt": {
+     "from": "Initial_Connection",
+     "event": "Receive 201",
+     "action": "Set posting prohibited",
+     "to": "Posting_Prohibited"
+    },
+    "candidate_index": 1,
+    "candidate": {
+     "from": "Established",
+     "event": "receive 201 greeting",
+     "action": "send 201 response",
+     "to": "PostingProhibited"
+    },
+    "confidence": 0.95,
+    "reason": "Both transition from initial state on receiving 201 to a posting-prohibited state."
+   },
+   {
+    "gt_index": 2,
+    "gt": {
+     "from": "Initial_Connection",
+     "event": "Receive 502",
+     "action": "Close connection",
+     "to": "Connection_Closed"
+    },
+    "candidate_index": 2,
+    "candidate": {
+     "from": "Established",
+     "event": "receive 502 greeting",
+     "action": "send 502 response; close connection immediately",
+     "to": "Closed"
+    },
+    "confidence": 0.95,
+    "reason": "Both transition from initial state on 502 to closed."
+   },
+   {
+    "gt_index": 3,
+    "gt": {
+     "from": "Initial_Connection",
+     "event": "Receive 400",
+     "action": "Close connection",
+     "to": "Connection_Closed"
+    },
+    "candidate_index": 3,
+    "candidate": {
+     "from": "Established",
+     "event": "receive 400 greeting",
+     "action": "send 400 response; close connection",
+     "to": "Closed"
+    },
+    "confidence": 0.95,
+    "reason": "Both transition from initial state on 400 to closed."
+   },
+   {
+    "gt_index": 4,
+    "gt": {
+     "from": "Service_Available",
+     "event": "MODE READER",
+     "action": "Switch to reader mode",
+     "to": "Posting_Allowed"
+    },
+    "candidate_index": 18,
+    "candidate": {
+     "from": "TransitMode",
+     "event": "receive MODE READER 200",
+     "action": "send 200 response; switch capabilities to reader mode",
+     "to": "ReaderModePostAllowed"
+    },
+    "confidence": 0.45,
+    "reason": "Both involve MODE READER from a general service state to a reader/posting-allowed state. But the state mappings are weak (Service_Available~TransitMode, Posting_Allowed~ReaderModePostAllowed)."
+   },
+   {
+    "gt_index": 5,
+    "gt": {
+     "from": "Posting_Prohibited",
+     "event": "MODE READER",
+     "action": "Switch to reader mode",
+     "to": "Posting_Allowed"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate transition from PostingProhibited on MODE READER to a posting-allowed state."
+   },
+   {
+    "gt_index": 6,
+    "gt": {
+     "from": "Posting_Allowed",
+     "event": "GROUP <group_name>",
+     "action": "Select newsgroup",
+     "to": "Group_Selected"
+    },
+    "candidate_index": 23,
+    "candidate": {
+     "from": "NoGroupSelected",
+     "event": "receive GROUP success",
+     "action": "send 211 response; set selected newsgroup",
+     "to": "GroupSelected"
+    },
+    "confidence": 0.5,
+    "reason": "Both select a newsgroup and transition to GroupSelected. Source states differ (PostingAllowed vs NoGroupSelected) but the protocol action is the same."
+   },
+   {
+    "gt_index": 7,
+    "gt": {
+     "from": "Group_Selected",
+     "event": "ARTICLE <article_id>",
+     "action": "Fetch article",
+     "to": "Article_Selected"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate transition for ARTICLE command from GroupSelected to an Article_Selected state."
+   },
+   {
+    "gt_index": 8,
+    "gt": {
+     "from": "Group_Selected",
+     "event": "POST",
+     "action": "Start article posting",
+     "to": "Posting_Article"
+    },
+    "candidate_index": 36,
+    "candidate": {
+     "from": "PostingAllowed",
+     "event": "receive POST command",
+     "action": "send 340 response",
+     "to": "ArticleInput"
+    },
+    "confidence": 0.55,
+    "reason": "Both initiate POST and transition to an article-input/posting state. Source states differ (GroupSelected vs PostingAllowed) but the protocol semantics match."
+   },
+   {
+    "gt_index": 9,
+    "gt": {
+     "from": "Article_Selected",
+     "event": "HEAD <article_id>",
+     "action": "Read headers",
+     "to": "Reading_Headers"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate state or transition for HEAD command."
+   },
+   {
+    "gt_index": 10,
+    "gt": {
+     "from": "Article_Selected",
+     "event": "BODY <article_id>",
+     "action": "Read body",
+     "to": "Reading_Body"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No candidate state or transition for BODY command."
+   },
+   {
+    "gt_index": 11,
+    "gt": {
+     "from": "Reading_Headers",
+     "event": "QUIT",
+     "action": "Close connection",
+     "to": "Connection_Closed"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No Reading_Headers state in candidate."
+   },
+   {
+    "gt_index": 12,
+    "gt": {
+     "from": "Reading_Body",
+     "event": "QUIT",
+     "action": "Close connection",
+     "to": "Connection_Closed"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No Reading_Body state in candidate."
+   },
+   {
+    "gt_index": 13,
+    "gt": {
+     "from": "Posting_Article",
+     "event": "Receive 240",
+     "action": "Article posted successfully",
+     "to": "Group_Selected"
+    },
+    "candidate_index": 37,
+    "candidate": {
+     "from": "ArticleInput",
+     "event": "receive article success",
+     "action": "send 240 response",
+     "to": "PostingAllowed"
+    },
+    "confidence": 0.7,
+    "reason": "Both represent successful article posting (240). Source states match (Posting_Article~ArticleInput). Destination differs (GroupSelected vs PostingAllowed) but semantically returns to active state."
+   },
+   {
+    "gt_index": 14,
+    "gt": {
+     "from": "Posting_Article",
+     "event": "Receive 441",
+     "action": "Posting failed",
+     "to": "Group_Selected"
+    },
+    "candidate_index": 38,
+    "candidate": {
+     "from": "ArticleInput",
+     "event": "receive article fail",
+     "action": "send 441 response",
+     "to": "PostingAllowed"
+    },
+    "confidence": 0.7,
+    "reason": "Both represent failed article posting (441). Source states match. Destination differs but semantically returns to active state."
+   },
+   {
+    "gt_index": 15,
+    "gt": {
+     "from": "Group_Selected",
+     "event": "QUIT",
+     "action": "Close connection",
+     "to": "Connection_Closed"
+    },
+    "candidate_index": null,
+    "candidate": null,
+    "confidence": 0.0,
+    "reason": "No direct QUIT transition from GroupSelected in candidate. The candidate has QUIT from CommandExchange and PostingAllowed/PostingProhibited but not from GroupSelected."
+   }
+  ],
+  "unmatched_candidate_transitions": [
+   {
+    "candidate_index": 4,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server sending greeting to enter command exchange is a valid server-side perspective not in GT."
+   },
+   {
+    "candidate_index": 5,
+    "class": "wrong_or_unsupported",
+    "reason": "XENCRYPT is not a standard NNTP command from the RFC; this is non-standard behavior."
+   },
+   {
+    "candidate_index": 6,
+    "class": "wrong_or_unsupported",
+    "reason": "XSECRET is not a standard NNTP command from the RFC; this is non-standard behavior."
+   },
+   {
+    "candidate_index": 7,
+    "class": "real_behavior_not_in_gt",
+    "reason": "3xx continuation response handling in command exchange is valid NNTP behavior not modeled in GT."
+   },
+   {
+    "candidate_index": 8,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Connection closed during command exchange is valid behavior not in GT."
+   },
+   {
+    "candidate_index": 9,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Autologout timeout is specified in NNTP RFC but not in GT."
+   },
+   {
+    "candidate_index": 10,
+    "class": "real_behavior_not_in_gt",
+    "reason": "QUIT from CommandExchange is valid NNTP behavior; GT has QUIT from other states."
+   },
+   {
+    "candidate_index": 11,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Resetting autologout timer on command receipt is valid behavior."
+   },
+   {
+    "candidate_index": 12,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server-initiated 400 shutdown is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 13,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Fault/disconnect handling is valid behavior."
+   },
+   {
+    "candidate_index": 14,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Receiving multiline data in AwaitingData is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 15,
+    "class": "real_behavior_not_in_gt",
+    "reason": "QUIT from PostingAllowed is valid NNTP behavior not explicitly in GT from that state."
+   },
+   {
+    "candidate_index": 16,
+    "class": "real_behavior_not_in_gt",
+    "reason": "QUIT from PostingProhibited is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 17,
+    "class": "real_behavior_not_in_gt",
+    "reason": "MODE READER entering reading mode is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 19,
+    "class": "real_behavior_not_in_gt",
+    "reason": "MODE READER returning 201 (post prohibited in reader mode) is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 20,
+    "class": "real_behavior_not_in_gt",
+    "reason": "MODE READER returning 502 and closing is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 21,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE denied in reading mode returning 500 is valid behavior."
+   },
+   {
+    "candidate_index": 22,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE denied in reader mode post allowed returning 500 is valid behavior."
+   },
+   {
+    "candidate_index": 24,
+    "class": "real_behavior_not_in_gt",
+    "reason": "GROUP command when already in a group (re-selecting) is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 25,
+    "class": "real_behavior_not_in_gt",
+    "reason": "LISTGROUP command is valid NNTP behavior not in GT."
+   },
+   {
+    "candidate_index": 26,
+    "class": "real_behavior_not_in_gt",
+    "reason": "LISTGROUP with group argument from NoGroupSelected is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 27,
+    "class": "real_behavior_not_in_gt",
+    "reason": "LISTGROUP without argument when no group selected returning 412 is valid."
+   },
+   {
+    "candidate_index": 28,
+    "class": "real_behavior_not_in_gt",
+    "reason": "LAST command success is valid NNTP behavior not in GT."
+   },
+   {
+    "candidate_index": 29,
+    "class": "real_behavior_not_in_gt",
+    "reason": "LAST with no group selected returning 412 is valid."
+   },
+   {
+    "candidate_index": 30,
+    "class": "real_behavior_not_in_gt",
+    "reason": "LAST with no previous article returning 422 is valid."
+   },
+   {
+    "candidate_index": 31,
+    "class": "real_behavior_not_in_gt",
+    "reason": "LAST with no current article returning 420 is valid."
+   },
+   {
+    "candidate_index": 32,
+    "class": "real_behavior_not_in_gt",
+    "reason": "NEXT command success is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 33,
+    "class": "real_behavior_not_in_gt",
+    "reason": "NEXT with no group selected returning 412 is valid."
+   },
+   {
+    "candidate_index": 34,
+    "class": "real_behavior_not_in_gt",
+    "reason": "NEXT with no next article returning 421 is valid."
+   },
+   {
+    "candidate_index": 35,
+    "class": "duplicate_or_alias",
+    "reason": "This is the same POST command transition as index 36 but from a different source state perspective; index 36 was matched to GT index 8."
+   },
+   {
+    "candidate_index": 39,
+    "class": "real_behavior_not_in_gt",
+    "reason": "POST denied with 440 when posting prohibited is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 40,
+    "class": "duplicate_or_alias",
+    "reason": "POST allowed from CommandExchange is an alias of the POST transition already matched."
+   },
+   {
+    "candidate_index": 41,
+    "class": "real_behavior_not_in_gt",
+    "reason": "POST denied from CommandExchange with 440 is valid behavior."
+   },
+   {
+    "candidate_index": 42,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Article terminated returning to CommandExchange is valid server-side behavior."
+   },
+   {
+    "candidate_index": 43,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE command initiation is valid NNTP transit mode behavior not in GT."
+   },
+   {
+    "candidate_index": 44,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE 335 continuation (send article) is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 45,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE 435 (article not wanted) is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 46,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE 436 initial rejection is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 47,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE 235 transfer success is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 48,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE 436 transfer failed retry is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 49,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE 437 transfer rejected is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 50,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server-side IHAVE 335 handling is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 51,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server-side IHAVE article accepted (235) is valid."
+   },
+   {
+    "candidate_index": 52,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server-side IHAVE article rejected (437) is valid."
+   },
+   {
+    "candidate_index": 53,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Server-side IHAVE article failed (436) is valid."
+   },
+   {
+    "candidate_index": 54,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE 435 not wanted from CommandExchange is valid."
+   },
+   {
+    "candidate_index": 55,
+    "class": "real_behavior_not_in_gt",
+    "reason": "IHAVE 436 from CommandExchange is valid."
+   },
+   {
+    "candidate_index": 56,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Pipeline command handling is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 57,
+    "class": "real_behavior_not_in_gt",
+    "reason": "3xx continuation in awaiting response is valid behavior."
+   },
+   {
+    "candidate_index": 58,
+    "class": "real_behavior_not_in_gt",
+    "reason": "Sending continuation data is valid behavior."
+   },
+   {
+    "candidate_index": 59,
+    "class": "real_behavior_not_in_gt",
+    "reason": "OVER with no group returning 412 is valid NNTP behavior."
+   },
+   {
+    "candidate_index": 60,
+    "class": "real_behavior_not_in_gt",
+    "reason": "OVER success returning 224 is valid NNTP behavior."
+   }
+  ]
+ }
+}

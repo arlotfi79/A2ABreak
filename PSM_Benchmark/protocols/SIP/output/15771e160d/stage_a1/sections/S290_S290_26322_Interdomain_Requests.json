@@ -1,0 +1,162 @@
+{
+  "section_id": "S290",
+  "title": "S290 26.3.2.2 Interdomain Requests",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S290 26.3.2.2 Interdomain Requests"
+  ],
+  "url_anchor": "#s290-26322-interdomain-requests",
+  "word_count": 820,
+  "statement_count": 6,
+  "elapsed_seconds": 37.52,
+  "statements": [
+    {
+      "statement_id": "D-S290-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "When the local outbound proxy server has validated the credentials presented by the UA in the INVITE, it SHOULD inspect the Request-URI to determine how the message should be routed.",
+      "is_inferred": false,
+      "confidence": 0.65,
+      "source_section": "S290",
+      "actors": [
+        "local outbound proxy"
+      ],
+      "from_state": "credentials_validated",
+      "to_state": "routing_determination",
+      "trigger": "INVITE credentials validated",
+      "pre_cond": "transaction.credentials_validated = true",
+      "post_cond": "transaction.route_determined = true",
+      "actions": [
+        "inspect Request-URI",
+        "determine routing"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S290-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "sip_fsm",
+      "description": "The local outbound proxy server at atlanta.com SHOULD therefore establish a TLS connection with the remote proxy server at biloxi.com when the Request-URI designates a remote domain.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S290",
+      "actors": [
+        "local outbound proxy",
+        "remote proxy"
+      ],
+      "from_state": "routing_determination",
+      "to_state": "tls_connection_establishing",
+      "trigger": "Request-URI designates remote domain",
+      "pre_cond": "request.request_uri.domain != local.domain",
+      "post_cond": "connection.tls_establishing = true",
+      "actions": [
+        "establish TLS connection with remote proxy"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S290-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "sip_fsm",
+      "description": "Each side of the connection SHOULD verify and inspect the certificate of the other. Once TLS negotiation has completed, resulting in a secure channel between the two proxies, the atlanta.com proxy can forward the INVITE request to biloxi.com.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S290",
+      "actors": [
+        "atlanta.com proxy",
+        "biloxi.com proxy"
+      ],
+      "from_state": "tls_connection_establishing",
+      "to_state": "tls_connection_established",
+      "trigger": "TLS negotiation completed",
+      "pre_cond": "connection.tls_negotiation_complete = true & connection.certificate_verified = true",
+      "post_cond": "connection.secure_channel = true",
+      "actions": [
+        "verify remote certificate",
+        "complete TLS negotiation",
+        "forward INVITE to remote proxy"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S290-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the INVITE has been approved by the biloxi proxy, the proxy server SHOULD identify the existing TLS channel, if any, associated with the user targeted by this request. The INVITE should be proxied through this channel to Bob.",
+      "is_inferred": false,
+      "confidence": 0.72,
+      "source_section": "S290",
+      "actors": [
+        "biloxi.com proxy",
+        "Bob"
+      ],
+      "from_state": "invite_approved",
+      "to_state": "invite_proxied",
+      "trigger": "INVITE approved by remote proxy",
+      "pre_cond": "transaction.invite_approved = true",
+      "post_cond": "transaction.invite_forwarded_to_target = true",
+      "actions": [
+        "identify existing TLS channel for target user",
+        "proxy INVITE to Bob via TLS channel"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S290-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "The biloxi proxy MAY have a strict security policy that requires it to reject requests that do not match the administrative domain from which they have been proxied.",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S290",
+      "actors": [
+        "biloxi.com proxy"
+      ],
+      "from_state": "routing_determination",
+      "to_state": "invite_rejected",
+      "trigger": "certificate domain does not match From header domain",
+      "pre_cond": "connection.certificate_domain != request.from.domain",
+      "post_cond": "transaction.rejected = true",
+      "actions": [
+        "reject INVITE request"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S290-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Before they forward the request, both proxy servers SHOULD add a Record-Route header field to the request so that all future requests in this dialog will pass through the proxy servers.",
+      "is_inferred": false,
+      "confidence": 0.6,
+      "source_section": "S290",
+      "actors": [
+        "local outbound proxy",
+        "remote proxy"
+      ],
+      "from_state": "invite_approved",
+      "to_state": "invite_proxied",
+      "trigger": "INVITE forwarded",
+      "pre_cond": "transaction.invite_approved = true",
+      "post_cond": "request.record_route_added = true",
+      "actions": [
+        "add Record-Route header field",
+        "forward request"
+      ],
+      "modality": "should"
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "section_id": "S036",
+  "title": "S036 8.1.3.4 Processing 3xx Responses",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S036 8.1.3.4 Processing 3xx Responses"
+  ],
+  "url_anchor": "#s036-8134-processing-3xx-responses",
+  "word_count": 765,
+  "statement_count": 8,
+  "elapsed_seconds": 43.63,
+  "statements": [
+    {
+      "statement_id": "D-S036-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "Upon receipt of a redirection response (for example, a 301 response status code), clients SHOULD use the URI(s) in the Contact header field to formulate one or more new requests based on the redirected request.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": null,
+      "to_state": "Redirect_Processing",
+      "trigger": "3xx_response_received",
+      "pre_cond": null,
+      "post_cond": "client.target_set = client.target_set + contact_uris",
+      "actions": [
+        "place Contact URIs into target set",
+        "formulate new requests based on redirected request"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S036-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "A client starts with an initial target set containing exactly one URI, the Request-URI of the original request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "state_name": "Initial_Target_Set",
+      "enum_name": "RedirectProcessingState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": "client.target_set.size = 1"
+    },
+    {
+      "statement_id": "D-S036-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "As the target set grows, the client MAY generate new requests to the URIs in any order.",
+      "is_inferred": false,
+      "confidence": 0.8,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "Redirect_Processing",
+      "to_state": "Redirect_Processing",
+      "trigger": "target_set_non_empty",
+      "pre_cond": "client.target_set.size > 0",
+      "post_cond": null,
+      "actions": [
+        "generate new request to next URI in target set",
+        "create new client transaction"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-S036-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If contacting an address in the list results in a failure, the element moves to the next address in the list, until the list is exhausted.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "Redirect_Processing",
+      "to_state": "Redirect_Processing",
+      "trigger": "contact_failure",
+      "pre_cond": "client.target_set.size > 0",
+      "post_cond": null,
+      "actions": [
+        "move to next address in target set",
+        "create new client transaction",
+        "deliver new request"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S036-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the list is exhausted, then the request has failed.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S036",
+      "actors": [
+        "UAC"
+      ],
+      "from_state": "Redirect_Processing",
+      "to_state": "Request_Failed",
+      "trigger": "target_set_exhausted",
+      "pre_cond": "client.target_set.size = 0",
+      "post_cond": "request.state = Failed",
+      "actions": [],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S036-006",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "If the list is exhausted, then the request has failed.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S036",
+      "state_name": "Request_Failed",
+      "enum_name": "RedirectProcessingState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": "client.target_set.size = 0"
+    },
+    {
+      "statement_id": "D-S036-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "sip_fsm",
+      "description": "Once the new request has been constructed, it is sent using a new client transaction, and therefore MUST have a new branch ID in the top Via field.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "object_name": "new_request",
+      "field_name": "top Via branch ID",
+      "field_type": "parameter",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "must be unique per new client transaction created on redirect"
+    },
+    {
+      "statement_id": "D-S036-008",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "client",
+      "stage": "sip_fsm",
+      "description": "A client processing 3xx class responses MUST NOT add any given URI to the target set more than once.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S036",
+      "object_name": "target_set",
+      "field_name": "URI entry",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "each URI must appear at most once in the target set; prevents infinite redirection loops"
+    }
+  ]
+}

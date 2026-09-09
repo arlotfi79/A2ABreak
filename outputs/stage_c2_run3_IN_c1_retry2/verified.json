@@ -1,0 +1,199 @@
+{
+  "findings": [
+    {
+      "finding_id": "F-001",
+      "candidate_id": "retry2:C-001",
+      "title": "Unbounded Authorization Delegation Chain Depth Enables Circular Resource Exhaustion in Multi-Agent Topologies",
+      "severity": "HIGH",
+      "description": "The A2A protocol explicitly enables multi-hop authorization delegation chains via TASK_STATE_AUTH_REQUIRED (Section 7.6), with the spec acknowledging 'This enables forming a chain of Tasks in TASK_STATE_AUTH_REQUIRED.' However, the protocol defines no maximum delegation depth counter, no chain identifier, and no cycle detection mechanism. The authorization_delegation transition in the interruption phase checks only that the client is an A2A agent actively processing a task — no guard examines chain depth, chain provenance, or prior participant identities. In a mesh topology where agents form a cycle (A→B→C→A), each agent complies individually by propagating AUTH_REQUIRED upstream, but the chain loops indefinitely because each agent has visibility only into its immediate caller (the hop-by-hop identity model). Each hop holds server-side resources (task in AUTH_REQUIRED state, potential open streams) with no protocol-defined timeout or depth escape from interrupted states. This is a missing primitive: the protocol needs chain metadata (depth counter, chain ID, or visited-agent set) to enable any participant to detect or bound circular delegation.",
+      "fsm_trace": [
+        {
+          "step": 1,
+          "stage": "initiation",
+          "state": "TASK_STATE_NONEXISTENT",
+          "transition": "send_message_requested",
+          "actor": "client",
+          "note": "Agent A (client) sends a task request to Agent B. Task T1 is created on Agent B and transitions to WORKING.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 2,
+          "stage": "task_execution",
+          "state": "TASK_STATE_WORKING",
+          "transition": "task_processing_continues (inter-stage from initiation)",
+          "actor": "server",
+          "note": "Agent B processes Task T1. As part of processing, Agent B (acting as client) creates Task T2 on Agent C — a separate FSM instance.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 3,
+          "stage": "task_execution",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_required",
+          "actor": "server",
+          "note": "Agent C determines it needs secondary credentials for Task T2 and transitions to AUTH_REQUIRED. Guard checks only task.state = TASK_STATE_WORKING. Agent C has no visibility into the chain.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 4,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_requested (inter-stage from task_execution)",
+          "actor": "server",
+          "note": "Task T2 enters the interruption phase on Agent C. Agent B (as client of Agent C) receives the auth request.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 5,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_delegation",
+          "actor": "client",
+          "note": "Agent B, being an A2A agent actively processing Task T1, propagates the auth requirement to Task T1 via authorization_delegation. Guard checks only client.is_a2a_agent and client.is_actively_processing_task — no depth counter, no chain ID, no cycle detection.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 6,
+          "stage": "interruption",
+          "state": "TASK_STATE_AUTH_REQUIRED",
+          "transition": "authorization_delegation",
+          "actor": "client",
+          "note": "Agent A receives AUTH_REQUIRED for Task T1. Agent A, to resolve the auth, delegates to another agent that routes back through the chain. The cycle repeats indefinitely — no protocol mechanism detects or breaks it. Each hop holds resources in AUTH_REQUIRED with no timeout transition to FAILED defined in the FSM.",
+          "is_reconstructed": false
+        }
+      ],
+      "missing_primitive": "Protocol-level delegation chain metadata: a chain depth counter incremented at each delegation hop and checked against a maximum, a chain identifier (chain_id) propagated with auth requests for cycle detection, and/or a visited-agent set enabling any agent to detect circular delegation before propagating further.",
+      "confirmed_absent": true,
+      "confirmed_not_by_design": true,
+      "spec_sections_checked": [
+        "7.6",
+        "7.5",
+        "4.1",
+        "3.4",
+        "13.1",
+        "3.1",
+        "3.2"
+      ],
+      "preventing_rule_checked_and_absent": true,
+      "source_ids": [
+        "D-7-6-005",
+        "N-7-6-008",
+        "N-7-6-003",
+        "D-4-1-009"
+      ]
+    },
+    {
+      "finding_id": "F-002",
+      "candidate_id": "retry2:C-003",
+      "title": "No Credential Lifecycle Management for Long-Lived SSE Streams Enables Post-Revocation Data Leakage",
+      "severity": "MEDIUM",
+      "description": "The A2A protocol requires servers to 'MUST authenticate every incoming request' and explicitly supports tasks lasting 'minutes, hours, or even days' via SSE streaming. An SSE stream is established with a single HTTP request that is authenticated once at connection time. The protocol defines no mechanism for mid-stream credential re-validation, no stream-level authentication challenge event type (analogous to HTTP 401 for discrete requests), and no mandatory stream duration limit tied to credential lifetime. When a client's credential (e.g., OAuth token) is revoked or expires during an active SSE stream — a routine security lifecycle event in enterprise deployments using short-lived tokens — the server continues sending task status updates and artifact data on the established stream. The FSM's STREAM_ACTIVE self-loop (task_event_generated) has a guard checking only stream.state, not credential validity, and the only protocol-defined exit from STREAM_ACTIVE is a task state change, not an auth state change. This creates an asymmetry with push notifications, where each notification is a separate HTTP request with per-request authentication. The protocol introduces a tension between its single-request authentication model and its multi-hour stream duration support without providing a reconciliation mechanism.",
+      "fsm_trace": [
+        {
+          "step": 1,
+          "stage": "authentication",
+          "state": "SERVER_VALIDATING_REQUEST",
+          "transition": "request_received",
+          "actor": "server",
+          "note": "Client sends message/stream request with valid Bearer token. Server authenticates this single HTTP request. The MUST authenticate every incoming request rule is satisfied.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 2,
+          "stage": "authentication",
+          "state": "REQUEST_AUTHORIZED",
+          "transition": "A2A_protocol_operations_request",
+          "actor": "server",
+          "note": "Request is authorized. Authentication is bound to this single HTTP connection. No protocol mechanism exists for credential refresh during the connection lifetime.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 3,
+          "stage": "initiation",
+          "state": "STREAM_STATE_OPEN",
+          "transition": "POST_message_stream",
+          "actor": "client",
+          "note": "SSE stream is established for the task. Stream will remain open for the task's entire duration, potentially hours or days.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 4,
+          "stage": "task_execution",
+          "state": "STREAM_ACTIVE",
+          "transition": "stream_open",
+          "actor": "shared",
+          "note": "Stream becomes active. Server sends events. Protocol defines no periodic re-authentication heartbeat and no auth-challenge event type.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 5,
+          "stage": "task_execution",
+          "state": "STREAM_ACTIVE",
+          "transition": "task_event_generated (self-loop)",
+          "actor": "server",
+          "note": "Time passes. The original auth token expires or is revoked. Server continues sending status updates and artifact data because no protocol mechanism signals credential invalidation mid-stream. Guard checks stream.state = STREAM_ACTIVE, not credential.valid = true.",
+          "is_reconstructed": false
+        },
+        {
+          "step": 6,
+          "stage": "task_execution",
+          "state": "STREAM_ACTIVE",
+          "transition": "task_event_generated (self-loop)",
+          "actor": "server",
+          "note": "Sensitive task output continues flowing to a client whose authorization has been revoked. No STREAM_AUTH_EXPIRED event type exists. The only exit from STREAM_ACTIVE is task_reaches_terminal_or_interrupted_state, which is task-state-triggered, not auth-state-triggered.",
+          "is_reconstructed": false
+        }
+      ],
+      "missing_primitive": "A protocol-level credential lifecycle management mechanism for long-lived streams: either a mandatory periodic re-authentication heartbeat, an AUTH_CHALLENGE stream event type for in-band re-authentication, a protocol-defined maximum stream duration tied to credential lifetime, or a STREAM_AUTH_EXPIRED event type signaling the client to resubscribe with fresh credentials.",
+      "confirmed_absent": true,
+      "confirmed_not_by_design": true,
+      "spec_sections_checked": [
+        "7.2",
+        "7.4",
+        "7.5",
+        "3.5",
+        "3.2",
+        "13.1",
+        "11.7"
+      ],
+      "preventing_rule_checked_and_absent": true,
+      "source_ids": [
+        "N-7-4-001",
+        "N-3-5-006",
+        "D-3-5-001",
+        "D-3-5-005"
+      ]
+    }
+  ],
+  "discarded": [
+    {
+      "candidate_id": "retry2:C-002",
+      "title": "Pull-Only Agent Card Discovery Lacks Emergency Revocation Mechanism",
+      "step_failed": "STEP_3",
+      "reason": "The protocol's pull-based caching model for agent cards follows standard HTTP caching practices, which the spec explicitly describes in Section 8.6. The spec states 'Agent Cards describe an agent's capabilities and typically change infrequently' and recommends 'Applying standard HTTP caching practices to Agent Card endpoints.' Critically, the server operator controls the Cache-Control max-age directive, meaning they can set arbitrarily short TTLs (even 0) for security-sensitive deployments. Additionally, TLS certificate revocation (CRL/OCSP) already provides transport-level protection — if the server domain is compromised, clients relying on TLS verification (a SHOULD in the spec) would detect invalid certificates. The JWS signing of agent cards is a MAY (optional) feature, and key revocation for JWS follows standard JWKS practices (key rotation via the JWKS URI referenced in the JWS header). The claimed gap — no emergency push revocation channel — is inherent to any HTTP pull-based resource model and the spec's delegation to standard HTTP caching practices constitutes an intentional architectural choice to reuse existing web infrastructure standards rather than invent a custom revocation protocol. The spec's stated design principle to 'Reuse existing, well-understood standards (HTTP, JSON-RPC 2.0, Server-Sent Events)' confirms this is by design."
+    }
+  ],
+  "verified_properties": [
+    {
+      "property": "Per-request authentication enforcement",
+      "evidence": "The FSM models authentication through SERVER_VALIDATING_REQUEST with branching to authenticated or AUTHENTICATION_FAILED states. The spec normatively requires 'MUST authenticate every incoming request based on the provided credentials and its declared authentication requirements' (Section 7.4, confirmed at a2a-protocol.org/latest/specification). This is enforced for all discrete HTTP requests (message/send, tasks/get, tasks/cancel, etc.). No surviving finding contradicts this for discrete requests."
+    },
+    {
+      "property": "Terminal task state finality",
+      "evidence": "The FSM correctly models terminal states (TASK_STATE_COMPLETED, TASK_STATE_FAILED, TASK_STATE_CANCELED, TASK_STATE_REJECTED) as final states with is_final=true and no outbound transitions to non-terminal active states. The spec confirms 'A task which has reached a terminal state (completed, canceled, rejected, or failed) can't be restarted. Sending a message to such a task will result in an error' (Section 3.4/6.2, confirmed at a2a-protocol.org). The TASK_STATE_TERMINAL self-loop in the termination phase (cancel_task on already-terminal task) correctly returns an error rather than changing state."
+    },
+    {
+      "property": "Stream closure on terminal or interrupted task state",
+      "evidence": "The FSM models STREAM_ACTIVE → STREAM_CLOSED with guard 'task.state IN (COMPLETED, FAILED, CANCELED, REJECTED, INPUT_REQUIRED, AUTH_REQUIRED)' and modality MUST. The spec confirms 'When a task reaches a terminal or interrupted state (e.g., COMPLETED, FAILED, CANCELED, REJECTED, or INPUT_REQUIRED), the server closes the stream and sends no further updates' (Section 3.5/streaming guidance at a2a-protocol.org/latest/topics/streaming-and-async). This prevents indefinite streaming after task completion."
+    },
+    {
+      "property": "Task-context binding integrity",
+      "evidence": "The FSM's task_execution:TASK_STATE_INPUT_REQUIRED → TASK_STATE_WORKING transition has guard 'message.taskId = task.taskId & message.contextId = task.contextId'. The spec normatively requires 'Agents MUST reject messages containing mismatching contextId and taskId (i.e., the provided contextId is different from that of the referenced Task)' (Section 3.4, confirmed at a2a-protocol.org/latest/specification). This prevents cross-task input injection."
+    },
+    {
+      "property": "Version negotiation error handling",
+      "evidence": "The FSM models TASK_STATE_NONEXISTENT → VERSION_NEGOTIATION_ERROR with guard '!server.version_supported' and modality MUST. The spec defines that servers must return version negotiation errors when the requested version is not supported (Section 6.4, confirmed at a2a-protocol.org). This prevents silent version mismatch issues."
+    }
+  ],
+  "inconclusive": []
+}

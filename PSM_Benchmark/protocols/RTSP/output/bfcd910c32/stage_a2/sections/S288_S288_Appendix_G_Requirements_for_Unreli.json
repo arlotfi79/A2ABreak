@@ -1,0 +1,180 @@
+{
+  "section_id": "S288",
+  "title": "S288 Appendix G. Requirements for Unreliable Transport of RTSP",
+  "depth": 3,
+  "parent_path": [
+    "RTSP",
+    "S288 Appendix G. Requirements for Unreliable Transport of RTSP"
+  ],
+  "url_anchor": "#s288-appendix-g-requirements-for-unreliable-transport-of-rtsp",
+  "word_count": 311,
+  "statement_count": 7,
+  "elapsed_seconds": 114.08,
+  "statements": [
+    {
+      "statement_id": "N-S288-1",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "The following points should be considered for an interoperable implementation:",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S288",
+      "actors": [
+        "implementer"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S288-001"
+    },
+    {
+      "statement_id": "N-S288-2",
+      "normative_level": "SHALL",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "Requests shall be acknowledged by the receiver.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S288",
+      "actors": [
+        "receiver"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "request_received",
+      "pre_cond": "transport.type = unreliable",
+      "post_cond": "acknowledgement_sent = true",
+      "actions": [
+        "send_acknowledgement"
+      ],
+      "modality": "shall",
+      "id": "N-S288-002"
+    },
+    {
+      "statement_id": "N-S288-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "participant",
+      "stage": "rtsp_fsm",
+      "description": "If there is no acknowledgement, the sender may resend the same message after a timeout of one round-trip time (RTT).",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S288",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "rtt_timeout_expired",
+      "pre_cond": "acknowledgement_received = false & rtt_timer.expired = true",
+      "post_cond": null,
+      "actions": [
+        "resend_message"
+      ],
+      "modality": "may",
+      "id": "N-S288-003"
+    },
+    {
+      "statement_id": "N-S288-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "Any retransmissions due to lack of acknowledgement must carry the same sequence number as the original request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S288",
+      "actors": [
+        "sender"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "retransmission_sent",
+      "pre_cond": "acknowledgement_received = false & retransmission = true",
+      "post_cond": "retransmission.sequence_number = original_request.sequence_number",
+      "actions": [
+        "set_sequence_number_equal_to_original_request"
+      ],
+      "modality": "must",
+      "id": "N-S288-004"
+    },
+    {
+      "statement_id": "N-S288-5",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "connection",
+      "stage": "rtsp_fsm",
+      "description": "An implementation may cache the last RTT measurement as the initial value for future connections.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S288",
+      "actors": [
+        "implementation"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "connection_closed",
+      "pre_cond": "rtt_measurement_available = true",
+      "post_cond": "rtt_cache.initial_value = last_rtt_measurement",
+      "actions": [
+        "cache_rtt_measurement_for_future_connections"
+      ],
+      "modality": "may",
+      "id": "N-S288-005"
+    },
+    {
+      "statement_id": "N-S288-6",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "rtsp_fsm",
+      "description": "RTSP messages are vulnerable to bit errors and should not be subjected to them.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S288",
+      "actors": [
+        "rtsp"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S288-006"
+    },
+    {
+      "statement_id": "N-S288-7",
+      "normative_level": "REQUIRED",
+      "category": "BEHAVIORAL",
+      "subject": "transaction",
+      "stage": "rtsp_fsm",
+      "description": "It should be noted that the CSeq header is also required to match requests and responses independent whether a reliable or unreliable transport is used.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S288",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_received",
+      "pre_cond": null,
+      "post_cond": "response.cseq = request.cseq",
+      "actions": [
+        "match_cseq_header_in_request_response"
+      ],
+      "modality": "must",
+      "id": "N-S288-007"
+    }
+  ]
+}

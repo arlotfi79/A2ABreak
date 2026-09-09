@@ -1,0 +1,65 @@
+{
+  "section_id": "S006",
+  "title": "S006 6. The UPDATE State",
+  "depth": 3,
+  "parent_path": [
+    "POP3",
+    "S006 6. The UPDATE State"
+  ],
+  "url_anchor": "#s006-6-the-update-state",
+  "word_count": 201,
+  "statement_count": 2,
+  "elapsed_seconds": 72.04,
+  "statements": [
+    {
+      "statement_id": "1-S006-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "session",
+      "stage": "pop3_fsm",
+      "description": "If a session terminates for some reason other than a client-issued QUIT command, the POP3 session does NOT enter the UPDATE state and MUST not remove any messages from the maildrop.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S006",
+      "actors": [
+        "server",
+        "session"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "session_terminated_without_client_QUIT",
+      "pre_cond": "session.termination_cause != client_issued_QUIT",
+      "post_cond": "session.state != UPDATE & maildrop.messages_removed = false",
+      "actions": [
+        "do not transition to UPDATE state",
+        "do not remove any messages from the maildrop"
+      ],
+      "modality": "must",
+      "id": "N-S006-001"
+    },
+    {
+      "statement_id": "2-S006-2",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "pop3_fsm",
+      "description": "In no case may the server remove any messages not marked as deleted.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S006",
+      "actors": [
+        "server"
+      ],
+      "from_state": "UPDATE",
+      "to_state": null,
+      "trigger": "processing_message_deletion",
+      "pre_cond": "protocol.state = UPDATE",
+      "post_cond": "server.removed_messages \u2286 maildrop.marked_as_deleted",
+      "actions": [
+        "remove only messages that are individually marked as deleted"
+      ],
+      "modality": "must",
+      "id": "N-S006-002"
+    }
+  ]
+}

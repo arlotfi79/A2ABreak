@@ -1,0 +1,121 @@
+{
+  "section_id": "13.2",
+  "title": "13.2. Push Notification Security",
+  "depth": 3,
+  "parent_path": [
+    "13. Security Considerations",
+    "13.2. Push Notification Security"
+  ],
+  "url_anchor": "#132-push-notification-security",
+  "word_count": 245,
+  "statement_count": 5,
+  "elapsed_seconds": 48.6,
+  "statements": [
+    {
+      "statement_id": "D-13-2-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents MUST include authentication credentials in webhook requests as specified in PushNotificationConfig.authentication",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "13.2",
+      "object_name": "PushNotificationConfig",
+      "field_name": "authentication",
+      "field_type": null,
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": null
+    },
+    {
+      "statement_id": "D-13-2-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents SHOULD implement retry logic with exponential backoff for failed deliveries; Agents MAY stop attempting delivery after a configured number of consecutive failures",
+      "is_inferred": true,
+      "confidence": 0.6,
+      "source_section": "13.2",
+      "actors": [
+        "agent"
+      ],
+      "from_state": "PUSH_NOTIFICATION_DELIVERY_RETRYING",
+      "to_state": "PUSH_NOTIFICATION_DELIVERY_ABANDONED",
+      "trigger": "consecutive_delivery_failures_threshold_reached",
+      "pre_cond": "push_notification.consecutive_failures >= push_notification.configured_failure_limit",
+      "post_cond": "push_notification.delivery_active = false",
+      "actions": [
+        "Agent ceases further webhook delivery attempts"
+      ],
+      "modality": "may"
+    },
+    {
+      "statement_id": "D-13-2-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Clients MUST validate webhook authenticity using the provided authentication credentials; Clients MUST respond with HTTP 2xx status codes to acknowledge successful receipt",
+      "is_inferred": true,
+      "confidence": 0.65,
+      "source_section": "13.2",
+      "actors": [
+        "client"
+      ],
+      "from_state": "PUSH_NOTIFICATION_RECEIVED",
+      "to_state": "PUSH_NOTIFICATION_ACKNOWLEDGED",
+      "trigger": "webhook_request_received",
+      "pre_cond": "push_notification.authentication_valid = true",
+      "post_cond": "push_notification.http_response_status >= 200 & push_notification.http_response_status < 300",
+      "actions": [
+        "Client validates webhook authenticity against PushNotificationConfig.authentication credentials",
+        "Client optionally verifies task ID in payload matches a known expected task",
+        "Client responds with HTTP 2xx status code"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-13-2-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Agents SHOULD validate webhook URLs to prevent SSRF attacks: Reject private IP ranges (127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16), Reject localhost and link-local addresses, Implement URL allowlists where appropriate",
+      "is_inferred": true,
+      "confidence": 0.55,
+      "source_section": "13.2",
+      "actors": [
+        "agent"
+      ],
+      "from_state": "PUSH_NOTIFICATION_URL_VALIDATION_PENDING",
+      "to_state": "PUSH_NOTIFICATION_URL_REJECTED",
+      "trigger": "webhook_url_validation_requested",
+      "pre_cond": "push_notification.url_is_private_ip = true | push_notification.url_is_localhost = true | push_notification.url_is_link_local = true | push_notification.url_in_allowlist = false",
+      "post_cond": "push_notification.url_accepted = false",
+      "actions": [
+        "Agent rejects webhook URL targeting private IP ranges or localhost",
+        "Agent enforces URL allowlist if configured"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-13-2-005",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "push_notification",
+      "stage": "task_execution",
+      "description": "Webhook URLs SHOULD use HTTPS to protect payload confidentiality in transit; Clients SHOULD use HTTPS endpoints for webhook URLs to ensure confidentiality",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "13.2",
+      "object_name": "PushNotificationConfig",
+      "field_name": "url",
+      "field_type": "string (HTTPS URL)",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": null
+    }
+  ]
+}

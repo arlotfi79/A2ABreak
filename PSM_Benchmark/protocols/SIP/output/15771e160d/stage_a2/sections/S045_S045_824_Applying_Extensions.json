@@ -1,0 +1,182 @@
+{
+  "section_id": "S045",
+  "title": "S045 8.2.4 Applying Extensions",
+  "depth": 3,
+  "parent_path": [
+    "SIP",
+    "S045 8.2.4 Applying Extensions"
+  ],
+  "url_anchor": "#s045-824-applying-extensions",
+  "word_count": 180,
+  "statement_count": 7,
+  "elapsed_seconds": 46.46,
+  "statements": [
+    {
+      "statement_id": "N-S045-1",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "A UAS that wishes to apply some extension when generating the response MUST NOT do so unless support for that extension is indicated in the Supported header field in the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S045",
+      "actors": [
+        "UAS"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_generation_with_extension",
+      "pre_cond": "extension.support_indicated_in_request.Supported = false",
+      "post_cond": "extension.applied_in_response = false",
+      "actions": [
+        "do not apply extension when generating response"
+      ],
+      "modality": "must",
+      "id": "N-S045-001"
+    },
+    {
+      "statement_id": "N-S045-2",
+      "normative_level": "SHOULD",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "If the desired extension is not supported, the server SHOULD rely only on baseline SIP and any other extensions supported by the client.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S045",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "desired_extension_not_supported",
+      "pre_cond": "extension.desired = true & extension.listed_in_request.Supported = false",
+      "post_cond": null,
+      "actions": [
+        "rely only on baseline SIP and extensions supported by client when generating response"
+      ],
+      "modality": "should",
+      "id": "N-S045-002"
+    },
+    {
+      "statement_id": "N-S045-3",
+      "normative_level": "MAY",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "In rare circumstances, where the server cannot process the request without the extension, the server MAY send a 421 (Extension Required) response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S045",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "server_cannot_process_without_extension",
+      "pre_cond": "server.can_process_without_extension = false",
+      "post_cond": "response.status = 421",
+      "actions": [
+        "send 421 (Extension Required) response"
+      ],
+      "modality": "may",
+      "id": "N-S045-003"
+    },
+    {
+      "statement_id": "N-S045-4",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "message",
+      "stage": "sip_fsm",
+      "description": "The needed extension(s) MUST be included in a Require header field in the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S045",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "sending_421_response",
+      "pre_cond": "response.status = 421",
+      "post_cond": "response.Require contains needed_extensions",
+      "actions": [
+        "include needed extensions in Require header field of 421 response"
+      ],
+      "modality": "must",
+      "id": "N-S045-004"
+    },
+    {
+      "statement_id": "N-S045-5",
+      "normative_level": "SHOULD NOT",
+      "category": "BEHAVIORAL",
+      "subject": "sip",
+      "stage": "sip_fsm",
+      "description": "This behavior is NOT RECOMMENDED, as it will generally break interoperability.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S045",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": null,
+      "pre_cond": null,
+      "post_cond": null,
+      "actions": [],
+      "modality": "should",
+      "id": "N-S045-005"
+    },
+    {
+      "statement_id": "N-S045-6",
+      "normative_level": "MUST",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Any extensions applied to a non-421 response MUST be listed in a Require header field included in the response.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S045",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "extension_applied_to_non_421_response",
+      "pre_cond": "response.status != 421 & extension.applied = true",
+      "post_cond": "response.Require lists applied_extensions",
+      "actions": [
+        "list all applied extensions in Require header field of response"
+      ],
+      "modality": "must",
+      "id": "N-S045-006"
+    },
+    {
+      "statement_id": "N-S045-7",
+      "normative_level": "MUST NOT",
+      "category": "BEHAVIORAL",
+      "subject": "server",
+      "stage": "sip_fsm",
+      "description": "Of course, the server MUST NOT apply extensions not listed in the Supported header field in the request.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S045",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "response_generation",
+      "pre_cond": "extension.listed_in_request.Supported = false",
+      "post_cond": "extension.applied = false",
+      "actions": [
+        "do not apply extensions not listed in Supported header field of request"
+      ],
+      "modality": "must",
+      "id": "N-S045-007"
+    }
+  ]
+}

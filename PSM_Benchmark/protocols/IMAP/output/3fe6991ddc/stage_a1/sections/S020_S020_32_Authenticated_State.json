@@ -1,0 +1,168 @@
+{
+  "section_id": "S020",
+  "title": "S020 3.2 Authenticated State",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S020 3.2 Authenticated State"
+  ],
+  "url_anchor": "#s020-32-authenticated-state",
+  "word_count": 57,
+  "statement_count": 7,
+  "elapsed_seconds": 25.17,
+  "statements": [
+    {
+      "statement_id": "D-S020-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "In the authenticated state, the client is authenticated and MUST select a mailbox to access before commands that affect messages will be permitted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "state_name": "Authenticated",
+      "enum_name": "IMAPSessionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "session.authenticated = true & session.mailbox_selected = false"
+    },
+    {
+      "statement_id": "D-S020-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "imap_fsm",
+      "description": "This state is entered when a pre-authenticated connection starts.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "pre-authenticated connection starts",
+      "pre_cond": "connection.pre_authenticated = true",
+      "post_cond": "session.state = Authenticated",
+      "actions": [
+        "enter Authenticated state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S020-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "This state is entered when acceptable authentication credentials have been provided.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Not Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "acceptable authentication credentials provided",
+      "pre_cond": "session.state = Not Authenticated & authentication.credentials_acceptable = true",
+      "post_cond": "session.state = Authenticated",
+      "actions": [
+        "enter Authenticated state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S020-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "This state is entered after an error in selecting a mailbox.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Authenticated",
+      "to_state": "Authenticated",
+      "trigger": "error in selecting a mailbox",
+      "pre_cond": "session.state = Authenticated & mailbox.select_error = true",
+      "post_cond": "session.state = Authenticated",
+      "actions": [
+        "remain in or re-enter Authenticated state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S020-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "This state is entered after a successful CLOSE command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Authenticated",
+      "trigger": "successful CLOSE command",
+      "pre_cond": "session.state = Selected & command.CLOSE.success = true",
+      "post_cond": "session.state = Authenticated",
+      "actions": [
+        "enter Authenticated state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S020-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "This state is entered after a successful UNSELECT command.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "actors": [
+        "client",
+        "server"
+      ],
+      "from_state": "Selected",
+      "to_state": "Authenticated",
+      "trigger": "successful UNSELECT command",
+      "pre_cond": "session.state = Selected & command.UNSELECT.success = true",
+      "post_cond": "session.state = Authenticated",
+      "actions": [
+        "enter Authenticated state"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S020-007",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "session",
+      "stage": "imap_fsm",
+      "description": "The client is authenticated and MUST select a mailbox to access before commands that affect messages will be permitted.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S020",
+      "object_name": "session",
+      "field_name": "selected_mailbox",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": null,
+      "guard_semantics": "session.state = Authenticated => commands_affecting_messages require session.mailbox_selected = true"
+    }
+  ]
+}

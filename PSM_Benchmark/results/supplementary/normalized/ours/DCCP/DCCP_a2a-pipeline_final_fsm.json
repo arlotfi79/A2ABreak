@@ -1,0 +1,259 @@
+{
+ "states": [
+  "CLOSED",
+  "LISTEN",
+  "REQUEST",
+  "RESPOND",
+  "PARTOPEN",
+  "OPEN",
+  "CLOSEREQ",
+  "CLOSING",
+  "TIMEWAIT"
+ ],
+ "initial_state": "CLOSED",
+ "final_states": [
+  "CLOSED"
+ ],
+ "transitions": [
+  {
+   "from": "CLOSED",
+   "event": "passive open",
+   "action": "",
+   "to": "LISTEN"
+  },
+  {
+   "from": "CLOSED",
+   "event": "active open",
+   "action": "Send REQUEST",
+   "to": "REQUEST"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive REQUEST",
+   "action": "send RESPONSE",
+   "to": "RESPOND"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive valid InitCookie",
+   "action": "create connection socket",
+   "to": "RESPOND"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive DCCP-Request InitCookie",
+   "action": "send Response with InitCookie",
+   "to": "LISTEN"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive bad-service Request",
+   "action": "send DCCP-Reset",
+   "to": "CLOSED"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive reserved-code Request",
+   "action": "send DCCP-Reset",
+   "to": "LISTEN"
+  },
+  {
+   "from": "LISTEN",
+   "event": "receive valid DCCP-Reset",
+   "action": "",
+   "to": "TIMEWAIT"
+  },
+  {
+   "from": "REQUEST",
+   "event": "receive RESPONSE",
+   "action": "send ACK",
+   "to": "PARTOPEN"
+  },
+  {
+   "from": "REQUEST",
+   "event": "timeout retransmission",
+   "action": "retransmit DCCP-Request",
+   "to": "REQUEST"
+  },
+  {
+   "from": "REQUEST",
+   "event": "receive DCCP-Sync",
+   "action": "send DCCP-Reset",
+   "to": "REQUEST"
+  },
+  {
+   "from": "REQUEST",
+   "event": "cond client abandons",
+   "action": "send DCCP-Reset",
+   "to": "CLOSED"
+  },
+  {
+   "from": "REQUEST",
+   "event": "receive valid DCCP-Reset",
+   "action": "",
+   "to": "TIMEWAIT"
+  },
+  {
+   "from": "RESPOND",
+   "event": "receive ACK or DATAACK",
+   "action": "",
+   "to": "OPEN"
+  },
+  {
+   "from": "RESPOND",
+   "event": "receive DCCP-Request",
+   "action": "send DCCP-Response",
+   "to": "RESPOND"
+  },
+  {
+   "from": "RESPOND",
+   "event": "timeout",
+   "action": "timeout",
+   "to": "CLOSED"
+  },
+  {
+   "from": "RESPOND",
+   "event": "receive valid DCCP-Reset",
+   "action": "",
+   "to": "TIMEWAIT"
+  },
+  {
+   "from": "PARTOPEN",
+   "event": "receive packet",
+   "action": "send ACK!",
+   "to": "OPEN"
+  },
+  {
+   "from": "PARTOPEN",
+   "event": "timeout retransmission",
+   "action": "send DCCP-Ack; back off timer",
+   "to": "PARTOPEN"
+  },
+  {
+   "from": "PARTOPEN",
+   "event": "receive DCCP-Response",
+   "action": "send DCCP-Ack",
+   "to": "PARTOPEN"
+  },
+  {
+   "from": "PARTOPEN",
+   "event": "timeout",
+   "action": "timeout",
+   "to": "CLOSED"
+  },
+  {
+   "from": "PARTOPEN",
+   "event": "receive valid DCCP-Reset",
+   "action": "",
+   "to": "TIMEWAIT"
+  },
+  {
+   "from": "PARTOPEN",
+   "event": "receive CLOSEREQ?",
+   "action": "send CLOSE!",
+   "to": "CLOSING"
+  },
+  {
+   "from": "OPEN",
+   "event": "active close",
+   "action": "send CLOSEREQ",
+   "to": "CLOSEREQ"
+  },
+  {
+   "from": "OPEN",
+   "event": "receive closeReq",
+   "action": "send close",
+   "to": "CLOSING"
+  },
+  {
+   "from": "OPEN",
+   "event": "active close",
+   "action": "send close",
+   "to": "CLOSING"
+  },
+  {
+   "from": "OPEN",
+   "event": "receive CLOSE",
+   "action": "send RESET",
+   "to": "CLOSED"
+  },
+  {
+   "from": "OPEN",
+   "event": "receive DCCP-Reset",
+   "action": "abort connection",
+   "to": "CLOSED"
+  },
+  {
+   "from": "OPEN",
+   "event": "receive DCCP-Sync",
+   "action": "send DCCP-SyncAck",
+   "to": "OPEN"
+  },
+  {
+   "from": "OPEN",
+   "event": "receive out-of-range Request",
+   "action": "send DCCP-Sync",
+   "to": "OPEN"
+  },
+  {
+   "from": "OPEN",
+   "event": "receive early data",
+   "action": "reject received data",
+   "to": "OPEN"
+  },
+  {
+   "from": "OPEN",
+   "event": "receive valid DCCP-Reset",
+   "action": "",
+   "to": "TIMEWAIT"
+  },
+  {
+   "from": "CLOSEREQ",
+   "event": "receive CLOSE",
+   "action": "send RESET?",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSEREQ",
+   "event": "timeout retransmission",
+   "action": "retransmit DCCP-CloseReq",
+   "to": "CLOSEREQ"
+  },
+  {
+   "from": "CLOSEREQ",
+   "event": "receive valid DCCP-Reset",
+   "action": "",
+   "to": "TIMEWAIT"
+  },
+  {
+   "from": "CLOSING",
+   "event": "receive Reset",
+   "action": "",
+   "to": "TIMEWAIT"
+  },
+  {
+   "from": "CLOSING",
+   "event": "cond teardown complete",
+   "action": "",
+   "to": "CLOSED"
+  },
+  {
+   "from": "CLOSING",
+   "event": "timeout retransmission",
+   "action": "retransmit DCCP-Close",
+   "to": "CLOSING"
+  },
+  {
+   "from": "TIMEWAIT",
+   "event": "timeout 2MSL",
+   "action": "",
+   "to": "CLOSED"
+  },
+  {
+   "from": "TIMEWAIT",
+   "event": "receive any packet",
+   "action": "generate Reset if needed",
+   "to": "TIMEWAIT"
+  }
+ ]
+}

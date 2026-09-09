@@ -1,0 +1,113 @@
+{
+  "section_id": "S068",
+  "title": "S068 4.2.5 Reply Codes after DATA and the Subsequent <CRLF>.<CRLF>",
+  "depth": 3,
+  "parent_path": [
+    "SMTP",
+    "S068 4.2.5 Reply Codes after DATA and the Subsequent <CRLF>.<CRLF>"
+  ],
+  "url_anchor": "#s068-425-reply-codes-after-data-and-the-subsequent-crlfcrlf",
+  "word_count": 286,
+  "statement_count": 4,
+  "elapsed_seconds": 31.26,
+  "statements": [
+    {
+      "statement_id": "D-S068-001",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When an SMTP server returns a positive completion status (2yz code) after the DATA command is completed with <CRLF>.<CRLF>, it accepts responsibility for delivering the message or retrying/notifying on failure.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S068",
+      "actors": [
+        "server"
+      ],
+      "from_state": "DATA_TERMINATOR_SENT",
+      "to_state": "TRANSACTION_COMPLETE",
+      "trigger": "2yz reply after DATA <CRLF>.<CRLF>",
+      "pre_cond": "transaction.data_terminator_sent = true",
+      "post_cond": "server.delivery_responsibility = accepted",
+      "actions": [
+        "send 2yz reply",
+        "accept responsibility for message delivery or retry/notification"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S068-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When an SMTP server returns a temporary error status (4yz) code after the DATA command is completed with <CRLF>.<CRLF>, it MUST NOT make a subsequent attempt to deliver that message. The SMTP client retains responsibility for the delivery of that message.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S068",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "DATA_TERMINATOR_SENT",
+      "to_state": "TRANSACTION_FAILED_TRANSIENT",
+      "trigger": "4yz reply after DATA <CRLF>.<CRLF>",
+      "pre_cond": "transaction.data_terminator_sent = true",
+      "post_cond": "server.delivery_responsibility = rejected_transient & client.delivery_responsibility = retained",
+      "actions": [
+        "send 4yz reply",
+        "server abandons delivery responsibility",
+        "client retains message for possible requeue or return to user"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S068-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "smtp_fsm",
+      "description": "When an SMTP server returns a permanent error status (5yz) code after the DATA command is completed with <CRLF>.<CRLF>, it MUST NOT make any subsequent attempt to deliver the message. The SMTP client retains responsibility but SHOULD not again attempt delivery to the same server without user review.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S068",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "DATA_TERMINATOR_SENT",
+      "to_state": "TRANSACTION_FAILED_PERMANENT",
+      "trigger": "5yz reply after DATA <CRLF>.<CRLF>",
+      "pre_cond": "transaction.data_terminator_sent = true",
+      "post_cond": "server.delivery_responsibility = rejected_permanent & client.delivery_responsibility = retained",
+      "actions": [
+        "send 5yz reply",
+        "server permanently abandons delivery responsibility",
+        "client retains message",
+        "client should not retry to same server without user intervention"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S068-004",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "transaction",
+      "stage": "smtp_fsm",
+      "description": "The server MUST NOT make a subsequent attempt to deliver the message after returning a 4yz or 5yz code following DATA <CRLF>.<CRLF>; delivery responsibility remains with the client.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S068",
+      "object_name": "transaction",
+      "field_name": "delivery_responsibility",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "server_accepted",
+        "client_retained_transient",
+        "client_retained_permanent"
+      ],
+      "guard_semantics": "Determined by reply code class (2yz, 4yz, 5yz) returned after DATA <CRLF>.<CRLF>"
+    }
+  ]
+}

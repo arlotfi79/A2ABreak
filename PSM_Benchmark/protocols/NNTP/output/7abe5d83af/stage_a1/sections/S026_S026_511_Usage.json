@@ -1,0 +1,201 @@
+{
+  "section_id": "S026",
+  "title": "S026 5.1.1 Usage",
+  "depth": 3,
+  "parent_path": [
+    "NNTP",
+    "S026 5.1.1 Usage"
+  ],
+  "url_anchor": "#s026-511-usage",
+  "word_count": 66,
+  "statement_count": 9,
+  "elapsed_seconds": 49.99,
+  "statements": [
+    {
+      "statement_id": "D-S026-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "These are the only valid response codes for the initial greeting; the server MUST not return any other generic response code.",
+      "is_inferred": false,
+      "confidence": 0.9,
+      "source_section": "S026",
+      "state_name": "Initial Greeting",
+      "enum_name": "NNTPConnectionState",
+      "semantic_type": "initial",
+      "is_initial": true,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S026-002",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "200 Service available, posting allowed",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "state_name": "Service Available Posting Allowed",
+      "enum_name": "NNTPConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S026-003",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "session",
+      "stage": "nntp_fsm",
+      "description": "201 Service available, posting prohibited",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "state_name": "Service Available Posting Prohibited",
+      "enum_name": "NNTPConnectionState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S026-004",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "nntp_fsm",
+      "description": "Following a 400 or 502 response, the server MUST immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "state_name": "Connection Closed",
+      "enum_name": "NNTPConnectionState",
+      "semantic_type": "terminal",
+      "is_initial": false,
+      "is_final": true,
+      "invariant_cond": null
+    },
+    {
+      "statement_id": "D-S026-005",
+      "normative_level": "DEFINITION",
+      "category": "ONEOF_CONSTRAINT",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "These are the only valid response codes for the initial greeting; the server MUST not return any other generic response code.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "object_name": "Initial Greeting",
+      "field_name": "response_code",
+      "field_type": "state variable",
+      "required": true,
+      "allowed_values": [
+        "200",
+        "201",
+        "400",
+        "502"
+      ],
+      "guard_semantics": "protocol.state = Initial Greeting"
+    },
+    {
+      "statement_id": "D-S026-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "200 Service available, posting allowed \u2014 initial greeting response transitions session to posting-allowed state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Initial Greeting",
+      "to_state": "Service Available Posting Allowed",
+      "trigger": "server sends 200 response",
+      "pre_cond": "protocol.state = Initial Greeting",
+      "post_cond": "session.posting_allowed = true",
+      "actions": [
+        "send 200 response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S026-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "201 Service available, posting prohibited \u2014 initial greeting response transitions session to posting-prohibited state.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "server",
+        "client"
+      ],
+      "from_state": "Initial Greeting",
+      "to_state": "Service Available Posting Prohibited",
+      "trigger": "server sends 201 response",
+      "pre_cond": "protocol.state = Initial Greeting",
+      "post_cond": "session.posting_allowed = false",
+      "actions": [
+        "send 201 response"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S026-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "400 Service temporarily unavailable. Following a 400 response, the server MUST immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Initial Greeting",
+      "to_state": "Connection Closed",
+      "trigger": "server sends 400 response",
+      "pre_cond": "protocol.state = Initial Greeting",
+      "post_cond": "protocol.state = Connection Closed",
+      "actions": [
+        "send 400 response",
+        "close connection immediately"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S026-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "nntp_fsm",
+      "description": "502 Service permanently unavailable. Following a 502 response, the server MUST immediately close the connection.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S026",
+      "actors": [
+        "server"
+      ],
+      "from_state": "Initial Greeting",
+      "to_state": "Connection Closed",
+      "trigger": "server sends 502 response",
+      "pre_cond": "protocol.state = Initial Greeting",
+      "post_cond": "protocol.state = Connection Closed",
+      "actions": [
+        "send 502 response",
+        "close connection immediately"
+      ],
+      "modality": "must"
+    }
+  ]
+}

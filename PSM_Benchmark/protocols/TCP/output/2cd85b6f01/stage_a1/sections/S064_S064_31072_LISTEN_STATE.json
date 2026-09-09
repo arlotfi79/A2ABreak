@@ -1,0 +1,131 @@
+{
+  "section_id": "S064",
+  "title": "S064 3.10.7.2 LISTEN STATE",
+  "depth": 3,
+  "parent_path": [
+    "TCP",
+    "S064 3.10.7.2 LISTEN STATE"
+  ],
+  "url_anchor": "#s064-31072-listen-state",
+  "word_count": 290,
+  "statement_count": 5,
+  "elapsed_seconds": 40.34,
+  "statements": [
+    {
+      "statement_id": "D-S064-001",
+      "normative_level": "DEFINITION",
+      "category": "FSM_STATE",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the state is LISTEN, then \u2026 (processing rules for RST, ACK, SYN, and other segments while in the LISTEN state)",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "state_name": "LISTEN",
+      "enum_name": "TCPState",
+      "semantic_type": "active",
+      "is_initial": false,
+      "is_final": false,
+      "invariant_cond": "protocol.state = LISTEN"
+    },
+    {
+      "statement_id": "D-S064-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "An incoming RST segment could not be valid since it could not have been sent in response to anything sent by this incarnation of the connection. An incoming RST should be ignored. Return.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "RST received",
+      "pre_cond": "protocol.state = LISTEN & segment.CTL.RST = 1",
+      "post_cond": "protocol.state = LISTEN",
+      "actions": [
+        "ignore RST segment"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S064-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Any acknowledgment is bad if it arrives on a connection still in the LISTEN state. An acceptable reset segment should be formed for any arriving ACK-bearing segment. The RST should be formatted as follows: <SEQ=SEG.ACK><CTL=RST>. Return.",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "ACK received",
+      "pre_cond": "protocol.state = LISTEN & segment.CTL.ACK = 1",
+      "post_cond": "protocol.state = LISTEN",
+      "actions": [
+        "send RST <SEQ=SEG.ACK><CTL=RST>"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S064-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "If the SYN bit is set, check the security. If the security/compartment on the incoming segment does not exactly match the security/compartment in the TCB, then send a reset and return. <SEQ=0><ACK=SEG.SEQ+SEG.LEN><CTL=RST,ACK>",
+      "is_inferred": false,
+      "confidence": 0.95,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "LISTEN",
+      "trigger": "SYN received with security mismatch",
+      "pre_cond": "protocol.state = LISTEN & segment.CTL.SYN = 1 & segment.security != tcb.security",
+      "post_cond": "protocol.state = LISTEN",
+      "actions": [
+        "send RST <SEQ=0><ACK=SEG.SEQ+SEG.LEN><CTL=RST,ACK>"
+      ],
+      "modality": "must"
+    },
+    {
+      "statement_id": "D-S064-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "connection",
+      "stage": "tcp_fsm",
+      "description": "Set RCV.NXT to SEG.SEQ+1, IRS is set to SEG.SEQ, and any other control or text should be queued for processing later. ISS should be selected and a SYN segment sent \u2026 SND.NXT is set to ISS+1 and SND.UNA to ISS. The connection state should be changed to SYN-RECEIVED.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S064",
+      "actors": [
+        "connection"
+      ],
+      "from_state": "LISTEN",
+      "to_state": "SYN-RECEIVED",
+      "trigger": "SYN received",
+      "pre_cond": "protocol.state = LISTEN & segment.CTL.SYN = 1 & segment.security = tcb.security",
+      "post_cond": "protocol.state = SYN-RECEIVED & rcv.NXT = SEG.SEQ+1 & snd.NXT = ISS+1 & snd.UNA = ISS",
+      "actions": [
+        "set RCV.NXT to SEG.SEQ+1",
+        "set IRS to SEG.SEQ",
+        "queue other control or text for later processing",
+        "select ISS",
+        "send SYN-ACK <SEQ=ISS><ACK=RCV.NXT><CTL=SYN,ACK>",
+        "set SND.NXT to ISS+1",
+        "set SND.UNA to ISS",
+        "fill in unspecified remote socket fields if listen was not fully specified"
+      ],
+      "modality": "should"
+    }
+  ]
+}

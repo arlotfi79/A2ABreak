@@ -1,0 +1,239 @@
+{
+  "section_id": "S066",
+  "title": "S066 6.3.9.6 CHILDINFO Extended Data Item",
+  "depth": 3,
+  "parent_path": [
+    "IMAP",
+    "S066 6.3.9.6 CHILDINFO Extended Data Item"
+  ],
+  "url_anchor": "#s066-6396-childinfo-extended-data-item",
+  "word_count": 431,
+  "statement_count": 10,
+  "elapsed_seconds": 36.93,
+  "statements": [
+    {
+      "statement_id": "D-S066-001",
+      "normative_level": "DEFINITION",
+      "category": "FIELD_PRESENCE",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "The CHILDINFO extended data item MUST NOT be returned unless the client has specified the RECURSIVEMATCH selection option.",
+      "is_inferred": false,
+      "confidence": 1.0,
+      "source_section": "S066",
+      "object_name": "LIST response",
+      "field_name": "CHILDINFO",
+      "field_type": "extended data item",
+      "required": false,
+      "allowed_values": null,
+      "guard_semantics": "client.selection_option = RECURSIVEMATCH"
+    },
+    {
+      "statement_id": "D-S066-002",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Servers SHOULD only return a non-matching mailbox name along with CHILDINFO if at least one matching child is not also being returned. That is, servers SHOULD suppress redundant CHILDINFO responses.",
+      "is_inferred": false,
+      "confidence": 0.7,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST response generation with RECURSIVEMATCH",
+      "pre_cond": "client.selection_option = RECURSIVEMATCH & mailbox.matches_selection = false & mailbox.has_matching_child = true",
+      "post_cond": "response.includes_CHILDINFO = true & response.redundant_CHILDINFO = false",
+      "actions": [
+        "suppress CHILDINFO when matching child is already returned"
+      ],
+      "modality": "should"
+    },
+    {
+      "statement_id": "D-S066-003",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailbox does not exist, does not meet selection criteria, has no child meeting selection criteria: no LIST response returned.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command evaluation",
+      "pre_cond": "mailbox.exists = false & mailbox.meets_selection = false & mailbox.has_matching_child = false",
+      "post_cond": "response.list_entry_returned = false",
+      "actions": [
+        "omit LIST response entry"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-004",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailbox exists, does not meet selection criteria, has no child meeting selection criteria: no LIST response returned.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command evaluation",
+      "pre_cond": "mailbox.exists = true & mailbox.meets_selection = false & mailbox.has_matching_child = false",
+      "post_cond": "response.list_entry_returned = false",
+      "actions": [
+        "omit LIST response entry"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-005",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailbox does not exist, meets selection criteria, has no child meeting criteria: return (\\NonExistent <attr>).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command evaluation",
+      "pre_cond": "mailbox.exists = false & mailbox.meets_selection = true & mailbox.has_matching_child = false",
+      "post_cond": "response.attributes = NonExistent | response.attributes = selection_attr",
+      "actions": [
+        "return LIST entry with \\NonExistent and selection attribute"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-006",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailbox exists, meets selection criteria, has no child meeting criteria: return (<attr>).",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command evaluation",
+      "pre_cond": "mailbox.exists = true & mailbox.meets_selection = true & mailbox.has_matching_child = false",
+      "post_cond": "response.attributes = selection_attr",
+      "actions": [
+        "return LIST entry with selection attribute"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-007",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailbox does not exist, does not meet selection criteria, has a child meeting criteria: return (\\NonExistent) + CHILDINFO.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command evaluation with RECURSIVEMATCH",
+      "pre_cond": "mailbox.exists = false & mailbox.meets_selection = false & mailbox.has_matching_child = true & client.selection_option = RECURSIVEMATCH",
+      "post_cond": "response.attributes = NonExistent & response.includes_CHILDINFO = true",
+      "actions": [
+        "return LIST entry with \\NonExistent and CHILDINFO extended data item"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-008",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailbox exists, does not meet selection criteria, has a child meeting criteria: return () + CHILDINFO.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command evaluation with RECURSIVEMATCH",
+      "pre_cond": "mailbox.exists = true & mailbox.meets_selection = false & mailbox.has_matching_child = true & client.selection_option = RECURSIVEMATCH",
+      "post_cond": "response.attributes = empty & response.includes_CHILDINFO = true",
+      "actions": [
+        "return LIST entry with empty attributes and CHILDINFO extended data item"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-009",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailbox does not exist, meets selection criteria, has a child meeting criteria: return (\\NonExistent <attr>) + CHILDINFO.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command evaluation with RECURSIVEMATCH",
+      "pre_cond": "mailbox.exists = false & mailbox.meets_selection = true & mailbox.has_matching_child = true & client.selection_option = RECURSIVEMATCH",
+      "post_cond": "response.attributes = NonExistent | response.attributes = selection_attr & response.includes_CHILDINFO = true",
+      "actions": [
+        "return LIST entry with \\NonExistent, selection attribute, and CHILDINFO extended data item"
+      ],
+      "modality": "unspecified"
+    },
+    {
+      "statement_id": "D-S066-010",
+      "normative_level": "DEFINITION",
+      "category": "IMPLICIT_TRANSITION",
+      "subject": "server",
+      "stage": "imap_fsm",
+      "description": "Mailbox exists, meets selection criteria, has a child meeting criteria: return (<attr>) + CHILDINFO.",
+      "is_inferred": false,
+      "confidence": 0.85,
+      "source_section": "S066",
+      "actors": [
+        "server"
+      ],
+      "from_state": null,
+      "to_state": null,
+      "trigger": "LIST command evaluation with RECURSIVEMATCH",
+      "pre_cond": "mailbox.exists = true & mailbox.meets_selection = true & mailbox.has_matching_child = true & client.selection_option = RECURSIVEMATCH",
+      "post_cond": "response.attributes = selection_attr & response.includes_CHILDINFO = true",
+      "actions": [
+        "return LIST entry with selection attribute and CHILDINFO extended data item"
+      ],
+      "modality": "unspecified"
+    }
+  ]
+}
