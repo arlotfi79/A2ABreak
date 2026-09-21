@@ -18,11 +18,19 @@ ROOT="$(pwd)"
 ALLOY="$ROOT/tools/alloy.jar"
 TLA="$ROOT/tools/tla2tools.jar"
 ALLOY_URL="https://github.com/AlloyTools/org.alloytools.alloy/releases/download/v6.2.0/org.alloytools.alloy.dist.jar"
-# "v1.8.0" is the GitHub release TAG; the bundled TLC self-identifies as build
-# 2026.08.11.125311 (rev 0894c34). The SHA-256 pin below makes the exact jar unambiguous.
+# tlaplus "v1.8.0" is a ROLLING PRERELEASE tag: upstream replaces the asset in
+# place, so the URL is not a stable identifier. The 2026-08-11 build this
+# artifact was developed against (2026.08.11.125311, rev 0894c34) was replaced
+# on 2026-09-17 and is no longer retrievable from GitHub.
+#
+# The jar is therefore VENDORED at tools/tla2tools.jar and committed with the
+# artifact; fetch() below downloads only when a file is absent, so the pin is
+# checked against the vendored copy and no network access is needed. Re-verified
+# on 2026-09-20 against build 2026.09.17.032053 (rev 142d0ba): all seven TLC
+# configurations still produce their expected verdicts.
 TLA_URL="https://github.com/tlaplus/tlaplus/releases/download/v1.8.0/tla2tools.jar"
 ALLOY_SHA="6b8c1cb5bc93bedfc7c61435c4e1ab6e688a242dc702a394628d9a9801edb78d"
-TLA_SHA="ab323b79802aedc3203b3f9af37c6aca3ed43f4e0225b36f2aa77b26de46c05f"
+TLA_SHA="9d36716ffb5e49d1ba8fae4651eba59f3189887e12eb90e204a42d2e6e993fef"
 
 sha256() { shasum -a 256 "$1" | awk '{print $1}'; }
 fetch() { # url out expected_sha

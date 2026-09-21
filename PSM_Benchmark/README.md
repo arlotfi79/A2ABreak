@@ -9,6 +9,7 @@ output with the benchmark's own evaluator, `eval_fsm_sim.py` at threshold 0.5 wi
 
 - Python 3.11+ with the pipeline packages from the repo's `requirements.txt`, and an Anthropic API key in the pipeline's `.env`.
 - A read-only clone of PSMBench at commit `df0bce6`, placed at `../RFC_PSM_Benchmark/`. The harness never writes to it.
+  Upstream is <https://github.com/Zilinlin/RFC_PSM_Benchmark> (Apache 2.0); `../scripts/fetch_psmbench.sh` clones and pins it for you.
 - The scorer's packages from the clone's own `requirements.txt`, mainly `sentence-transformers`, `numpy`, `pandas`, `matplotlib`, and `seaborn`. The evaluator loads a MiniLM sentence-embedding model on first use.
 
 ```bash

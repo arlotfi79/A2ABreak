@@ -1,0 +1,262 @@
+# ACSAC 2026 artifact metadata.
+#
+# artifact_url is the GitHub repository during evaluation; it will be replaced
+# with the permanent DOI at the camera-ready deadline, as README.md states.
+
+badge = "r"
+artifact_url = "https://github.com/arlotfi79/A2ABreak"
+cd = "b"
+
+citation = """
+@misc{lotfi2026a2abreaksystematicsecurityanalysis,
+      title={A2ABreak: Systematic Security Analysis of the A2A Protocol},
+      author={Alireza Lotfi and Mirza Masfiqur Rahman and Imtiaz Karim and Elisa Bertino},
+      year={2026},
+      eprint={2609.10871},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2609.10871},
+}
+"""
+
+license_url = "https://github.com/arlotfi79/A2ABreak/blob/main/LICENSE"
+
+# --------------------------------------------------------------------------
+# Infrastructure
+# --------------------------------------------------------------------------
+infrastructure_url = "https://www.cloudlab.us"
+infrastructure_resources = "https://github.com/arlotfi79/A2ABreak/blob/main/REQUIREMENTS.md"
+infrastructure_allocation = """
+No allocation, reservation or testbed-specific resource is required. Any
+general-purpose CPU node works: 4 GB RAM and 400 MB disk for tiers 0-1, 8 GB
+and 2.5 GB for tier 2 (tier 2 pulls in PyTorch via sentence-transformers).
+
+    git clone https://github.com/arlotfi79/A2ABreak && cd A2ABreak
+    bash scripts/install.sh
+    bash scripts/reproduce_all.sh
+
+Requires Python 3.11+, plus default-jre and graphviz for the supplementary
+formal verification and the FSM figures.
+
+VERIFIED ENVIRONMENT: macOS 26.5.1 (arm64). That is the only environment the
+artifact has been run in. It is pure Python with an optional JVM, no
+platform-specific code and no compiled extensions, so it should run anywhere
+Python 3.11+ runs -- but we have not tested Linux, Windows or any public
+testbed and make no claim about them.
+"""
+
+install_script = "https://github.com/arlotfi79/A2ABreak/blob/main/scripts/install.sh"
+
+use = """
+Intended for studying the security properties of the A2A protocol, for reusing
+the extracted statement corpus and unified finite-state machine as a formal
+model of the A2A lifecycle, and for applying the extraction methodology to
+other natural-language protocol specifications.
+
+Not suitable for: testing or attacking live A2A deployments; auditing a
+specific implementation, since every finding is design-level and says nothing
+about any implementation's correctness; use as an A2A reference implementation,
+which this is not; automated vulnerability scanning.
+
+Limitations. LLM-assisted stages are not bit-reproducible -- re-running
+produces similar but not identical output -- which is why claim verification
+recomputes the paper's numbers from the shipped outputs rather than re-running
+the pipeline. The analysed source document is A2A specification v1.0.0,
+retrieved 2026-05-13, but src/config.yaml fetches it from the site's "latest"
+path, which aliases the dev branch rather than a tagged release -- so a fresh
+run today reads a much later document. Pin to
+https://a2a-protocol.org/v1.0.0/specification/ to reproduce Stage A. Five of the seven claims reproduce the paper's numbers
+exactly; two carry a documented caveat, and CLAIMS.md states which and why.
+"""
+
+destructive = """
+None. The artifact performs no destructive action.
+
+Writes are confined to the repository directory: .venv/, src/outputs/,
+formal_verification/tools/ and results/, PSM_Benchmark/protocols/<P>/output/,
+PSM_Benchmark/tests/_scratch/, and symlinks at the repository root created by
+scripts/link_pipeline.sh (removable with --unlink). Nothing is installed or
+modified outside the repository.
+
+The PSMBench clone at RFC_PSM_Benchmark/ is treated as strictly read-only: the
+harness symlinks into it rather than copying, sets sys.dont_write_bytecode so
+it never gains a __pycache__, and aborts if the clone is dirty.
+
+The one real cost is financial: live re-runs bill the Anthropic API. A full
+reproduction is roughly $308. Tiers 0 and 1, which verify all seven claims,
+make no API calls and cost nothing.
+"""
+
+# --------------------------------------------------------------------------
+# Research claims
+# --------------------------------------------------------------------------
+# Full detail, including the expected output and tolerance for each claim, is
+# in CLAIMS.md. Claims 2 and 7 each carry a documented caveat, stated below.
+
+claim1 = """
+RQ1 (Section 5): a zero-shot LLM baseline operating over the same specification
+produces zero confirmed findings. Two independent runs produced nine candidate
+attacks, and Stage C2 adversarial verification rejected all nine.
+"""
+script1 = "https://github.com/arlotfi79/A2ABreak/blob/main/scripts/claim1_zero_shot.sh"
+expected1 = """
+Two zero-shot runs and nine candidate attacks total (5 in run 1, 4 in run 2),
+zero confirmed findings. PARTIAL: the candidate count reproduces exactly, but
+no Stage C2 verification record over the zero-shot candidates is shipped -- all
+five C2 runs take a Stage C1 file as input. The rejection itself is therefore
+not verifiable from the artifact. See CLAIMS.md, claim 1.
+"""
+
+claim2 = """
+RQ2 / Table 1 (Section 5): benchmarked against the TCP ground-truth state
+machine from PSMBench, the pipeline recovers all 11 protocol states and 19 of
+20 ground-truth transitions, at precision 0.760, recall 0.950 and F1 0.844.
+"""
+script2 = "https://github.com/arlotfi79/A2ABreak/blob/main/scripts/claim2_tcp_psmbench.sh"
+expected2 = """
+REPRODUCES AS AN EXPERIMENT; DIFFERS FROM TABLE 1 AS PRINTED. The PSMBench TCP
+run is complete and pinned (run_key 2cd85b6f01, with SHA-256 recorded for the
+exported FSM, the ground truth and PSMBench's own unmodified evaluator), so
+`python3 main.py eval --protocol TCP` re-scores it and returns our numbers: 75
+extracted transitions, 15 of 20 matched at P 0.200 / R 0.750 / F1 0.316, and 10
+of 11 states. Table 1 reports 25 extracted and 19 matched at P 0.760 / R 0.950 /
+F1 0.844. The difference is in the export (75 edges versus 25), not the scoring,
+so re-scoring cannot close it: METHOD.md section 7 applies no post-hoc filtering
+and emits full per-state behaviour, whereas Table 1 corresponds to a differently
+configured TCP-specific evaluation. Reconciling the printed table is a
+camera-ready task, not an artifact gap. See CLAIMS.md, claim 2.
+"""
+
+claim3 = """
+RQ2 (Section 5): across the analysis runs Stage C1 produced 17 unique candidate
+vulnerabilities; Stage C2 accepted 16 and correctly rejected 1; expert review
+validated 11 as true positives, giving precision 73.3% and F1 84.6%.
+"""
+script3 = "https://github.com/arlotfi79/A2ABreak/blob/main/scripts/claim3_vuln_accuracy.sh"
+expected3 = """
+Reproduces exactly: 17 C1 candidates, 5 C2 runs, 16 accepted, 1 rejected, 11
+expert-validated findings, precision 0.733 (11 of 15 non-duplicate), F1 0.846.
+"""
+
+claim4 = """
+RQ3 / Figure 3 (Section 5): of 929 verified statements only 283 carry
+transition structure, producing a raw graph of 38 states and 245 transitions
+that refines to a unified FSM of 37 states and 76 transitions -- a 69%
+transition reduction from raw synthesis and 92% end to end.
+"""
+script4 = "https://github.com/arlotfi79/A2ABreak/blob/main/scripts/claim4_fsm_refinement.sh"
+expected4 = """
+Reproduces exactly, every cell: 929 statements, 283 with transition structure,
+B1 38/245, B2 65/77, B4 65/92, D1 41/68, D2 37/76, 69% and 92% reductions.
+"""
+
+claim5 = """
+RQ4 / Figure 5 (Section 5): behavioural complexity does not track textual
+volume. Authentication holds only 21 statements but produces 16 transitions
+(0.76 per statement), three times the ratio of Discovery (0.24).
+"""
+script5 = "https://github.com/arlotfi79/A2ABreak/blob/main/scripts/claim5_complexity.sh"
+expected5 = """
+All eighteen cells in Figure 5 reproduce exactly: statements 46/21/41/128/22/25,
+states 9/10/7/18/6/9, transitions 11/16/11/26/10/14.
+
+Counts come from the per-stage export in
+outputs/stage_b4/unified_fsm_llm_dedup_by_stage/ under one consistent rule: a
+state belongs to the phase it is local to, a transition to the phase it
+originates in. A boundary edge is credited to the phase it leaves, which is why
+the transition column sums to 88 against 76 distinct transitions. The underlying
+model is the same 37 states and 76 transitions that claim 4 verifies.
+"""
+
+claim6 = """
+RQ5 / Table 2 (Section 5): a single end-to-end run costs $40.97 in API calls,
+of which $34.67 is consumed by Stages A and B, with Stage B2 the single most
+expensive step at $11.64.
+"""
+script6 = "https://github.com/arlotfi79/A2ABreak/blob/main/scripts/claim6_cost.sh"
+expected6 = """
+Reproduces to the cent from the shipped per-stage cost records: A1 $9.04,
+A2 $5.46, A3 $0.38, A4 $5.42, B2 $11.64, B3 $1.65, D2 $1.08, C1 $3.20,
+C2 $3.10, total $40.98 (the penny is rounding). B1, B4 and D1 make no LLM
+calls and cost nothing.
+"""
+
+claim7 = """
+Table 3 (Section 6): A2ABreak identifies eleven protocol-level vulnerabilities
+spanning discovery, initiation, task execution and interruption, each
+exploitable under full specification compliance without any implementation
+flaw or misconfiguration.
+"""
+script7 = "https://github.com/arlotfi79/A2ABreak/blob/main/scripts/claim7_vulnerabilities.sh"
+expected7 = """
+Eleven findings in outputs/final_verified.json, all eleven carrying spec
+section references, confirmed absent and confirmed not by design.
+PARTIAL: Table 3 also gives a STRIDE category and a CIA impact per
+finding, and neither is a field in the pipeline output, so those two columns
+cannot be recomputed from the artifact. Everything else in Table 3 reproduces.
+"""
+
+# --------------------------------------------------------------------------
+# Requirements
+# --------------------------------------------------------------------------
+hw = """
+No special hardware. No GPU, accelerator, FPGA, SGX or other trusted-execution
+requirement, and no specific geolocation.
+
+Tiers 0-1 (all seven claims): any x86-64 or arm64 CPU, 4 GB RAM, 400 MB disk
+(the artifact is 39 MB unpacked; the rest is the Python virtual environment).
+Tier 2 (live re-runs): 4+ cores, 8 GB RAM, 1.5 GB disk.
+Tier 3 (full reproduction): 8+ cores, 16 GB RAM, 2.5 GB disk.
+
+The repository is about 165 MB across roughly 19,500 files; no single file
+exceeds 5 MB.
+"""
+
+sw = """
+Required: Python 3.11 or newer (the pipeline uses PEP 604 unions and tomllib;
+scripts/install.sh enforces this) plus the four packages in requirements.txt --
+requests, pyyaml, litellm, python-dotenv. No paid software.
+
+Optional, by component:
+  Java 11+, curl, shasum   formal_verification/ (supplementary; no claim)
+  Graphviz (dot)           FSM figures only (no claim)
+  git                      PSMBench clone-cleanliness check
+  sentence-transformers,   live PSMBench re-scoring only; installed from the
+  numpy, pandas,           PSMBench clone's own requirements.txt. First use
+  matplotlib, seaborn      downloads a MiniLM model, roughly 90 MB.
+
+Verified on macOS 26.5.1 (arm64) only. Linux and Windows are untested. The
+artifact is pure Python with an optional JVM, no platform-specific code and no
+compiled extensions. No GUI, no paid software.
+
+Network endpoints: a2a-protocol.org (tier 3 only), the Anthropic API (tiers
+2-3), two pinned solver jars from GitHub releases (first formal-verification
+run), the PSMBench repository and HuggingFace (tier 2 PSMBench only).
+"""
+
+api = """
+Yes, for live re-runs only: an Anthropic API key (ANTHROPIC_API_KEY), read from
+src/.env or the environment.
+
+Tiers 0 and 1 need no key. All seven paper claims are verified from the shipped
+outputs by scripts/verify_claims.py, which makes no API calls and costs nothing.
+
+For evaluators who want to confirm the pipeline still executes, tier 2 costs
+$6.30 for a live Stage C1+C2 pass (about 22 minutes) or $22.52 for one PSMBench
+protocol, TCP (about 17 minutes); per-protocol cost ranges $5.72 to $44.66. A
+full reproduction is about $308 -- $40.97 for the A2A pipeline and $265.28 for
+all fourteen PSMBench protocols. Runtime is not the obstacle: measured from the
+run manifests it is roughly 13 hours, inside ACSAC's one-day limit. The spend is
+why we do not propose it by default. We will supply a scoped key through HotCRP
+on request rather than embed one in the artifact.
+"""
+
+gui = "n"
+
+# --------------------------------------------------------------------------
+# Dataset artifact
+# --------------------------------------------------------------------------
+provenance = "https://github.com/arlotfi79/A2ABreak/blob/main/PROVENANCE.md"
+ethics = "https://github.com/arlotfi79/A2ABreak/blob/main/ETHICS.md"
+
+readme = "https://github.com/arlotfi79/A2ABreak/blob/main/README.md"

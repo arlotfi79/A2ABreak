@@ -16,9 +16,17 @@ and `run1:C-002`.
 ## Running
 
 You need Java 11+, `curl`, `shasum`, and Python 3 (standard library only, for the verdict
-validator). `run_all.sh` downloads the Alloy and TLC jars into `tools/`, verifies their checksums,
+validator). `run_all.sh` downloads the Alloy jar into `tools/`, verifies both jars' checksums,
 runs each check, and compares every verdict with what we expect. It writes `results/` only when all of them
 agree.
+
+The TLA⁺ jar is committed at `tools/tla2tools.jar` rather than downloaded, so only Alloy needs
+network access on a first run. See "Tool versions" below for why.
+
+Note that a successful run **replaces** `results/` with its own logs. The copies committed here are
+our recorded run; a fresh run produces the same verdicts but different timestamps, seeds, process
+IDs and paths, so `git status` will show a diff afterwards. Restore with
+`git checkout -- formal_verification/results/`.
 
 ```bash
 cd formal_verification
@@ -74,9 +82,23 @@ outside our compliant-adversary threat model.
 
 ## Tool versions
 
-| Tool | Release | SHA-256 |
-|---|---|---|
-| Alloy | `org.alloytools.alloy.dist.jar` v6.2.0 | `6b8c1cb5bc93bedfc7c61435c4e1ab6e688a242dc702a394628d9a9801edb78d` |
-| TLA⁺ | `tla2tools.jar` v1.8.0 (build 2026.08.11.125311) | `ab323b79802aedc3203b3f9af37c6aca3ed43f4e0225b36f2aa77b26de46c05f` |
+| Tool | Release | SHA-256 | Source |
+|---|---|---|---|
+| Alloy | `org.alloytools.alloy.dist.jar` v6.2.0 | `6b8c1cb5bc93bedfc7c61435c4e1ab6e688a242dc702a394628d9a9801edb78d` | downloaded |
+| TLA⁺ | `tla2tools.jar` build 2026.09.17.032053 (rev `142d0ba`) | `9d36716ffb5e49d1ba8fae4651eba59f3189887e12eb90e204a42d2e6e993fef` | **vendored** |
 
-`run_all.sh` verifies both checksums after download and aborts on a mismatch.
+`run_all.sh` verifies both checksums and aborts on a mismatch.
+
+**Why the TLA⁺ jar is committed.** The tlaplus `v1.8.0` GitHub tag is a rolling *prerelease*:
+upstream replaces the asset in place, so a URL plus a checksum is not a durable pin. The build this
+work was originally developed against (2026.08.11.125311, rev `0894c34`) was replaced on
+2026-09-17 and is no longer retrievable, which broke the download for anyone running the script
+afterwards. The jar is 4.5 MB, so committing it costs little and makes the component reproducible
+offline and immune to further drift.
+
+We re-ran all seven TLC configurations against the 2026-09-17 build on 2026-09-20: every verdict is
+unchanged, so the findings do not depend on the TLC version. The logs committed in `results/` are
+from the original 2026-08-11 run and still carry that version string.
+
+Alloy stays a download: its `v6.2.0` tag is a normal immutable release, its pin still verifies, and
+at 21 MB it is not worth committing.
