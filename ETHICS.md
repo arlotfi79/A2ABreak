@@ -4,7 +4,7 @@ This is the file referenced by `ethics` in `metadata.toml`.
 
 ## Responsible disclosure
 
-All eleven vulnerabilities have been reported to the A2A project maintainers under the Linux Foundation. **The maintainers have acknowledged the report**, and we are engaged with them, supplying further detail on the findings as they assess them. We remain committed to improving the standard through that exchange.
+All eleven vulnerabilities have been reported to the A2A project maintainers under the Linux Foundation.
 
 The paper records the status as of its submission, when a response was still pending; the acknowledgement and the ongoing exchange followed.
 
